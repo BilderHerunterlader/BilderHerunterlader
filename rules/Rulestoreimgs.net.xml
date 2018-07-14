@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="storeimgs.net" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://storeimgs\.net/img-[0-9a-zA-Z]+\.html$</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="(?s)&lt;a href='(.+?)'.+?&lt;img class='centred_resized' src='.+?' alt='image'" replace="$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

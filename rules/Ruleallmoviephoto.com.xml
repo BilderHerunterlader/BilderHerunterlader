@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="allmoviephoto.com" version="0.3" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?allmoviephoto\.com/photo/.+?[0-9]{3}\.html</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;a href=&quot;.+?_big\.html&quot;.*?&gt;&lt;img src=&quot;(http://images.allmoviephoto.com/.*?)&quot;" replace="$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0">
+    <regexp search="http://(www\.)?allmoviephoto\.com/photo/(.+?)\.html" replace="$2" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

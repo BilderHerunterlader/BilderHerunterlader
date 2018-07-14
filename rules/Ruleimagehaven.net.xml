@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="imagehaven.net" version="1.9" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.|(img|a)[0-9]+\.)?imagehaven\.net//?(vievver|img)\.php\?id=.+</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;img.+?src=[&quot;']./(.+?)[&quot;'].+?id=&quot;image&quot;" replace="$SRV$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0">
+    <regexp search=".+?id=(.+)" replace="$1" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0">
+    <regexp search=".+?id=(.+)" replace="$1" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

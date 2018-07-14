@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="images-box.com" version="0.4" redirect="false" resend="true" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?images-box\.com/(gallerie_)?view\.php\?file=[a-zA-Z0-9]+</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="(http://(www\.)?images-box\.com/)(gallerie_)?view\.php\?file=([a-zA-Z0-9]+)" replace="$1g-$4.html" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

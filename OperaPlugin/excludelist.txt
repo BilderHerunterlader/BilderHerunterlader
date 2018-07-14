@@ -1,0 +1,5 @@
+.svn
+languages
+OperaPluginSetup.nsi
+BHTransmit.exedebug.txt
+BHTransmit.exeforceDebug.txt

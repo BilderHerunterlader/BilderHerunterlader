@@ -1,0 +1,11 @@
+.svn
+createXPI.bat
+createJar.bat
+template-install.rdf
+excludelist.txt
+content
+locale
+skin
+chrome/content
+chrome/locale
+chrome/skin

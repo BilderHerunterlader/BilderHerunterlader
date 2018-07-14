@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="hotflick.net_alt01" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(?:www\.)?hotflick.net/pictures/.+?\.html$</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;img[^&gt;]+src=&quot;/?([^&quot;]*)(?:/tn[0-9]+)?(/[^/&quot;]*)&quot;[^&gt;]+class=&quot;img-center&quot;" replace="$SRV$1$2" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

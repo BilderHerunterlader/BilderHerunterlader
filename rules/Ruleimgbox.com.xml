@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="imgbox.com" version="0.3" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>https?://imgbox.com/(.+)</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;img.+?id=&quot;img&quot;.+?src=&quot;(.+?)&quot;" replace="$1" />
+    </pipeline>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&amp;amp;" replace="&amp;" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="6">
+    <regexp search="(.+)\?st=.+" replace="$1" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

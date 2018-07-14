@@ -1,0 +1,144 @@
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.IHoster;
+import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
+import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RulePipeline;
+import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.settings.SettingsManager;
+
+/**
+ * Host class for www.cocoimage.com
+ * 
+ * @version 1.3
+ */
+public class HostCocoimage extends Host implements IHoster {
+	/**
+	 * Version dieser Klasse
+	 */
+	public static final String VERSION = "1.3";
+
+	/**
+	 * Name dieser Klasse
+	 */
+	public static final String NAME = "HostCocoimage";
+
+	private RulePipeline pipe1 = new RulePipelineURLRegex(Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+
+	private RulePipeline pipe2 = new RulePipelineURLRegex(Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+
+	private RuleRegExp regex1 = new RuleRegExp();
+
+	private RuleRegExp regex2 = new RuleRegExp();
+
+	private RuleRegExp regex3 = new RuleRegExp();
+
+	/**
+	 * Kompiliertes Muster
+	 */
+	private Pattern urlPattern;
+
+	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
+
+	/**
+	 * Konstruktor
+	 */
+	public HostCocoimage() {
+		urlPattern = Pattern.compile("^http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*");
+		regex1.setSearch("window\\.location=\"(http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*?)\"");
+		regex1.setReplace("$1");
+		regex2.setSearch("img.*?id=\"img\".*?src=\"(.*?)\"");
+		regex2.setReplace("$1");
+		pipe1.addRegExp(regex1);
+		pipe2.addRegExp(regex2);
+
+		regex3.setSearch("^http://img[0-9]+\\.cocoimage\\.com/showimg\\.php\\?id=([0-9]+).*");
+		regex3.setReplace("$1.jpg");
+	}
+
+	@Override
+	public boolean isFromThisHoster(String url) {
+		Matcher urlMatcher = urlPattern.matcher(url);
+		if (urlMatcher.matches()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * URL parsen
+	 * 
+	 * @param url Container-URL
+	 * @return URL
+	 * @throws HostException
+	 */
+	private synchronized String parseURL(String url) throws HostException {
+		String htmlCode = "";
+		String result = "";
+		String referrer = "";
+		boolean downloadLoop = true;
+		int counter = 0;
+
+		do {
+			htmlCode = downloadContainerPage(url, referrer);
+			if (htmlCode.contains("window.location")) {
+				referrer = url;
+				url = pipe1.getURL(url, null, htmlCode, null);
+			} else {
+				result = pipe2.getURL(url, null, htmlCode, null);
+				downloadLoop = false;
+			}
+			counter++;
+		} while (downloadLoop && (counter < 50));
+
+		return result;
+	}
+
+	@Override
+	public String getVersion() {
+		return VERSION;
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
+	public String getFilenameFromURL(String url) {
+		if (!isFromThisHoster(url)) {
+			return "";
+		}
+		return "";
+	}
+
+	@Override
+	public void parseURLAndFilename(URLParseObject upo) throws HostException {
+		String result = parseURL(upo.getContainerURL()); // URL
+		upo.setDirectLink(result);
+		String filename = regex3.doURLReplace(result, upo.getPic());
+		upo.setCorrectedFilename(filename);
+	}
+
+	@Override
+	public String toString() {
+		return NAME;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return !deactivateOption.isDeactivated();
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		deactivateOption.setDeactivated(!enabled);
+		deactivateOption.saveOption();
+		SettingsManager.instance().writeSettings(true);
+	}
+}

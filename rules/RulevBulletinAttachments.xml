@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="vBulletinAttachments" version="0.2" redirect="false" resend="false" usecontentdisposition="true" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://([0-9a-zA-Z-]+\.)?[0-9a-zA-Z-.]+/(.*/)?(.*?\?page=Attachment&amp;attachmentID=|attachment\.php\?attachmentid=)[0-9a-zA-Z]+&amp;(h|d)=[0-9a-zA-Z]+</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false" />
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

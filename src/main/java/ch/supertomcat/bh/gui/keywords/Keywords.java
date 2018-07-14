@@ -1,0 +1,788 @@
+package ch.supertomcat.bh.gui.keywords;
+
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.EventQueue;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.regex.PatternSyntaxException;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JToggleButton;
+import javax.swing.RowFilter;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
+import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.RowSorterEvent;
+import javax.swing.event.RowSorterListener;
+import javax.swing.event.TableColumnModelEvent;
+import javax.swing.event.TableColumnModelListener;
+
+import org.jdesktop.swingx.JXTable;
+import org.jdesktop.swingx.sort.TableSortController;
+
+import ch.supertomcat.bh.gui.BHGUIConstants;
+import ch.supertomcat.bh.gui.Icons;
+import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.renderer.KeywordsStringColorRowRenderer;
+import ch.supertomcat.bh.importexport.ExportKeywords;
+import ch.supertomcat.bh.importexport.ImportKeywords;
+import ch.supertomcat.bh.keywords.Keyword;
+import ch.supertomcat.bh.keywords.KeywordManager;
+import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcattools.guitools.TableTool;
+import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
+
+/**
+ * Panel containing the Keywords-Table
+ */
+public class Keywords extends JPanel implements ActionListener, MouseListener, TableColumnModelListener {
+	/**
+	 * UID
+	 */
+	private static final long serialVersionUID = -5829519139175122738L;
+
+	/**
+	 * TabelModel
+	 */
+	private KeywordsTableModel model = new KeywordsTableModel();
+
+	private TableSortController<KeywordsTableModel> sorter = new TableSortController<>(model);
+
+	/**
+	 * Table
+	 */
+	private JXTable jtKeywords = new JXTable(model);
+
+	/**
+	 * Label
+	 */
+	private JLabel lblInfo = new JLabel(Localization.getString("Count") + ": 0");
+
+	/**
+	 * Button
+	 */
+	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoIcon("actions/document-save-as.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnImport = new JButton(Localization.getString("Import"), Icons.getTangoIcon("actions/document-open.png", 16));
+
+	/**
+	 * Panel
+	 */
+	private JPanel pnlButtons = new JPanel();
+
+	/**
+	 * PopupMenu
+	 */
+	private JPopupMenu popupMenu = new JPopupMenu();
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem menuItemTitleToKeyword = new JMenuItem(Localization.getString("TitleToKeyword"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem menuItemTitleToDirectory = new JMenuItem(Localization.getString("TitleToDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem menuItemTitleToRelativeDirectory = new JMenuItem(Localization.getString("TitleToRelativeDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem menuItemAbsoluteToRelativeDirectory = new JMenuItem(Localization.getString("AbsoluteToRelativeDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+
+	/**
+	 * Panel
+	 */
+	private JPanel pnlFilter = new JPanel();
+
+	/**
+	 * Panel
+	 */
+	private JPanel pnlInfo = new JPanel();
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtTitle = new JTextField(20);
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtKeywords = new JTextField(20);
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtPath = new JTextField(20);
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtRPath = new JTextField(20);
+
+	/**
+	 * Label
+	 */
+	private JLabel lblTitle = new JLabel(Localization.getString("Title"));
+
+	/**
+	 * Label
+	 */
+	private JLabel lblKeywords = new JLabel(Localization.getString("Keywords"));
+
+	/**
+	 * Label
+	 */
+	private JLabel lblPath = new JLabel(Localization.getString("Folder"));
+
+	/**
+	 * Label
+	 */
+	private JLabel lblRPath = new JLabel(Localization.getString("RelativeFolder"));
+
+	/**
+	 * Filter-Patterns
+	 */
+	private String patterns[] = new String[4];
+
+	/**
+	 * Columns
+	 */
+	private int cols[] = new int[4];
+
+	/**
+	 * DocumentListener
+	 */
+	private DocumentListener dl0 = null;
+
+	/**
+	 * DocumentListener
+	 */
+	private DocumentListener dl1 = null;
+
+	/**
+	 * DocumentListener
+	 */
+	private DocumentListener dl2 = null;
+
+	/**
+	 * DocumentListener
+	 */
+	private DocumentListener dl3 = null;
+
+	/**
+	 * Button
+	 */
+	private JToggleButton btnFilter = new JToggleButton(Localization.getString("Filter"), Icons.getTangoIcon("actions/edit-find.png", 16));
+
+	/**
+	 * Flag if a process is running
+	 */
+	private boolean running = false;
+
+	/**
+	 * Constructor
+	 */
+	public Keywords() {
+		TableTool.internationalizeColumns(jtKeywords);
+
+		jtKeywords.setRowSorter(sorter);
+		setLayout(new BorderLayout());
+		jtKeywords.getColumn("Folder").setMinWidth(200);
+		jtKeywords.getColumn("RelativeFolder").setMinWidth(200);
+		updateColWidthsFromSettingsManager();
+		jtKeywords.getColumnModel().addColumnModelListener(this);
+		jtKeywords.setRowHeight(TableTool.calculateRowHeight(jtKeywords, true, true));
+		jtKeywords.getTableHeader().setReorderingAllowed(false);
+		jtKeywords.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
+		jtKeywords.setVisibleRowCount(10);
+
+		patterns[0] = txtTitle.getText();
+		patterns[1] = txtKeywords.getText();
+		patterns[2] = txtPath.getText();
+		patterns[3] = txtRPath.getText();
+		cols[0] = jtKeywords.getColumn("Title").getModelIndex();
+		cols[1] = jtKeywords.getColumn("Keywords").getModelIndex();
+		cols[2] = jtKeywords.getColumn("Folder").getModelIndex();
+		cols[3] = jtKeywords.getColumn("RelativeFolder").getModelIndex();
+
+		JScrollPane jsp = new JScrollPane(jtKeywords);
+		add(jsp, BorderLayout.CENTER);
+
+		btnNew.addActionListener(this);
+		btnEdit.addActionListener(this);
+		btnDelete.addActionListener(this);
+
+		btnImport.addActionListener(this);
+		btnExport.addActionListener(this);
+
+		pnlButtons.add(btnNew);
+		pnlButtons.add(btnEdit);
+		pnlButtons.add(btnDelete);
+		pnlButtons.add(btnImport);
+		pnlButtons.add(btnExport);
+		add(pnlButtons, BorderLayout.SOUTH);
+
+		TitledBorder brdFilter = BorderFactory.createTitledBorder(Localization.getString("Filter"));
+		pnlFilter.setBorder(brdFilter);
+		pnlFilter.setLayout(new GridLayout(2, 4, 2, 2));
+		pnlFilter.add(lblTitle);
+		pnlFilter.add(lblKeywords);
+		pnlFilter.add(lblPath);
+		pnlFilter.add(lblRPath);
+		pnlFilter.add(txtTitle);
+		pnlFilter.add(txtKeywords);
+		pnlFilter.add(txtPath);
+		pnlFilter.add(txtRPath);
+		dl0 = createDocumentListener(0);
+		dl1 = createDocumentListener(1);
+		dl2 = createDocumentListener(2);
+		dl3 = createDocumentListener(3);
+		txtTitle.getDocument().addDocumentListener(dl0);
+		txtKeywords.getDocument().addDocumentListener(dl1);
+		txtPath.getDocument().addDocumentListener(dl2);
+		txtRPath.getDocument().addDocumentListener(dl3);
+
+		lblInfo.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
+
+		pnlInfo = new JPanel();
+		pnlInfo.setLayout(new BorderLayout());
+		pnlInfo.add(lblInfo, BorderLayout.WEST);
+		pnlInfo.add(btnFilter, BorderLayout.EAST);
+
+		JPanel pnlP = new JPanel();
+		pnlP.setLayout(new BorderLayout());
+		pnlP.add(pnlInfo, BorderLayout.NORTH);
+		pnlP.add(pnlFilter, BorderLayout.CENTER);
+		add(pnlP, BorderLayout.NORTH);
+		boolean filterEnabled = SettingsManager.instance().isKeywordFilterEnabled();
+		btnFilter.setSelected(filterEnabled);
+		pnlFilter.setVisible(filterEnabled);
+		btnFilter.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				pnlFilter.setVisible(btnFilter.isSelected());
+				SettingsManager.instance().setKeywordFilterEnabled(btnFilter.isSelected());
+				SettingsManager.instance().writeSettings(true);
+			}
+		});
+
+		popupMenu.add(menuItemTitleToKeyword);
+		popupMenu.add(menuItemTitleToDirectory);
+		popupMenu.add(menuItemTitleToRelativeDirectory);
+		popupMenu.add(menuItemAbsoluteToRelativeDirectory);
+		menuItemTitleToKeyword.addActionListener(this);
+		menuItemTitleToDirectory.addActionListener(this);
+		menuItemTitleToRelativeDirectory.addActionListener(this);
+		menuItemAbsoluteToRelativeDirectory.addActionListener(this);
+
+		List<Keyword> keywords = KeywordManager.instance().getKeywords();
+		for (Keyword k : keywords) {
+			addKeyword(k);
+		}
+
+		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
+		sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(sortKeys);
+		sorter.sort();
+
+		lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+		jtKeywords.addMouseListener(this);
+		jtKeywords.setDefaultRenderer(Object.class, new KeywordsStringColorRowRenderer());
+		jtKeywords.getColumn("RelativPath").setCellRenderer(new DefaultBooleanColorRowRenderer());
+		updateTableSortOrdersFromSettingsManager();
+		jtKeywords.getTableHeader().addMouseListener(this);
+
+		sorter.addRowSorterListener(new RowSorterListener() {
+			@Override
+			public void sorterChanged(RowSorterEvent e) {
+				if (running) {
+					return;
+				}
+				updateTableSortOrdersToSettingsManager();
+			}
+		});
+
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtPath);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtKeywords);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtRPath);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtTitle);
+	}
+
+	/**
+	 * Reload keywords
+	 */
+	public void reloadKeywords() {
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				enableComponents(false);
+				model.removeAllRows();
+
+				List<Keyword> keywords = KeywordManager.instance().getKeywords();
+				for (Keyword k : keywords) {
+					addKeyword(k);
+				}
+
+				lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+				enableComponents(true);
+			}
+		};
+
+		if (EventQueue.isDispatchThread()) {
+			runnable.run();
+		} else {
+			EventQueue.invokeLater(runnable);
+		}
+	}
+
+	/**
+	 * Adds a keyword
+	 * 
+	 * @param keyword Keyword
+	 */
+	public void addKeyword(Keyword keyword) {
+		model.addRow(keyword);
+		lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+	}
+
+	/**
+	 * Creates a DocumentListener for a column
+	 * 
+	 * @param col Column
+	 * @return DocumentListener
+	 */
+	private DocumentListener createDocumentListener(final int col) {
+		return new DocumentListener() {
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				filterTable(col);
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				filterTable(col);
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				filterTable(col);
+			}
+		};
+	}
+
+	/**
+	 * Filter Table
+	 * 
+	 * @param col Column
+	 */
+	private synchronized void filterTable(int col) {
+		switch (col) {
+			case 0:
+				patterns[0] = txtTitle.getText();
+				break;
+			case 1:
+				patterns[1] = txtKeywords.getText();
+				break;
+			case 2:
+				patterns[2] = txtPath.getText();
+				break;
+			case 3:
+				patterns[3] = txtRPath.getText();
+				break;
+			default:
+				return;
+		}
+		List<RowFilter<KeywordsTableModel, Object>> filters = new ArrayList<>(4);
+		for (int i = 0; i < cols.length; i++) {
+			boolean filterSyntaxError = false;
+			String filterErrorMessage = "";
+			try {
+				RowFilter<KeywordsTableModel, Object> rowFilter = RowFilter.regexFilter("(?i)" + patterns[i], cols[i]);
+				filters.add(rowFilter);
+			} catch (PatternSyntaxException pse) {
+				filterSyntaxError = true;
+				filterErrorMessage = pse.getMessage();
+			}
+			Color backgroundColor;
+			if (filterSyntaxError) {
+				backgroundColor = Color.RED;
+			} else {
+				backgroundColor = UIManager.getColor("TextField.background");
+			}
+			switch (i) {
+				case 0:
+					txtTitle.setBackground(backgroundColor);
+					txtTitle.repaint();
+					txtTitle.setToolTipText(filterErrorMessage);
+					break;
+				case 1:
+					txtKeywords.setBackground(backgroundColor);
+					txtKeywords.repaint();
+					txtKeywords.setToolTipText(filterErrorMessage);
+					break;
+				case 2:
+					txtPath.setBackground(backgroundColor);
+					txtPath.repaint();
+					txtPath.setToolTipText(filterErrorMessage);
+					break;
+				case 3:
+					txtRPath.setBackground(backgroundColor);
+					txtRPath.repaint();
+					txtRPath.setToolTipText(filterErrorMessage);
+					break;
+			}
+		}
+		RowFilter<KeywordsTableModel, Object> filter = RowFilter.andFilter(filters);
+		sorter.setRowFilter(filter);
+	}
+
+	/**
+	 * Lock/Unlock Components
+	 * 
+	 * @param b Enabled (Unlocked)
+	 */
+	private void enableComponents(boolean b) {
+		if (!b) {
+			running = true;
+			jtKeywords.removeMouseListener(this);
+		}
+		txtTitle.setEnabled(b);
+		txtKeywords.setEditable(b);
+		txtPath.setEnabled(b);
+		txtRPath.setEnabled(b);
+		btnNew.setEnabled(b);
+		btnEdit.setEnabled(b);
+		btnDelete.setEnabled(b);
+		btnImport.setEnabled(b);
+		btnExport.setEnabled(b);
+		jtKeywords.setEnabled(b);
+		if (b) {
+			jtKeywords.addMouseListener(this);
+			running = false;
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+	 */
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if (running) {
+			return;
+		}
+		if (e.getSource() == btnNew) {
+			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(Main.instance(), Localization.getString("Add"), "", "", SettingsManager.instance().getSavePath(), true, "");
+			if (dialog != null) {
+				KeywordManager.instance().addKeyword(dialog.getKeyword());
+			}
+		} else if (e.getSource() == btnDelete) {
+			int retval = JOptionPane.showConfirmDialog(Main.instance(), Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
+					.getTangoIcon("status/dialog-warning.png", 32));
+			if (retval == JOptionPane.NO_OPTION) {
+				return;
+			}
+
+			enableComponents(false);
+
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						ProgressObserver pg = new ProgressObserver();
+						Main.instance().addProgressObserver(pg);
+						pg.progressChanged(Localization.getString("DeleteEntries"));
+						pg.progressModeChanged(true);
+
+						int[] selectedRows = jtKeywords.getSelectedRows();
+						int[] selectedModelRows = new int[selectedRows.length];
+
+						for (int i = 0; i < selectedRows.length; i++) {
+							selectedModelRows[i] = jtKeywords.convertRowIndexToModel(selectedRows[i]);
+						}
+
+						Arrays.sort(selectedModelRows);
+						KeywordManager.instance().removeKeywords(selectedModelRows);
+
+						lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+						Main.instance().removeProgressObserver(pg);
+						Main.instance().setMessage(Localization.getString("EntriesDeleted"));
+					} finally {
+						enableComponents(true);
+					}
+				}
+			});
+			t.setName("DeleteKeywordsThread-" + t.getId());
+			t.start();
+		} else if (e.getSource() == btnEdit) {
+			if (jtKeywords.getSelectedRowCount() < 1) {
+				return;
+			}
+			if (jtKeywords.getSelectedRowCount() > 1) {
+				JOptionPane.showMessageDialog(Main.instance(), Localization.getString("NoMultipleRowEdit"), "Edit", JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
+			int row = jtKeywords.getSelectedRow();
+			row = jtKeywords.convertRowIndexToModel(row);
+			Keyword k = KeywordManager.instance().getKeywordByIndex(row);
+			KeywordEditDialog dialog = KeywordEditDialog
+					.openKeywordEditDialog(Main.instance(), Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k.getRelativeDownloadPath());
+			if (dialog != null) {
+				k.setTitle(dialog.getKeywordTitle());
+				k.setKeywords(dialog.getKeywords());
+				k.setDownloadPath(dialog.getPath());
+				k.setRelativePath(dialog.isRelativePathSelected());
+				k.setRelativeDownloadPath(dialog.getRelativePath());
+				KeywordManager.instance().updateKeyword(k);
+			}
+		} else if (e.getSource() == btnImport) {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					enableComponents(false);
+					ImportKeywords.importKeywords();
+					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+					enableComponents(true);
+				}
+			});
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		} else if (e.getSource() == btnExport) {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					enableComponents(false);
+					ExportKeywords.exportKeywords();
+					enableComponents(true);
+				}
+			});
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		} else if (e.getSource() == menuItemTitleToKeyword) {
+			enableComponents(false);
+			int s[] = jtKeywords.getSelectedRows();
+			String val = "";
+			for (int i = 0; i < s.length; i++) {
+				val = (String)jtKeywords.getValueAt(s[i], 0);
+				jtKeywords.setValueAt(val, s[i], 1);
+			}
+			enableComponents(true);
+		} else if (e.getSource() == menuItemTitleToDirectory) {
+			enableComponents(false);
+			int s[] = jtKeywords.getSelectedRows();
+			String val = "";
+			String path = SettingsManager.instance().getSavePath();
+			for (int i = 0; i < s.length; i++) {
+				val = path + (String)jtKeywords.getValueAt(s[i], 0);
+				jtKeywords.setValueAt(val, s[i], 2);
+			}
+			enableComponents(true);
+		} else if (e.getSource() == menuItemTitleToRelativeDirectory) {
+			enableComponents(false);
+			int s[] = jtKeywords.getSelectedRows();
+			String val = "";
+			for (int i = 0; i < s.length; i++) {
+				val = (String)jtKeywords.getValueAt(s[i], 0);
+				jtKeywords.setValueAt(val, s[i], 3);
+			}
+			enableComponents(true);
+		} else if (e.getSource() == menuItemAbsoluteToRelativeDirectory) {
+			enableComponents(false);
+			int s[] = jtKeywords.getSelectedRows();
+			String val = "";
+			for (int i = 0; i < s.length; i++) {
+				val = (String)jtKeywords.getValueAt(s[i], 2);
+				String dlFolder = SettingsManager.instance().getSavePath();
+				int pos = val.indexOf(dlFolder);
+				if (pos == 0) {
+					val = val.substring(dlFolder.length());
+				}
+				val = val.replaceAll("[:]", "");
+				jtKeywords.setValueAt(val, s[i], 3);
+			}
+			enableComponents(true);
+		}
+	}
+
+	private void showTablePopupMenu(MouseEvent e) {
+		SwingUtilities.updateComponentTreeUI(popupMenu);
+		popupMenu.show(e.getComponent(), e.getX(), e.getY());
+	}
+
+	@Override
+	public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override
+	public void mouseExited(MouseEvent e) {
+	}
+
+	@Override
+	public void mousePressed(MouseEvent e) {
+		if (running) {
+			return;
+		}
+		if (e.getSource() == jtKeywords && e.isPopupTrigger() && jtKeywords.getSelectedRowCount() > 0) {
+			showTablePopupMenu(e);
+		}
+	}
+
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		if (running) {
+			return;
+		}
+		if (e.getSource() == jtKeywords && e.isPopupTrigger() && jtKeywords.getSelectedRowCount() > 0) {
+			showTablePopupMenu(e);
+		}
+	}
+
+	/**
+	 * Clear filters
+	 */
+	public synchronized void clearFilters() {
+		txtTitle.setText("");
+		txtKeywords.setText("");
+		txtPath.setText("");
+		txtRPath.setText("");
+	}
+
+	/**
+	 * updateTableSortOrdersToSettingsManager
+	 */
+	private void updateTableSortOrdersToSettingsManager() {
+		if (SettingsManager.instance().isSaveTableSortOrders()) {
+			SettingsManager.instance().setTableSortOrdersKeywords(TableTool.serializeTableSortOrderSetting(jtKeywords));
+			SettingsManager.instance().writeSettings(true);
+		}
+	}
+
+	/**
+	 * updateTableSortOrdersFromSettingsManager
+	 */
+	private void updateTableSortOrdersFromSettingsManager() {
+		if (SettingsManager.instance().isSaveTableSortOrders()) {
+			TableTool.applyTableSortOrder(jtKeywords, SettingsManager.instance().getTableSortOrdersKeywords());
+		}
+	}
+
+	/**
+	 * updateColWidthsToSettingsManager
+	 */
+	private void updateColWidthsToSettingsManager() {
+		if (SettingsManager.instance().isSaveTableColumnSizes()) {
+			SettingsManager.instance().setColWidthsKeywords(TableTool.serializeColWidthSetting(jtKeywords));
+			SettingsManager.instance().writeSettings(true);
+		}
+	}
+
+	/**
+	 * updateColWidthsFromSettingsManager
+	 */
+	private void updateColWidthsFromSettingsManager() {
+		if (SettingsManager.instance().isSaveTableColumnSizes()) {
+			TableTool.applyColWidths(jtKeywords, SettingsManager.instance().getColWidthsKeywords());
+		}
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
+	 */
+	@Override
+	public void columnAdded(TableColumnModelEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
+	 */
+	@Override
+	public void columnMarginChanged(ChangeEvent e) {
+		updateColWidthsToSettingsManager();
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
+	 */
+	@Override
+	public void columnMoved(TableColumnModelEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
+	 */
+	@Override
+	public void columnRemoved(TableColumnModelEvent e) {
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * 
+	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
+	 */
+	@Override
+	public void columnSelectionChanged(ListSelectionEvent e) {
+	}
+}

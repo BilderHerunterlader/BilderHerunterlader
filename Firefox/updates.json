@@ -1,0 +1,13 @@
+{
+	"addons": {
+		"bilderherunterlader@gmail.com": {
+			"updates": [
+				{
+					"version": "4.7",
+					"update_link": "https://www.dropbox.com/s/tzs5uah7o1enefd/bilderherunterladerwebext-4.7-an%2Bfx.xpi?dl=1",
+					"update_hash": "sha256:92862be5caff13bfebba349f156e49ed31c580b9fff3c2013cc08833ef4c557b"
+				}
+			]
+		}
+	}
+}

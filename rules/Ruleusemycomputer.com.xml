@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="usemycomputer.com" version="0.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="1" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?usemycomputer\.com/show\.html\?(w=[0-9]+&amp;)?(h=[0-9]+&amp;)?i=.*</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="(http://(www\.)?usemycomputer\.com)/show\.html\?(w=[0-9]+&amp;)?(h=[0-9]+&amp;)?i=(.*)" replace="$1$5" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

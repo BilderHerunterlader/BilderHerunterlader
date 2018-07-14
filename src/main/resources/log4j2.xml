@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="INFO">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{ISO8601} %-5level [%t]: %m - %c (%F:%L)%n" />
+		</Console>
+		<RollingFile name="DailyRollingFile" fileName="${sys:bhlog4jlogfile}" filePattern="${sys:bhlog4jlogfile}.%d{yyyy-MM-dd}" append="true" immediateFlush="true">
+			<PatternLayout pattern="%d{ISO8601} %-5level [%t]: %m - %c (%F:%L)%n" />
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+			</Policies>
+		</RollingFile>
+	</Appenders>
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="DailyRollingFile"/>
+		</Root>
+	</Loggers>
+</Configuration>

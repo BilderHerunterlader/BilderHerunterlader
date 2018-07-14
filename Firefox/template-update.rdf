@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<RDF:RDF xmlns:RDF="http://www.w3.org/1999/02/22-rdf-syntax-ns#" xmlns:em="http://www.mozilla.org/2004/em-rdf#">
+	<!-- Extension with new ID -->
+	<RDF:Description about="urn:mozilla:extension:bilderherunterlader@gmail.com">
+		<em:updates>
+			<RDF:Seq>
+				<!-- Version 4.7 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.7</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>57.0</em:minVersion>
+								<em:maxVersion>*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/tzs5uah7o1enefd/bilderherunterladerwebext-4.7-an%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:92862be5caff13bfebba349f156e49ed31c580b9fff3c2013cc08833ef4c557b</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+					</RDF:Description>
+				</RDF:li>
+				
+				<!-- Version 4.5 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.5</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/kht2qy26fu65d1m/bilderherunterlader-4.5-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:23676157d47fe797a95e5f015555200bf6c022ce0f9a4fa057941b1b263a2c09</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>27.*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/kht2qy26fu65d1m/bilderherunterlader-4.5-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:23676157d47fe797a95e5f015555200bf6c022ce0f9a4fa057941b1b263a2c09</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/kht2qy26fu65d1m/bilderherunterlader-4.5-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:23676157d47fe797a95e5f015555200bf6c022ce0f9a4fa057941b1b263a2c09</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			
+				<!-- Version 4.4 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.4</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/59u9ojyyg2rbzlr/bilderherunterlader-4.4-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:91a4555f686cb5d374fecbdec06787a85d279917edea8ff86f24699d613984ad</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>26.*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/59u9ojyyg2rbzlr/bilderherunterlader-4.4-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:91a4555f686cb5d374fecbdec06787a85d279917edea8ff86f24699d613984ad</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/59u9ojyyg2rbzlr/bilderherunterlader-4.4-fx%2Bsm.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:91a4555f686cb5d374fecbdec06787a85d279917edea8ff86f24699d613984ad</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			
+				<!-- Version 4.3 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.3</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>49.0</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/eilisrr0cnbsked/bilderherunterlader-4.3-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0bce1bfb97164c8412d19fd8abb66f993a6ade4922f44a52eb48a0a93e7a938e</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>26.*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/eilisrr0cnbsked/bilderherunterlader-4.3-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0bce1bfb97164c8412d19fd8abb66f993a6ade4922f44a52eb48a0a93e7a938e</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>2.46</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/eilisrr0cnbsked/bilderherunterlader-4.3-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0bce1bfb97164c8412d19fd8abb66f993a6ade4922f44a52eb48a0a93e7a938e</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			
+				<!-- Version 4.1 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.1</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>46.0</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>25.*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>2.42</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			</RDF:Seq>
+		</em:updates>
+	</RDF:Description>
+	
+	<!-- Extension with old ID -->
+	<RDF:Description about="urn:mozilla:extension:{af2f0750-c598-4826-8e5f-bb98aab519a5}">
+		<em:updates>
+			<RDF:Seq>
+				<!-- Version 4.1 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.1</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>46.0</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>25.*</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>2.42</em:maxVersion>
+								<em:updateLink>https://www.dropbox.com/s/r13y6r6lne3h9r3/bilderherunterlader-4.1-sm%2Bfx.xpi?dl=1</em:updateLink>
+								<em:updateHash>sha256:0380a9cde3c4d7cb99ba2ce6480bb83190fe507dfcded888c9bfdfeb4171f1be</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			
+				<!-- Version 4.0 -->
+				<RDF:li>
+					<RDF:Description>
+						<em:version>4.0</em:version>
+						
+						<!-- Firefox -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
+								<em:minVersion>1.5</em:minVersion>
+								<em:maxVersion>*.*.*</em:maxVersion>
+								<em:updateLink>http://bihe.berlios.de/bh/bilderherunterlader-v4.0.xpi</em:updateLink>
+								<em:updateHash>sha256:51d3a15a122736322e27f5198d38b4ab9034d61082379f04d86ce7765bc5d703</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Pale Moon -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{8de7fcbb-c55c-4fbe-bfc5-fc555c87dbc4}</em:id>
+								<em:minVersion>25.0</em:minVersion>
+								<em:maxVersion>25.*</em:maxVersion>
+								<em:updateLink>http://bihe.berlios.de/bh/bilderherunterlader-v4.0.xpi</em:updateLink>
+								<em:updateHash>sha256:51d3a15a122736322e27f5198d38b4ab9034d61082379f04d86ce7765bc5d703</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+						<!-- Seamonkey -->
+						<em:targetApplication>
+							<RDF:Description>
+								<em:id>{92650c4d-4b8e-4d2a-b7eb-24ecf4f6b63a}</em:id>
+								<em:minVersion>2.0</em:minVersion>
+								<em:maxVersion>*.*.*</em:maxVersion>
+								<em:updateLink>http://bihe.berlios.de/bh/bilderherunterlader-v4.0.xpi</em:updateLink>
+								<em:updateHash>sha256:51d3a15a122736322e27f5198d38b4ab9034d61082379f04d86ce7765bc5d703</em:updateHash>
+							</RDF:Description>
+						</em:targetApplication>
+						
+					</RDF:Description>
+				</RDF:li>
+			</RDF:Seq>
+		</em:updates>
+	</RDF:Description>
+</RDF:RDF>

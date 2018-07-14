@@ -1,0 +1,7 @@
+HostzDefaultImages.txt
+*developerhosts*
+*developerhostssrc*
+*developerrules*
+excludelist.txt
+.svn
+target

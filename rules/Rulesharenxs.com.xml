@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="sharenxs.com" version="1.2" redirect="false" resend="true" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?sharenxs\.com/(?:view/\?id=[0-9a-zA-Z-]+|gallery/[0-9a-zA-Z_-]+/[0-9a-zA-Z_-]+)</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;a href=&quot;/(.+?/original)&quot;&gt;&lt;span&gt;original&lt;/span&gt;&lt;/a&gt;" replace="$SRV$1" />
+    </pipeline>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;a href=&quot;#&quot; class=&quot;thumb_large&quot;&gt;&lt;img class=&quot;view_photo&quot; src=&quot;/(.+?)&quot;/&gt;" replace="$SRV$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="6">
+    <regexp search="\?[0-9]+$" replace="" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0">
+    <regexp search="id=(.+)" replace="$1" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

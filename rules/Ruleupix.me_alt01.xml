@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="upix.me_alt01" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://www\.upix\.me/i/v/\?q=([a-zA-Z0-9-_%]+)\.([a-zA-Z0-9-_%]+)\.([a-zA-Z]+)</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="http://www\.upix\.me/i/v/\?q=([a-zA-Z0-9-_%]+)\.([a-zA-Z0-9-_%]+)\.([a-zA-Z]+)" replace="$SRVu/n/$1/$2.$3" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="4">
+    <regexp search="&lt;img[^&gt;]*?id=&quot;img&quot;[^&gt;]*?src=&quot;(?:http://www.hotflick.net)?/u/n/(?:[a-zA-Z0-9-_%]+)/([a-zA-Z0-9-_%]+)\.([a-zA-Z]+)&quot;[^&gt;]*title=&quot;\1\.\2 - ([^&gt;]+)&quot;&gt;" replace="$3 - $1.$2" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

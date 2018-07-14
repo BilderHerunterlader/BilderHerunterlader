@@ -1,0 +1,56 @@
+<script language="VBScript">
+	Dim first
+	Dim title
+	Dim ref
+	Dim urls
+	Dim out
+	Dim ch
+	Dim imgc
+	Dim imgs
+	
+	Set urls = external.menuArguments.document.links
+	
+	first = "BH{af2f0750-c598-4826-8e5f-bb98aab519a5}" & Chr(9) & Chr(10)
+	title = external.menuArguments.document.All.tags("TITLE")(0).innerHTML & Chr(9) & Chr(10)
+	ref = external.menuArguments.document.Url & Chr(9) & Chr(10)
+	On Error Resume Next
+	out = first & title & ref
+	For i = 0 To urls.length - 1
+		out = out & urls(i).href
+		imgc = 0
+		imgs = ""
+		Set ch = urls(i).Children
+		For x = 0 To ch.length - 1
+			IF UCase(ch(x).TagName) = UCase("IMG") THEN
+				imgs = ch(x).src
+				imgc = imgc + 1
+			END IF
+		Next
+		If imgc = 1 Then
+			out = out & Chr(9) & imgs
+		Else
+			out = out & Chr(9)
+		End if
+		out = out & Chr(10)
+	Next
+	
+	path = document.Url
+	path = mid(path, 8, len(path) - 21)
+	
+	Set objShell = CreateObject("Wscript.Shell")
+	strEnv = objShell.ExpandEnvironmentStrings("%temp%")
+	
+	Set objFs= CreateObject("Scripting.FileSystemObject")
+	
+	Randomize
+	strDateiname = strEnv & "\" & cStr(Rnd()) & ".txt"
+	
+	Set objTextStream = objFs.CreateTextFile(strDateiname, True)
+	objTextStream.Write out
+	objTextStream.Close
+	Set objTextStream = Nothing
+	Set objFs = Nothing
+	
+	set wshshell=createobject("wscript.shell")
+	wshshell.run(chr(34) & path & "BHTransmit.exe" & chr(34) & " -f " & """" & strDateiname & """") 
+</script>

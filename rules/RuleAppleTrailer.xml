@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="AppleTrailer" version="0.4" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>^(http://(movietrailers|trailers|movies)\.apple\.com/movies/.+?/.+?/.+?-.+?_)h?([0-9]+[a-z]\.mov)</urlpattern>
+  <pipes>
+    <pipeline mode="5" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+      <javascript>var regexDownload = new RegExp("^(http://(movietrailers|trailers|movies)\\.apple\\.com/movies/.+?/.+?/.+?-.+?_)h?([0-9]+[a-z]\\.mov)", "i");&#xD;
+&#xD;
+var match = regexDownload.exec(containerURL);&#xD;
+if (match) {&#xD;
+    directLink = match[1] + "h" + match[3];&#xD;
+}&#xD;
+&#xD;
+setInfo("useUserAgent", "QuickTime/7.6.2 (qtver=7.6.2;os=Windows NT 5.1Service Pack 3)");</javascript>
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

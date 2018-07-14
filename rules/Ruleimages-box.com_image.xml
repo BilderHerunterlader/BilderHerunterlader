@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="images-box.com_image" version="0.7" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?images-box\.com/([a-z]-[a-zA-Z0-9]+/)?[a-z]-[a-zA-Z0-9]+(.+?)?\.html</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;img src='(http://(www\.)?images-box\.com/(./)?(gallerie/)?uploads/.*?)'" replace="$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="6">
+    <regexp search="[a-zA-Z0-9]+_(.+)" replace="$1" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0">
+    <regexp search="[a-z]-[a-zA-Z0-9]+_?(.+?)?\.html" replace="$1" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

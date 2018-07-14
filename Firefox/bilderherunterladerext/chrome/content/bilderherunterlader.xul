@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE overlay SYSTEM "chrome://bilderherunterlader/locale/popupmenu.dtd">
+	 
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<script type="application/x-javascript" src="chrome://bilderherunterlader/content/bh_util.js"/>
+	<script type="application/x-javascript" src="chrome://bilderherunterlader/content/bh_pageTitle.js"/>
+	<script type="application/x-javascript" src="chrome://bilderherunterlader/content/bh_contextMenu.js"/>
+	
+	<keyset>
+		<key id="bhLaunchKey" modifiers="shift" key="B" oncommand="fireDownloadLinks();"/>
+	</keyset>
+	
+	<!-- firefox context menu -->
+	<popup id="contentAreaContextMenu">
+		<menuseperator/>
+		<menuitem id="ContextMenu_BilderHerunterlader_FireImages" label="&popupmenu.bhImages;" oncommand="fireDownloadImages();" insertafter="context-stop" />
+		<menuitem id="ContextMenu_BilderHerunterlader_FireLinks" label="&popupmenu.bh;" oncommand="fireDownloadLinks();" key="bhLaunchKey" insertafter="context-stop" />
+		<menuseperator/>
+	</popup>
+</overlay>

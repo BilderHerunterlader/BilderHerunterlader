@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="imgpit.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?imgpit\.com/img-([a-zA-Z0-9]+)\.html</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="http://(www\.)?imgpit\.com/upload/big/([0-9]{4})/([0-9]{2})/([0-9]{2})/([a-zA-Z0-9]+)\.([a-zA-Z0-9]+)" replace="http://imgpit.com/upload/big/$2/$3/$4/$5.$6" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

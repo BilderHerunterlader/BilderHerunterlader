@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://global/skin/" type="text/css"?>
+
+<!DOCTYPE overlay SYSTEM "chrome://bilderherunterlader/locale/options.dtd">
+
+<prefwindow id="bilderherunterlader-prefs" title="&bhoptions.windowtitle.label;" xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+	<prefpane id="pane" label="Options">
+		<preferences>
+			<preference id="pref_bhtransmitmode" name="extensions.bilderherunterlader.bhtransmitmode" type="bool" />
+			<preference id="pref_bhfireimages" name="extensions.bilderherunterlader.fireImages" type="bool" />
+			<preference id="pref_bhfirelinks" name="extensions.bilderherunterlader.fireLinks" type="bool" />
+			<preference id="pref_bhframes" name="extensions.bilderherunterlader.frames" type="bool" />
+			<preference id="pref_bhiframes" name="extensions.bilderherunterlader.iframes" type="bool" />
+			<preference id="pref_bhdataurlattributes" name="extensions.bilderherunterlader.dataurlattributes" type="bool" />
+		</preferences>
+		<groupbox>
+			<caption label="&bhoptions.bhtransmitmode.label;" />
+			<description>&bhoptions.bhtransmitmode.description;</description>
+			<checkbox preference="pref_bhtransmitmode" label="&bhoptions.bhtransmitmode.label;" />
+		</groupbox>
+		<groupbox>
+			<caption label="&bhoptions.contextmenu.label;" />
+			<checkbox preference="pref_bhfireimages" label="&bhoptions.popupmenu.bhImages;" />
+			<checkbox preference="pref_bhfirelinks" label="&bhoptions.popupmenu.bh;" />
+		</groupbox>
+		<groupbox>
+			<caption label="&bhoptions.linkextract.label;" />
+			<checkbox preference="pref_bhframes" label="&bhoptions.linkextract.frames;" />
+			<checkbox preference="pref_bhiframes" label="&bhoptions.linkextract.iframes;" />
+			<checkbox preference="pref_bhdataurlattributes" label="&bhoptions.linkextract.dataurlattributes;" />
+		</groupbox>
+	</prefpane>
+</prefwindow>

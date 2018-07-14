@@ -1,0 +1,8 @@
+overlay	chrome://browser/content/browser.xul	chrome://bilderherunterlader/content/bilderherunterlader.xul
+overlay	chrome://navigator/content/navigator.xul	chrome://bilderherunterlader/content/bilderherunterlader.xul
+content	bilderherunterlader	jar:chrome/bilderherunterlader.jar!/content/
+
+locale	bilderherunterlader	de-DE	jar:chrome/bilderherunterlader.jar!/locale/de-DE/
+locale	bilderherunterlader	en-US	jar:chrome/bilderherunterlader.jar!/locale/en-US/
+
+skin	bilderherunterlader	classic	jar:chrome/bilderherunterlader.jar!/skin/classic/

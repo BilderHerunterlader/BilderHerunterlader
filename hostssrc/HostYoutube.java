@@ -1,0 +1,910 @@
+import java.awt.BorderLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SpringLayout;
+
+import org.apache.commons.codec.net.URLCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Node;
+
+import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostIOException;
+import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.SpringUtilities;
+import ch.supertomcat.bh.hoster.ContainerPage;
+import ch.supertomcat.bh.hoster.DownloadContainerPageOptions;
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.IHoster;
+import ch.supertomcat.bh.hoster.IHosterURLAdder;
+import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
+import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
+import ch.supertomcat.bh.hoster.hosteroptions.IHosterOverrideDirectoryOption;
+import ch.supertomcat.bh.hoster.hosteroptions.OverrideDirectoryOption;
+import ch.supertomcat.bh.hoster.linkextract.ExtractTools;
+import ch.supertomcat.bh.hoster.linkextract.ILinkExtractFilter;
+import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
+import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.URL;
+import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcattools.fileiotools.FileTool;
+import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
+import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcattools.htmltools.HTMLTool;
+import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+
+/**
+ * Host class for Youtube
+ * 
+ * @version 7.6
+ */
+public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
+	/**
+	 * Logger
+	 */
+	private static Logger logger = LoggerFactory.getLogger(HostYoutube.class);
+
+	/**
+	 * Version dieser Klasse
+	 */
+	public static final String VERSION = "7.6";
+
+	/**
+	 * Name dieser Klasse
+	 */
+	public static final String NAME = "HostYoutube";
+
+	private static final int QUALITY_STANDARD = 0;
+	private static final int QUALITY_OLD_MOBILE = 1;
+	private static final int QUALITY_MOBILE = 2;
+	private static final int QUALITY_MEDIUM = 3;
+	private static final int QUALITY_OLD_HIGH = 4;
+	private static final int QUALITY_HIGH = 5;
+	private static final int QUALITY_HD = 6;
+	private static final int QUALITY_FULL_HD = 7;
+	private static final int QUALITY_4K_HD = 8;
+
+	/**
+	 * Kompiliertes Muster
+	 */
+	private Pattern urlPattern;
+
+	private Pattern youtubeSearchPatternFirstPage;
+
+	private Pattern youtubeSearchPatternNextPage;
+
+	private RuleRegExp regexTitle;
+
+	private RuleRegExp regexError;
+
+	private RuleRegExp regexFmtUrlMap;
+
+	private RuleRegExp regexAdaptiveFmts;
+
+	private Map<Integer, String[]> strQualities = new HashMap<>();
+
+	private boolean download4KHD = true;
+
+	private boolean downloadFullHD = true;
+
+	private boolean downloadHD = true;
+
+	private boolean downloadHigh = true;
+
+	private boolean downloadMedium = true;
+
+	private boolean downloadMobile = false;
+
+	private boolean preferWEBM = false;
+
+	private boolean prefer3D = false;
+
+	private boolean filenameIncludeVideoID = false;
+
+	private OverrideDirectoryOption overrideDirectoryOption = new OverrideDirectoryOption(NAME);
+
+	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
+
+	/**
+	 * Beschraenkung
+	 */
+	private Restriction restriction = null;
+
+	/**
+	 * Konstruktor
+	 */
+	public HostYoutube() {
+		/**
+		 * Name, Container Format, Video Format, Aspect Ratio, Max Video Resolution,
+		 * Audio Format, Audio Channels, Sampling Rate (kHz), File-Extension, QUALITY_...
+		 * 
+		 * Keys = fmt
+		 */
+		strQualities.put(13, new String[] { "Mobile (Old)", "3GP", "H.263/AMR", "4:3", "176x144", "AMR", "Mono", "8", ".3gp", String.valueOf(QUALITY_OLD_MOBILE), "2D" });
+		strQualities.put(17, new String[] { "Mobile", "3GP", "MPEG-4 Part 2", "11:9", "176x144", "AAC", "Stereo", "44.1", ".3gp", String.valueOf(QUALITY_MOBILE), "2D" });
+		strQualities.put(36, new String[] { "Mobile", "3GP", "MPEG-4 Part 2", "4:3", "320x240", "AAC", "Stereo", "22", ".3gp", String.valueOf(QUALITY_MOBILE), "2D" });
+		// strQualities.put(160, new String[] {"Mobile", "MP4", "H.264/MPEG-4 AVC", "16:9", "256x144", "AAC", "Stereo", "22", ".mp4",
+		// String.valueOf(QUALITY_MOBILE), "2D"});
+
+		strQualities.put(34, new String[] { "240p", "FLV", "H.264/MPEG-4 AVC", "4:3 / 16:9", "320x240 / 400x226", "AAC", "Stereo", "44.1", ".flv", String.valueOf(QUALITY_STANDARD), "2D" });
+		strQualities.put(5, new String[] { "240p", "FLV", "FLV", "Unkown", "?x240p", "MP3", "?", "?", ".flv", String.valueOf(QUALITY_STANDARD), "2D" });
+		// strQualities.put(133, new String[] {"240p", "MP4", "H.264/MPEG-4 AVC", "16:9", "426x240", "AAC", "?", "?", ".mp4", String.valueOf(QUALITY_STANDARD),
+		// "2D"});
+
+		strQualities.put(18, new String[] { "360p", "MP4", "H.264/MPEG-4 AVC", "4:3", "480x360", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_MEDIUM), "2D" });
+		strQualities.put(6, new String[] { "360p", "FLV", "H.263", "4:3", "480x360", "MP3", "Mono", "44.1", ".flv", String.valueOf(QUALITY_MEDIUM), "2D" });
+		strQualities.put(43, new String[] { "360p", "WEBM", "VP8", "4:3", "480x360", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_MEDIUM), "2D" });
+		strQualities.put(82, new String[] { "360p", "MP4", "H.264/MPEG-4 AVC", "4:3", "480x360", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_MEDIUM), "3D" });
+		strQualities.put(100, new String[] { "360p", "WEBM", "VP8", "4:3", "480x360", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_MEDIUM), "3D" });
+		// strQualities.put(134, new String[] {"360p", "MP4", "H.264/MPEG-4 AVC", "16:9", "640x360", "AAC", "Stereo", "44.1", ".mp4",
+		// String.valueOf(QUALITY_MEDIUM), "2D"});
+
+		strQualities.put(35, new String[] { "480p", "FLV", "H.264/MPEG-4 AVC", "4:3", "854x480", "AAC", "Stereo", "44.1", ".flv", String.valueOf(QUALITY_HIGH), "2D" });
+		strQualities.put(44, new String[] { "480p", "WEBM", "VP8", "4:3", "854x480", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HIGH), "2D" });
+		// strQualities.put(135, new String[] {"480p", "MP4", "H.264/MPEG-4 AVC", "4:3", "854x480", "AAC", "Stereo", "44.1", ".mp4",
+		// String.valueOf(QUALITY_HIGH), "2D"});
+
+		strQualities.put(22, new String[] { "720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HD), "2D" });
+		strQualities.put(45, new String[] { "720p", "WEBM", "VP8", "16:9", "1280x720", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HD), "2D" });
+		strQualities.put(84, new String[] { "720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HD), "3D" });
+		strQualities.put(102, new String[] { "720p", "WEBM", "VP8", "16:9", "1280x720", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HD), "3D" });
+		// strQualities.put(136, new String[] {"720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4",
+		// String.valueOf(QUALITY_HD), "2D"});
+
+		strQualities.put(37, new String[] { "1080p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1920x1080", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_FULL_HD), "2D" });
+		strQualities.put(46, new String[] { "1080p", "WEBM", "VP8", "16:9", "1920x1080", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_FULL_HD), "2D" });
+		// strQualities.put(137, new String[] {"1080p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1920x1080", "AAC", "Stereo", "44.1", ".mp4",
+		// String.valueOf(QUALITY_FULL_HD), "2D"});
+
+		strQualities.put(38, new String[] { "4KHD", "MP4", "H.264/MPEG-4 AVC", "16:9", "4096x2304", "AAC", "Stereo", "48.0", ".mp4", String.valueOf(QUALITY_4K_HD), "2D" });
+
+		/*
+		 * DASH (Dynamic Adaptive Streaming over HTTP) video formats:
+		 * 160, 133, 134, 135, 136, 137 are video only
+		 * 139, 140, 141 are audio only
+		 */
+
+		urlPattern = Pattern.compile("^https?://(www\\.)?youtube\\.com/(watch\\?(.*?)?v=([^&]+).*|(.*?)?#([0-9a-zA-Z]/)+([^&]+))");
+
+		youtubeSearchPatternFirstPage = Pattern.compile("https?://(www\\.)?youtube\\.com/results\\?(&?search_sort=[^&]+|&?&filters=[^&]+|&?search_type=[^&]+|&?search_query=[^&]+){3,4}");
+		youtubeSearchPatternNextPage = Pattern.compile("https?://(www\\.)?youtube\\.com/results\\?(&?search_sort=[^&]+|&?&filters=[^&]+|&?search_type=[^&]+|&?search_query=[^&]+){3,4}&page=[0-9]+");
+
+		regexTitle = new RuleRegExp();
+		regexTitle.setSearch("(?m)<title>(.+?) - YouTube");
+		regexTitle.setReplace("$1");
+
+		regexError = new RuleRegExp();
+		regexError
+				.setSearch("(The video you have requested is not available|no longer available|url contained a malformed video id|Confirm Birth Date|copyright claim|This video has been removed due to terms of use violation|This video is not available in your country|This video has been deleted|This video has been removed by the user|This video contains content from [^,]+, who has blocked it in your country on copyright grounds)");
+		regexError.setReplace("$1");
+
+		regexFmtUrlMap = new RuleRegExp();
+		regexFmtUrlMap.setSearch("\"url_encoded_fmt_stream_map\": ?\"(.+?)\"");
+		regexFmtUrlMap.setReplace("$1");
+
+		regexAdaptiveFmts = new RuleRegExp("\"adaptive_fmts\": ?\"(.+?)\"", "$1");
+
+		int iMaxConnections = 0;
+		try {
+			iMaxConnections = SettingsManager.instance().getIntValue(NAME + ".maxSimultaneousDownloads");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".maxSimultaneousDownloads", 1);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			download4KHD = SettingsManager.instance().getBooleanValue(NAME + ".download4KHD");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".download4KHD", download4KHD);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			downloadFullHD = SettingsManager.instance().getBooleanValue(NAME + ".downloadFullHD");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			downloadHD = SettingsManager.instance().getBooleanValue(NAME + ".downloadHD");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadHD", downloadHD);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			downloadHigh = SettingsManager.instance().getBooleanValue(NAME + ".downloadHigh");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadHigh", downloadHigh);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			downloadMedium = SettingsManager.instance().getBooleanValue(NAME + ".downloadMedium");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadMedium", downloadMedium);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			downloadMobile = SettingsManager.instance().getBooleanValue(NAME + ".downloadMobile");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadMobile", downloadMobile);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			preferWEBM = SettingsManager.instance().getBooleanValue(NAME + ".preferWEBM");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".preferWEBM", preferWEBM);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			prefer3D = SettingsManager.instance().getBooleanValue(NAME + ".prefer3D");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".prefer3D", prefer3D);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			filenameIncludeVideoID = SettingsManager.instance().getBooleanValue(NAME + ".filenameIncludeVideoID");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		restriction = new Restriction("youtube.com", iMaxConnections);
+		DownloadQueueManager.instance().addRestriction(restriction);
+	}
+
+	@Override
+	public boolean isFromThisHoster(String url) {
+		if (deactivateOption.isDeactivated()) {
+			return false;
+		}
+		Matcher urlMatcher = urlPattern.matcher(url);
+		if (urlMatcher.matches()) {
+			return true;
+		}
+		Matcher searchUrlMatcher = youtubeSearchPatternFirstPage.matcher(url);
+		if (searchUrlMatcher.matches()) {
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * URL parsen
+	 * 
+	 * @param url Container-URL
+	 * @param upo URLParseObject
+	 * @param pic Pic
+	 * @return URL
+	 * @throws HostException
+	 */
+	private String parseURL(String url, URLParseObject upo, Pic pic) throws HostException {
+		// Videos in Channel-Pages does not work, so we rewrite the url to a normal video-url to get it working
+		String videoID = urlPattern.matcher(url).replaceAll("$4$7");
+		url = "http://www.youtube.com/watch?v=" + videoID;
+
+		/*
+		 * We check the status code later and get the sourcecode first, to check for
+		 * error messages, because it is better to display an error message like
+		 * "This video has been removed by the user" instead of just a 404 HTTP Error.
+		 */
+		ContainerPage result = downloadContainerPageEx(url, null, new DownloadContainerPageOptions(true, false));
+		String htmlCode = result.getPage();
+
+		/*
+		 * Check for error messages
+		 */
+		String error = regexError.doPageSourcecodeReplace(htmlCode, 0, url, null);
+		if (!error.isEmpty()) {
+			throw new HostIOException(error);
+		}
+
+		int statusCode = result.getStatusLine().getStatusCode();
+		if (statusCode != 200) {
+			throw new HostIOException("HTTP-Error: " + statusCode);
+		}
+
+		try {
+			String parsedURL = "";
+
+			/*
+			 * Get title and error messages from the page-source-code
+			 */
+			String title = regexTitle.doPageSourcecodeReplace(htmlCode, 0, url, null);
+			title = title.replaceAll("\\\\'", "'");
+
+			/*
+			 * First Method of getting the download link, which should always work,
+			 * but does not always provide the highest quality
+			 */
+			String urlmap = regexFmtUrlMap.doPageSourcecodeReplace(htmlCode, 0, url, null);
+			String fmtUrls[] = urlmap.split(",");
+
+			int qualityIndex = 0; // =fmt
+
+			if (fmtUrls != null && fmtUrls.length > 0) {
+				String retvalUrl = "";
+				int fmt = 0;
+				String sig = "";
+				for (String strFmtUrlMap : fmtUrls) {
+					Map<String, String> fmtUrlMap = getVideoInfo(strFmtUrlMap);
+					int quality = 0;
+					try {
+						quality = Integer.parseInt(fmtUrlMap.get("itag"));
+					} catch (NumberFormatException nfe) {
+					}
+					if (isHigherQuality(quality, fmt)) {
+						fmt = quality;
+						retvalUrl = fmtUrlMap.get("url");
+						sig = fmtUrlMap.get("sig");
+					}
+				}
+				if (retvalUrl.length() > 0) {
+					qualityIndex = fmt;
+					// Remove the application/x-www-form-urlencoded encoding
+					URLCodec urlCodec = new URLCodec("UTF-8");
+					retvalUrl = urlCodec.decode(retvalUrl);
+					parsedURL = retvalUrl + "&signature=" + sig;
+				}
+			}
+
+			String adaptiveFmtsMap = regexAdaptiveFmts.doPageSourcecodeReplace(htmlCode, 0, url, null);
+			String adaptiveFmts[] = adaptiveFmtsMap.split(",");
+			if (adaptiveFmts != null && adaptiveFmts.length > 0) {
+				String retvalUrl = "";
+
+				int fmt = qualityIndex;
+				String sig = "";
+				for (String adaptiveFmt : adaptiveFmts) {
+					Map<String, String> fmtUrlMap = getVideoInfo(adaptiveFmt);
+					int quality = 0;
+					try {
+						quality = Integer.parseInt(fmtUrlMap.get("itag"));
+					} catch (NumberFormatException nfe) {
+					}
+					if (isHigherQuality(quality, fmt)) {
+						fmt = quality;
+						retvalUrl = fmtUrlMap.get("url");
+						sig = fmtUrlMap.get("sig");
+					}
+				}
+				if (retvalUrl.length() > 0) {
+					qualityIndex = fmt;
+					// Remove the application/x-www-form-urlencoded encoding
+					URLCodec urlCodec = new URLCodec("UTF-8");
+					retvalUrl = urlCodec.decode(retvalUrl);
+					parsedURL = retvalUrl + "&signature=" + sig;
+				}
+			}
+
+			/*
+			 * If no title could be read from the page, the video id is used
+			 */
+			if (title.length() == 0) {
+				title = videoID;
+			} else {
+				title = HTMLTool.unescapeHTML(title);
+			}
+
+			/*
+			 * Generate the filename
+			 */
+			int titleEndIndex = FileTool.FILENAME_LENGTH_LIMIT - 24;
+			if (titleEndIndex > title.length()) {
+				titleEndIndex = title.length();
+			}
+			String filename = title.substring(0, titleEndIndex); // shorten title so that id and quality are not removed by reduceFilenameLength method
+			if (filenameIncludeVideoID) {
+				filename += "-" + videoID;
+			}
+			String[] qualityArray = strQualities.get(qualityIndex);
+			filename += "-" + qualityArray[0] + qualityArray[8];
+			filename = filterFilename(filename);
+			upo.setCorrectedFilename(filename);
+
+			if (overrideDirectoryOption.isPathOverride()) {
+				if (overrideDirectoryOption.isPathOverrideSubdirsAllowed() == false) {
+					pic.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
+				} else {
+					if (FileTool.checkIsSameOrSubFolder(pic.getTargetPath(), overrideDirectoryOption.getPathOverrideVal()) == false) {
+						pic.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
+					}
+				}
+			}
+			return parsedURL;
+		} catch (Exception e) {
+			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
+		}
+	}
+
+	private Map<String, String> getVideoInfo(String strFmtUrlMap) {
+		Map<String, String> fmtUrlMap = new HashMap<>();
+
+		String arr[] = strFmtUrlMap.split("\\\\u0026");
+		if (arr != null) {
+			String key;
+			String val;
+			for (String str : arr) {
+				int index = str.indexOf("=");
+				if (index > 0 && index < (str.length() - 1)) {
+					key = str.substring(0, index);
+					val = str.substring(index + 1);
+					fmtUrlMap.put(key, val);
+				}
+			}
+		}
+		return fmtUrlMap;
+	}
+
+	private boolean isQualityEnabled(int qualityIndex) {
+		switch (qualityIndex) {
+			case QUALITY_4K_HD:
+				return download4KHD;
+			case QUALITY_FULL_HD:
+				return downloadFullHD;
+			case QUALITY_HD:
+				return downloadHD;
+			case QUALITY_HIGH:
+				return downloadHigh;
+			case QUALITY_OLD_HIGH:
+				return downloadHigh;
+			case QUALITY_MEDIUM:
+				return downloadMedium;
+			case QUALITY_MOBILE:
+				return downloadMobile;
+			case QUALITY_OLD_MOBILE:
+				return downloadMobile;
+			case QUALITY_STANDARD:
+				return download4KHD;
+			default:
+				return false;
+		}
+	}
+
+	private boolean isHigherQuality(int newFmt, int currentFmt) {
+		String[] qualityArrayNew = strQualities.get(newFmt);
+		String[] qualityArrayCurrent = strQualities.get(currentFmt);
+
+		if (qualityArrayNew == null) {
+			logger.warn("Unrecognized Youtube fmt detected: {}", newFmt);
+			return false;
+		}
+
+		int newIndex = Integer.parseInt(qualityArrayNew[9]);
+		int currentIndex = 0;
+		if (qualityArrayCurrent != null) {
+			currentIndex = Integer.parseInt(qualityArrayCurrent[9]);
+		}
+
+		if (isQualityEnabled(newIndex)) {
+			if (newIndex > currentIndex) {
+				return true;
+			} else if (newIndex == currentIndex) {
+				boolean bNewIs3D = qualityArrayNew[10].equals("3D");
+				boolean bNewIsWEBM = qualityArrayNew[8].equals(".webm");
+				boolean bCurrentIs3D = qualityArrayCurrent != null && qualityArrayCurrent[10].equals("3D");
+				boolean bCurrentIsWEBM = qualityArrayCurrent != null && qualityArrayCurrent[8].equals(".webm");
+
+				if (prefer3D && !preferWEBM) {
+					if (bNewIs3D == true && bNewIsWEBM == false) {
+						return true;
+					}
+				} else if (preferWEBM && !prefer3D) {
+					if (bNewIsWEBM == true && bNewIs3D == false) {
+						return true;
+					}
+				} else if (preferWEBM && prefer3D) {
+					if (bNewIsWEBM == true && bNewIs3D == true) {
+						return true;
+					}
+				} else {
+					if (bNewIs3D && !bCurrentIs3D) {
+						return false;
+					} else if (bNewIsWEBM && !bCurrentIsWEBM) {
+						return false;
+					}
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	@Override
+	public String getVersion() {
+		return VERSION;
+	}
+
+	@Override
+	public String getName() {
+		return NAME;
+	}
+
+	@Override
+	public String getFilenameFromURL(String url) {
+		if (!isFromThisHoster(url)) {
+			return "";
+		}
+		return "";
+	}
+
+	@Override
+	public void openOptionsDialog() {
+		final JButton btnOK = new JButton("OK");
+		final JButton btnCancel = new JButton("Cancel");
+		JPanel pnlButtons = new JPanel();
+		JPanel pnlCenter = new JPanel();
+		JPanel pnlOther = new JPanel();
+		JLabel lblMaxConnections = new JLabel(Localization.getString("MaxConnectionCount"));
+		final JTextField txtMaxConnections = new JTextField("1", 3);
+		JPanel pnlPathOverride = new JPanel();
+		final JCheckBox cbPathOverride = new JCheckBox(Localization.getString("PathOverride"), overrideDirectoryOption.isPathOverride());
+		final JTextField txtPathOverride = new JTextField(overrideDirectoryOption.getPathOverrideVal(), 30);
+		final JButton btnPathOverride = new JButton("...");
+		final JCheckBox cbPathOverrideSubdirs = new JCheckBox(Localization.getString("PathOverrideSubdirs"), overrideDirectoryOption.isPathOverrideSubdirsAllowed());
+		JPanel pnlQuality = new JPanel();
+		final JCheckBox cbDownload4KHD = new JCheckBox(Localization.getString("YoutubeDownload4KHD"), download4KHD);
+		final JCheckBox cbDownloadFullHD = new JCheckBox(Localization.getString("YoutubeDownloadFullHD"), downloadFullHD);
+		final JCheckBox cbDownloadHD = new JCheckBox(Localization.getString("YoutubeDownloadHD"), downloadHD);
+		final JCheckBox cbDownloadHigh = new JCheckBox(Localization.getString("YoutubeDownloadHigh"), downloadHigh);
+		final JCheckBox cbDownloadMedium = new JCheckBox(Localization.getString("YoutubeDownloadMedium"), downloadMedium);
+		final JCheckBox cbDownloadMobile = new JCheckBox(Localization.getString("YoutubeDownloadMobile"), downloadMobile);
+		final JCheckBox cbDownloadStandard = new JCheckBox(Localization.getString("YoutubeDownloadStandard"), true);
+		final JCheckBox cbFilenameIncludeVideoID = new JCheckBox(Localization.getString("YoutubeFilenameIncludeVideoID"), filenameIncludeVideoID);
+		final JCheckBox cbPreferWEBM = new JCheckBox(Localization.getString("YoutubePreferWEBM"), preferWEBM);
+		final JCheckBox cbPrefer3D = new JCheckBox(Localization.getString("YoutubePrefer3D"), prefer3D);
+
+		pnlButtons.add(btnOK);
+		pnlButtons.add(btnCancel);
+
+		txtMaxConnections.setToolTipText(Localization.getString("MaxConnectionCountToolTip"));
+
+		pnlOther.setBorder(BorderFactory.createTitledBorder(Localization.getString("Others")));
+		pnlOther.setLayout(new SpringLayout());
+		pnlOther.add(lblMaxConnections);
+		pnlOther.add(txtMaxConnections);
+		pnlOther.add(cbFilenameIncludeVideoID);
+		pnlOther.add(new JLabel());
+		SpringUtilities.makeCompactGrid(pnlOther, 2, 2, 0, 0, 5, 5);
+
+		btnPathOverride.setEnabled(overrideDirectoryOption.isPathOverride());
+		txtPathOverride.setEditable(false);
+		txtPathOverride.setEnabled(overrideDirectoryOption.isPathOverride());
+		cbPathOverrideSubdirs.setEnabled(overrideDirectoryOption.isPathOverride());
+
+		pnlPathOverride.setBorder(BorderFactory.createTitledBorder(Localization.getString("PathOverrideTitle")));
+		pnlPathOverride.setLayout(new SpringLayout());
+		pnlPathOverride.add(cbPathOverride);
+		pnlPathOverride.add(new JLabel());
+		pnlPathOverride.add(txtPathOverride);
+		pnlPathOverride.add(btnPathOverride);
+		pnlPathOverride.add(cbPathOverrideSubdirs);
+		pnlPathOverride.add(new JLabel());
+		SpringUtilities.makeCompactGrid(pnlPathOverride, 3, 2, 0, 0, 5, 5);
+
+		cbDownloadStandard.setEnabled(false);
+
+		pnlQuality.setBorder(BorderFactory.createTitledBorder(Localization.getString("YoutubeQuality")));
+		pnlQuality.setLayout(new SpringLayout());
+		pnlQuality.add(cbDownload4KHD);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadFullHD);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadHD);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadHigh);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadMedium);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadMobile);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbDownloadStandard);
+		pnlQuality.add(new JLabel(""));
+		pnlQuality.add(cbPreferWEBM);
+		pnlQuality.add(cbPrefer3D);
+		SpringUtilities.makeCompactGrid(pnlQuality, 8, 2, 0, 0, 5, 5);
+
+		Insets insets = new Insets(0, 0, 5, 0);
+		pnlCenter.setLayout(new GridBagLayout());
+		pnlCenter.add(pnlOther, new GridBagConstraints(0, 0, 1, 1, 1.0, 0.2, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+		pnlCenter.add(pnlPathOverride, new GridBagConstraints(0, 1, 1, 1, 1.0, 0.3, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+		pnlCenter.add(pnlQuality, new GridBagConstraints(0, 2, 1, 1, 1.0, 0.4, GridBagConstraints.CENTER, GridBagConstraints.BOTH, insets, 0, 0));
+
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtMaxConnections);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtPathOverride);
+
+		final JDialog dialog = new JDialog(Main.instance(), NAME, true);
+		dialog.setLayout(new BorderLayout());
+		dialog.add(pnlButtons, BorderLayout.SOUTH);
+		try {
+			txtMaxConnections.setText(Integer.toString(SettingsManager.instance().getIntValue(NAME + ".maxSimultaneousDownloads")));
+			cbFilenameIncludeVideoID.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".filenameIncludeVideoID"));
+			cbPathOverride.setSelected(overrideDirectoryOption.isPathOverride());
+			cbPathOverrideSubdirs.setSelected(overrideDirectoryOption.isPathOverrideSubdirsAllowed());
+			cbDownload4KHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".download4KHD"));
+			cbDownloadFullHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadFullHD"));
+			cbDownloadHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadHD"));
+			cbDownloadHigh.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadHigh"));
+			cbDownloadMedium.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMedium"));
+			cbDownloadMobile.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMobile"));
+			txtPathOverride.setText(overrideDirectoryOption.getPathOverrideVal());
+		} catch (Exception ex) {
+			logger.error(ex.getMessage(), ex);
+		}
+		dialog.add(pnlCenter, BorderLayout.CENTER);
+
+		ActionListener action = new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (e.getSource() == btnOK) {
+					int iVal;
+					try {
+						iVal = Integer.parseInt(txtMaxConnections.getText());
+						overrideDirectoryOption.setPathOverride(cbPathOverride.isSelected());
+						overrideDirectoryOption.setPathOverrideVal(txtPathOverride.getText());
+						overrideDirectoryOption.setPathOverrideSubdirsAllowed(cbPathOverrideSubdirs.isSelected());
+						filenameIncludeVideoID = cbFilenameIncludeVideoID.isSelected();
+						download4KHD = cbDownload4KHD.isSelected();
+						downloadFullHD = cbDownloadFullHD.isSelected();
+						downloadHD = cbDownloadHD.isSelected();
+						downloadHigh = cbDownloadHigh.isSelected();
+						downloadMedium = cbDownloadMedium.isSelected();
+						downloadMobile = cbDownloadMobile.isSelected();
+					} catch (NumberFormatException nfe) {
+						return;
+					}
+					try {
+						SettingsManager.instance().setOptionValue(NAME + ".maxSimultaneousDownloads", iVal);
+						SettingsManager.instance().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
+						SettingsManager.instance().setOptionValue(NAME + ".download4KHD", download4KHD);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadHD", downloadHD);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadHigh", downloadHigh);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadMedium", downloadMedium);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadMobile", downloadMobile);
+						overrideDirectoryOption.saveOptions();
+						deactivateOption.saveOption();
+						SettingsManager.instance().writeSettings(true);
+					} catch (Exception ex) {
+						logger.error(ex.getMessage(), ex);
+					}
+					restriction.setMaxSimultaneousDownloads(iVal);
+					dialog.dispose();
+				} else if (e.getSource() == btnCancel) {
+					dialog.dispose();
+				} else if (e.getSource() == btnPathOverride) {
+					File folder = FileDialogTool.showFolderDialog(Main.instance(), txtPathOverride.getText(), null);
+					if (folder != null) {
+						if ((folder.getAbsolutePath().endsWith("\\") == false) && (folder.getAbsolutePath().endsWith("/") == false)) {
+							txtPathOverride.setText(folder.getAbsolutePath() + FileTool.FILE_SEPERATOR);
+						} else {
+							txtPathOverride.setText(folder.getAbsolutePath());
+						}
+					}
+					folder = null;
+				}
+			}
+		};
+
+		btnOK.addActionListener(action);
+		btnCancel.addActionListener(action);
+		btnPathOverride.addActionListener(action);
+
+		cbPathOverride.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				txtPathOverride.setEnabled(cbPathOverride.isSelected());
+				btnPathOverride.setEnabled(cbPathOverride.isSelected());
+				cbPathOverrideSubdirs.setEnabled(cbPathOverride.isSelected());
+			}
+		});
+
+		dialog.pack();
+		dialog.setLocationRelativeTo(Main.instance());
+		dialog.setVisible(true);
+	}
+
+	@Override
+	public void parseURLAndFilename(URLParseObject upo) throws HostException {
+		if (isFromThisHoster(upo.getContainerURL())) {
+			String s = parseURL(upo.getContainerURL(), upo, upo.getPic());
+			upo.setDirectLink(s);
+			// upo.addInfo("useCookies", "");
+		}
+	}
+
+	@Override
+	public OverrideDirectoryOption getOverrideDirectoryOption() {
+		return this.overrideDirectoryOption;
+	}
+
+	@Override
+	public String toString() {
+		return NAME;
+	}
+
+	@Override
+	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+		if (overrideDirectoryOption.isPathOverride()) {
+			url.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
+		}
+		isFromThisHoster.setValue(true);
+
+		Matcher matcherSearch = youtubeSearchPatternFirstPage.matcher(url.getURL());
+		if (matcherSearch.matches()) {
+			isFromThisHoster.setValue(false);
+
+			ILinkExtractFilter filter = new ILinkExtractFilter() {
+				private Node getParentNode(int level, Node node) {
+					if (level < 0) {
+						return null;
+					}
+					if (level == 0) {
+						return node;
+					}
+
+					Node parentNode = node;
+					for (int i = 0; i < level; i++) {
+						parentNode = parentNode.getParentNode();
+						if (parentNode == null) {
+							break;
+						}
+					}
+					return parentNode;
+				}
+
+				@Override
+				public boolean isLinkAccepted(Node nodeURL, Document nodeRoot, URL url, String containerURL) {
+					String link = ExtractTools.getAttributeValueFromNode(nodeURL, "href");
+					if (link != null && link.length() > 0) {
+						URL extractedURL = new URL(link);
+						if (link.startsWith("http://") == false) {
+							// If the link was relative we have to correct that
+							extractedURL = ExtractTools.convertURLFromRelativeToAbsolute(containerURL, extractedURL);
+						}
+						Matcher matcherSearch = youtubeSearchPatternNextPage.matcher(extractedURL.getURL());
+						if (matcherSearch.matches()) {
+							return true;
+						}
+					}
+
+					String strClass = null;
+					Node parentNode = getParentNode(6, nodeURL);
+					if (parentNode != null) {
+						strClass = ExtractTools.getAttributeValueFromNode(parentNode, "class");
+					}
+					if (strClass != null && strClass.contains("item-section")) {
+						Matcher matcher = urlPattern.matcher(url.getURL());
+						String videoID = matcher.replaceAll("$4$7");
+
+						String title = ExtractTools.getTextValueFromNode(nodeURL);
+
+						String filename = videoID;
+						if (title != null && title.length() > 0) {
+							title = title.replaceAll("\\\\'", "'");
+							title = HTMLTool.unescapeHTML(title);
+							filename = title;
+							if (filenameIncludeVideoID) {
+								filename += "-id" + videoID;
+							}
+							filename = filterFilename(filename);
+							url.setFilenameCorrected(title);
+						}
+						url.setFilenameCorrected(filename);
+						return true;
+					}
+
+					return false;
+				}
+			};
+
+			List<URL> links = new ArrayList<>();
+			links.add(url);
+
+			List<URL> downloadedLinks = new ArrayList<>();
+			for (int i = 0; i < links.size(); i++) {
+				Matcher matcherSearchFirst = youtubeSearchPatternFirstPage.matcher(links.get(i).getURL());
+				Matcher matcherSearchNext = youtubeSearchPatternNextPage.matcher(links.get(i).getURL());
+
+				if (matcherSearchNext.matches() || matcherSearchFirst.matches()) {
+					if (downloadedLinks.contains(links.get(i)) == false) {
+						progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
+
+						// System.out.println("Extract: " + links.get(i).getURL());
+						List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter);
+						for (int x = 0; x < foundLinks.size(); x++) {
+							if (links.contains(foundLinks.get(x)) == false) {
+								links.add(foundLinks.get(x));
+								// System.out.println("Accepted: " + foundLinks.get(x).getURL());
+							}
+						}
+						downloadedLinks.add(links.get(i));
+					}
+					links.remove(i);
+					i--;
+					progress.progressChanged(0, links.size(), (downloadedLinks.size() + i));
+					progress.progressChanged("Extracting Links from " + url + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
+				}
+			}
+
+			return links;
+		}
+		return null;
+	}
+
+	@Override
+	public boolean isEnabled() {
+		return !deactivateOption.isDeactivated();
+	}
+
+	@Override
+	public void setEnabled(boolean enabled) {
+		deactivateOption.setDeactivated(!enabled);
+		deactivateOption.saveOption();
+		SettingsManager.instance().writeSettings(true);
+	}
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="upix.me" version="0.5" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://upix.me/files[0-9]*/.+?/#.+\.(?:jpg|png)</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="http://upix.me/(files[0-9]*)/(.+?)/#(.+\.(?:jpg|png))" replace="$SRV$1/$2/$3" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="2">
+    <regexp search="#(.+)" replace="$1" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="0">
+    <regexp search="#(.+)" replace="$1" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

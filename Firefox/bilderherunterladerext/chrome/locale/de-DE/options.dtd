@@ -1,0 +1,10 @@
+﻿<!ENTITY bhoptions.bhtransmitmode.label "BH-Transmit-Mode">
+<!ENTITY bhoptions.bhtransmitmode.description "Falls du auf Bilder-Links laden mit BH klickst und nichts passiert, dann solltest du diese Option aktivieren. Dies könnte das Problem lösen.">
+<!ENTITY bhoptions.windowtitle.label "BilderHerunterlader-Einstellungen">
+<!ENTITY bhoptions.contextmenu.label "Kontext-Menü">
+<!ENTITY bhoptions.popupmenu.bh "Dateien mit BH herunterladen">
+<!ENTITY bhoptions.popupmenu.bhImages "Eingebettete Bilder mit BH herunterladen">
+<!ENTITY bhoptions.linkextract.label "Link-/Bild-Extrahierer">
+<!ENTITY bhoptions.linkextract.frames "Links/Bilder von Frames extrahieren">
+<!ENTITY bhoptions.linkextract.iframes "Links/Bilder von iFrames extrahieren">
+<!ENTITY bhoptions.linkextract.dataurlattributes "Links von data-url Attributen extrahieren">

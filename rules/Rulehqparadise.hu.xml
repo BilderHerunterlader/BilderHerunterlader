@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="hqparadise.hu / starity.hu" version="0.4" redirect="false" resend="false" usecontentdisposition="true" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>http://(www\.)?(hqparadise\.hu|starity\.hu)/(index\.php\?(s=[0-9a-zA-Z]+&amp;)?act=Attach&amp;type=post&amp;id=[0-9]+|forum/csatolas/[0-9]+/)</urlpattern>
+  <pipes>
+    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false" />
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="0" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
+  <maxConnections value="0" />
+</rule>

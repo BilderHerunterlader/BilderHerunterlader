@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rule name="directupload.net" version="1.9" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm</urlpattern>
+  <pipes>
+    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
+      <regexp search="&lt;meta property=&quot;og:image&quot; content=&quot;(.+?)&quot;" replace="$1" />
+    </pipeline>
+  </pipes>
+  <pipesFailures />
+  <pipeline mode="2" filenamemode="1">
+    <regexp search="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replace="$2.$3" />
+  </pipeline>
+  <pipeline mode="3" filenameDownloadSelectionMode="1">
+    <regexp search="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replace="$2.$3" />
+  </pipeline>
+  <maxConnections value="0" />
+</rule>

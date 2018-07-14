@@ -1,0 +1,3 @@
+.svn
+createXPI.bat
+excludelist.txt

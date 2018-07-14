@@ -1,0 +1,46 @@
+{
+	"manifest_version": 2,
+	"name": "BilderHerunterlader",
+	"version": "4.7",
+	"description": "Download files with BilderHerunterlader / Dateien mit BilderHerunterlader herunterladen",
+	"homepage_url": "http://bilderherunterlader.sourceforge.net/page/?loc=bilderherunterlader/bh4",
+	"default_locale": "en",
+	"applications": {
+		"gecko": {
+			"id": "bilderherunterlader@gmail.com",
+			"update_url": "https://www.dropbox.com/s/ct8cc1ddksshqz7/updates.json?dl=1"
+		}
+	},
+	"icons": {
+		"32": "icons/bilderherunterlader.png"
+	},
+	"permissions": [
+		"http://localhost/*",
+		"activeTab",
+		"contextMenus",
+		"webRequest",
+		"storage"
+	],
+	"browser_action": {
+		"default_icon": "icons/bilderherunterlader.png",
+		"default_title": "BilderHerunterlader"
+	},
+	"background": {
+		"scripts": ["background/bh_contextMenu.js"]
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["contentscripts/bh_Util.js", "contentscripts/bh_RequestData.js", "contentscripts/bh_PageTitle.js", "contentscripts/bh_SendToBH.js"]
+		}
+	],
+	"commands": {
+		"bhSendLinksFromTabToBH": {
+			"suggested_key": { "default": "Ctrl+Shift+Y" },
+			"description": "Send a 'bhSendLinksFromTabToBH' event to the extension"
+		}
+	},
+	"options_ui": {
+		"page": "settings/options.html"
+	}
+}

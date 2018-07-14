@@ -1,0 +1,10 @@
+﻿<!ENTITY bhoptions.bhtransmitmode.label "BH-Transmit-Mode">
+<!ENTITY bhoptions.bhtransmitmode.description "If you click on Load image-links with BH and nothing happens, you should activate this option. This could fix the problem.">
+<!ENTITY bhoptions.windowtitle.label "BilderHerunterlader-Settings">
+<!ENTITY bhoptions.contextmenu.label "Context-Menu">
+<!ENTITY bhoptions.popupmenu.bh "Download files with BH">
+<!ENTITY bhoptions.popupmenu.bhImages "Download embedded images with BH">
+<!ENTITY bhoptions.linkextract.label "Link-/Image-Extractor">
+<!ENTITY bhoptions.linkextract.frames "Extract links/images from frames">
+<!ENTITY bhoptions.linkextract.iframes "Extract links/images from iframes">
+<!ENTITY bhoptions.linkextract.dataurlattributes "Extract links from data-url attributes">
