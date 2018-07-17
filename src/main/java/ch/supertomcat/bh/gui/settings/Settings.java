@@ -511,6 +511,16 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * Label
 	 */
+	private JLabel lblDownloadSelectionWindowSizePos = new JLabel(Localization.getString("DownloadSelectionWindow"));
+
+	/**
+	 * Checkbox
+	 */
+	private JCheckBox chkDownloadSelectionWindowSizePos = new JCheckBox(Localization.getString("WindowSizePos"), false);
+
+	/**
+	 * Label
+	 */
 	private JLabel lblAlwaysAddTitle = new JLabel(Localization.getString("TargetFolder"));
 
 	/**
@@ -1272,10 +1282,15 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadRate, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadRate, pnlGUI);
-		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblWindowSizePos, pnlGUI);
-		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkWindowSizePos, pnlGUI);
+		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadSelectionWindowSizePos, pnlGUI);
+		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadSelectionWindowSizePos, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblSaveTableColumnSizes, pnlGUI);
@@ -1533,6 +1548,8 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		}
 
 		chkWindowSizePos.setSelected(sm.isSaveWindowSizePosition());
+
+		chkDownloadSelectionWindowSizePos.setSelected(sm.isSaveDownloadSelectionWindowSizePosition());
 
 		chkSaveTableColumnSizes.setSelected(sm.isSaveTableColumnSizes());
 
@@ -1804,6 +1821,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		sm.setAllowedFilenameChars(cmbAllowedFilenameChars.getSelectedIndex());
 		sm.setDebugLevel((String)cmbDebugLevel.getSelectedItem());
 		sm.setSaveWindowSizePosition(chkWindowSizePos.isSelected());
+		sm.setSaveDownloadSelectionWindowSizePosition(chkDownloadSelectionWindowSizePos.isSelected());
 		sm.setSaveTableColumnSizes(chkSaveTableColumnSizes.isSelected());
 		sm.setSaveTableSortOrders(chkSaveTableSortOrders.isSelected());
 		sm.setSaveLastPath(chkRememberLastUsedPath.isSelected());

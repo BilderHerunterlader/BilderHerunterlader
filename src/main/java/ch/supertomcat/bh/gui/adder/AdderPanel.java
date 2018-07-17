@@ -19,6 +19,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.AdjustmentEvent;
 import java.awt.event.AdjustmentListener;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyAdapter;
@@ -901,8 +903,44 @@ public class AdderPanel extends JFrame implements ActionListener {
 		im.put(windowOkStroke, windowOkKey);
 		am.put(windowOkKey, windowOkAction);
 
-		pack();
-		setLocationRelativeTo(Main.instance());
+		SettingsManager sm = SettingsManager.instance();
+		if (sm.isSaveDownloadSelectionWindowSizePosition()) {
+			this.setSize(sm.getDownloadSelectionWindowWidth(), sm.getDownloadSelectionWindowHeight());
+			this.setLocation(sm.getDownloadSelectionWindowXPos(), sm.getDownloadSelectionWindowYPos());
+		} else {
+			pack();
+			setLocationRelativeTo(Main.instance());
+		}
+
+		addComponentListener(new ComponentListener() {
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void componentResized(ComponentEvent e) {
+				SettingsManager sm = SettingsManager.instance();
+				sm.setDownloadSelectionWindowWidth(getWidth());
+				sm.setDownloadSelectionWindowHeight(getHeight());
+				sm.writeSettings(true);
+
+			}
+
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				SettingsManager sm = SettingsManager.instance();
+				sm.setDownloadSelectionWindowXPos(getX());
+				sm.setDownloadSelectionWindowYPos(getY());
+				sm.writeSettings(true);
+			}
+
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// Nothing to do
+			}
+		});
+
 		btnOK.requestFocusInWindow();
 		setVisible(true);
 	}

@@ -192,7 +192,7 @@ public class SettingsManager {
 	 * Restricted Settingspaths
 	 * This Settings can not be overwritten by the set*Value-Methods!
 	 */
-	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "Keywords.FilterEnabled", "Keywords.MatchMode", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
+	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.DownloadSelectionWindow.Width", "GUI.DownloadSelectionWindow.Height", "GUI.DownloadSelectionWindow.X", "GUI.DownloadSelectionWindow.Y", "GUI.DownloadSelectionWindow.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "Keywords.FilterEnabled", "Keywords.MatchMode", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
 
 	/**
 	 * Restricted Settingspaths and subpaths
@@ -369,6 +369,31 @@ public class SettingsManager {
 	 * Save Size and Position of Main-Window
 	 */
 	private boolean saveWindowSizePosition = false;
+
+	/**
+	 * Width
+	 */
+	private int downloadSelectionWindowWidth = 0;
+
+	/**
+	 * Height
+	 */
+	private int downloadSelectionWindowHeight = 0;
+
+	/**
+	 * X-Position
+	 */
+	private int downloadSelectionWindowXPos = 0;
+
+	/**
+	 * Y-Position
+	 */
+	private int downloadSelectionWindowYPos = 0;
+
+	/**
+	 * Save Size and Position of Main-Window
+	 */
+	private boolean saveDownloadSelectionWindowSizePosition = false;
 
 	/**
 	 * Always add the title automatically to the downloadpath
@@ -891,6 +916,13 @@ public class SettingsManager {
 			this.windowState = readIntValue("GUI.Window.State", root, this.windowState);
 			this.saveWindowSizePosition = readBooleanValue("GUI.Window.Save", root, this.saveWindowSizePosition);
 
+			// Download-Selection-Window
+			this.downloadSelectionWindowWidth = readIntValue("GUI.DownloadSelectionWindow.Width", root, this.downloadSelectionWindowWidth);
+			this.downloadSelectionWindowHeight = readIntValue("GUI.DownloadSelectionWindow.Height", root, this.downloadSelectionWindowHeight);
+			this.downloadSelectionWindowXPos = readIntValue("GUI.DownloadSelectionWindow.X", root, this.downloadSelectionWindowXPos);
+			this.downloadSelectionWindowYPos = readIntValue("GUI.DownloadSelectionWindow.Y", root, this.downloadSelectionWindowYPos);
+			this.saveDownloadSelectionWindowSizePosition = readBooleanValue("GUI.DownloadSelectionWindow.Save", root, this.saveDownloadSelectionWindowSizePosition);
+
 			this.colWidthsQueue = readStringValue("GUI.colWidthsQueue", root, this.colWidthsQueue);
 			this.colWidthsLog = readStringValue("GUI.colWidthsLog", root, this.colWidthsLog);
 			this.colWidthsKeywords = readStringValue("GUI.colWidthsKeywords", root, this.colWidthsKeywords);
@@ -1247,6 +1279,13 @@ public class SettingsManager {
 		addIntValue("GUI.Window.Y", this.windowYPos, root);
 		addIntValue("GUI.Window.State", this.windowState, root);
 		addBooleanValue("GUI.Window.Save", this.saveWindowSizePosition, root);
+
+		// Download-Selection-Window
+		addIntValue("GUI.DownloadSelectionWindow.Width", this.downloadSelectionWindowWidth, root);
+		addIntValue("GUI.DownloadSelectionWindow.Height", this.downloadSelectionWindowHeight, root);
+		addIntValue("GUI.DownloadSelectionWindow.X", this.downloadSelectionWindowXPos, root);
+		addIntValue("GUI.DownloadSelectionWindow.Y", this.downloadSelectionWindowYPos, root);
+		addBooleanValue("GUI.DownloadSelectionWindow.Save", this.saveDownloadSelectionWindowSizePosition, root);
 
 		addStringValue("GUI.colWidthsQueue", this.colWidthsQueue, root);
 		addStringValue("GUI.colWidthsLog", this.colWidthsLog, root);
@@ -2465,6 +2504,96 @@ public class SettingsManager {
 	 */
 	public void setWindowYPos(int windowYPos) {
 		this.windowYPos = windowYPos;
+	}
+
+	/**
+	 * Returns the downloadSelectionWindowWidth
+	 * 
+	 * @return downloadSelectionWindowWidth
+	 */
+	public int getDownloadSelectionWindowWidth() {
+		return downloadSelectionWindowWidth;
+	}
+
+	/**
+	 * Sets the downloadSelectionWindowWidth
+	 * 
+	 * @param downloadSelectionWindowWidth downloadSelectionWindowWidth
+	 */
+	public void setDownloadSelectionWindowWidth(int downloadSelectionWindowWidth) {
+		this.downloadSelectionWindowWidth = downloadSelectionWindowWidth;
+	}
+
+	/**
+	 * Returns the downloadSelectionWindowHeight
+	 * 
+	 * @return downloadSelectionWindowHeight
+	 */
+	public int getDownloadSelectionWindowHeight() {
+		return downloadSelectionWindowHeight;
+	}
+
+	/**
+	 * Sets the downloadSelectionWindowHeight
+	 * 
+	 * @param downloadSelectionWindowHeight downloadSelectionWindowHeight
+	 */
+	public void setDownloadSelectionWindowHeight(int downloadSelectionWindowHeight) {
+		this.downloadSelectionWindowHeight = downloadSelectionWindowHeight;
+	}
+
+	/**
+	 * Returns the downloadSelectionWindowXPos
+	 * 
+	 * @return downloadSelectionWindowXPos
+	 */
+	public int getDownloadSelectionWindowXPos() {
+		return downloadSelectionWindowXPos;
+	}
+
+	/**
+	 * Sets the downloadSelectionWindowXPos
+	 * 
+	 * @param downloadSelectionWindowXPos downloadSelectionWindowXPos
+	 */
+	public void setDownloadSelectionWindowXPos(int downloadSelectionWindowXPos) {
+		this.downloadSelectionWindowXPos = downloadSelectionWindowXPos;
+	}
+
+	/**
+	 * Returns the downloadSelectionWindowYPos
+	 * 
+	 * @return downloadSelectionWindowYPos
+	 */
+	public int getDownloadSelectionWindowYPos() {
+		return downloadSelectionWindowYPos;
+	}
+
+	/**
+	 * Sets the downloadSelectionWindowYPos
+	 * 
+	 * @param downloadSelectionWindowYPos downloadSelectionWindowYPos
+	 */
+	public void setDownloadSelectionWindowYPos(int downloadSelectionWindowYPos) {
+		this.downloadSelectionWindowYPos = downloadSelectionWindowYPos;
+	}
+
+	/**
+	 * Returns the saveDownloadSelectionWindowSizePosition
+	 * 
+	 * @return saveDownloadSelectionWindowSizePosition
+	 */
+	public boolean isSaveDownloadSelectionWindowSizePosition() {
+		return saveDownloadSelectionWindowSizePosition;
+	}
+
+	/**
+	 * Sets the saveDownloadSelectionWindowSizePosition
+	 * 
+	 * @param saveDownloadSelectionWindowSizePosition saveDownloadSelectionWindowSizePosition
+	 */
+	public void setSaveDownloadSelectionWindowSizePosition(boolean saveDownloadSelectionWindowSizePosition) {
+		this.saveDownloadSelectionWindowSizePosition = saveDownloadSelectionWindowSizePosition;
 	}
 
 	/**
