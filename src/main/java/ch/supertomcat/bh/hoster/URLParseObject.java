@@ -22,12 +22,12 @@ public class URLParseObject {
 	/**
 	 * The parsed URL
 	 */
-	private String directLink = "";
+	private URLParseObjectFile directLink = new URLParseObjectFile();
 
 	/**
-	 * The corrected filename
+	 * Additional parsed URLs
 	 */
-	private String correctedFilename = "";
+	private List<URLParseObjectFile> additionalDirectLinks = new ArrayList<>();
 
 	/**
 	 * The container URLs
@@ -66,7 +66,6 @@ public class URLParseObject {
 	 * @param pic The Pic
 	 */
 	public URLParseObject(String containerURL, String thumbURL, Pic pic) {
-		super();
 		containerURLs.add(containerURL);
 		this.thumbURL = thumbURL;
 		this.pic = pic;
@@ -121,12 +120,22 @@ public class URLParseObject {
 	}
 
 	/**
+	 * @return All Parsed URLs
+	 */
+	public List<URLParseObjectFile> getAllDirectLinks() {
+		List<URLParseObjectFile> allDirectLinks = new ArrayList<>();
+		allDirectLinks.add(directLink);
+		allDirectLinks.addAll(additionalDirectLinks);
+		return allDirectLinks;
+	}
+
+	/**
 	 * Returns the parsed URL
 	 * 
 	 * @return the directLink
 	 */
 	public String getDirectLink() {
-		return directLink;
+		return directLink.getDirectLink();
 	}
 
 	/**
@@ -135,7 +144,7 @@ public class URLParseObject {
 	 * @param directLink the directLink to set
 	 */
 	public void setDirectLink(String directLink) {
-		this.directLink = directLink;
+		this.directLink.setDirectLink(directLink);
 	}
 
 	/**
@@ -144,7 +153,7 @@ public class URLParseObject {
 	 * @return the correctedFilename
 	 */
 	public String getCorrectedFilename() {
-		return correctedFilename;
+		return directLink.getCorrectedFilename();
 	}
 
 	/**
@@ -153,7 +162,34 @@ public class URLParseObject {
 	 * @param correctedFilename the correctedFilename to set
 	 */
 	public void setCorrectedFilename(String correctedFilename) {
-		this.correctedFilename = correctedFilename;
+		this.directLink.setCorrectedFilename(correctedFilename);
+	}
+
+	/**
+	 * Returns the additionalDirectLinks
+	 * 
+	 * @return additionalDirectLinks
+	 */
+	public List<URLParseObjectFile> getAdditionalDirectLinks() {
+		return additionalDirectLinks;
+	}
+
+	/**
+	 * Sets the additionalDirectLinks
+	 * 
+	 * @param additionalDirectLinks additionalDirectLinks
+	 */
+	public void setAdditionalDirectLinks(List<URLParseObjectFile> additionalDirectLinks) {
+		this.additionalDirectLinks = additionalDirectLinks;
+	}
+
+	/**
+	 * Add additional direct link
+	 * 
+	 * @param additionalDirectLink Additional direct link
+	 */
+	public void addAdditionalDirectLink(URLParseObjectFile additionalDirectLink) {
+		this.additionalDirectLinks.add(additionalDirectLink);
 	}
 
 	/**

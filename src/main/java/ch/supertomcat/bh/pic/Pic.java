@@ -36,6 +36,7 @@ import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.URLParseObjectFile;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.bh.queue.QueueManager;
@@ -341,11 +342,6 @@ public class Pic implements Runnable, IDownloadListener {
 		stopOncePressed = true;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
 	@Override
 	public void run() {
 		/*
@@ -401,11 +397,6 @@ public class Pic implements Runnable, IDownloadListener {
 		boolean localFile = false;
 		File fLocal = null;
 
-		boolean stopped = false;
-
-		// Absolute path and filename
-		String target = "";
-
 		String referrer = this.containerURL;
 
 		// Create a new URLParseObject
@@ -416,63 +407,63 @@ public class Pic implements Runnable, IDownloadListener {
 		try {
 			// Now let the HostManager parse it
 			result = HostManager.instance().parseURL(upo);
-			// If we get null back
 			if (result == null) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
 			}
-			// if the direct link is not null and not empty
-			if (result.getDirectLink() != null && !result.getDirectLink().equals("")) {
-				// get the direct link
-				url = result.getDirectLink();
-				downloadURL = url;
 
-				// Check if the URL is a file
-				fLocal = new File(url);
-				if (fLocal.exists()) {
-					localFile = true;
-				}
-
-				referrer = result.getContainerURL();
-				Hoster lastHoster = result.getLastHoster();
-				if ((lastHoster != null) && (lastHoster instanceof Rule)) {
-					Rule lastRule = (Rule)lastHoster;
-					switch (lastRule.getReferrerModeDownload()) {
-						case Rule.REFERRER_NO_REFERRER:
-							referrer = "";
-							break;
-						case Rule.REFERRER_LAST_CONTAINER_URL:
-							referrer = upo.getContainerURL();
-							break;
-						case Rule.REFERRER_FIRST_CONTAINER_URL:
-							referrer = upo.getFirstContainerURL();
-							break;
-						case Rule.REFERRER_ORIGIN_PAGE:
-							referrer = upo.getPic().getThreadURL();
-							break;
-						case Rule.REFERRER_CUSTOM:
-							referrer = lastRule.getCustomReferrerDownload();
-							break;
-					}
-				}
-
-				// if the hostclass gives us a nice filename
-				if ((result.getCorrectedFilename() != null) && (!result.getCorrectedFilename().equals("")) && ((this.fixedTargetFilename == false) || (this.targetFilename.length() == 0))) {
-					// get it
-					this.targetFilename = BHUtil.filterFilename(result.getCorrectedFilename());
-				}
-
-				// If no specific filename was set, then get it from URL
-				if (this.targetFilename.isEmpty() || this.targetFilename.equals(Localization.getString("Unkown"))) {
-					String filenameFromURL;
-					if (localFile) {
-						filenameFromURL = FileTool.getFilename(url);
-					} else {
-						filenameFromURL = HTTPTool.getFilenameFromURL(url, Localization.getString("Unkown"));
-					}
-					this.targetFilename = BHUtil.filterFilename(filenameFromURL);
-				}
-			} else {
+			// Check if the direct link is not null and not empty
+			if (result.getDirectLink() == null && result.getDirectLink().isEmpty()) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
+			}
+
+			// get the direct link
+			url = result.getDirectLink();
+			downloadURL = url;
+
+			// Check if the URL is a file
+			fLocal = new File(url);
+			if (fLocal.exists()) {
+				localFile = true;
+			}
+
+			referrer = result.getContainerURL();
+			Hoster lastHoster = result.getLastHoster();
+			if ((lastHoster != null) && (lastHoster instanceof Rule)) {
+				Rule lastRule = (Rule)lastHoster;
+				switch (lastRule.getReferrerModeDownload()) {
+					case Rule.REFERRER_NO_REFERRER:
+						referrer = "";
+						break;
+					case Rule.REFERRER_LAST_CONTAINER_URL:
+						referrer = upo.getContainerURL();
+						break;
+					case Rule.REFERRER_FIRST_CONTAINER_URL:
+						referrer = upo.getFirstContainerURL();
+						break;
+					case Rule.REFERRER_ORIGIN_PAGE:
+						referrer = upo.getPic().getThreadURL();
+						break;
+					case Rule.REFERRER_CUSTOM:
+						referrer = lastRule.getCustomReferrerDownload();
+						break;
+				}
+			}
+
+			// if the hostclass gives us a nice filename
+			if ((result.getCorrectedFilename() != null) && (!result.getCorrectedFilename().equals("")) && ((this.fixedTargetFilename == false) || (this.targetFilename.length() == 0))) {
+				// get it
+				this.targetFilename = BHUtil.filterFilename(result.getCorrectedFilename());
+			}
+
+			// If no specific filename was set, then get it from URL
+			if (this.targetFilename.isEmpty() || this.targetFilename.equals(Localization.getString("Unkown"))) {
+				String filenameFromURL;
+				if (localFile) {
+					filenameFromURL = FileTool.getFilename(url);
+				} else {
+					filenameFromURL = HTTPTool.getFilenameFromURL(url, Localization.getString("Unkown"));
+				}
+				this.targetFilename = BHUtil.filterFilename(filenameFromURL);
 			}
 		} catch (HostCompletedException e) {
 			/*
@@ -552,32 +543,19 @@ public class Pic implements Runnable, IDownloadListener {
 		}
 
 		if (!localFile) {
-			// And replace the %20 in the filename, if there are any ;-)
-			this.targetFilename = this.targetFilename.replaceAll("%20", " ");
-
 			/*
 			 * Now we filter not allowed chars and make sure path and filename
 			 * are not too long.
 			 */
 			this.targetPath = BHUtil.filterPath(this.targetPath);
 			this.targetPath = FileTool.pathRTrim(this.targetPath);
-			this.targetFilename = BHUtil.filterPath(this.targetFilename);
 
 			boolean bReducePathLength = true;
 			if (result.checkExistInfo("ReducePathLength") && result.getInfo("ReducePathLength") instanceof Boolean) {
 				bReducePathLength = (Boolean)result.getInfo("ReducePathLength");
 			}
-
-			boolean bReduceFilenameLength = true;
-			if (result.checkExistInfo("ReduceFilenameLength") && result.getInfo("ReduceFilenameLength") instanceof Boolean) {
-				bReduceFilenameLength = (Boolean)result.getInfo("ReduceFilenameLength");
-			}
-
 			if (bReducePathLength) {
 				this.targetPath = FileTool.reducePathLength(this.targetPath);
-			}
-			if (bReduceFilenameLength) {
-				this.targetFilename = FileTool.reduceFilenameLength(this.targetFilename);
 			}
 		}
 
@@ -588,8 +566,6 @@ public class Pic implements Runnable, IDownloadListener {
 			// If the directory could not be created
 			progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
 			setStatus(Pic.FAILED, Localization.getString("ErrorDirectoryCouldNotBeCreated"));
-			fLocal = null;
-			fTarget = null;
 			DownloadQueueManager.instance().removeDLSlotListener(this); // important!
 			return;
 		}
@@ -599,424 +575,479 @@ public class Pic implements Runnable, IDownloadListener {
 		 * use the result from it.
 		 */
 		this.targetPath = strRet;
-		// New merge path and filename together
-		target = this.targetPath + this.targetFilename;
-		strRet = null;
-		fTarget = null;
-
-		File f = new File(target);
 		if (localFile) {
-			// if we have a file on the harddisk
-			if (f.getAbsolutePath().equals(fLocal.getAbsolutePath())) {
-				// And the old path and the path were we should move it is the same, we are done
-				progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
-				setStatus(Pic.COMPLETE);
-				fLocal = null;
-				f = null;
-				DownloadQueueManager.instance().removeDLSlotListener(this); // important!
-				return;
+			File f = new File(this.targetPath + this.targetFilename);
+			executeLocalFileMove(fLocal, f);
+		} else {
+			boolean bReduceFilenameLength = true;
+			if (result.checkExistInfo("ReduceFilenameLength") && result.getInfo("ReduceFilenameLength") instanceof Boolean) {
+				bReduceFilenameLength = (Boolean)result.getInfo("ReduceFilenameLength");
 			}
-			// Get the filesize
-			setSize((int)fLocal.length());
-			progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
 
-			// Move the file
-			File fMoved = Pic.moveFile(fLocal, new File(this.targetPath));
-			if (fMoved == null) {
-				// If the file could not be moved
-				logger.error("File '" + fLocal.getAbsolutePath() + "' could not be moved to '" + this.targetPath + "'");
-				setStatus(Pic.FAILED, Localization.getString("ErrorFileCouldNotBeMoved"));
-				progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-			} else {
-				this.targetPath = FileTool.getDirectory(fMoved.getAbsolutePath());
-				this.targetFilename = fMoved.getName();
-				targetChanged();
-				progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
-				setStatus(Pic.COMPLETE);
+			// And replace the %20 in the filename, if there are any ;-)
+			this.targetFilename = BHUtil.filterPath(this.targetFilename.replace("%20", " "));
+			if (bReduceFilenameLength) {
+				this.targetFilename = FileTool.reduceFilenameLength(this.targetFilename);
 			}
-			// Give the slot back to the Queue
+
+			boolean firstURL = true;
+			for (URLParseObjectFile directLink : result.getAllDirectLinks()) {
+				String currentCorrectedFilename = directLink.getCorrectedFilename();
+				String currentTargetFilename = this.targetFilename;
+
+				// if the hostclass gives us a nice filename
+				if (currentCorrectedFilename != null && !currentCorrectedFilename.isEmpty() && (this.fixedTargetFilename == false || this.targetFilename.isEmpty())) {
+					currentTargetFilename = BHUtil.filterFilename(currentCorrectedFilename);
+					// And replace the %20 in the filename, if there are any ;-)
+					currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "));
+					if (bReduceFilenameLength) {
+						currentTargetFilename = FileTool.reduceFilenameLength(currentTargetFilename);
+					}
+				}
+
+				executeFileDownload(directLink.getDirectLink(), directLink.getCorrectedFilename(), result, referrer, firstURL);
+				firstURL = false;
+			}
+		}
+	}
+
+	/**
+	 * Execute local file move
+	 * 
+	 * @param sourceFile Source File
+	 * @param targetFile Target File
+	 */
+	private void executeLocalFileMove(File sourceFile, File targetFile) {
+		// if we have a file on the harddisk
+		if (targetFile.getAbsolutePath().equals(sourceFile.getAbsolutePath())) {
+			// And the old path and the path were we should move it is the same, we are done
+			progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
+			setStatus(Pic.COMPLETE);
 			DownloadQueueManager.instance().removeDLSlotListener(this); // important!
 			return;
+		}
+		// Get the filesize
+		setSize((int)sourceFile.length());
+		progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
+
+		// Move the file
+		File fMoved = Pic.moveFile(sourceFile, new File(this.targetPath));
+		if (fMoved == null) {
+			// If the file could not be moved
+			logger.error("File '" + sourceFile.getAbsolutePath() + "' could not be moved to '" + this.targetPath + "'");
+			setStatus(Pic.FAILED, Localization.getString("ErrorFileCouldNotBeMoved"));
+			progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
 		} else {
-			// If we don't have a file on the harddisk here, but an URL
+			this.targetPath = FileTool.getDirectory(fMoved.getAbsolutePath());
+			this.targetFilename = fMoved.getName();
+			targetChanged();
+			progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
+			setStatus(Pic.COMPLETE);
+		}
+		// Give the slot back to the Queue
+		DownloadQueueManager.instance().removeDLSlotListener(this); // important!
+		return;
+	}
 
-			// Get the cookies for the url
-			String cookies = CookieManager.getCookies(url);
+	/**
+	 * Execute file download
+	 * 
+	 * @param url URL
+	 * @param correctedFilename Corrected Filename
+	 * @param result Result
+	 * @param referrer Referrer
+	 * @param firstURL First URL
+	 */
+	private void executeFileDownload(String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL) {
+		boolean stopped = false;
 
-			/*
-			 * Get a HttpClient
-			 * We have to use this method, because otherwise we
-			 * have to check here if the user uses a proxy. With
-			 * this method we get a configured HttpClient, set to use
-			 * a proxy if needed and set user and password of the proxy.
-			 */
-			boolean nonMultiThreadedHttpClient = false;
-			if (result.checkExistInfo("useNonMultithreadedHttpClient") && result.getInfo("useNonMultithreadedHttpClient") instanceof Boolean
-					&& (Boolean)result.getInfo("useNonMultithreadedHttpClient") == true) {
-				nonMultiThreadedHttpClient = true;
+		String target = this.targetPath + correctedFilename;
+		File f = new File(target);
+
+		// Get the cookies for the url
+		String cookies = CookieManager.getCookies(url);
+
+		/*
+		 * Get a HttpClient
+		 * We have to use this method, because otherwise we
+		 * have to check here if the user uses a proxy. With
+		 * this method we get a configured HttpClient, set to use
+		 * a proxy if needed and set user and password of the proxy.
+		 */
+		boolean nonMultiThreadedHttpClient = false;
+		if (result.checkExistInfo("useNonMultithreadedHttpClient") && result.getInfo("useNonMultithreadedHttpClient") instanceof Boolean
+				&& (Boolean)result.getInfo("useNonMultithreadedHttpClient") == true) {
+			nonMultiThreadedHttpClient = true;
+		}
+
+		HttpUriRequest method = null;
+		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? ProxyManager.instance().getNonMultithreadedHTTPClient() : ProxyManager.instance().getHTTPClient()) {
+			String encodedURL = HTTPTool.encodeURL(url);
+
+			// Create a new GetMethod or PostMethod and set timeouts, cookies, user-agent and so on
+			if (result.checkExistInfo("useMethod") && result.getInfo("useMethod") instanceof String && "POST".equals(result.getInfo("useMethod"))) {
+				method = new HttpPost(encodedURL);
+			} else {
+				method = new HttpGet(encodedURL);
+			}
+			String userAgent = SettingsManager.instance().getUserAgent();
+			if (result.checkExistInfo("useUserAgent") && result.getInfo("useUserAgent") instanceof String) {
+				userAgent = (String)result.getInfo("useUserAgent");
+			}
+			method.setHeader("User-Agent", userAgent);
+			if (result.checkExistInfo("useReferrer") && result.getInfo("useReferrer") instanceof String) {
+				referrer = (String)result.getInfo("useReferrer");
+			}
+			if (referrer.length() > 0) {
+				method.setHeader("Referer", referrer);
+			}
+			boolean sendCookies = true;
+			if (result.checkExistInfo("sendCookies") && result.getInfo("useCookies") instanceof Boolean) {
+				sendCookies = (Boolean)result.getInfo("useCookies");
+			}
+			if (result.checkExistInfo("useCookies") && result.getInfo("useCookies") instanceof String) {
+				cookies = (String)result.getInfo("useCookies");
+			}
+			if (sendCookies && !cookies.isEmpty()) {
+				method.setHeader("Cookie", cookies);
 			}
 
-			HttpUriRequest method = null;
-			try (CloseableHttpClient client = nonMultiThreadedHttpClient ? ProxyManager.instance().getNonMultithreadedHTTPClient() : ProxyManager.instance().getHTTPClient()) {
-				String encodedURL = HTTPTool.encodeURL(url);
+			// Good, now open the connection
+			try (CloseableHttpResponse response = client.execute(method)) {
+				int statusCode = response.getStatusLine().getStatusCode();
 
-				// Create a new GetMethod or PostMethod and set timeouts, cookies, user-agent and so on
-				if (result.checkExistInfo("useMethod") && result.getInfo("useMethod") instanceof String && "POST".equals(result.getInfo("useMethod"))) {
-					method = new HttpPost(encodedURL);
-				} else {
-					method = new HttpGet(encodedURL);
-				}
-				String userAgent = SettingsManager.instance().getUserAgent();
-				if (result.checkExistInfo("useUserAgent") && result.getInfo("useUserAgent") instanceof String) {
-					userAgent = (String)result.getInfo("useUserAgent");
-				}
-				method.setHeader("User-Agent", userAgent);
-				if (result.checkExistInfo("useReferrer") && result.getInfo("useReferrer") instanceof String) {
-					referrer = (String)result.getInfo("useReferrer");
-				}
-				if (referrer.length() > 0) {
-					method.setHeader("Referer", referrer);
-				}
-				boolean sendCookies = true;
-				if (result.checkExistInfo("sendCookies") && result.getInfo("useCookies") instanceof Boolean) {
-					sendCookies = (Boolean)result.getInfo("useCookies");
-				}
-				if (result.checkExistInfo("useCookies") && result.getInfo("useCookies") instanceof String) {
-					cookies = (String)result.getInfo("useCookies");
-				}
-				if (sendCookies && !cookies.isEmpty()) {
-					method.setHeader("Cookie", cookies);
+				if (statusCode < 200 || statusCode >= 300) {
+					this.failedCount++;
+					checkDeactivate();
+					setStatus(Pic.FAILED, "HTTP-Error: " + response.getStatusLine());
+					progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
+					DownloadQueueManager.instance().removeDLSlotListener(this); // important!
+					method.abort();
+					return;
 				}
 
-				// Good, now open the connection
-				try (CloseableHttpResponse response = client.execute(method)) {
-					int statusCode = response.getStatusLine().getStatusCode();
-
-					if (statusCode < 200 || statusCode >= 300) {
-						this.failedCount++;
-						checkDeactivate();
-						setStatus(Pic.FAILED, "HTTP-Error: " + response.getStatusLine());
-						progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-						DownloadQueueManager.instance().removeDLSlotListener(this); // important!
-						method.abort();
-						return;
-					}
-
-					if (renameWithContentDisposition && fixedTargetFilename == false) {
-						Header contentDisposition = response.getFirstHeader("content-disposition");
-						if (contentDisposition != null) {
-							String val = contentDisposition.getValue();
-							logger.debug("contentdispval: " + val);
-							try {
-								val = val.replaceAll("\\\\", "");
-								Matcher matcher = contentDispositionFilenamePattern.matcher(val);
-								String cdResult = "";
-								if (matcher.find()) {
-									logger.debug("Matcher found");
-									cdResult = matcher.replaceAll("$3");
-									logger.debug("Result: " + cdResult);
-									if (cdResult.length() > 0) {
-										cdResult = BHUtil.filterFilename(cdResult);
-										this.targetFilename = cdResult;
-										target = this.targetPath + this.targetFilename;
-										f = new File(target);
+				if (renameWithContentDisposition && fixedTargetFilename == false) {
+					Header contentDisposition = response.getFirstHeader("content-disposition");
+					if (contentDisposition != null) {
+						String val = contentDisposition.getValue();
+						logger.debug("contentdispval: " + val);
+						try {
+							val = val.replaceAll("\\\\", "");
+							Matcher matcher = contentDispositionFilenamePattern.matcher(val);
+							String cdResult = "";
+							if (matcher.find()) {
+								logger.debug("Matcher found");
+								cdResult = matcher.replaceAll("$3");
+								logger.debug("Result: " + cdResult);
+								if (cdResult.length() > 0) {
+									cdResult = BHUtil.filterFilename(cdResult);
+									correctedFilename = cdResult;
+									if (firstURL) {
+										this.targetFilename = correctedFilename;
 									}
+									target = this.targetPath + correctedFilename;
+									f = new File(target);
 								}
-							} catch (Exception e) {
 							}
+						} catch (Exception e) {
 						}
 					}
+				}
 
-					RegexReplacePipeline regexPipe = SettingsManager.instance().getRegexReplacePipelineFilename();
-					this.targetFilename = regexPipe.getReplacedFilename(this.targetFilename);
-					this.targetFilename = BHUtil.filterFilename(this.targetFilename);
-					target = this.targetPath + this.targetFilename;
-					f = new File(target);
+				RegexReplacePipeline regexPipe = SettingsManager.instance().getRegexReplacePipelineFilename();
+				correctedFilename = regexPipe.getReplacedFilename(correctedFilename);
+				correctedFilename = BHUtil.filterFilename(correctedFilename);
+				if (firstURL) {
+					this.targetFilename = correctedFilename;
+				}
+				target = this.targetPath + correctedFilename;
+				f = new File(target);
+
+				/*
+				 * Now we create a new file.
+				 * The createFile-Method gives us a File back
+				 * because there could already be a file of the same
+				 * name, so get back a new filename or another pathname.
+				 */
+				File fRetval = Pic.createFile(f, correctedFilename, this.targetPath);
+				if (fRetval == null) {
+					// If the file coult not be created
+					setStatus(Pic.FAILED, Localization.getString("ErrorFileCouldNotBeCreated"));
+					progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
+					DownloadQueueManager.instance().removeDLSlotListener(this); // important!
+					method.abort();
+					return;
+				}
+				correctedFilename = fRetval.getName();
+				if (firstURL) {
+					this.targetFilename = correctedFilename;
+				}
+				target = this.targetPath + correctedFilename;
+				fRetval = null;
+				f = null;
+				targetChanged(); // Let the listeners know, that the target has changed
+
+				/*
+				 * Get the filesize
+				 * Note: Some servers doesn't give us the filesize, so
+				 * the filesize is maybe 0
+				 */
+				if (method instanceof HttpGet) {
+					long contentLength = response.getEntity().getContentLength();
+					setSize(contentLength >= 0 ? contentLength : 0);
+				} else if (method instanceof HttpPost) {
+					long contentLength = response.getEntity().getContentLength();
+					setSize(contentLength >= 0 ? contentLength : 0);
+				} else {
+					setSize(0);
+				}
+
+				if ((this.size > 0) && (this.size < SettingsManager.instance().getMinFilesize())) {
+					/*
+					 * The user can set in an options, which defines a minimum filesize.
+					 * If the file here is to small
+					 * Note: i check this here, and not above (where we get the filesize)
+					 * because some servers don't give the filesize.
+					 * So only here, we know the filesize really.
+					 */
+					this.failedCount = SettingsManager.instance().getMaxFailedCount(); // increase the failure-counter
+					checkDeactivate(); // check if the download has to be deactivated
+					setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeToSmall"));
+					progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
+					DownloadQueueManager.instance().removeDLSlotListener(this); // important!
+					logger.error("Download failed (Filesize is too small): '" + this.containerURL + "'");
+					// Now we have to delete the file
+					File fileT = new File(target);
+					if (fileT.exists()) {
+						fileT.delete();
+					}
+					fileT = null;
+					method.abort();
+					return;
+				}
+
+				progressBarChanged(0, Pic.STATUS_T[Pic.WAITING]);
+
+				long iBW = 0; // the amount of bytes we read since started downloading
+
+				// Now get the inputstream and outputstream
+				try (InputStream in = response.getEntity().getContent(); FileOutputStream out = new FileOutputStream(target)) {
+					// Read some bytes to a buffer and write them to the outputstream
+					int n; // the amount of bytes where were read per loop course
+					byte[] buf = new byte[8192]; // The buffer
+					int iBWs = 0; // the amount of bytes read since last download rate calculation
+					int nReads = 0;
+					String bitrate = ""; // the download rate as string
+					long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
+					progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
 
 					/*
-					 * Now we create a new file.
-					 * The createFile-Method gives us a File back
-					 * because there could already be a file of the same
-					 * name, so get back a new filename or another pathname.
+					 * Create a new timer, which sets every 10 seconds the recalculate-flag
+					 * to true, so we know, we have to recalculate the download rate.
+					 * I do this, because calculating the download rate over all bytes
+					 * read since start of downloading, doesn't provide the information
+					 * of wath the download rate is at this moment.
+					 * And we should make the rate depending on the time, not on the bytes
+					 * read.
 					 */
-					File fRetval = Pic.createFile(f, this.targetFilename, this.targetPath);
-					if (fRetval == null) {
-						// If the file coult not be created
-						setStatus(Pic.FAILED, Localization.getString("ErrorFileCouldNotBeCreated"));
-						progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-						DownloadQueueManager.instance().removeDLSlotListener(this); // important!
-						method.abort();
-						return;
-					}
-					this.targetFilename = fRetval.getName();
-					target = this.targetPath + this.targetFilename;
-					fRetval = null;
-					f = null;
-					targetChanged(); // Let the listeners know, that the target has changed
-
-					/*
-					 * Get the filesize
-					 * Note: Some servers doesn't give us the filesize, so
-					 * the filesize is maybe 0
-					 */
-					if (method instanceof HttpGet) {
-						long contentLength = response.getEntity().getContentLength();
-						setSize(contentLength >= 0 ? contentLength : 0);
-					} else if (method instanceof HttpPost) {
-						long contentLength = response.getEntity().getContentLength();
-						setSize(contentLength >= 0 ? contentLength : 0);
-					} else {
-						setSize(0);
-					}
-
-					if ((this.size > 0) && (this.size < SettingsManager.instance().getMinFilesize())) {
+					boolean downloadRate = SettingsManager.instance().isDownloadRate();
+					// Ok, now start downloading
+					while ((n = in.read(buf)) > 0) {
 						/*
-						 * The user can set in an options, which defines a minimum filesize.
-						 * If the file here is to small
-						 * Note: i check this here, and not above (where we get the filesize)
-						 * because some servers don't give the filesize.
-						 * So only here, we know the filesize really.
+						 * Old:
+						 * I commented this out, because when downloading from rapidshare
+						 * and we stop downloading before the complete file is downloaded
+						 * the close-Method (or was it releaseConnection?, don't remember)
+						 * of the inputstream will block this thread for ever.
+						 * This happend only on downloads from rapidshare. I didn't
+						 * found out why.
+						 * It would be not so nice, but maybe an idea to check if we are
+						 * downloading from rapidshare, and when not we allow to stop
+						 * otherwise not.
+						 * 
+						 * New:
+						 * I found out that with method.abort() it works to close the connection.
+						 * But internal the data is still downloaded on connection to some servers.
+						 * But the data is not written to a file, but to /dev/nul
+						 * I will now see if this is really a good solution...
 						 */
-						this.failedCount = SettingsManager.instance().getMaxFailedCount(); // increase the failure-counter
-						checkDeactivate(); // check if the download has to be deactivated
-						setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeToSmall"));
+						if (stop) {
+							method.abort();
+							stopped = true;
+							break;
+						}
+						iBW += n;
+						iBWs += n;
+						out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
+						out.flush();
+						nReads++;
+						if (nReads > 12) {
+							nReads = 0;
+							// change the progressbar
+							progressBarChanged(iBW, getProgressString(iBW, size) + bitrate);
+						}
+						if (recalcutateRate && downloadRate) {
+							// the flag is set to true, so we recalculate the download rate
+							long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
+							// get the string for the rate
+							downloadBitrate = UnitFormatTool.getBitrate(iBWs, size, timeStarted, now);
+							bitrate = " " + UnitFormatTool.getBitrateString(downloadBitrate);
+
+							/*
+							 * With this, we get always the actual download rate, not
+							 * just an average over all the time
+							 */
+							timeStarted = now; // set this variable to current timestamp
+							iBWs = 0; // set bytes read since last calculation to 0
+							recalcutateRate = false; // set the flag to false
+						}
+					}
+					// Good, the file is downloaded, now flush the outputstream
+					out.flush();
+					recalcutateRate = false;
+					EntityUtils.consume(response.getEntity());
+				}
+
+				// If we have to set last modification timestamp to the file, we do it
+				if (this.fixedLastModified && this.lastModified > 0) {
+					File fMod = new File(target);
+					fMod.setLastModified(this.lastModified);
+					fMod = null;
+				}
+
+				if (stop == false) {
+					// If the user doesn't stopped the download
+
+					boolean downloadFailed = ((this.size > 0) && (iBW != this.size)) || (iBW < SettingsManager.instance().getMinFilesize());
+					if (downloadFailed) {
+						this.failedCount++;
+						checkDeactivate();
 						progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-						DownloadQueueManager.instance().removeDLSlotListener(this); // important!
-						logger.error("Download failed (Filesize is too small): '" + this.containerURL + "'");
+						if ((this.size > 0) && (iBW != this.size)) {
+							/*
+							 * if we got a filesize, but the filesize does
+							 * not equals the bytes we read, we didn't read
+							 * the complete file, or more bytes than the file
+							 * should have.
+							 */
+							setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
+							logger.error("Download failed (Too many or to less bytes were downloaded): '" + this.containerURL + "'");
+						} else if (iBW < SettingsManager.instance().getMinFilesize()) {
+							/*
+							 * The user can set in an options, which defines a minimum filesize.
+							 * If the file here is to small
+							 * Note: i check this here, and not above (where we get the filesize)
+							 * because some servers don't give the filesize.
+							 * So only here, we know the filesize really.
+							 */
+							this.failedCount = SettingsManager.instance().getMaxFailedCount(); // increase the failure-counter
+							checkDeactivate(); // check if the download has to be deactivated
+							setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeToSmall"));
+							logger.error("Download failed (Filesize is too small): '" + this.containerURL + "'");
+						}
 						// Now we have to delete the file
 						File fileT = new File(target);
 						if (fileT.exists()) {
 							fileT.delete();
 						}
 						fileT = null;
-						method.abort();
-						return;
-					}
-
-					progressBarChanged(0, Pic.STATUS_T[Pic.WAITING]);
-
-					long iBW = 0; // the amount of bytes we read since started downloading
-
-					// Now get the inputstream and outputstream
-					try (InputStream in = response.getEntity().getContent(); FileOutputStream out = new FileOutputStream(target)) {
-						// Read some bytes to a buffer and write them to the outputstream
-						int n; // the amount of bytes where were read per loop course
-						byte[] buf = new byte[8192]; // The buffer
-						int iBWs = 0; // the amount of bytes read since last download rate calculation
-						int nReads = 0;
-						String bitrate = ""; // the download rate as string
-						long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
-						progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
+					} else {
+						/*
+						 * If we get here, everything is fine
+						 */
+						this.setSize(iBW);
+						progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
+						setStatus(Pic.COMPLETE);
 
 						/*
-						 * Create a new timer, which sets every 10 seconds the recalculate-flag
-						 * to true, so we know, we have to recalculate the download rate.
-						 * I do this, because calculating the download rate over all bytes
-						 * read since start of downloading, doesn't provide the information
-						 * of wath the download rate is at this moment.
-						 * And we should make the rate depending on the time, not on the bytes
-						 * read.
+						 * The user can set subdirs for specific filesize-ranges
+						 * So maybe we have to move the file
 						 */
-						boolean downloadRate = SettingsManager.instance().isDownloadRate();
-						// Ok, now start downloading
-						while ((n = in.read(buf)) > 0) {
-							/*
-							 * Old:
-							 * I commented this out, because when downloading from rapidshare
-							 * and we stop downloading before the complete file is downloaded
-							 * the close-Method (or was it releaseConnection?, don't remember)
-							 * of the inputstream will block this thread for ever.
-							 * This happend only on downloads from rapidshare. I didn't
-							 * found out why.
-							 * It would be not so nice, but maybe an idea to check if we are
-							 * downloading from rapidshare, and when not we allow to stop
-							 * otherwise not.
-							 * 
-							 * New:
-							 * I found out that with method.abort() it works to close the connection.
-							 * But internal the data is still downloaded on connection to some servers.
-							 * But the data is not written to a file, but to /dev/nul
-							 * I will now see if this is really a good solution...
-							 */
-							if (stop) {
-								method.abort();
-								stopped = true;
-								break;
-							}
-							iBW += n;
-							iBWs += n;
-							out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
-							out.flush();
-							nReads++;
-							if (nReads > 12) {
-								nReads = 0;
-								// change the progressbar
-								progressBarChanged(iBW, getProgressString(iBW, size) + bitrate);
-							}
-							if (recalcutateRate && downloadRate) {
-								// the flag is set to true, so we recalculate the download rate
-								long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
-								// get the string for the rate
-								downloadBitrate = UnitFormatTool.getBitrate(iBWs, size, timeStarted, now);
-								bitrate = " " + UnitFormatTool.getBitrateString(downloadBitrate);
+						if (SettingsManager.instance().isSubdirsEnabled()) {
+							boolean isImage = false;
+							int imageWidth = 0;
+							int imageHeight = 0;
 
-								/*
-								 * With this, we get always the actual download rate, not
-								 * just an average over all the time
-								 */
-								timeStarted = now; // set this variable to current timestamp
-								iBWs = 0; // set bytes read since last calculation to 0
-								recalcutateRate = false; // set the flag to false
-							}
-						}
-						// Good, the file is downloaded, now flush the outputstream
-						out.flush();
-						recalcutateRate = false;
-						EntityUtils.consume(response.getEntity());
-					}
-
-					// If we have to set last modification timestamp to the file, we do it
-					if (this.fixedLastModified && this.lastModified > 0) {
-						File fMod = new File(target);
-						fMod.setLastModified(this.lastModified);
-						fMod = null;
-					}
-
-					if (stop == false) {
-						// If the user doesn't stopped the download
-
-						boolean downloadFailed = ((this.size > 0) && (iBW != this.size)) || (iBW < SettingsManager.instance().getMinFilesize());
-						if (downloadFailed) {
-							this.failedCount++;
-							checkDeactivate();
-							progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-							if ((this.size > 0) && (iBW != this.size)) {
-								/*
-								 * if we got a filesize, but the filesize does
-								 * not equals the bytes we read, we didn't read
-								 * the complete file, or more bytes than the file
-								 * should have.
-								 */
-								setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
-								logger.error("Download failed (Too many or to less bytes were downloaded): '" + this.containerURL + "'");
-							} else if (iBW < SettingsManager.instance().getMinFilesize()) {
-								/*
-								 * The user can set in an options, which defines a minimum filesize.
-								 * If the file here is to small
-								 * Note: i check this here, and not above (where we get the filesize)
-								 * because some servers don't give the filesize.
-								 * So only here, we know the filesize really.
-								 */
-								this.failedCount = SettingsManager.instance().getMaxFailedCount(); // increase the failure-counter
-								checkDeactivate(); // check if the download has to be deactivated
-								setStatus(Pic.FAILED, Localization.getString("ErrorFilesizeToSmall"));
-								logger.error("Download failed (Filesize is too small): '" + this.containerURL + "'");
-							}
-							// Now we have to delete the file
-							File fileT = new File(target);
-							if (fileT.exists()) {
-								fileT.delete();
-							}
-							fileT = null;
-						} else {
-							/*
-							 * If we get here, everything is fine
-							 */
-							this.setSize(iBW);
-							progressBarChanged(size, Pic.STATUS_T[Pic.COMPLETE]);
-							setStatus(Pic.COMPLETE);
-
-							/*
-							 * The user can set subdirs for specific filesize-ranges
-							 * So maybe we have to move the file
-							 */
-							if (SettingsManager.instance().isSubdirsEnabled()) {
-								boolean isImage = false;
-								int imageWidth = 0;
-								int imageHeight = 0;
-
-								try {
-									String strImages = ".*?(\\.(bmp|gif|jpe|jpg|jpeg|png|pcx|iff|ras|pbm|pgm|psd|tif|tiff))$";
-									Pattern patternImage = Pattern.compile(strImages, Pattern.CASE_INSENSITIVE);
-									Matcher matcherImage = patternImage.matcher(target);
-									if (matcherImage.matches()) {
-										try (FileInputStream imageinput = new FileInputStream(target)) {
-											ImageInfo imageinfo = new ImageInfo();
-											imageinfo.setInput(imageinput);
-											if (!imageinfo.check()) {
-												logger.debug("File ist not an image or the image format is not supported");
-											} else {
-												imageWidth = imageinfo.getWidth();
-												imageHeight = imageinfo.getHeight();
-												isImage = true;
-											}
+							try {
+								String strImages = ".*?(\\.(bmp|gif|jpe|jpg|jpeg|png|pcx|iff|ras|pbm|pgm|psd|tif|tiff))$";
+								Pattern patternImage = Pattern.compile(strImages, Pattern.CASE_INSENSITIVE);
+								Matcher matcherImage = patternImage.matcher(target);
+								if (matcherImage.matches()) {
+									try (FileInputStream imageinput = new FileInputStream(target)) {
+										ImageInfo imageinfo = new ImageInfo();
+										imageinfo.setInput(imageinput);
+										if (!imageinfo.check()) {
+											logger.debug("File ist not an image or the image format is not supported");
+										} else {
+											imageWidth = imageinfo.getWidth();
+											imageHeight = imageinfo.getHeight();
+											isImage = true;
 										}
 									}
-								} catch (Exception e) {
 								}
-
-								List<Subdir> v = SettingsManager.instance().getSubdirs();
-								for (int i = 0; i < v.size(); i++) {
-									Subdir sdir = v.get(i);
-
-									if (sdir.isInRange(this.size, imageWidth, imageHeight, isImage)) {
-										// If the filesize is in the size-range of this subdir, then we move to file
-										File fMoved = Pic.moveFileToSubdir(this.targetFilename, this.targetPath, sdir.getSubdirName());
-										if (fMoved == null) {
-											// The move failed
-											logger.error("File '" + this.targetPath + this.targetFilename + "' could not be moved");
-										}
-										break;
-									}
-								}
+							} catch (Exception e) {
 							}
 
+							List<Subdir> v = SettingsManager.instance().getSubdirs();
+							for (int i = 0; i < v.size(); i++) {
+								Subdir sdir = v.get(i);
+
+								if (sdir.isInRange(this.size, imageWidth, imageHeight, isImage)) {
+									// If the filesize is in the size-range of this subdir, then we move to file
+									File fMoved = Pic.moveFileToSubdir(correctedFilename, this.targetPath, sdir.getSubdirName());
+									if (fMoved == null) {
+										// The move failed
+										logger.error("File '" + this.targetPath + correctedFilename + "' could not be moved");
+									}
+									break;
+								}
+							}
 						}
-					} else {
-						// If the user stopped the download
-						progressBarChanged(0, Pic.STATUS_T[Pic.SLEEPING]);
-						setStatus(Pic.SLEEPING);
-						// Delete the file
-						File fileT = new File(target);
-						if (fileT.exists()) {
-							fileT.delete();
-						}
+
 					}
-				}
-			} catch (MalformedURLException e) {
-				this.failedCount++;
-				checkDeactivate();
-				setStatus(Pic.FAILED, e.getMessage());
-				progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-				logger.error("URL: {} (Stopped: {})", url, stopped, e);
-			} catch (Exception e) {
-				this.failedCount++;
-				checkDeactivate();
-				setStatus(Pic.FAILED, e.getMessage());
-				progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
-				/*
-				 * There are some Exceptions where we don't need to write the stacktrace also to the log,
-				 * so we just write the message to the log
-				 */
-				if (e instanceof IOException) {
-					logger.error("URL: {} (Stopped: {}) : {}", url, stopped, e.getMessage());
 				} else {
-					logger.error("URL: {} (Stopped: {})", url, stopped, e);
+					// If the user stopped the download
+					progressBarChanged(0, Pic.STATUS_T[Pic.SLEEPING]);
+					setStatus(Pic.SLEEPING);
+					// Delete the file
+					File fileT = new File(target);
+					if (fileT.exists()) {
+						fileT.delete();
+					}
 				}
-				// Delete the file
-				File fileT = new File(target);
-				if (fileT.exists()) {
-					fileT.delete();
-				}
-			} finally {
-				if (method != null) {
-					method.abort();
-				}
-				// Give the slot back to the Queue
-				DownloadQueueManager.instance().removeDLSlotListener(this); // important!
 			}
+		} catch (MalformedURLException e) {
+			this.failedCount++;
+			checkDeactivate();
+			setStatus(Pic.FAILED, e.getMessage());
+			progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
+			logger.error("URL: {} (Stopped: {})", url, stopped, e);
+		} catch (Exception e) {
+			this.failedCount++;
+			checkDeactivate();
+			setStatus(Pic.FAILED, e.getMessage());
+			progressBarChanged(0, Pic.STATUS_T[Pic.FAILED]);
+			/*
+			 * There are some Exceptions where we don't need to write the stacktrace also to the log,
+			 * so we just write the message to the log
+			 */
+			if (e instanceof IOException) {
+				logger.error("URL: {} (Stopped: {}) : {}", url, stopped, e.getMessage());
+			} else {
+				logger.error("URL: {} (Stopped: {})", url, stopped, e);
+			}
+			// Delete the file
+			File fileT = new File(target);
+			if (fileT.exists()) {
+				fileT.delete();
+			}
+		} finally {
+			if (method != null) {
+				method.abort();
+			}
+			// Give the slot back to the Queue
+			DownloadQueueManager.instance().removeDLSlotListener(this); // important!
 		}
-
 	}
 
 	/**
