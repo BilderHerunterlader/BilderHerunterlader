@@ -1,8 +1,8 @@
 package ch.supertomcat.bh.keywords;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.JFrame;
@@ -166,13 +166,17 @@ public class KeywordSearchThread extends Thread {
 		progressBarChanged(0, keywords.size() - 1, 0); // configure progressbar
 		List<KeywordMatch> foundKeywords = new ArrayList<>();
 
-		Iterator<Keyword> it = keywords.iterator();
+		int keywordMatchMode = SettingsManager.instance().getKeywordMatchMode();
+		// Check if we have to match only exact
+		boolean exactOnly = keywordMatchMode == KeywordManager.MATCH_ONLY_EXACT;
+		// Check if we have to do a strict search
+		boolean strict = keywordMatchMode == KeywordManager.MATCH_ALL_STRICT;
+
 		String str = search.toUpperCase(); // Bring the searchstring to UpperCase
 		int loopCount = 0; // to set the value of the progressbar
-		while (it.hasNext()) {
-			Keyword kw = it.next();
+		for (Keyword kw : keywords) {
 			String ks = kw.getKeywords().toUpperCase(); // Bring the keywords to UpperCase
-			if (ks.length() == 0) {
+			if (ks.isEmpty()) {
 				continue; // if there are no keywords we can ignore this
 			}
 
@@ -180,9 +184,9 @@ public class KeywordSearchThread extends Thread {
 
 			// Check if we have an exact match
 			String ksArr[] = ks.split(";"); // Split the keywordgroups
-			for (int i = 0; i < ksArr.length; i++) {
+			for (String singleKeyword : ksArr) {
 				// Check if the searchstring contains the complete keyword
-				if (str.contains(ksArr[i])) {
+				if (str.contains(singleKeyword)) {
 					bExactMatch = true;
 					foundKeywords.add(new KeywordMatch(kw, KeywordMatchType.MATCHED_EXACT));
 					break;
@@ -190,31 +194,33 @@ public class KeywordSearchThread extends Thread {
 			}
 
 			// If we have not an exact match and the user wants only exact matches, we don't need to check for other matches
-			if ((bExactMatch == false) && (SettingsManager.instance().getKeywordMatchMode() == KeywordManager.MATCH_ONLY_EXACT)) {
+			if (!bExactMatch && exactOnly) {
+				loopCount++;
+				progressBarChanged(loopCount); // update the value of the progressbar
 				continue;
 			}
 
-			if (bExactMatch == false) {
+			if (!bExactMatch) {
 				// Check if all or some keywords match
-				for (int i = 0; i < ksArr.length; i++) {
-					String ksSingleArr[] = ksArr[i].split(" ");
+				for (String singleKeyword : ksArr) {
+					String ksSingleArr[] = singleKeyword.split(" ");
 					int foundCount = 0;
 
-					// Check if we have to do a strict search
-					boolean strict = ((SettingsManager.instance().getKeywordMatchMode() == KeywordManager.MATCH_ALL_STRICT));
-
-					for (int o = 0; o < ksSingleArr.length; o++) {
-						if (ksSingleArr[o].length() == 0) {
+					for (String singleKeywordPart : ksSingleArr) {
+						if (singleKeywordPart.isEmpty()) {
 							continue; // if this keyword is empty ignore it (I never thought about if this really could happen)
 						}
+
+						/*
+						 * check first if the searchstring contains the
+						 * keyword before compiling the pattern! This is faster!
+						 */
+						boolean containsKeywordPart = str.contains(singleKeywordPart);
+
 						if (strict) {
 							// if we have to do a strict search
 
-							/*
-							 * check first if the searchstring contains the
-							 * keyword before compile the pattern! This is faster!
-							 */
-							if (str.contains(ksSingleArr[o]) == false) {
+							if (!containsKeywordPart) {
 								continue;
 							}
 
@@ -222,27 +228,8 @@ public class KeywordSearchThread extends Thread {
 							 * We build a regex including the keyword, but the keyword could contain special regex characters,
 							 * which could cause a PatternSyntaxException
 							 * So we escape here some of these characters
-							 * If there still would be a PatternSyntaxException, we catch the Exception and go on
 							 */
-							try {
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\\\", "\\\\");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\[", "\\[");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\[", "\\[");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\)", "\\)");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\(", "\\(");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\}", "\\}");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\{", "\\{");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\|", "\\|");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\?", "\\?");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\+", "\\+");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\-", "\\-");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\*", "\\*");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\^", "\\^");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\$", "\\$");
-								ksSingleArr[o] = ksSingleArr[o].replaceAll("\\.", "\\.");
-							} catch (PatternSyntaxException nfe) {
-								logger.error(nfe.getMessage(), nfe);
-							}
+							String escapedSingleKeywordPart = Pattern.quote(singleKeywordPart);
 
 							/*
 							 * So here is wath strict search means:
@@ -264,29 +251,28 @@ public class KeywordSearchThread extends Thread {
 							 * Without strict search the keyword would match, but this is not very nice.
 							 * So the strict search has less false positives
 							 */
-							String regex = "^(.*[^a-zA-Z]+|)" + ksSingleArr[o] + "([^a-zA-Z]+.*|)$";
+							String regex = "^(?:.*[^a-zA-Z]+|)" + escapedSingleKeywordPart + "(?:[^a-zA-Z]+.*|)$";
 							try {
 								if (str.matches(regex)) {
 									foundCount++;
 								}
 							} catch (PatternSyntaxException nfe) {
-								logger.error(nfe.getMessage(), nfe);
+								logger.error("Could not compile pattern: {}", regex, nfe);
 							}
 						} else {
-							if (str.contains(ksSingleArr[o])) {
+							if (str.contains(singleKeywordPart)) {
 								foundCount++;
 							}
 						}
 					}
+
 					if (foundCount > 0) {
 						// if keywords had matched
 						// Check if all keywords had matched
 						KeywordMatchType matchType = foundCount == ksSingleArr.length ? KeywordMatchType.MATCHED_ALL_KEYWORDS : KeywordMatchType.MATCHED_SOME_KEYWORDS;
 						foundKeywords.add(new KeywordMatch(kw, matchType));
 					}
-					ksSingleArr = null;
 				}
-				ks = null;
 			}
 			loopCount++;
 			progressBarChanged(loopCount); // update the value of the progressbar
@@ -348,8 +334,8 @@ public class KeywordSearchThread extends Thread {
 
 				// Check if there are exact matches
 				String ksArr[] = ks.split(";");
-				for (int i = 0; i < ksArr.length; i++) {
-					if (str.contains(ksArr[i])) {
+				for (String singleKeyword : ksArr) {
+					if (str.contains(singleKeyword)) {
 						bExactMatch = true;
 						foundKeywords.add(new KeywordMatch(keyword, KeywordMatchType.MATCHED_EXACT));
 						break;
@@ -364,11 +350,11 @@ public class KeywordSearchThread extends Thread {
 						/*
 						 * Here we can't do a strict search, because it is not useful in an URL
 						 */
-						for (int o = 0; o < ksSingleArr.length; o++) {
-							if (ksSingleArr[o].length() == 0) {
+						for (String singleKeywordPart : ksSingleArr) {
+							if (singleKeywordPart.isEmpty()) {
 								continue;
 							}
-							if (str.contains(ksSingleArr[o])) {
+							if (str.contains(singleKeywordPart)) {
 								foundCount++;
 							}
 						}
@@ -377,9 +363,7 @@ public class KeywordSearchThread extends Thread {
 							KeywordMatchType matchType = foundCount == ksSingleArr.length ? KeywordMatchType.MATCHED_ALL_KEYWORDS : KeywordMatchType.MATCHED_SOME_KEYWORDS;
 							foundKeywords.add(new KeywordMatch(keyword, matchType));
 						}
-						ksSingleArr = null;
 					}
-					ks = null;
 				}
 				if (kstl == null) {
 					// if there is no Listener we can stop, because there is no object to get the result of the search
