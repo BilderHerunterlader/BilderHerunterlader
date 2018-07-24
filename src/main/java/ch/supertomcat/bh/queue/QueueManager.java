@@ -61,8 +61,6 @@ public class QueueManager implements IPicListener {
 	private QueueManager() {
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
-			pic.initializeListenerList();
-
 			if (pic.getStatus() != Pic.COMPLETE) {
 				if ((pic.getStatus() == Pic.WAITING) || (pic.getStatus() == Pic.DOWNLOADING) || (pic.getStatus() == Pic.ABORTING)) {
 					pic.setStatus(Pic.SLEEPING);
