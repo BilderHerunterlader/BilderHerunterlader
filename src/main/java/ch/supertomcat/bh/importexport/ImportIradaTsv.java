@@ -10,8 +10,6 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.pic.Tsv;
-
 /**
  * Class for import tsv-Files created by Irada
  * Irada is a tool to upload files to imagehosts/filehosts.

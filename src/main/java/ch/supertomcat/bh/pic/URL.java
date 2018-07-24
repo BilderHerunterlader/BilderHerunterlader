@@ -15,7 +15,7 @@ public class URL {
 	/**
 	 * Container-URL
 	 */
-	private String url = "";
+	private String url;
 
 	/**
 	 * Flag if url is already checked for redirect
@@ -40,12 +40,12 @@ public class URL {
 	/**
 	 * Corrected filename
 	 */
-	private String filenameCorrected = "";
+	private String filenameCorrected;
 
 	/**
 	 * Thumbnail-URL
 	 */
-	private String thumb = "";
+	private String thumb;
 
 	/**
 	 * The host which is responsible to parse this url

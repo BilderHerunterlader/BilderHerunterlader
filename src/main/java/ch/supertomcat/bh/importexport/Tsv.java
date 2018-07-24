@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.pic;
+package ch.supertomcat.bh.importexport;
 
 /**
  * One object of this class represent a line of tsv-file
@@ -11,12 +11,12 @@ public class Tsv {
 	 * Relative path
 	 */
 	private String relativePath = "";
-	
+
 	/**
 	 * Container-URL
 	 */
 	private String containerURL = "";
-	
+
 	/**
 	 * Timestamp (last modified)
 	 */
@@ -24,6 +24,7 @@ public class Tsv {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param relativePath Relative path
 	 * @param containerURL Container-URL
 	 * @param lastModified Last modified
@@ -37,6 +38,7 @@ public class Tsv {
 
 	/**
 	 * Get-Method
+	 * 
 	 * @return the relativePath
 	 */
 	public String getRelativePath() {
@@ -45,6 +47,7 @@ public class Tsv {
 
 	/**
 	 * Set-Method
+	 * 
 	 * @param relativePath the relativePath to set
 	 */
 	public void setRelativePath(String relativePath) {
@@ -53,6 +56,7 @@ public class Tsv {
 
 	/**
 	 * Get-Method
+	 * 
 	 * @return the containerURL
 	 */
 	public String getContainerURL() {
@@ -61,6 +65,7 @@ public class Tsv {
 
 	/**
 	 * Set-Method
+	 * 
 	 * @param containerURL the containerURL to set
 	 */
 	public void setContainerURL(String containerURL) {
@@ -69,6 +74,7 @@ public class Tsv {
 
 	/**
 	 * Get-Method
+	 * 
 	 * @return the lastModified
 	 */
 	public long getLastModified() {
@@ -77,11 +83,10 @@ public class Tsv {
 
 	/**
 	 * Set-Method
+	 * 
 	 * @param lastModified the lastModified to set
 	 */
 	public void setLastModified(long lastModified) {
 		this.lastModified = lastModified;
 	}
-	
-	
 }
