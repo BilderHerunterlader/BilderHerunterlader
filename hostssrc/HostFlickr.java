@@ -31,7 +31,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * If that fails (e.g. original image is not available for download) it
  * will load the embedded image from the container site.
  *
- * @version 2.7
+ * @version 2.8
  */
 public class HostFlickr extends Host implements IHoster {
 	/**
@@ -40,7 +40,7 @@ public class HostFlickr extends Host implements IHoster {
 	private static Logger logger = LoggerFactory.getLogger(HostFlickr.class);
 
 	/** the version of this class **/
-	public static final String VERSION = "2.7";
+	public static final String VERSION = "2.8";
 
 	/** the name of this class **/
 	public static final String NAME = "HostFlickr";
@@ -146,7 +146,7 @@ public class HostFlickr extends Host implements IHoster {
 		this.embeddedImagePattern = Pattern.compile("<img src=\"(https?://.*?flickr\\.com/.+?/[0-9]+?[^/]*?\\.[a-z]*?(\\?[a-z]+=[0-9]+)??)\"", Pattern.CASE_INSENSITIVE);
 
 		this.regexTitle = new RuleRegExp();
-		this.regexTitle.setSearch("<meta name=\"title\" content=\"(.*?)\">");
+		this.regexTitle.setSearch("<meta name=\"title\" content=\"(.+?)\"[^>]*>");
 		this.regexTitle.setReplace("$1");
 
 		pipeOriginalDateTime = new RulePipelineURLRegex(Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
@@ -267,7 +267,7 @@ public class HostFlickr extends Host implements IHoster {
 				String adResult[] = parseAlbumTitleAndDate(baseContainerUrl, baseContainerPage);
 				String albumTitle = adResult[0];
 				String date = adResult[1];
-				String title = regexTitle.doPageSourcecodeReplace(allSizesContainerPage, 0, allSizesContainerUrl, null);
+				String title = regexTitle.doPageSourcecodeReplace(baseContainerPage, 0, baseContainerUrl, null);
 				String dateTime = getOriginalDateTime(metaContainerUrl);
 				if (dateTime.length() == 0 && date.length() > 0) {
 					dateTime = date;
