@@ -1678,36 +1678,55 @@ public class SettingsManager {
 	 */
 	@SuppressWarnings("unchecked")
 	public synchronized <E> void setOptionValue(String path, E value) throws OptionException {
-		Option<E> option = (Option<E>)getOptionForPath(path);
+		Class<E> valueType = (Class<E>)value.getClass();
+		Option<?> option = getOptionForPath(path);
 		if (option == null) {
-			option = Option.getNewOptionByClass((Class<E>)value.getClass(), path);
+			option = Option.getNewOptionByClass(valueType, path);
 			if (option == null) {
-				throw new OptionException("No Options for this class! You can only use Boolean, Byte, Double, Float, Integer, Long, Short or String");
+				throw new OptionException("No Options for this type! You can only use Boolean, Byte, Double, Float, Integer, Long, Short or String");
 			}
 			options.add(option);
+		} else if (!Option.checkType(option, valueType)) {
+			throw new OptionException("Could not set Value because there is already an Option with the same path, but with another datatype: " + path);
 		}
 
-		if (Option.checkType(option, value.getClass()) == false) {
-			throw new OptionException("Could not set Value because there is already an Option with the same path, but with another datatype");
-		}
-
-		option.setValue(value);
+		((Option<E>)option).setValue(value);
 	}
 
 	/**
 	 * Gibt den Wert zurueck
 	 * 
 	 * @param path Pfad der Einstellung
+	 * @param valueType Value Type
 	 * @return Wert
 	 * @throws OptionException
 	 */
-	public synchronized boolean getBooleanValue(String path) throws OptionException {
+	public synchronized <E> E getOptionValue(String path, Class<? extends Option<E>> valueType) throws OptionException {
 		Option<?> option = getOptionForPath(path);
 		if (option == null) {
 			throw new OptionException("Option does not exists: " + path);
+		} else if (valueType.isInstance(option)) {
+			return valueType.cast(option).getValue();
+		} else {
+			throw new OptionException("Could not get Value because the Option with this path has another datatype: " + path);
 		}
-		if (option instanceof OptionBoolean) {
-			return ((OptionBoolean)option).getValue();
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param valueType Value Type
+	 * @param defaultValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized <E> E getOptionValue(String path, Class<? extends Option<E>> valueType, E defaultValue) throws OptionException {
+		Option<?> option = getOptionForPath(path);
+		if (option == null) {
+			return defaultValue;
+		} else if (valueType.isInstance(option)) {
+			return valueType.cast(option).getValue();
 		} else {
 			throw new OptionException("Could not get Value because the Option with this path has another datatype: " + path);
 		}
@@ -1720,16 +1739,43 @@ public class SettingsManager {
 	 * @return Wert
 	 * @throws OptionException
 	 */
+	public synchronized boolean getBooleanValue(String path) throws OptionException {
+		return getOptionValue(path, OptionBoolean.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized boolean getBooleanValue(String path, boolean defautValue) throws OptionException {
+		return getOptionValue(path, OptionBoolean.class, defautValue);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @return Wert
+	 * @throws OptionException
+	 */
 	public synchronized int getIntValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionInt) {
-			return ((OptionInt)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionInt.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized int getIntValue(String path, int defautValue) throws OptionException {
+		return getOptionValue(path, OptionInt.class, defautValue);
 	}
 
 	/**
@@ -1740,15 +1786,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized String getStringValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionString) {
-			return ((OptionString)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionString.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized String getStringValue(String path, String defautValue) throws OptionException {
+		return getOptionValue(path, OptionString.class, defautValue);
 	}
 
 	/**
@@ -1759,15 +1809,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized long getLongValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionLong) {
-			return ((OptionLong)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionLong.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized long getLongValue(String path, long defautValue) throws OptionException {
+		return getOptionValue(path, OptionLong.class, defautValue);
 	}
 
 	/**
@@ -1778,15 +1832,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized byte getByteValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionByte) {
-			return ((OptionByte)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionByte.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized byte getByteValue(String path, byte defautValue) throws OptionException {
+		return getOptionValue(path, OptionByte.class, defautValue);
 	}
 
 	/**
@@ -1797,15 +1855,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized short getShortValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionShort) {
-			return ((OptionShort)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionShort.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized short getShortValue(String path, short defautValue) throws OptionException {
+		return getOptionValue(path, OptionShort.class, defautValue);
 	}
 
 	/**
@@ -1816,15 +1878,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized float getFloatValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionFloat) {
-			return ((OptionFloat)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionFloat.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized float getFloatValue(String path, float defautValue) throws OptionException {
+		return getOptionValue(path, OptionFloat.class, defautValue);
 	}
 
 	/**
@@ -1835,15 +1901,19 @@ public class SettingsManager {
 	 * @throws OptionException
 	 */
 	public synchronized double getDoubleValue(String path) throws OptionException {
-		Option<?> option = getOptionForPath(path);
-		if (option == null) {
-			throw new OptionException("Option does not exists");
-		}
-		if (option instanceof OptionDouble) {
-			return ((OptionDouble)option).getValue();
-		} else {
-			throw new OptionException("Could not get Value because the Option with this path has another datatype");
-		}
+		return getOptionValue(path, OptionDouble.class);
+	}
+
+	/**
+	 * Gibt den Wert zurueck
+	 * 
+	 * @param path Pfad der Einstellung
+	 * @param defautValue Default Value
+	 * @return Wert
+	 * @throws OptionException
+	 */
+	public synchronized double getDoubleValue(String path, double defautValue) throws OptionException {
+		return getOptionValue(path, OptionDouble.class, defautValue);
 	}
 
 	/**
