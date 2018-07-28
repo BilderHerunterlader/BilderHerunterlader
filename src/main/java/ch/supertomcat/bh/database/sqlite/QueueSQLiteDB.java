@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 
 /**
  * Class for Sqlite Database connections for Queue Database
@@ -150,12 +151,13 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 		boolean fixedLastModified = result.getBoolean("FixedLastModified");
 		long size = result.getLong("Size");
 		int status = result.getInt("Status");
+		PicState state = PicState.getByValue(status);
 		String errMsg = result.getString("ErrorMessage");
 		boolean deactivated = result.getBoolean("Deactivated");
 		boolean renameWithContentDisposition = result.getBoolean("RenameWithContentDisposition");
 		long dateTime = result.getLong("DateTime");
 
-		return new Pic(id, urlContainer, targetFilename, targetPath, threadURL, thumb, downloadURL, fixedTargetFilename, lastModified, fixedLastModified, size, status, errMsg, deactivated, renameWithContentDisposition, dateTime);
+		return new Pic(id, urlContainer, targetFilename, targetPath, threadURL, thumb, downloadURL, fixedTargetFilename, lastModified, fixedLastModified, size, state, errMsg, deactivated, renameWithContentDisposition, dateTime);
 	}
 
 	@Override
@@ -211,7 +213,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 				statement.setLong(8, entry.getLastModified());
 				statement.setBoolean(9, entry.isFixedLastModified());
 				statement.setLong(10, entry.getSize());
-				statement.setInt(11, entry.getStatus());
+				statement.setInt(11, entry.getStatus().getValue());
 				statement.setString(12, entry.getErrMsg());
 				statement.setBoolean(13, entry.isDeactivated());
 				statement.setBoolean(14, entry.isRenameWithContentDisposition());
@@ -271,7 +273,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 				statement.setLong(8, entry.getLastModified());
 				statement.setBoolean(9, entry.isFixedLastModified());
 				statement.setLong(10, entry.getSize());
-				statement.setInt(11, entry.getStatus());
+				statement.setInt(11, entry.getStatus().getValue());
 				statement.setString(12, entry.getErrMsg());
 				statement.setBoolean(13, entry.isDeactivated());
 				statement.setBoolean(14, entry.isRenameWithContentDisposition());

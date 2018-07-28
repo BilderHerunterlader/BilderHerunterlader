@@ -34,54 +34,7 @@ public class Pic implements Runnable, IDownloadListener {
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(Pic.class);
-
-	/**
-	 * Download is sleeping
-	 */
-	public static final int SLEEPING = 0;
-
-	/**
-	 * Download is waiting for a free slot
-	 */
-	public static final int WAITING = 1;
-
-	/**
-	 * Download is downloading
-	 */
-	public static final int DOWNLOADING = 2;
-
-	/**
-	 * Download is complete
-	 */
-	public static final int COMPLETE = 3;
-
-	/**
-	 * Download failed
-	 */
-	public static final int FAILED = 4;
-
-	/**
-	 * Download failed
-	 */
-	public static final int ABORTING = 5;
-
-	/**
-	 * Download failed
-	 */
-	public static final int FAILED_FILE_NOT_EXIST = 6;
-
-	/**
-	 * Download failed
-	 */
-	public static final int FAILED_FILE_TEMPORARY_OFFLINE = 7;
-
-	/**
-	 * Strings for status of the download
-	 */
-	public static final String[] STATUS_T = { Localization.getString("Sleeping"), Localization.getString("Waiting"), Localization.getString("Downloading"), Localization
-			.getString("Complete"), Localization
-					.getString("Failed"), Localization.getString("Aborting"), Localization.getString("FileNotExistsOnTheServer"), Localization.getString("FileTemporaryOffline") };
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Database ID
@@ -147,7 +100,7 @@ public class Pic implements Runnable, IDownloadListener {
 	/**
 	 * Status of the download
 	 */
-	private int status = Pic.SLEEPING;
+	private PicState status = PicState.SLEEPING;
 
 	/**
 	 * Error-Message
@@ -234,7 +187,7 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param dateTime DateTime
 	 */
 	public Pic(int id, String urlContainer, String targetFilename, String targetPath, String threadURL, String thumb, String downloadURL, boolean fixedTargetFilename, long lastModified,
-			boolean fixedLastModified, long size, int status, String errMsg, boolean deactivated, boolean renameWithContentDisposition, long dateTime) {
+			boolean fixedLastModified, long size, PicState status, String errMsg, boolean deactivated, boolean renameWithContentDisposition, long dateTime) {
 		this(urlContainer, targetFilename, targetPath);
 		this.id = id;
 		this.threadURL = threadURL;
@@ -244,10 +197,7 @@ public class Pic implements Runnable, IDownloadListener {
 		this.lastModified = lastModified;
 		this.fixedLastModified = fixedLastModified;
 		this.size = size;
-		if (!((status != Pic.SLEEPING) && (status != Pic.WAITING) && (status != Pic.DOWNLOADING) && (status != Pic.COMPLETE) && (status != Pic.FAILED) && (status != Pic.FAILED_FILE_NOT_EXIST)
-				&& (status != Pic.ABORTING) && (status != Pic.FAILED_FILE_TEMPORARY_OFFLINE))) {
-			this.status = status;
-		}
+		this.status = status;
 		this.errMsg = errMsg;
 		this.deactivated = deactivated;
 		this.renameWithContentDisposition = renameWithContentDisposition;
@@ -264,11 +214,11 @@ public class Pic implements Runnable, IDownloadListener {
 		}
 
 		// If there is not already a request for a download-slot and the status is sleeping or failed
-		if ((!(DownloadQueueManager.instance().isDLSlotListenerRegistered(this)))
-				&& ((this.status == Pic.SLEEPING) || (this.status == Pic.FAILED) || (this.status == Pic.FAILED_FILE_NOT_EXIST) || (this.status == FAILED_FILE_TEMPORARY_OFFLINE))) {
+		if ((!(DownloadQueueManager.instance().isDLSlotListenerRegistered(this))) && ((this.status == PicState.SLEEPING) || (this.status == PicState.FAILED)
+				|| (this.status == PicState.FAILED_FILE_NOT_EXIST) || (this.status == PicState.FAILED_FILE_TEMPORARY_OFFLINE))) {
 			stop = false;
 			stopOncePressed = false;
-			setStatus(Pic.WAITING); // Change the status
+			setStatus(PicState.WAITING); // Change the status
 			DownloadQueueManager.instance().addDLSlotListener(this); // Request a download slot
 		}
 	}
@@ -284,19 +234,19 @@ public class Pic implements Runnable, IDownloadListener {
 		if (stopOncePressed) {
 			stop = true;
 		}
-		if (this.status == Pic.WAITING) {
+		if (this.status == PicState.WAITING) {
 			stop = true;
-			setStatus(Pic.SLEEPING);
-			progressBarChanged(0, Pic.STATUS_T[Pic.SLEEPING]);
+			setStatus(PicState.SLEEPING);
+			progressBarChanged(0, PicState.SLEEPING.getText());
 			/*
 			 * Free the download-slot
 			 * Maybe i should do this not at this point, because the user could
 			 * start the download again, before it has really stopped
 			 */
 			DownloadQueueManager.instance().removeDLSlotListenerStopping(this);
-		} else if (this.status == Pic.DOWNLOADING) {
+		} else if (this.status == PicState.DOWNLOADING) {
 			if (stop) {
-				setStatus(Pic.ABORTING);
+				setStatus(PicState.ABORTING);
 			}
 		}
 		stopOncePressed = true;
@@ -338,8 +288,8 @@ public class Pic implements Runnable, IDownloadListener {
 		 */
 		if (stop) {
 			// Status aendern und Slot freigeben
-			setStatus(Pic.SLEEPING);
-			progressBarChanged(0, Pic.STATUS_T[Pic.SLEEPING]);
+			setStatus(PicState.SLEEPING);
+			progressBarChanged(0, PicState.SLEEPING.getText());
 			DownloadQueueManager.instance().removeDLSlotListener(this);
 			return;
 		}
@@ -453,9 +403,9 @@ public class Pic implements Runnable, IDownloadListener {
 		 * we don't start the download! So we return false!
 		 */
 
-		if (this.status == Pic.WAITING) {
+		if (this.status == PicState.WAITING) {
 			// Set the status to DOWNLOADING
-			setStatus(Pic.DOWNLOADING);
+			setStatus(PicState.DOWNLOADING);
 
 			// Now we make this Pic to a thread and start it
 			Thread t = new Thread(this);
@@ -534,23 +484,16 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @return Statustext
 	 */
 	public String getStatusText() {
-		return Pic.STATUS_T[this.status];
+		return status.getText();
 	}
 
 	/**
 	 * Returns the status
-	 * Available states:
-	 * Pic.SLEEPING
-	 * Pic.WAITING
-	 * Pic.DOWNLOADING
-	 * Pic.COMPLETE
-	 * Pic.FAILED
-	 * Pic.FAILED_FILE_NOT_EXIST
 	 * 
 	 * @return Status
 	 */
-	public int getStatus() {
-		return this.status;
+	public PicState getStatus() {
+		return status;
 	}
 
 	/**
@@ -563,13 +506,6 @@ public class Pic implements Runnable, IDownloadListener {
 	 * object could have DOWNLOADING as status and that is terrible.
 	 * 
 	 * Sets the status of the download
-	 * Available states:
-	 * Pic.SLEEPING
-	 * Pic.WAITING
-	 * Pic.DOWNLOADING
-	 * Pic.COMPLETE
-	 * Pic.FAILED
-	 * Pic.FAILED_FILE_NOT_EXIST
 	 * If the status-argument is not one of those, the
 	 * method will not set anything!
 	 * 
@@ -577,19 +513,12 @@ public class Pic implements Runnable, IDownloadListener {
 	 * 
 	 * @param status Status
 	 */
-	public void setStatus(int status) {
+	public void setStatus(PicState status) {
 		setStatus(status, "");
 	}
 
 	/**
 	 * Sets the status of the download
-	 * Available states:
-	 * Pic.SLEEPING
-	 * Pic.WAITING
-	 * Pic.DOWNLOADING
-	 * Pic.COMPLETE
-	 * Pic.FAILED
-	 * Pic.FAILED_FILE_NOT_EXIST
 	 * If the status-argument is not one of those, the
 	 * method will not set anything!
 	 * 
@@ -599,20 +528,16 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param status Status
 	 * @param errMsg Error-Message
 	 */
-	public void setStatus(int status, String errMsg) {
-		if ((status != Pic.SLEEPING) && (status != Pic.WAITING) && (status != Pic.DOWNLOADING) && (status != Pic.COMPLETE) && (status != Pic.FAILED) && (status != Pic.FAILED_FILE_NOT_EXIST)
-				&& (status != Pic.ABORTING) && (status != Pic.FAILED_FILE_TEMPORARY_OFFLINE)) {
-			return;
-		}
+	public void setStatus(PicState status, String errMsg) {
 		this.status = status;
 		this.errMsg = errMsg;
-		if (status == Pic.COMPLETE) {
+		if (status == PicState.COMPLETE) {
 			this.dateTime = System.currentTimeMillis();
 		}
 		for (IPicListener listener : listeners) {
 			listener.statusChanged(this);
 		}
-		if ((status != Pic.SLEEPING) && (status != Pic.WAITING) && (status != Pic.DOWNLOADING) && (status != Pic.ABORTING)) {
+		if ((status != PicState.SLEEPING) && (status != PicState.WAITING) && (status != PicState.DOWNLOADING) && (status != PicState.ABORTING)) {
 			/*
 			 * We can gain some speed by only updating the status in the database in some cases.
 			 * When pics are loaded, they reset to SLEEPING if the status is one of the three in the condition above.

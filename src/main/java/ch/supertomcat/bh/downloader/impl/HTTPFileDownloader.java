@@ -23,6 +23,7 @@ import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
 import ch.supertomcat.bh.hoster.URLParseObjectFile;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -251,7 +252,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					return;
 				}
 
-				pic.progressBarChanged(0, Pic.STATUS_T[Pic.WAITING]);
+				pic.progressBarChanged(0, PicState.WAITING.getText());
 
 				long iBW = 0; // the amount of bytes we read since started downloading
 
@@ -264,7 +265,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					int nReads = 0;
 					String bitrate = ""; // the download rate as string
 					long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
-					pic.progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
+					pic.progressBarChanged(0, PicState.DOWNLOADING.getText());
 
 					/*
 					 * Create a new timer, which sets every 10 seconds the recalculate-flag

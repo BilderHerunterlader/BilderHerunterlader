@@ -24,7 +24,7 @@ import javax.swing.event.TableColumnModelListener;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
-import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RuleRegExp;
@@ -68,7 +68,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 	@SuppressWarnings("unused")
 	private Rule rule = null;
 
-	private JComboBox<String> cmbFailureType = new JComboBox<>();
+	private JComboBox<PicState> cmbFailureType = new JComboBox<>();
 
 	private JCheckBox cbURL = new JCheckBox(Localization.getString("ContainerURL"));
 
@@ -152,12 +152,12 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 		}
 		sp = new JScrollPane(table);
 
-		cmbFailureType.addItem(Localization.getString("Failed"));
-		cmbFailureType.addItem(Localization.getString("FileNotExistsOnTheServer"));
-		cmbFailureType.addItem(Localization.getString("FileTemporaryOffline"));
-		cmbFailureType.addItem(Localization.getString("Sleeping"));
-		cmbFailureType.addItem(Localization.getString("Complete"));
-		cmbFailureType.setSelectedItem(getFailureStringForNumber(pipe.getFailureType()));
+		cmbFailureType.addItem(PicState.FAILED);
+		cmbFailureType.addItem(PicState.FAILED_FILE_NOT_EXIST);
+		cmbFailureType.addItem(PicState.FAILED_FILE_TEMPORARY_OFFLINE);
+		cmbFailureType.addItem(PicState.SLEEPING);
+		cmbFailureType.addItem(PicState.COMPLETE);
+		cmbFailureType.setSelectedItem(pipe.getFailureType());
 
 		cbURL.setSelected(pipe.isCheckURL());
 		cbThumbURL.setSelected(pipe.isCheckThumbURL());
@@ -188,66 +188,32 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 		btnDelete.addActionListener(this);
 	}
 
-	private int getNumberForFailureString(String failure) {
-		if (failure.equals(Localization.getString("Sleeping"))) {
-			return Pic.SLEEPING;
-		} else if (failure.equals(Localization.getString("Complete"))) {
-			return Pic.COMPLETE;
-		} else if (failure.equals(Localization.getString("Failed"))) {
-			return Pic.FAILED;
-		} else if (failure.equals(Localization.getString("FileNotExistsOnTheServer"))) {
-			return Pic.FAILED_FILE_NOT_EXIST;
-		} else if (failure.equals(Localization.getString("FileTemporaryOffline"))) {
-			return Pic.FAILED_FILE_TEMPORARY_OFFLINE;
-		} else {
-			return Pic.FAILED;
-		}
-	}
-
-	private String getFailureStringForNumber(int number) {
-		switch (number) {
-			case Pic.COMPLETE:
-				return Localization.getString("Complete");
-			case Pic.SLEEPING:
-				return Localization.getString("Sleeping");
-			case Pic.FAILED_FILE_TEMPORARY_OFFLINE:
-				return Localization.getString("FileTemporaryOffline");
-			case Pic.FAILED_FILE_NOT_EXIST:
-				return Localization.getString("FileNotExistsOnTheServer");
-			case Pic.FAILED:
-				return Localization.getString("Failed");
-			default:
-				return Localization.getString("Failed");
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnNew) {
 			RuleRegExp rre = new RuleRegExp();
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.addRow(rre.getSearch());
 			pipe.addRegExp(rre);
 		} else if (e.getSource() == btnEdit) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			RuleRegExp rre = pipe.getRegexp(row);
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.setValueAt(rre.getSearch(), row, 0);
 		} else if (e.getSource() == btnDelete) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			model.removeRow(row);
 			pipe.removeRegExp(row);
 		} else if (e.getSource() == btnUp) {
@@ -271,7 +237,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 	 * Apply
 	 */
 	public void apply() {
-		pipe.setFailureType(getNumberForFailureString((String)cmbFailureType.getSelectedItem()));
+		pipe.setFailureType((PicState)cmbFailureType.getSelectedItem());
 		pipe.setCheckURL(cbURL.isSelected());
 		pipe.setCheckThumbURL(cbThumbURL.isSelected());
 		pipe.setCheckPageSourceCode(cbContainerPage.isSelected());
@@ -281,8 +247,9 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		SettingsManager.instance().setColWidthsRulesEditor(TableTool.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
@@ -291,53 +258,29 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
 	@Override
 	public void columnMarginChanged(ChangeEvent e) {
 		updateColWidthsToSettingsManager();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
 	}

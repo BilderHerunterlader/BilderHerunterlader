@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.fileiotools.FileTool;
@@ -104,13 +105,10 @@ public abstract class ImportQueue {
 						String threadURL = arr[2];
 						String targetPath = arr[3];
 						String targetFilename = arr[4];
-						int status = Pic.SLEEPING;
+						PicState status = PicState.SLEEPING;
 						try {
 							int iStatus = Integer.parseInt(arr[5]);
-							if ((iStatus == Pic.SLEEPING) || (iStatus == Pic.WAITING) || (iStatus == Pic.DOWNLOADING) || (iStatus == Pic.COMPLETE) || (iStatus == Pic.FAILED)
-									|| (iStatus == Pic.FAILED_FILE_NOT_EXIST) || (iStatus == Pic.ABORTING) || (iStatus == Pic.FAILED_FILE_TEMPORARY_OFFLINE)) {
-								status = iStatus;
-							}
+							status = PicState.getByValue(iStatus);
 						} catch (NumberFormatException nfe) {
 							logger.error(nfe.getMessage(), nfe);
 						}

@@ -11,6 +11,7 @@ import ch.supertomcat.bh.database.sqlite.QueueSQLiteDB;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
 
@@ -61,14 +62,14 @@ public class QueueManager implements IPicListener {
 	private QueueManager() {
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
-			if (pic.getStatus() != Pic.COMPLETE) {
-				if ((pic.getStatus() == Pic.WAITING) || (pic.getStatus() == Pic.DOWNLOADING) || (pic.getStatus() == Pic.ABORTING)) {
-					pic.setStatus(Pic.SLEEPING);
+			if (pic.getStatus() != PicState.COMPLETE) {
+				if ((pic.getStatus() == PicState.WAITING) || (pic.getStatus() == PicState.DOWNLOADING) || (pic.getStatus() == PicState.ABORTING)) {
+					pic.setStatus(PicState.SLEEPING);
 				}
 				pic.removeAllListener();
 				pic.addPicListener(this);
 				pics.add(pic);
-			} else if (pic.getStatus() == Pic.COMPLETE) {
+			} else if (pic.getStatus() == PicState.COMPLETE) {
 				queueSQLiteDB.deleteEntry(pic);
 			}
 		}
@@ -223,7 +224,7 @@ public class QueueManager implements IPicListener {
 	 * @param pic Pic
 	 */
 	public void removePic(Pic pic) {
-		if (pic.getStatus() == Pic.WAITING || pic.getStatus() == Pic.DOWNLOADING || pic.getStatus() == Pic.ABORTING) {
+		if (pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.DOWNLOADING || pic.getStatus() == PicState.ABORTING) {
 			return;
 		}
 
@@ -397,7 +398,7 @@ public class QueueManager implements IPicListener {
 				l.picStatusChanged(pic, index);
 			}
 		}
-		if (pic.getStatus() == Pic.COMPLETE) {
+		if (pic.getStatus() == PicState.COMPLETE) {
 			if (SettingsManager.instance().isSaveLogs()) {
 				LogManager.instance().addPicToLog(pic);
 			}

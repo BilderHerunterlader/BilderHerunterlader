@@ -80,7 +80,7 @@ public abstract class ExportQueue {
 				String threadURL = pic.getThreadURL();
 				String targetPath = pic.getTargetPath();
 				String targetFilename = pic.getTargetFilename();
-				int status = pic.getStatus();
+				int status = pic.getStatus().getValue();
 				long lastModified = pic.getLastModified();
 				boolean fixedTargetFilename = pic.isFixedTargetFilename();
 				boolean fixedLastModified = pic.isFixedLastModified();

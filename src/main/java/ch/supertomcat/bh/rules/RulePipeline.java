@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 
 /**
  * RulePipeline
@@ -442,8 +443,8 @@ public abstract class RulePipeline {
 	 * 
 	 * @return failureType
 	 */
-	public int getFailureType() {
-		return -1;
+	public PicState getFailureType() {
+		return null;
 	}
 
 	/**
@@ -451,7 +452,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @param failureType failureType
 	 */
-	public void setFailureType(int failureType) {
+	public void setFailureType(PicState failureType) {
 	}
 
 	/**

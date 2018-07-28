@@ -25,6 +25,7 @@ import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcattools.fileiotools.FileTool;
@@ -55,7 +56,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	/**
 	 * Logger for this class
 	 */
-	protected Logger logger = LoggerFactory.getLogger(Pic.class);
+	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Sets the status of the Pic and returns the download slot
@@ -64,7 +65,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param status Status
 	 * @param progressBarValue ProgressBar Value
 	 */
-	protected void changeStatusAndReturnSlot(Pic pic, int status, long progressBarValue) {
+	protected void changeStatusAndReturnSlot(Pic pic, PicState status, long progressBarValue) {
 		changeStatusAndReturnSlot(pic, status, progressBarValue, (String)null);
 	}
 
@@ -76,7 +77,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param progressBarValue ProgressBar Value
 	 * @param e Throwable or null
 	 */
-	protected void changeStatusAndReturnSlot(Pic pic, int status, long progressBarValue, Throwable e) {
+	protected void changeStatusAndReturnSlot(Pic pic, PicState status, long progressBarValue, Throwable e) {
 		if (e == null) {
 			changeStatusAndReturnSlot(pic, status, progressBarValue, (String)null);
 		} else {
@@ -92,13 +93,13 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param progressBarValue ProgressBar Value
 	 * @param errorMessage Error message or null
 	 */
-	protected void changeStatusAndReturnSlot(Pic pic, int status, long progressBarValue, String errorMessage) {
+	protected void changeStatusAndReturnSlot(Pic pic, PicState status, long progressBarValue, String errorMessage) {
 		if (errorMessage == null) {
 			pic.setStatus(status);
 		} else {
 			pic.setStatus(status, errorMessage);
 		}
-		pic.progressBarChanged(progressBarValue, Pic.STATUS_T[status]);
+		pic.progressBarChanged(progressBarValue, status.getText());
 		DownloadQueueManager.instance().removeDLSlotListener(pic);
 	}
 
@@ -108,7 +109,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param pic Pic
 	 */
 	protected void stopDownload(Pic pic) {
-		changeStatusAndReturnSlot(pic, Pic.SLEEPING, 0);
+		changeStatusAndReturnSlot(pic, PicState.SLEEPING, 0);
 	}
 
 	/**
@@ -151,9 +152,9 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			pic.increaseFailedCount();
 		}
 		if (errorMessage != null) {
-			changeStatusAndReturnSlot(pic, Pic.FAILED, 0, errorMessage);
+			changeStatusAndReturnSlot(pic, PicState.FAILED, 0, errorMessage);
 		} else {
-			changeStatusAndReturnSlot(pic, Pic.FAILED, 0, e);
+			changeStatusAndReturnSlot(pic, PicState.FAILED, 0, e);
 		}
 		if (e != null) {
 			if (upo != null) {
@@ -172,7 +173,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 */
 	protected void failDownloadTemporaryOffline(Pic pic, HostFileTemporaryOfflineException e) {
 		pic.setToMaxFailedCount();
-		changeStatusAndReturnSlot(pic, Pic.FAILED_FILE_TEMPORARY_OFFLINE, 0, e);
+		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_TEMPORARY_OFFLINE, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());
 		}
@@ -186,7 +187,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 */
 	protected void failDownloadFileNotExist(Pic pic, HostFileNotExistException e) {
 		pic.setToMaxFailedCount();
-		changeStatusAndReturnSlot(pic, Pic.FAILED_FILE_NOT_EXIST, 0, e);
+		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_NOT_EXIST, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());
 		}
@@ -199,7 +200,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param progressBarValue ProgressBar Value
 	 */
 	protected void completeDownload(Pic pic, long progressBarValue) {
-		changeStatusAndReturnSlot(pic, Pic.COMPLETE, progressBarValue);
+		changeStatusAndReturnSlot(pic, PicState.COMPLETE, progressBarValue);
 	}
 
 	/**
@@ -215,8 +216,8 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			throw new HostAbortedException("Download was aborted");
 		}
 
-		pic.setStatus(Pic.DOWNLOADING);
-		pic.progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
+		pic.setStatus(PicState.DOWNLOADING);
+		pic.progressBarChanged(0, PicState.DOWNLOADING.getText());
 
 		// Create a new URLParseObject
 		URLParseObject upo = new URLParseObject(pic.getContainerURL(), pic.getThumb(), pic);
@@ -234,9 +235,6 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			if (result.getDirectLink() == null && result.getDirectLink().isEmpty()) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
 			}
-
-			FileDownloaderParsedInfo parsedInfo = new FileDownloaderParsedInfo();
-			parsedInfo.setResult(result);
 
 			// get the direct link
 			String url = result.getDirectLink();

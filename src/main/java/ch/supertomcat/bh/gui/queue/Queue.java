@@ -56,6 +56,7 @@ import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.importexport.ImportLocalFiles;
 import ch.supertomcat.bh.importexport.ImportQueue;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
@@ -1190,8 +1191,8 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						}
 
 						boolean valueIsAlreadyProgressBar = o instanceof JProgressBar;
-						boolean picIsNotDownloading = pic.getStatus() == Pic.FAILED || pic.getStatus() == Pic.FAILED_FILE_NOT_EXIST || pic.getStatus() == Pic.SLEEPING || pic.getStatus() == Pic.WAITING
-								|| pic.getStatus() == Pic.FAILED_FILE_TEMPORARY_OFFLINE;
+						boolean picIsNotDownloading = pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING
+								|| pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE;
 
 						if (picIsNotDownloading && !valueIsAlreadyProgressBar) {
 							model.setValueAt(pic, row, 3);
@@ -1321,8 +1322,8 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 			Runnable r = new Runnable() {
 				@Override
 				public void run() {
-					if (pic.getStatus() == Pic.FAILED || pic.getStatus() == Pic.FAILED_FILE_NOT_EXIST || pic.getStatus() == Pic.SLEEPING || pic.getStatus() == Pic.WAITING
-							|| pic.getStatus() == Pic.FAILED_FILE_TEMPORARY_OFFLINE) {
+					if (pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING || pic.getStatus() == PicState.WAITING
+							|| pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
 						int row = index;
 						if ((row > -1) && (model.getRowCount() > row)) {
 							model.setValueAt(pic, row, 3);

@@ -1,16 +1,15 @@
 package ch.supertomcat.bh.rules;
 
+import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.jdom2.Element;
 
 import ch.supertomcat.bh.exceptions.HostAbortedException;
 import ch.supertomcat.bh.exceptions.HostCompletedException;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
-import ch.supertomcat.bh.pic.Pic;
-
+import ch.supertomcat.bh.pic.PicState;
 
 /**
  * RulePipeline
@@ -20,28 +19,30 @@ public class RulePipelineFailures extends RulePipeline {
 	 * Logger for this class
 	 */
 	private static Logger logger = LoggerFactory.getLogger(RulePipelineFailures.class);
-	
+
 	/**
 	 * failureType
 	 */
-	private int failureType = Pic.FAILED;
-	
+	private PicState failureType = PicState.FAILED;
+
 	private boolean checkURL = false;
-	
+
 	private boolean checkThumbURL = false;
-	
+
 	private boolean checkPageSourceCode = false;
-	
+
 	/**
 	 * Constructor
+	 * 
 	 * @param mode Rule-Mode
 	 */
 	public RulePipelineFailures(int mode) {
 		super(mode);
 	}
-	
+
 	/**
 	 * Constructor
+	 * 
 	 * @param e Element
 	 */
 	public RulePipelineFailures(Element e) {
@@ -49,7 +50,7 @@ public class RulePipelineFailures extends RulePipeline {
 		try {
 			if (this.mode == Rule.RULE_MODE_FAILURES) {
 				try {
-					setFailureType(Integer.parseInt(e.getAttributeValue("failureType")));
+					setFailureType(PicState.getByValue(Integer.parseInt(e.getAttributeValue("failureType"))));
 				} catch (Exception exx) {
 				}
 				try {
@@ -68,9 +69,10 @@ public class RulePipelineFailures extends RulePipeline {
 		} catch (Exception ex) {
 		}
 	}
-	
+
 	/**
 	 * Returns the Element for creating the XML-File
+	 * 
 	 * @return Element
 	 */
 	@Override
@@ -84,9 +86,10 @@ public class RulePipelineFailures extends RulePipeline {
 		}
 		return e;
 	}
-	
+
 	/**
 	 * Returns the checkURL
+	 * 
 	 * @return checkURL
 	 */
 	@Override
@@ -96,6 +99,7 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Sets the checkURL
+	 * 
 	 * @param checkURL checkURL
 	 */
 	@Override
@@ -105,6 +109,7 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Returns the checkThumbURL
+	 * 
 	 * @return checkThumbURL
 	 */
 	@Override
@@ -114,6 +119,7 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Sets the checkThumbURL
+	 * 
 	 * @param checkThumbURL checkThumbURL
 	 */
 	@Override
@@ -123,6 +129,7 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Returns the checkPageSourceCode
+	 * 
 	 * @return checkPageSourceCode
 	 */
 	@Override
@@ -132,6 +139,7 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Sets the checkPageSourceCode
+	 * 
 	 * @param checkPageSourceCode checkPageSourceCode
 	 */
 	@Override
@@ -141,28 +149,34 @@ public class RulePipelineFailures extends RulePipeline {
 
 	/**
 	 * Returns the failureType
+	 * 
 	 * @return failureType
 	 */
 	@Override
-	public int getFailureType() {
+	public PicState getFailureType() {
 		return failureType;
 	}
 
 	/**
 	 * Sets the failureType
+	 * 
 	 * @param failureType failureType
 	 */
 	@Override
-	public void setFailureType(int failureType) {
+	public void setFailureType(PicState failureType) {
 		switch (failureType) {
-			case Pic.COMPLETE: case Pic.SLEEPING: case Pic.FAILED_FILE_TEMPORARY_OFFLINE: case Pic.FAILED_FILE_NOT_EXIST: case Pic.FAILED:
+			case COMPLETE:
+			case SLEEPING:
+			case FAILED_FILE_TEMPORARY_OFFLINE:
+			case FAILED_FILE_NOT_EXIST:
+			case FAILED:
 				this.failureType = failureType;
 				break;
 			default:
 				break;
 		}
 	}
-	
+
 	private String check(String input) {
 		String result = "";
 		int start = 0;
@@ -181,7 +195,7 @@ public class RulePipelineFailures extends RulePipeline {
 		}
 		return result;
 	}
-	
+
 	/**
 	 * @param url URL
 	 * @throws HostException
@@ -189,29 +203,29 @@ public class RulePipelineFailures extends RulePipeline {
 	@Override
 	public void checkForFailure(String url) throws HostException {
 		String message = "";
-		
+
 		if (checkURL) {
 			message = check(url);
 		}
-		
+
 		if (message.length() > 0) {
 			switch (failureType) {
-				case Pic.COMPLETE:
+				case COMPLETE:
 					throw new HostCompletedException(message);
-				case Pic.SLEEPING:
+				case SLEEPING:
 					throw new HostAbortedException(message);
-				case Pic.FAILED_FILE_TEMPORARY_OFFLINE:
+				case FAILED_FILE_TEMPORARY_OFFLINE:
 					throw new HostFileTemporaryOfflineException(message);
-				case Pic.FAILED_FILE_NOT_EXIST:
+				case FAILED_FILE_NOT_EXIST:
 					throw new HostFileNotExistException(message);
-				case Pic.FAILED:
+				case FAILED:
 					throw new HostException(message);
 				default:
 					break;
 			}
 		}
 	}
-	
+
 	/**
 	 * @param url URL
 	 * @param thumbURL Thumbnail-URL
@@ -221,30 +235,30 @@ public class RulePipelineFailures extends RulePipeline {
 	@Override
 	public void checkForFailure(String url, String thumbURL, String htmlcode) throws HostException {
 		String message = "";
-		
+
 		if (checkURL) {
 			message = check(url);
 		}
-		
+
 		if (checkThumbURL && message.length() == 0) {
 			message = check(thumbURL);
 		}
-		
+
 		if (checkPageSourceCode && message.length() == 0) {
 			message = check(htmlcode);
 		}
-		
+
 		if (message.length() > 0) {
 			switch (failureType) {
-				case Pic.COMPLETE:
+				case COMPLETE:
 					throw new HostCompletedException(message);
-				case Pic.SLEEPING:
+				case SLEEPING:
 					throw new HostAbortedException(message);
-				case Pic.FAILED_FILE_TEMPORARY_OFFLINE:
+				case FAILED_FILE_TEMPORARY_OFFLINE:
 					throw new HostFileTemporaryOfflineException(message);
-				case Pic.FAILED_FILE_NOT_EXIST:
+				case FAILED_FILE_NOT_EXIST:
 					throw new HostFileNotExistException(message);
-				case Pic.FAILED:
+				case FAILED:
 					throw new HostException(message);
 				default:
 					break;

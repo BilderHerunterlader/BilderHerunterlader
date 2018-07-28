@@ -7,6 +7,7 @@ import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.supertomcattools.fileiotools.FileTool;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
@@ -34,7 +35,7 @@ public class LocalFileDownloader extends FileDownloaderBase {
 	private void moveLocalFile(Pic pic, URLParseObject result, File sourceFile, File targetFolder) {
 		// Get the filesize
 		pic.setSize(sourceFile.length());
-		pic.progressBarChanged(0, Pic.STATUS_T[Pic.DOWNLOADING]);
+		pic.progressBarChanged(0, PicState.DOWNLOADING.getText());
 
 		// Move the file
 		try {
