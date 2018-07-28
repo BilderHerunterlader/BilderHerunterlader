@@ -553,7 +553,7 @@ public class HostFlickr extends Host implements IHoster {
 			logger.warn(NAME + " Could not get date and time from meta container URL", e);
 		}
 
-		if (dateTime.length() == 0) {
+		if (dateTime.isEmpty()) {
 			dateTime = this.regexOriginalDate.doPageSourcecodeReplace(metaContainerPage, 0, metaContainerUrl, null);
 		}
 
