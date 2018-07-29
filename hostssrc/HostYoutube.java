@@ -8,6 +8,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,6 +24,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SpringLayout;
 
+import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.URLParseObjectFile;
 import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOverrideDirectoryOption;
@@ -63,7 +66,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * Host class for Youtube
  * 
- * @version 7.6
+ * @version 7.7
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
@@ -74,7 +77,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "7.6";
+	public static final String VERSION = "7.7";
 
 	/**
 	 * Name dieser Klasse
@@ -109,6 +112,8 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	private RuleRegExp regexAdaptiveFmts;
 
 	private Map<Integer, String[]> strQualities = new HashMap<>();
+	private Map<Integer, String[]> strQualitiesDASHVideo = new HashMap<>();
+	private Map<Integer, String[]> strQualitiesDASHAudio = new HashMap<>();
 
 	private boolean download4KHD = true;
 
@@ -122,9 +127,13 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 	private boolean downloadMobile = false;
 
+	private boolean downloadDASH = false;
+
 	private boolean preferWEBM = false;
 
 	private boolean prefer3D = false;
+
+	private boolean preferDASH = false;
 
 	private boolean filenameIncludeVideoID = false;
 
@@ -150,40 +159,38 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		strQualities.put(13, new String[] { "Mobile (Old)", "3GP", "H.263/AMR", "4:3", "176x144", "AMR", "Mono", "8", ".3gp", String.valueOf(QUALITY_OLD_MOBILE), "2D" });
 		strQualities.put(17, new String[] { "Mobile", "3GP", "MPEG-4 Part 2", "11:9", "176x144", "AAC", "Stereo", "44.1", ".3gp", String.valueOf(QUALITY_MOBILE), "2D" });
 		strQualities.put(36, new String[] { "Mobile", "3GP", "MPEG-4 Part 2", "4:3", "320x240", "AAC", "Stereo", "22", ".3gp", String.valueOf(QUALITY_MOBILE), "2D" });
-		// strQualities.put(160, new String[] {"Mobile", "MP4", "H.264/MPEG-4 AVC", "16:9", "256x144", "AAC", "Stereo", "22", ".mp4",
-		// String.valueOf(QUALITY_MOBILE), "2D"});
+		strQualitiesDASHVideo.put(160, new String[] { "Mobile", "MP4", "H.264/MPEG-4 AVC", "16:9", "256x144", "AAC", "Stereo", "22", ".mp4", String.valueOf(QUALITY_MOBILE), "2D" });
 
 		strQualities.put(34, new String[] { "240p", "FLV", "H.264/MPEG-4 AVC", "4:3 / 16:9", "320x240 / 400x226", "AAC", "Stereo", "44.1", ".flv", String.valueOf(QUALITY_STANDARD), "2D" });
 		strQualities.put(5, new String[] { "240p", "FLV", "FLV", "Unkown", "?x240p", "MP3", "?", "?", ".flv", String.valueOf(QUALITY_STANDARD), "2D" });
-		// strQualities.put(133, new String[] {"240p", "MP4", "H.264/MPEG-4 AVC", "16:9", "426x240", "AAC", "?", "?", ".mp4", String.valueOf(QUALITY_STANDARD),
-		// "2D"});
+		strQualitiesDASHVideo.put(133, new String[] { "240p", "MP4", "H.264/MPEG-4 AVC", "16:9", "426x240", "AAC", "?", "?", ".mp4", String.valueOf(QUALITY_STANDARD), "2D" });
 
 		strQualities.put(18, new String[] { "360p", "MP4", "H.264/MPEG-4 AVC", "4:3", "480x360", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_MEDIUM), "2D" });
 		strQualities.put(6, new String[] { "360p", "FLV", "H.263", "4:3", "480x360", "MP3", "Mono", "44.1", ".flv", String.valueOf(QUALITY_MEDIUM), "2D" });
 		strQualities.put(43, new String[] { "360p", "WEBM", "VP8", "4:3", "480x360", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_MEDIUM), "2D" });
 		strQualities.put(82, new String[] { "360p", "MP4", "H.264/MPEG-4 AVC", "4:3", "480x360", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_MEDIUM), "3D" });
 		strQualities.put(100, new String[] { "360p", "WEBM", "VP8", "4:3", "480x360", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_MEDIUM), "3D" });
-		// strQualities.put(134, new String[] {"360p", "MP4", "H.264/MPEG-4 AVC", "16:9", "640x360", "AAC", "Stereo", "44.1", ".mp4",
-		// String.valueOf(QUALITY_MEDIUM), "2D"});
+		strQualitiesDASHVideo.put(134, new String[] { "360p", "MP4", "H.264/MPEG-4 AVC", "16:9", "640x360", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_MEDIUM), "2D" });
 
 		strQualities.put(35, new String[] { "480p", "FLV", "H.264/MPEG-4 AVC", "4:3", "854x480", "AAC", "Stereo", "44.1", ".flv", String.valueOf(QUALITY_HIGH), "2D" });
 		strQualities.put(44, new String[] { "480p", "WEBM", "VP8", "4:3", "854x480", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HIGH), "2D" });
-		// strQualities.put(135, new String[] {"480p", "MP4", "H.264/MPEG-4 AVC", "4:3", "854x480", "AAC", "Stereo", "44.1", ".mp4",
-		// String.valueOf(QUALITY_HIGH), "2D"});
+		strQualitiesDASHVideo.put(135, new String[] { "480p", "MP4", "H.264/MPEG-4 AVC", "4:3", "854x480", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HIGH), "2D" });
 
 		strQualities.put(22, new String[] { "720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HD), "2D" });
 		strQualities.put(45, new String[] { "720p", "WEBM", "VP8", "16:9", "1280x720", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HD), "2D" });
 		strQualities.put(84, new String[] { "720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HD), "3D" });
 		strQualities.put(102, new String[] { "720p", "WEBM", "VP8", "16:9", "1280x720", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_HD), "3D" });
-		// strQualities.put(136, new String[] {"720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4",
-		// String.valueOf(QUALITY_HD), "2D"});
+		strQualitiesDASHVideo.put(136, new String[] { "720p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1280x720", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_HD), "2D" });
 
 		strQualities.put(37, new String[] { "1080p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1920x1080", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_FULL_HD), "2D" });
 		strQualities.put(46, new String[] { "1080p", "WEBM", "VP8", "16:9", "1920x1080", "Vorbis", "Stereo", "44.1", ".webm", String.valueOf(QUALITY_FULL_HD), "2D" });
-		// strQualities.put(137, new String[] {"1080p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1920x1080", "AAC", "Stereo", "44.1", ".mp4",
-		// String.valueOf(QUALITY_FULL_HD), "2D"});
+		strQualitiesDASHVideo.put(137, new String[] { "1080p", "MP4", "H.264/MPEG-4 AVC", "16:9", "1920x1080", "AAC", "Stereo", "44.1", ".mp4", String.valueOf(QUALITY_FULL_HD), "2D" });
 
 		strQualities.put(38, new String[] { "4KHD", "MP4", "H.264/MPEG-4 AVC", "16:9", "4096x2304", "AAC", "Stereo", "48.0", ".mp4", String.valueOf(QUALITY_4K_HD), "2D" });
+
+		strQualitiesDASHAudio.put(139, new String[] { "Dash Audio 48kbps", "MP4", "None", "None", "None", "AAC", "Stereo", "44.1", ".m4a", String.valueOf(QUALITY_HD), "2D" });
+		strQualitiesDASHAudio.put(140, new String[] { "Dash Audio 128kbps", "MP4", "None", "None", "None", "AAC", "Stereo", "44.1", ".m4a", String.valueOf(QUALITY_FULL_HD), "2D" });
+		strQualitiesDASHAudio.put(141, new String[] { "Dash Audio 256kbps", "MP4", "None", "None", "None", "AAC", "Stereo", "44.1", ".m4a", String.valueOf(QUALITY_4K_HD), "2D" });
 
 		/*
 		 * DASH (Dynamic Adaptive Streaming over HTTP) video formats:
@@ -283,6 +290,16 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		}
 
 		try {
+			downloadDASH = SettingsManager.instance().getBooleanValue(NAME + ".downloadDASH");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".downloadDASH", downloadDASH);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
 			preferWEBM = SettingsManager.instance().getBooleanValue(NAME + ".preferWEBM");
 		} catch (Exception e) {
 			try {
@@ -297,6 +314,16 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		} catch (Exception e) {
 			try {
 				SettingsManager.instance().setOptionValue(NAME + ".prefer3D", prefer3D);
+			} catch (Exception e1) {
+				logger.error(e1.getMessage(), e1);
+			}
+		}
+
+		try {
+			preferDASH = SettingsManager.instance().getBooleanValue(NAME + ".preferDASH");
+		} catch (Exception e) {
+			try {
+				SettingsManager.instance().setOptionValue(NAME + ".preferDASH", preferDASH);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -338,10 +365,9 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	 * @param url Container-URL
 	 * @param upo URLParseObject
 	 * @param pic Pic
-	 * @return URL
 	 * @throws HostException
 	 */
-	private String parseURL(String url, URLParseObject upo, Pic pic) throws HostException {
+	private void parseURL(String url, URLParseObject upo, Pic pic) throws HostException {
 		// Videos in Channel-Pages does not work, so we rewrite the url to a normal video-url to get it working
 		String videoID = urlPattern.matcher(url).replaceAll("$4$7");
 		url = "http://www.youtube.com/watch?v=" + videoID;
@@ -368,8 +394,6 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		}
 
 		try {
-			String parsedURL = "";
-
 			/*
 			 * Get title and error messages from the page-source-code
 			 */
@@ -380,70 +404,79 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			 * First Method of getting the download link, which should always work,
 			 * but does not always provide the highest quality
 			 */
-			String urlmap = regexFmtUrlMap.doPageSourcecodeReplace(htmlCode, 0, url, null);
-			String fmtUrls[] = urlmap.split(",");
-
-			int qualityIndex = 0; // =fmt
-
-			if (fmtUrls != null && fmtUrls.length > 0) {
-				String retvalUrl = "";
-				int fmt = 0;
-				String sig = "";
-				for (String strFmtUrlMap : fmtUrls) {
-					Map<String, String> fmtUrlMap = getVideoInfo(strFmtUrlMap);
-					int quality = 0;
-					try {
-						quality = Integer.parseInt(fmtUrlMap.get("itag"));
-					} catch (NumberFormatException nfe) {
-					}
-					if (isHigherQuality(quality, fmt)) {
-						fmt = quality;
-						retvalUrl = fmtUrlMap.get("url");
-						sig = fmtUrlMap.get("sig");
-					}
-				}
-				if (retvalUrl.length() > 0) {
-					qualityIndex = fmt;
-					// Remove the application/x-www-form-urlencoded encoding
-					URLCodec urlCodec = new URLCodec("UTF-8");
-					retvalUrl = urlCodec.decode(retvalUrl);
-					parsedURL = retvalUrl + "&signature=" + sig;
-				}
-			}
+			String normalFmtsMap = regexFmtUrlMap.doPageSourcecodeReplace(htmlCode, 0, url, null);
+			String normalFmts[] = normalFmtsMap.split(",");
 
 			String adaptiveFmtsMap = regexAdaptiveFmts.doPageSourcecodeReplace(htmlCode, 0, url, null);
 			String adaptiveFmts[] = adaptiveFmtsMap.split(",");
-			if (adaptiveFmts != null && adaptiveFmts.length > 0) {
-				String retvalUrl = "";
 
-				int fmt = qualityIndex;
+			List<String> fmtUrls = new ArrayList<>();
+
+			if (normalFmts != null && normalFmts.length > 0) {
+				fmtUrls.addAll(Arrays.asList(normalFmts));
+			}
+
+			if (adaptiveFmts != null && adaptiveFmts.length > 0) {
+				fmtUrls.addAll(Arrays.asList(adaptiveFmts));
+			}
+
+			int qualityIndex = 0; // =fmt
+			String parsedURL = "";
+
+			int dashAudioQualityIndex = 0;
+			String parsedDashAudioURL = "";
+
+			if (!fmtUrls.isEmpty()) {
+				String retvalUrl = "";
+				int fmt = 0;
 				String sig = "";
-				for (String adaptiveFmt : adaptiveFmts) {
-					Map<String, String> fmtUrlMap = getVideoInfo(adaptiveFmt);
-					int quality = 0;
+
+				String dashAudioRetvalUrl = "";
+				int dashAudioFmt = 0;
+				String dashAudioSig = "";
+
+				for (String strFmtUrlMap : fmtUrls) {
+					Map<String, String> fmtUrlMap = getVideoInfo(strFmtUrlMap);
 					try {
-						quality = Integer.parseInt(fmtUrlMap.get("itag"));
+						int quality = Integer.parseInt(fmtUrlMap.get("itag"));
+						if (isHigherQuality(quality, fmt, fmtUrlMap)) {
+							fmt = quality;
+							retvalUrl = fmtUrlMap.get("url");
+							sig = fmtUrlMap.get("sig");
+						}
+						if (isHigherDashAudioQuality(quality, fmt)) {
+							dashAudioFmt = quality;
+							dashAudioRetvalUrl = fmtUrlMap.get("url");
+							dashAudioSig = fmtUrlMap.get("sig");
+						}
 					} catch (NumberFormatException nfe) {
-					}
-					if (isHigherQuality(quality, fmt)) {
-						fmt = quality;
-						retvalUrl = fmtUrlMap.get("url");
-						sig = fmtUrlMap.get("sig");
+						logger.error("itag is not an integer: {}", fmtUrlMap.get("itag"), nfe);
 					}
 				}
-				if (retvalUrl.length() > 0) {
+				if (!retvalUrl.isEmpty()) {
 					qualityIndex = fmt;
-					// Remove the application/x-www-form-urlencoded encoding
-					URLCodec urlCodec = new URLCodec("UTF-8");
-					retvalUrl = urlCodec.decode(retvalUrl);
-					parsedURL = retvalUrl + "&signature=" + sig;
+					parsedURL = prepareDownloadURL(retvalUrl, sig);
 				}
+				if (!dashAudioRetvalUrl.isEmpty()) {
+					dashAudioQualityIndex = dashAudioFmt;
+					parsedDashAudioURL = prepareDownloadURL(dashAudioRetvalUrl, dashAudioSig);
+				}
+			}
+
+			/*
+			 * Get information for filename
+			 */
+			String[] qualityArray = strQualities.get(qualityIndex);
+			boolean dash = false;
+			if (qualityArray == null) {
+				qualityArray = strQualitiesDASHVideo.get(qualityIndex);
+				dash = qualityArray != null;
 			}
 
 			/*
 			 * If no title could be read from the page, the video id is used
 			 */
-			if (title.length() == 0) {
+			if (title.isEmpty()) {
 				title = videoID;
 			} else {
 				title = HTMLTool.unescapeHTML(title);
@@ -456,13 +489,27 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			if (titleEndIndex > title.length()) {
 				titleEndIndex = title.length();
 			}
-			String filename = title.substring(0, titleEndIndex); // shorten title so that id and quality are not removed by reduceFilenameLength method
+			StringBuilder sbFilename = new StringBuilder();
+			// shorten title so that id and quality are not removed by reduceFilenameLength method
+			sbFilename.append(title.substring(0, titleEndIndex));
+
 			if (filenameIncludeVideoID) {
-				filename += "-" + videoID;
+				sbFilename.append("-");
+				sbFilename.append(videoID);
 			}
-			String[] qualityArray = strQualities.get(qualityIndex);
-			filename += "-" + qualityArray[0] + qualityArray[8];
-			filename = filterFilename(filename);
+
+			sbFilename.append("-");
+			sbFilename.append(qualityArray[0]);
+
+			String filenameAudioDash = null;
+			if (dash) {
+				String[] qualityArrayDashAudio = strQualitiesDASHAudio.get(dashAudioQualityIndex);
+				filenameAudioDash = sbFilename.toString() + qualityArrayDashAudio[8];
+			}
+
+			sbFilename.append(qualityArray[8]);
+
+			String filename = filterFilename(sbFilename.toString());
 			upo.setCorrectedFilename(filename);
 
 			if (overrideDirectoryOption.isPathOverride()) {
@@ -474,10 +521,23 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 					}
 				}
 			}
-			return parsedURL;
+
+			upo.setDirectLink(parsedURL);
+
+			if (dash && dashAudioQualityIndex != 0) {
+				URLParseObjectFile additionalDirectLink = new URLParseObjectFile(parsedDashAudioURL, filenameAudioDash);
+				upo.addAdditionalDirectLink(additionalDirectLink);
+			}
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
 		}
+	}
+
+	private String prepareDownloadURL(String fmtURL, String fmtSig) throws DecoderException {
+		// Remove the application/x-www-form-urlencoded encoding
+		URLCodec urlCodec = new URLCodec("UTF-8");
+		String decodedFmtURL = urlCodec.decode(fmtURL);
+		return decodedFmtURL + "&signature=" + fmtSig;
 	}
 
 	private Map<String, String> getVideoInfo(String strFmtUrlMap) {
@@ -485,13 +545,11 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 		String arr[] = strFmtUrlMap.split("\\\\u0026");
 		if (arr != null) {
-			String key;
-			String val;
 			for (String str : arr) {
 				int index = str.indexOf("=");
 				if (index > 0 && index < (str.length() - 1)) {
-					key = str.substring(0, index);
-					val = str.substring(index + 1);
+					String key = str.substring(0, index);
+					String val = str.substring(index + 1);
 					fmtUrlMap.put(key, val);
 				}
 			}
@@ -524,13 +582,25 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		}
 	}
 
-	private boolean isHigherQuality(int newFmt, int currentFmt) {
+	private boolean isHigherQuality(int newFmt, int currentFmt, Map<String, String> fmtUrlMap) {
 		String[] qualityArrayNew = strQualities.get(newFmt);
-		String[] qualityArrayCurrent = strQualities.get(currentFmt);
-
+		boolean bNewIsDASH = false;
 		if (qualityArrayNew == null) {
-			logger.warn("Unrecognized Youtube fmt detected: {}", newFmt);
+			qualityArrayNew = strQualitiesDASHVideo.get(newFmt);
+			bNewIsDASH = qualityArrayNew != null;
+		}
+		if (qualityArrayNew == null) {
+			if (strQualitiesDASHAudio.get(newFmt) == null) {
+				logger.warn("Unrecognized Youtube fmt detected: {}. FMT-Map: {}", newFmt, fmtUrlMap);
+			}
 			return false;
+		}
+
+		boolean bCurrentIsDASH = false;
+		String[] qualityArrayCurrent = strQualities.get(currentFmt);
+		if (qualityArrayCurrent == null) {
+			qualityArrayCurrent = strQualitiesDASHVideo.get(currentFmt);
+			bCurrentIsDASH = qualityArrayCurrent != null;
 		}
 
 		int newIndex = Integer.parseInt(qualityArrayNew[9]);
@@ -539,36 +609,55 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			currentIndex = Integer.parseInt(qualityArrayCurrent[9]);
 		}
 
-		if (isQualityEnabled(newIndex)) {
-			if (newIndex > currentIndex) {
-				return true;
-			} else if (newIndex == currentIndex) {
-				boolean bNewIs3D = qualityArrayNew[10].equals("3D");
-				boolean bNewIsWEBM = qualityArrayNew[8].equals(".webm");
-				boolean bCurrentIs3D = qualityArrayCurrent != null && qualityArrayCurrent[10].equals("3D");
-				boolean bCurrentIsWEBM = qualityArrayCurrent != null && qualityArrayCurrent[8].equals(".webm");
+		if (!isQualityEnabled(newIndex)) {
+			return false;
+		}
 
-				if (prefer3D && !preferWEBM) {
-					if (bNewIs3D == true && bNewIsWEBM == false) {
-						return true;
-					}
-				} else if (preferWEBM && !prefer3D) {
-					if (bNewIsWEBM == true && bNewIs3D == false) {
-						return true;
-					}
-				} else if (preferWEBM && prefer3D) {
-					if (bNewIsWEBM == true && bNewIs3D == true) {
-						return true;
-					}
-				} else {
-					if (bNewIs3D && !bCurrentIs3D) {
-						return false;
-					} else if (bNewIsWEBM && !bCurrentIsWEBM) {
-						return false;
-					}
-					return true;
-				}
+		if (bNewIsDASH && !downloadDASH) {
+			return false;
+		}
+
+		if (newIndex > currentIndex) {
+			return true;
+		} else if (newIndex == currentIndex) {
+			// Quality is the same
+			boolean bNewIs3D = qualityArrayNew[10].equals("3D");
+			boolean bNewIsWEBM = qualityArrayNew[8].equals(".webm");
+			boolean bCurrentIs3D = qualityArrayCurrent != null && qualityArrayCurrent[10].equals("3D");
+			boolean bCurrentIsWEBM = qualityArrayCurrent != null && qualityArrayCurrent[8].equals(".webm");
+
+			if (prefer3D == bNewIs3D && prefer3D != bCurrentIs3D) {
+				return true;
 			}
+
+			if (preferDASH == bNewIsDASH && preferDASH != bCurrentIsDASH) {
+				return true;
+			}
+
+			if (preferWEBM == bNewIsWEBM && preferWEBM != bCurrentIsWEBM) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private boolean isHigherDashAudioQuality(int newFmt, int currentFmt) {
+		String[] qualityArrayNew = strQualitiesDASHAudio.get(newFmt);
+		if (qualityArrayNew == null) {
+			return false;
+		}
+
+		String[] qualityArrayCurrent = strQualitiesDASHAudio.get(currentFmt);
+
+		int newIndex = Integer.parseInt(qualityArrayNew[9]);
+		int currentIndex = 0;
+		if (qualityArrayCurrent != null) {
+			currentIndex = Integer.parseInt(qualityArrayCurrent[9]);
+		}
+
+		if (newIndex > currentIndex) {
+			return true;
 		}
 
 		return false;
@@ -617,6 +706,8 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		final JCheckBox cbFilenameIncludeVideoID = new JCheckBox(Localization.getString("YoutubeFilenameIncludeVideoID"), filenameIncludeVideoID);
 		final JCheckBox cbPreferWEBM = new JCheckBox(Localization.getString("YoutubePreferWEBM"), preferWEBM);
 		final JCheckBox cbPrefer3D = new JCheckBox(Localization.getString("YoutubePrefer3D"), prefer3D);
+		final JCheckBox cbDownloadDASH = new JCheckBox(Localization.getString("YoutubeDownloadDASH"), downloadDASH);
+		final JCheckBox cbPreferDASH = new JCheckBox(Localization.getString("YoutubePreferDASH"), preferDASH);
 
 		pnlButtons.add(btnOK);
 		pnlButtons.add(btnCancel);
@@ -666,7 +757,9 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		pnlQuality.add(new JLabel(""));
 		pnlQuality.add(cbPreferWEBM);
 		pnlQuality.add(cbPrefer3D);
-		SpringUtilities.makeCompactGrid(pnlQuality, 8, 2, 0, 0, 5, 5);
+		pnlQuality.add(cbDownloadDASH);
+		pnlQuality.add(cbPreferDASH);
+		SpringUtilities.makeCompactGrid(pnlQuality, 9, 2, 0, 0, 5, 5);
 
 		Insets insets = new Insets(0, 0, 5, 0);
 		pnlCenter.setLayout(new GridBagLayout());
@@ -691,6 +784,10 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			cbDownloadHigh.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadHigh"));
 			cbDownloadMedium.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMedium"));
 			cbDownloadMobile.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMobile"));
+			cbPreferWEBM.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".preferWEBM"));
+			cbPrefer3D.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".prefer3D"));
+			cbDownloadDASH.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadDASH"));
+			cbPreferDASH.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".preferDASH"));
 			txtPathOverride.setText(overrideDirectoryOption.getPathOverrideVal());
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
@@ -714,6 +811,10 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 						downloadHigh = cbDownloadHigh.isSelected();
 						downloadMedium = cbDownloadMedium.isSelected();
 						downloadMobile = cbDownloadMobile.isSelected();
+						preferWEBM = cbPreferWEBM.isSelected();
+						prefer3D = cbPrefer3D.isSelected();
+						downloadDASH = cbDownloadDASH.isSelected();
+						preferDASH = cbPreferDASH.isSelected();
 					} catch (NumberFormatException nfe) {
 						return;
 					}
@@ -726,6 +827,10 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 						SettingsManager.instance().setOptionValue(NAME + ".downloadHigh", downloadHigh);
 						SettingsManager.instance().setOptionValue(NAME + ".downloadMedium", downloadMedium);
 						SettingsManager.instance().setOptionValue(NAME + ".downloadMobile", downloadMobile);
+						SettingsManager.instance().setOptionValue(NAME + ".preferWEBM", preferWEBM);
+						SettingsManager.instance().setOptionValue(NAME + ".prefer3D", prefer3D);
+						SettingsManager.instance().setOptionValue(NAME + ".downloadDASH", downloadDASH);
+						SettingsManager.instance().setOptionValue(NAME + ".preferDASH", preferDASH);
 						overrideDirectoryOption.saveOptions();
 						deactivateOption.saveOption();
 						SettingsManager.instance().writeSettings(true);
@@ -771,9 +876,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
 		if (isFromThisHoster(upo.getContainerURL())) {
-			String s = parseURL(upo.getContainerURL(), upo, upo.getPic());
-			upo.setDirectLink(s);
-			// upo.addInfo("useCookies", "");
+			parseURL(upo.getContainerURL(), upo, upo.getPic());
 		}
 	}
 
@@ -820,9 +923,9 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 				@Override
 				public boolean isLinkAccepted(Node nodeURL, Document nodeRoot, URL url, String containerURL) {
 					String link = ExtractTools.getAttributeValueFromNode(nodeURL, "href");
-					if (link != null && link.length() > 0) {
+					if (link != null && !link.isEmpty()) {
 						URL extractedURL = new URL(link);
-						if (link.startsWith("http://") == false) {
+						if (!link.startsWith("http://") && !link.startsWith("https://")) {
 							// If the link was relative we have to correct that
 							extractedURL = ExtractTools.convertURLFromRelativeToAbsolute(containerURL, extractedURL);
 						}
@@ -874,12 +977,10 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 					if (downloadedLinks.contains(links.get(i)) == false) {
 						progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
 
-						// System.out.println("Extract: " + links.get(i).getURL());
 						List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter);
 						for (int x = 0; x < foundLinks.size(); x++) {
 							if (links.contains(foundLinks.get(x)) == false) {
 								links.add(foundLinks.get(x));
-								// System.out.println("Accepted: " + foundLinks.get(x).getURL());
 							}
 						}
 						downloadedLinks.add(links.get(i));
