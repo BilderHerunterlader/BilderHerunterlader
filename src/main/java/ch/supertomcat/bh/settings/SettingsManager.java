@@ -192,7 +192,7 @@ public class SettingsManager {
 	 * Restricted Settingspaths
 	 * This Settings can not be overwritten by the set*Value-Methods!
 	 */
-	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.DownloadSelectionWindow.Width", "GUI.DownloadSelectionWindow.Height", "GUI.DownloadSelectionWindow.X", "GUI.DownloadSelectionWindow.Y", "GUI.DownloadSelectionWindow.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "Keywords.FilterEnabled", "Keywords.MatchMode", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
+	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.DownloadSelectionWindow.Width", "GUI.DownloadSelectionWindow.Height", "GUI.DownloadSelectionWindow.X", "GUI.DownloadSelectionWindow.Y", "GUI.DownloadSelectionWindow.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "GUI.previewSize", "Keywords.FilterEnabled", "Keywords.MatchMode", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
 
 	/**
 	 * Restricted Settingspaths and subpaths
@@ -726,6 +726,8 @@ public class SettingsManager {
 
 	private boolean downloadPreviews = false;
 
+	private int previewSize = 100;
+
 	private Map<String, Boolean> deactivatedHosts = new HashMap<>();
 
 	/**
@@ -1049,6 +1051,10 @@ public class SettingsManager {
 
 			// Image Previews
 			this.downloadPreviews = readBooleanValue("GUI.downloadPreviews", root, this.downloadPreviews);
+			int ps = readIntValue("GUI.previewSize", root, this.previewSize);
+			if (ps >= 100 && ps <= 1000) {
+				this.previewSize = ps;
+			}
 
 			/* Keywords */
 			// Keyword-Filter
@@ -1356,6 +1362,7 @@ public class SettingsManager {
 
 		// Image Previews
 		addBooleanValue("GUI.downloadPreviews", this.downloadPreviews, root);
+		addIntValue("GUI.previewSize", this.previewSize, root);
 
 		/* Keywords */
 		// Keyword-Filter
@@ -3764,5 +3771,25 @@ public class SettingsManager {
 	 */
 	public void setDownloadPreviews(boolean downloadPreviews) {
 		this.downloadPreviews = downloadPreviews;
+	}
+
+	/**
+	 * Returns the previewSize
+	 * 
+	 * @return previewSize
+	 */
+	public int getPreviewSize() {
+		return previewSize;
+	}
+
+	/**
+	 * Sets the previewSize
+	 * 
+	 * @param previewSize previewSize
+	 */
+	public void setPreviewSize(int previewSize) {
+		if (previewSize >= 100 && previewSize <= 1000) {
+			this.previewSize = previewSize;
+		}
 	}
 }

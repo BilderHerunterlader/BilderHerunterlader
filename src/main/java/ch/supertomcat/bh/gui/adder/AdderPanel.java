@@ -551,9 +551,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		previewCache.addListener(previewCacheListener);
 
-		// TODO Load configuredPreviewHeight from settings
-		int configuredPreviewHeight = MINIMUM_PREVIEW_HEIGHT;
-		previewHeight = Integer.min(MINIMUM_PREVIEW_HEIGHT, configuredPreviewHeight);
+		int configuredPreviewHeight = SettingsManager.instance().getPreviewSize();
+		previewHeight = Integer.max(MINIMUM_PREVIEW_HEIGHT, configuredPreviewHeight);
 		imgDummy = ImageTool.generatePreviewImage(Icons.getBHImage("Dummy.png", 16), -1, previewHeight);
 		iconDummy = new ImageIcon(imgDummy);
 

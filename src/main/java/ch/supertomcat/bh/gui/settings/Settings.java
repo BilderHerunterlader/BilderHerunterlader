@@ -766,6 +766,16 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * Label
 	 */
+	private JLabel lblPreviewSize = new JLabel(Localization.getString("PreviewSize"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtPreviewSize = new JTextField("100", 4);
+
+	/**
+	 * Label
+	 */
 	private JLabel lblAutoRetryAfterDownloadsComplete = new JLabel(Localization.getString("Downloads"));
 
 	/**
@@ -1311,6 +1321,11 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadPreviews, pnlGUI);
 		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblPreviewSize, pnlGUI);
+		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, txtPreviewSize, pnlGUI);
+		i++;
 		gbc = gblt.getGBC(0, i, 4, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, pnlRegexReplacePageTitle, pnlGUI);
 
@@ -1474,6 +1489,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		chkDownloadRate.setSelected(sm.isDownloadRate());
 		chkDownloadsCompleteNotification.setSelected(sm.isDownloadsCompleteNotification());
 		chkDownloadPreviews.setSelected(sm.isDownloadPreviews());
+		txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
 		sldConnectionCount.setValue(sm.getConnections());
 		sldConnectionCountPerHost.setValue(sm.getConnectionsPerHost());
 		sldThreadCount.setValue(sm.getThreadCount());
@@ -1832,6 +1848,17 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		sm.setSubdirsEnabled(chkSubdirsEnabled.isSelected());
 		sm.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
 		sm.setDownloadPreviews(chkDownloadPreviews.isSelected());
+		try {
+			int val = Integer.parseInt(txtPreviewSize.getText());
+			if (val < 100 || val > 1000) {
+				txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
+			} else {
+				sm.setPreviewSize(val);
+			}
+		} catch (NumberFormatException nfe) {
+			logger.error(nfe.getMessage(), nfe);
+			txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
+		}
 		sm.setSortDownloadsOnStart(cmbSortDownloadsOnStart.getSelectedIndex());
 		sm.setSubdirsResolutionMode(cmbSubdirsResolutionMode.getSelectedIndex());
 
