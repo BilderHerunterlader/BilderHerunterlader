@@ -104,7 +104,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				}
 
 				boolean lastURL = count == directLinksSize;
-				if (!executeFileDownload(pic, directLink.getDirectLink(), directLink.getCorrectedFilename(), result, referrer, firstURL, lastURL)) {
+				if (!executeFileDownload(pic, directLink.getDirectLink(), currentTargetFilename, result, referrer, firstURL, lastURL)) {
 					break;
 				}
 				firstURL = false;
