@@ -2,75 +2,88 @@ package ch.supertomcat.bh.gui.rules;
 
 import javax.swing.table.DefaultTableModel;
 
+import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.supertomcattools.guitools.Localization;
-
 
 /**
  * TableModel for Rules
  */
 public class RulesTableModel extends DefaultTableModel {
+
 	/**
-	 * UID
+	 * serialVersionUID
 	 */
-	private static final long serialVersionUID = 7776217313342054743L;
-	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Konstruktor
 	 */
 	public RulesTableModel() {
-		super();
-		this.addColumn("Rules");
+		this.addColumn("Rule");
 		this.addColumn("Version");
 		this.addColumn("Mode");
 		this.addColumn("Enabled");
 	}
-	
-	/* (non-Javadoc)
-	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
-	 */
+
 	@Override
 	public boolean isCellEditable(int row, int column) {
-		if (column == 3) return true;
-		return false;
+		return column == 3;
 	}
-	
-	/* (non-Javadoc)
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
+
 	@Override
 	public Class<?> getColumnClass(int column) {
-		if (column == 3) return Boolean.class;
+		if (column == 3) {
+			return Boolean.class;
+		}
 		return super.getColumnClass(column);
 	}
 
 	/**
 	 * Add a row
-	 * @param rulename Rulename
-	 * @param version Version
-	 * @param mode Mode
-	 * @param pipeCount Pipe-Count
-	 * @param redirect Is Redirect
-	 * @param enabled Enabled
+	 * 
+	 * @param rule Rule
 	 */
-	public void addRow(String rulename, String version, int mode, int pipeCount, boolean redirect, boolean enabled) {
+	public void addRow(Rule rule) {
 		Object data[] = new Object[4];
-		data[0] = rulename;
-		data[1] = version;
-		String strRedirect = (redirect == true) ? "Redirect | " : "";
-		if (pipeCount > 0) {
-			String strPipeCount = "";
+		data[0] = rule;
+		data[1] = rule.getVersion();
+		data[2] = getModeString(rule);
+		data[3] = rule.isEnabled();
+		this.addRow(data);
+	}
+
+	/**
+	 * Update row
+	 * 
+	 * @param row Row
+	 */
+	public void updateRow(int row) {
+		Rule rule = (Rule)this.getValueAt(row, 0);
+		this.setValueAt(rule.getVersion(), row, 1);
+		this.setValueAt(getModeString(rule), row, 2);
+		this.setValueAt(rule.isEnabled(), row, 3);
+	}
+
+	private String getModeString(Rule rule) {
+		String strRedirect = rule.isRedirect() ? "Redirect | " : "";
+		if (!rule.getPipelines().isEmpty()) {
+			int pipeCount = rule.getPipelines().size();
+
+			String strPipeCount;
 			if (pipeCount > 1) {
 				strPipeCount = " + " + (pipeCount - 1) + " Pipelines";
-			}
-			if (mode == 0) {
-				data[2] = strRedirect + Localization.getString("RuleModeZeroShort") + strPipeCount;
 			} else {
-				data[2] = strRedirect + Localization.getString("RuleModeOneShort") + strPipeCount;
+				strPipeCount = "";
+			}
+
+			int mode = rule.getPipelines().get(0).getMode();
+			if (mode == 0) {
+				return strRedirect + Localization.getString("RuleModeZeroShort") + strPipeCount;
+			} else {
+				return strRedirect + Localization.getString("RuleModeOneShort") + strPipeCount;
 			}
 		} else {
-			data[2] = strRedirect + "0 Pipelines";
+			return strRedirect + "0 Pipelines";
 		}
-		data[3] = enabled;
-		this.addRow(data);
 	}
 }

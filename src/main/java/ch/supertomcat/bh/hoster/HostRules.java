@@ -24,34 +24,37 @@ import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
  */
 public class HostRules extends Host implements IHoster, IRedirect {
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(HostRules.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Version dieser Klasse
+	 * Version
 	 */
 	public static final String VERSION = "0.5";
 
 	/**
-	 * Name dieser Klasse
+	 * Name
 	 */
 	public static final String NAME = "HostRules";
 
 	/**
 	 * Domains
 	 */
-	private List<String> domains = null;
+	private List<String> domains;
 
 	/**
-	 * Regeln
+	 * Rules
 	 */
 	private List<Rule> rules = new ArrayList<>();
 
+	/**
+	 * Flag if developer rules are enabled
+	 */
 	private boolean developerRulesEnabled = false;
 
 	/**
-	 * Konstruktor
+	 * Constructor
 	 */
 	public HostRules() {
 		super(NAME, VERSION, false);
@@ -59,12 +62,12 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		domains.add("NODOMAINS");
 
 		// DEVELOPER RULES
-		File ruleFolderDeveloper = new File(ApplicationProperties.getProperty("ApplicationPath") + "developerrules");
+		File ruleFolderDeveloper = new File(ApplicationProperties.getProperty("ApplicationPath"), "developerrules");
 		// Do NOT create folder, if it not exists
 		loadRules(ruleFolderDeveloper, true);
 
 		// NORMAL RULES
-		File ruleFolder = new File(ApplicationProperties.getProperty("ApplicationPath") + "rules");
+		File ruleFolder = new File(ApplicationProperties.getProperty("ApplicationPath"), "rules");
 		// Create folder, if it not exists
 		if (!ruleFolder.exists()) {
 			try {
@@ -77,60 +80,58 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	}
 
 	/**
-	 * Regel hinzufuegen
+	 * Add Rule
 	 * 
 	 * @param rule Rule
 	 */
-	public void addRule(Rule rule) {
+	public synchronized void addRule(Rule rule) {
 		rules.add(rule);
 	}
 
 	/**
-	 * Regel loeschen
+	 * Remove Rule
 	 * 
-	 * @param index Index
+	 * @param rule Rule
 	 */
-	public void removeRule(int index) {
-		if (index >= rules.size()) {
-			return;
+	public synchronized void removeRule(Rule rule) {
+		int index = -1;
+		int i = 0;
+		for (Rule r : rules) {
+			// Compare reference
+			if (r == rule) {
+				index = i;
+			}
+			i++;
 		}
-		rules.remove(index);
+
+		if (index >= 0) {
+			rules.remove(index);
+		}
 	}
 
 	/**
-	 * Alle Regeln speichern
+	 * Save all rules
+	 * 
+	 * @return True if all rules were saved successfully, false otherwise
 	 */
-	public void saveAllRules() {
-		for (int i = 0; i < rules.size(); i++) {
-			rules.get(i).writeRule();
+	public synchronized boolean saveAllRules() {
+		boolean result = true;
+		for (Rule rule : rules) {
+			if (!rule.writeRule()) {
+				result = false;
+			}
 		}
+		return result;
 	}
 
 	/**
-	 * Get-Methode
-	 * 
 	 * @return Rules
 	 */
-	public List<Rule> getRules() {
+	public synchronized List<Rule> getRules() {
 		return rules;
 	}
 
 	/**
-	 * Get-Methode
-	 * 
-	 * @param index Index
-	 * @return Rule
-	 */
-	public Rule getRule(int index) {
-		if (index >= rules.size()) {
-			return null;
-		}
-		return rules.get(index);
-	}
-
-	/**
-	 * Get-Method
-	 * 
 	 * @return Domains
 	 */
 	public List<String> getDomains() {
@@ -139,8 +140,8 @@ public class HostRules extends Host implements IHoster, IRedirect {
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		for (int i = 0; i < rules.size(); i++) {
-			if (rules.get(i).isFromThisHoster(url, null)) {
+		for (Rule rule : rules) {
+			if (rule.isFromThisHoster(url, null)) {
 				return true;
 			}
 		}
@@ -154,9 +155,9 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 * @return Rule
 	 */
 	public Rule getRuleForURL(String url) {
-		for (int i = 0; i < rules.size(); i++) {
-			if (rules.get(i).isFromThisHoster(url, null)) {
-				return rules.get(i);
+		for (Rule rule : rules) {
+			if (rule.isFromThisHoster(url, null)) {
+				return rule;
 			}
 		}
 		return null;
@@ -164,30 +165,23 @@ public class HostRules extends Host implements IHoster, IRedirect {
 
 	@Override
 	public String getFilenameFromURL(String url) {
-		if (!isFromThisHoster(url)) {
-			return "";
-		}
-		try {
-			for (int i = 0; i < rules.size(); i++) {
-				if (rules.get(i).isFromThisHoster(url, null)) {
-					return rules.get(i).getFilename(url);
-				}
+		for (Rule rule : rules) {
+			if (rule.isFromThisHoster(url, null)) {
+				return rule.getFilename(url);
 			}
-			return "";
-		} catch (Exception e) {
-			return "";
 		}
+		return "";
 	}
 
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
-		for (int i = 0; i < rules.size(); i++) {
-			if (rules.get(i).isFromThisHoster(upo.getContainerURL(), upo.getLastRule())) {
-				upo.addHoster(rules.get(i));
-				String result[] = rules.get(i).getURLAndFilename(upo);
+		for (Rule rule : rules) {
+			if (rule.isFromThisHoster(upo.getContainerURL(), upo.getLastRule())) {
+				upo.addHoster(rule);
+				String result[] = rule.getURLAndFilename(upo);
 				upo.setDirectLink(result[0]);
 				upo.setCorrectedFilename(result[1]);
-				if (rules.get(i).isResend()) {
+				if (rule.isResend()) {
 					upo.setContainerURL(result[0]);
 					HostManager.instance().parseURL(upo);
 				}
@@ -198,8 +192,8 @@ public class HostRules extends Host implements IHoster, IRedirect {
 
 	@Override
 	public boolean isFromThisRedirect(URL url) {
-		for (int i = 0; i < rules.size(); i++) {
-			if (rules.get(i).isFromThisRedirect(url.getURL(), null)) {
+		for (Rule rule : rules) {
+			if (rule.isFromThisRedirect(url.getURL(), null)) {
 				return true;
 			}
 		}
@@ -219,26 +213,23 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		pic.setThreadURL(url.getThreadURL());
 		URLParseObject upo = new URLParseObject(url.getURL(), url.getThumb(), pic);
 
-		for (int i = 0; i < rules.size(); i++) {
-			if (rules.get(i).isFromThisRedirect(upo.getContainerURL(), upo.getLastRule())) {
+		for (Rule rule : rules) {
+			if (rule.isFromThisRedirect(upo.getContainerURL(), upo.getLastRule())) {
 				try {
-					upo.addHoster(rules.get(i));
-					String result[] = rules.get(i).getURLAndFilename(upo);
+					upo.addHoster(rule);
+					String result[] = rule.getURLAndFilename(upo);
 					upo.setDirectLink(result[0]);
 					upo.setCorrectedFilename(result[1]);
 					/*
 					 * RESEND IS NOT WORKING FOR REDIRECTS
 					 */
-					redirectedURL = upo.getDirectLink();
+					return upo.getDirectLink();
 				} catch (HostException e) {
-					logger.error(e.getMessage(), e);
+					logger.error("Could not get URL and Filename from rule: {} {}", rule.getName(), rule.getVersion(), e);
+					return redirectedURL;
 				}
-				break;
 			}
 		}
-
-		pic = null;
-		upo = null;
 		return redirectedURL;
 	}
 
@@ -258,42 +249,41 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 * @param developerRules True if developer rules, false otherwise
 	 */
 	private void loadRules(File folder, boolean developerRules) {
-		try {
-			if (!folder.exists() || !folder.isDirectory()) {
-				return;
-			}
-			if (developerRules) {
-				developerRulesEnabled = true;
-			}
+		if (!folder.exists() || !folder.isDirectory()) {
+			return;
+		}
+		if (developerRules) {
+			developerRulesEnabled = true;
+		}
 
-			String developerRuleLogText = developerRules ? "Developer" : "";
+		String developerRuleLogText = developerRules ? "Developer" : "";
 
-			File subfiles[] = folder.listFiles(new RuleFileFilter());
-			if (subfiles != null) {
-				Arrays.sort(subfiles);
-				for (File subFile : subfiles) {
-					logger.debug("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
+		File subfiles[] = folder.listFiles(new RuleFileFilter());
+		if (subfiles != null) {
+			Arrays.sort(subfiles);
+			for (File subFile : subfiles) {
+				logger.debug("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
 
-					try {
-						Rule r = new Rule(subFile.getAbsolutePath(), developerRules);
-						if (r.getStatusOK()) {
-							rules.add(r);
-							logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getName());
-						} else {
-							logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
-						}
-					} catch (Exception e) {
-						logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath(), e);
+				try {
+					Rule r = new Rule(subFile.getAbsolutePath(), developerRules);
+					if (r.getStatusOK()) {
+						rules.add(r);
+						logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getName());
+					} else {
+						logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
 					}
+				} catch (Exception e) {
+					logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath(), e);
 				}
-			} else {
-				logger.error("Could not list rule files from directoy: {}", folder);
 			}
-		} catch (Exception e) {
-			logger.error("Exception while loading rules from directoy: {}", folder, e);
+		} else {
+			logger.error("Could not list rule files from directoy: {}", folder);
 		}
 	}
 
+	/**
+	 * File Filter for Rules
+	 */
 	private static class RuleFileFilter implements FileFilter {
 		@Override
 		public boolean accept(File pathname) {

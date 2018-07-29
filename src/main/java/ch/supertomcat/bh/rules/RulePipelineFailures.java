@@ -82,7 +82,7 @@ public class RulePipelineFailures extends RulePipeline {
 			e.setAttribute("checkURL", String.valueOf(this.checkURL));
 			e.setAttribute("checkThumbURL", String.valueOf(this.checkThumbURL));
 			e.setAttribute("checkPageSourceCode", String.valueOf(this.checkPageSourceCode));
-			e.setAttribute("failureType", String.valueOf(this.failureType));
+			e.setAttribute("failureType", String.valueOf(this.failureType.getValue()));
 		}
 		return e;
 	}

@@ -6,22 +6,21 @@ import java.awt.Component;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
-import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
-
 
 /**
  * RulesColorRowRenderer
  */
 public class RulesColorRowRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 9050984401350807572L;
-	
+
+	private static final long serialVersionUID = 1L;
+
+	private static final Color REDIRECT_COLOR = Color.decode("#FF4500");
+
 	/**
 	 * Sets the Foreground-Color of the component
+	 * 
 	 * @param comp The Component
 	 * @param table The Table
 	 * @param value The Value
@@ -32,18 +31,20 @@ public class RulesColorRowRenderer extends DefaultStringColorRowRenderer impleme
 	 */
 	@Override
 	public void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		Color cf = table.getForeground();
+		Color cf;
 		if (isSelected) {
 			cf = table.getSelectionForeground();
-		}
-		Rule r = HostManager.instance().getHr().getRule(row);
-		if (r != null) {
+		} else {
+			Rule r = (Rule)table.getModel().getValueAt(table.convertRowIndexToModel(row), 0);
 			if (r.isDeveloper()) {
 				cf = Color.BLUE;
 			} else if (r.isRedirect()) {
-				cf = Color.RED;
+				cf = REDIRECT_COLOR;
+			} else {
+				cf = table.getForeground();
 			}
 		}
 		comp.setForeground(cf);
+
 	}
 }
