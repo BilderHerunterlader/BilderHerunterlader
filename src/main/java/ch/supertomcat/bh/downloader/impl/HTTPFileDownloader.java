@@ -45,62 +45,74 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
-		URLParseObject result = parseURL(pic);
+		try {
+			URLParseObject result = parseURL(pic);
 
-		String referrer = result.getContainerURL();
-		Hoster lastHoster = result.getLastHoster();
-		if ((lastHoster != null) && (lastHoster instanceof Rule)) {
-			Rule lastRule = (Rule)lastHoster;
-			switch (lastRule.getReferrerModeDownload()) {
-				case Rule.REFERRER_NO_REFERRER:
-					referrer = "";
-					break;
-				case Rule.REFERRER_LAST_CONTAINER_URL:
-					referrer = result.getContainerURL();
-					break;
-				case Rule.REFERRER_FIRST_CONTAINER_URL:
-					referrer = result.getFirstContainerURL();
-					break;
-				case Rule.REFERRER_ORIGIN_PAGE:
-					referrer = pic.getThreadURL();
-					break;
-				case Rule.REFERRER_CUSTOM:
-					referrer = lastRule.getCustomReferrerDownload();
-					break;
-			}
-		}
-
-		boolean bReduceFilenameLength = true;
-		if (result.checkExistInfo("ReduceFilenameLength") && result.getInfo("ReduceFilenameLength") instanceof Boolean) {
-			bReduceFilenameLength = (Boolean)result.getInfo("ReduceFilenameLength");
-		}
-
-		// And replace the %20 in the filename, if there are any
-		String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "));
-		if (bReduceFilenameLength) {
-			targetFilename = FileTool.reduceFilenameLength(targetFilename);
-		}
-		pic.setTargetFilename(targetFilename);
-
-		boolean fixedTargetFilename = pic.isFixedTargetFilename();
-
-		boolean firstURL = true;
-		for (URLParseObjectFile directLink : result.getAllDirectLinks()) {
-			String currentTargetFilename = targetFilename;
-
-			// if the hostclass gives us a nice filename
-			String currentCorrectedFilename = directLink.getCorrectedFilename();
-			if (currentCorrectedFilename != null && !currentCorrectedFilename.isEmpty() && (!fixedTargetFilename || targetFilename.isEmpty())) {
-				currentTargetFilename = BHUtil.filterFilename(currentCorrectedFilename);
-				// And replace the %20 in the filename, if there are any
-				currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "));
-				if (bReduceFilenameLength) {
-					currentTargetFilename = FileTool.reduceFilenameLength(currentTargetFilename);
+			String referrer = result.getContainerURL();
+			Hoster lastHoster = result.getLastHoster();
+			if ((lastHoster != null) && (lastHoster instanceof Rule)) {
+				Rule lastRule = (Rule)lastHoster;
+				switch (lastRule.getReferrerModeDownload()) {
+					case Rule.REFERRER_NO_REFERRER:
+						referrer = "";
+						break;
+					case Rule.REFERRER_LAST_CONTAINER_URL:
+						referrer = result.getContainerURL();
+						break;
+					case Rule.REFERRER_FIRST_CONTAINER_URL:
+						referrer = result.getFirstContainerURL();
+						break;
+					case Rule.REFERRER_ORIGIN_PAGE:
+						referrer = pic.getThreadURL();
+						break;
+					case Rule.REFERRER_CUSTOM:
+						referrer = lastRule.getCustomReferrerDownload();
+						break;
 				}
 			}
 
-			executeFileDownload(pic, directLink.getDirectLink(), directLink.getCorrectedFilename(), result, referrer, firstURL);
-			firstURL = false;
+			boolean bReduceFilenameLength = true;
+			if (result.checkExistInfo("ReduceFilenameLength") && result.getInfo("ReduceFilenameLength") instanceof Boolean) {
+				bReduceFilenameLength = (Boolean)result.getInfo("ReduceFilenameLength");
+			}
+
+			// And replace the %20 in the filename, if there are any
+			String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "));
+			if (bReduceFilenameLength) {
+				targetFilename = FileTool.reduceFilenameLength(targetFilename);
+			}
+			pic.setTargetFilename(targetFilename);
+
+			boolean fixedTargetFilename = pic.isFixedTargetFilename();
+
+			List<URLParseObjectFile> allDirectLinks = result.getAllDirectLinks();
+			boolean firstURL = true;
+			int count = 1;
+			int directLinksSize = allDirectLinks.size();
+			for (URLParseObjectFile directLink : allDirectLinks) {
+				String currentTargetFilename = targetFilename;
+
+				// if the hostclass gives us a nice filename
+				String currentCorrectedFilename = directLink.getCorrectedFilename();
+				if (currentCorrectedFilename != null && !currentCorrectedFilename.isEmpty() && (!fixedTargetFilename || targetFilename.isEmpty())) {
+					currentTargetFilename = BHUtil.filterFilename(currentCorrectedFilename);
+					// And replace the %20 in the filename, if there are any
+					currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "));
+					if (bReduceFilenameLength) {
+						currentTargetFilename = FileTool.reduceFilenameLength(currentTargetFilename);
+					}
+				}
+
+				boolean lastURL = count == directLinksSize;
+				if (!executeFileDownload(pic, directLink.getDirectLink(), directLink.getCorrectedFilename(), result, referrer, firstURL, lastURL)) {
+					break;
+				}
+				firstURL = false;
+				count++;
+			}
+		} finally {
+			// Give the slot back to the Queue
+			DownloadQueueManager.instance().removeDLSlotListener(pic); // important!
 		}
 	}
 
@@ -113,8 +125,10 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @param result Result
 	 * @param referrer Referrer
 	 * @param firstURL First URL
+	 * @param lastURL Last URL
+	 * @return True if download was successful, false otherwise
 	 */
-	private void executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL) {
+	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL) {
 		String target = pic.getTargetPath() + correctedFilename;
 
 		// Get the cookies for the url
@@ -172,7 +186,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				if (statusCode < 200 || statusCode >= 300) {
 					failDownload(pic, result, false, "HTTP-Error: " + response.getStatusLine());
 					method.abort();
-					return;
+					return false;
 				}
 
 				if (pic.isRenameWithContentDisposition() && !pic.isFixedTargetFilename()) {
@@ -205,7 +219,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					// If the file coult not be created
 					failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
 					method.abort();
-					return;
+					return false;
 				}
 				correctedFilename = fRetval.getName();
 				if (firstURL) {
@@ -249,7 +263,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						fileT.delete();
 					}
 					method.abort();
-					return;
+					return false;
 				}
 
 				pic.progressBarChanged(0, PicState.WAITING.getText());
@@ -368,7 +382,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						if (fileT.exists()) {
 							fileT.delete();
 						}
-						fileT = null;
+						return false;
 					} else {
 						/*
 						 * If we get here, everything is fine
@@ -419,7 +433,10 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 							}
 						}
 
-						completeDownload(pic, size);
+						if (lastURL) {
+							completeDownload(pic, size);
+						}
+						return true;
 					}
 				} else {
 					// If the user stopped the download
@@ -429,10 +446,12 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					if (fileT.exists()) {
 						fileT.delete();
 					}
+					return false;
 				}
 			}
 		} catch (MalformedURLException e) {
 			failDownload(pic, result, false, e);
+			return false;
 		} catch (Exception e) {
 			failDownload(pic, result, false, e);
 			// Delete the file
@@ -440,12 +459,11 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			if (fileT.exists()) {
 				fileT.delete();
 			}
+			return false;
 		} finally {
 			if (method != null) {
 				method.abort();
 			}
-			// Give the slot back to the Queue
-			DownloadQueueManager.instance().removeDLSlotListener(pic); // important!
 		}
 	}
 
