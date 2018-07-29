@@ -5,23 +5,21 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Host class for www.cocoimage.com
  * 
- * @version 1.3
+ * @version 1.4
  */
 public class HostCocoimage extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.3";
+	public static final String VERSION = "1.4";
 
 	/**
 	 * Name dieser Klasse
@@ -43,12 +41,11 @@ public class HostCocoimage extends Host implements IHoster {
 	 */
 	private Pattern urlPattern;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostCocoimage() {
+		super(NAME, VERSION);
 		urlPattern = Pattern.compile("^http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*");
 		regex1.setSearch("window\\.location=\"(http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*?)\"");
 		regex1.setReplace("$1");
@@ -100,16 +97,6 @@ public class HostCocoimage extends Host implements IHoster {
 	}
 
 	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -123,22 +110,5 @@ public class HostCocoimage extends Host implements IHoster {
 		upo.setDirectLink(result);
 		String filename = regex3.doURLReplace(result, upo.getPic());
 		upo.setCorrectedFilename(filename);
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

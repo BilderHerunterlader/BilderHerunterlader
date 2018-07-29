@@ -17,13 +17,13 @@ import ch.supertomcat.supertomcattools.httptools.HTTPTool;
  * on the harddisk, i decided to move this class in the program itself.
  * So the check if this host-class exists is not needed anymore.
  * 
- * @version 0.8
+ * @version 0.9
  */
 public class HostSortImages extends Host implements IHoster {
 	/**
 	 * Version
 	 */
-	public static final String VERSION = "0.8";
+	public static final String VERSION = "0.9";
 
 	/**
 	 * Name
@@ -46,6 +46,7 @@ public class HostSortImages extends Host implements IHoster {
 	 * Constructor
 	 */
 	public HostSortImages() {
+		super(NAME, VERSION, false);
 		// This is the default pattern, allows just images to be sort
 		urlPattern = Pattern.compile("^.*\\.(gif|jpg|jpeg|jpe|png|tif|tiff)$", Pattern.CASE_INSENSITIVE);
 
@@ -84,16 +85,6 @@ public class HostSortImages extends Host implements IHoster {
 	}
 
 	@Override
-	public String getVersion() {
-		return HostSortImages.VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return HostSortImages.NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -113,20 +104,5 @@ public class HostSortImages extends Host implements IHoster {
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
 		upo.setDirectLink(getURL(upo.getContainerURL())); // URL
 		upo.setCorrectedFilename(getFilenameFromURL(upo.getContainerURL())); // CorrectedFilename
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		// Nothing do to
 	}
 }

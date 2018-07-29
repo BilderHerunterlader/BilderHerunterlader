@@ -26,7 +26,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.linkextract.ExtractTools;
 import ch.supertomcat.bh.hoster.linkextract.ILinkExtractFilter;
@@ -42,7 +41,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 2.7
+ * @version 2.8
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
@@ -53,7 +52,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.7";
+	public static final String VERSION = "2.8";
 
 	/**
 	 * Name dieser Klasse
@@ -70,14 +69,13 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 
 	private RuleRegExp regexImg = new RuleRegExp();
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	private boolean recursive = false;
 
 	/**
 	 * Konstruktor
 	 */
 	public HostPhotoSharingGallery() {
+		super(NAME, VERSION);
 		patternCategory = Pattern.compile("https?://[^/]+/([^/]+/)*showgallery\\.php(/cat/[0-9]+/?(page/[0-9]+)?|\\?cat=[0-9]+(&page=[0-9]+)?)");
 		patternCategoryNoPages = Pattern.compile("https?://[^/]+/([^/]+/)*showgallery\\.php(/cat/[0-9]+/?|\\?cat=[0-9]+)");
 		patternCategoryPages = Pattern.compile("https?://[^/]+/([^/]+/)*showgallery\\.php(/cat/[0-9]+/page/[0-9]+|\\?cat=[0-9]+&page=[0-9]+)");
@@ -114,16 +112,6 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		}
 
 		return false;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	@Override
@@ -382,22 +370,5 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		 */
 		isFromThisHoster.setValue(false);
 		return links;
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

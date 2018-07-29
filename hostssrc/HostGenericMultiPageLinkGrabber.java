@@ -35,7 +35,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -53,7 +52,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 2.6
+ * @version 2.7
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
@@ -64,7 +63,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.6";
+	public static final String VERSION = "2.7";
 
 	/**
 	 * Name dieser Klasse
@@ -90,8 +89,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 
 	private Pattern patternPhpBBThread;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	private boolean bVBulletin = true;
 
 	private boolean bPhpBB = true;
@@ -102,6 +99,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	 * Konstruktor
 	 */
 	public HostGenericMultiPageLinkGrabber() {
+		super(NAME, VERSION);
 		patternDomain = Pattern.compile("^(https?://(.*?/){1,}|).*$");
 
 		// vBulletin
@@ -141,16 +139,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		}
 
 		return bOK;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	@Override
@@ -414,11 +402,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		throw new HostException("This Host-Plugin cannot parse URLs trough parseURLAndFilename-Method");
 	}
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
 	private URL convertURLFromRelativeToAbsolute(String absoluteURL, URL urlToConvert) {
 		String strCurrentURL = urlToConvert.getURL();
 		Matcher m = patternDomain.matcher(absoluteURL);
@@ -622,17 +605,5 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		} else {
 			return super.removeDuplicateEqualsMethod(url1, url2);
 		}
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

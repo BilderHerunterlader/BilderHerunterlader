@@ -66,6 +66,11 @@ public abstract class Hoster {
 	public abstract void setEnabled(boolean enabled);
 
 	/**
+	 * @return True if hoster can be disabled, false otherwise
+	 */
+	public abstract boolean canBeDisabled();
+
+	/**
 	 * Method to compare to URLs for removing duplicate URLs
 	 * Attention: This Method is called always when the equals-Method
 	 * on an URL-Object is called. And this happens as example on

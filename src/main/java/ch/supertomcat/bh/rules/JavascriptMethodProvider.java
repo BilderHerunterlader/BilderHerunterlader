@@ -89,6 +89,11 @@ public class JavascriptMethodProvider {
 			public boolean isEnabled() {
 				return true;
 			}
+
+			@Override
+			public boolean canBeDisabled() {
+				return false;
+			}
 		};
 		return hoster.downloadContainerPage("JavascriptMethodProviderDummyHoster", url, referrer);
 	}

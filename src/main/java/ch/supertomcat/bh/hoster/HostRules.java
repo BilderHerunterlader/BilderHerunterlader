@@ -20,7 +20,7 @@ import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
 /**
  * Host-Class for Rules
  * 
- * @version 0.4
+ * @version 0.5
  */
 public class HostRules extends Host implements IHoster, IRedirect {
 	/**
@@ -31,7 +31,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "0.4";
+	public static final String VERSION = "0.5";
 
 	/**
 	 * Name dieser Klasse
@@ -54,6 +54,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 * Konstruktor
 	 */
 	public HostRules() {
+		super(NAME, VERSION, false);
 		domains = new ArrayList<>();
 		domains.add("NODOMAINS");
 
@@ -162,16 +163,6 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	}
 
 	@Override
-	public String getVersion() {
-		return HostRules.VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return HostRules.NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -203,11 +194,6 @@ public class HostRules extends Host implements IHoster, IRedirect {
 				return;
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
 	}
 
 	@Override
@@ -263,15 +249,6 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 */
 	public boolean isDeveloperRulesEnabled() {
 		return developerRulesEnabled;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return true;
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
 	}
 
 	/**

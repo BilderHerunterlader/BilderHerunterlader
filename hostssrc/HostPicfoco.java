@@ -5,23 +5,21 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Host class for Picfoco
  * 
- * @version 1.0
+ * @version 1.1
  */
 public class HostPicfoco extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.0";
+	public static final String VERSION = "1.1";
 
 	/**
 	 * Name dieser Klasse
@@ -39,12 +37,11 @@ public class HostPicfoco extends Host implements IHoster {
 
 	private RulePipeline pipeURL;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostPicfoco() {
+		super(NAME, VERSION);
 		urlPattern = Pattern.compile("^http://img[0-9]+\\.(picfoco)\\.com/img\\.php\\?id=([0-9]+)(&q=.*)?$");
 		regexForwarding = new RuleRegExp();
 		regexForwarding.setSearch("window\\.location=\"([^\"]+)\"");
@@ -97,16 +94,6 @@ public class HostPicfoco extends Host implements IHoster {
 	}
 
 	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -128,22 +115,5 @@ public class HostPicfoco extends Host implements IHoster {
 				upo.setDirectLink(s);
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

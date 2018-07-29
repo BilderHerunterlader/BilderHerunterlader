@@ -10,23 +10,21 @@ import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
 /**
  * Host class for ImageBam
  * 
- * @version 3.6
+ * @version 3.7
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.6";
+	public static final String VERSION = "3.7";
 
 	/**
 	 * Name dieser Klasse
@@ -46,12 +44,11 @@ public class HostImageBam extends Host implements IHoster {
 
 	private RuleRegExp regexFilename = null;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostImageBam() {
+		super(NAME, VERSION);
 		urlPattern = Pattern.compile("^http://(www\\.)?imagebam\\.com/image/[a-z0-9]+(/)?");
 
 		regexServerMaintenance = new RuleRegExp();
@@ -104,16 +101,6 @@ public class HostImageBam extends Host implements IHoster {
 		}
 
 		return downloadURL;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	@Override
@@ -182,22 +169,5 @@ public class HostImageBam extends Host implements IHoster {
 			}
 		}
 		return "";
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

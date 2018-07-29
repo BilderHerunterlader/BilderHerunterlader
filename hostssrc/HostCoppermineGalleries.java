@@ -34,7 +34,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.linkextract.ExtractTools;
 import ch.supertomcat.bh.pic.URL;
@@ -50,7 +49,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 3.9
+ * @version 4.0
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
@@ -61,7 +60,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.9";
+	public static final String VERSION = "4.0";
 
 	/**
 	 * Name dieser Klasse
@@ -89,12 +88,11 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 	private boolean metaAlbumsEnabled = false;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostCoppermineGalleries() {
+		super(NAME, VERSION);
 		patternDomain = Pattern.compile("^(https?://.*/|)(index|thumbnails|displayimage)\\.php.*$");
 
 		patternIndexWithoutPageParam = Pattern.compile("^(https?://.*/|)index\\.php\\?cat=[0-9]+$");
@@ -137,16 +135,6 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		}
 
 		return false;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	@Override
@@ -551,11 +539,6 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		}
 	}
 
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
 	private boolean isDisplayPage(String url) {
 		if (metaAlbumsEnabled) {
 			return patternDisplayMetaAlbums.matcher(url).matches();
@@ -690,17 +673,5 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		 */
 		isFromThisHoster.setValue(false);
 		return newURLs;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

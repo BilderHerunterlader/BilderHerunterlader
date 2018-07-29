@@ -24,7 +24,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.pic.URL;
@@ -41,13 +40,13 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionInt;
 /**
  * Host class for BabesBoard
  * 
- * @version 2.7
+ * @version 2.8
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.7";
+	public static final String VERSION = "2.8";
 
 	/**
 	 * Name dieser Klasse
@@ -82,12 +81,11 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 	private RuleRegExp regexAjaxURI = new RuleRegExp();
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostBabesBoard() {
+		super(NAME, VERSION);
 		urlPatterns = new Pattern[2];
 		urlPatterns[0] = Pattern.compile("^http://babeshack([0-9])?\\.babes-board\\.ch/shack.php\\?image=[0-9a-z]+\\..*$", Pattern.CASE_INSENSITIVE);
 		urlPatterns[1] = Pattern.compile("^http://babeshack([0-9])?\\.babes-board\\.ch/f/[0-9]+/[0-9]+/.*$", Pattern.CASE_INSENSITIVE);
@@ -130,16 +128,6 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			return true;
 		}
 		return false;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
 	}
 
 	@Override
@@ -336,22 +324,5 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 				method.abort();
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

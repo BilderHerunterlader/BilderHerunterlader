@@ -9,12 +9,10 @@ import ch.supertomcat.bh.hoster.ContainerPage;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Host class for <code>http://www.flickr.com</code> <br>
@@ -31,7 +29,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * If that fails (e.g. original image is not available for download) it
  * will load the embedded image from the container site.
  *
- * @version 2.8
+ * @version 2.9
  */
 public class HostFlickr extends Host implements IHoster {
 	/**
@@ -40,7 +38,7 @@ public class HostFlickr extends Host implements IHoster {
 	private static Logger logger = LoggerFactory.getLogger(HostFlickr.class);
 
 	/** the version of this class **/
-	public static final String VERSION = "2.8";
+	public static final String VERSION = "2.9";
 
 	/** the name of this class **/
 	public static final String NAME = "HostFlickr";
@@ -128,12 +126,11 @@ public class HostFlickr extends Host implements IHoster {
 	 */
 	private final RuleRegExp regexAlbumTitle;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Default constructor. Initializes all required patterns.
 	 */
 	public HostFlickr() {
+		super(NAME, VERSION);
 		String container = "(https?://www\\.flickr\\.com/photos/(?!tags/)[^/]+?/([0-9]+?)/?)";
 		String size = "sizes/(sq|q|t|s|n|m|z|c|l|h|k|o)/?";
 		String inset = "(in/.+?/?)??";
@@ -194,16 +191,6 @@ public class HostFlickr extends Host implements IHoster {
 	}
 
 	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
 	public boolean isFromThisHoster(String url) {
 		Matcher matcher = this.containerUrlPattern.matcher(url);
 		if (matcher.matches()) {
@@ -211,14 +198,6 @@ public class HostFlickr extends Host implements IHoster {
 		}
 		matcher = this.subContainerUrlPattern.matcher(url);
 		return matcher.matches();
-	}
-
-	/**
-	 * Returns the name of this class.
-	 */
-	@Override
-	public String toString() {
-		return NAME;
 	}
 
 	@Override
@@ -558,17 +537,5 @@ public class HostFlickr extends Host implements IHoster {
 		}
 
 		return dateTime;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

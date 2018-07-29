@@ -9,14 +9,12 @@ import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Host class for ImageVenue
  * 
- * @version 3.3
+ * @version 3.4
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
@@ -27,7 +25,7 @@ public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.3";
+	public static final String VERSION = "3.4";
 
 	/**
 	 * Name dieser Klasse
@@ -41,12 +39,11 @@ public class HostImageVenue extends Host implements IHoster {
 
 	private RuleRegExp regexImage = new RuleRegExp();
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostImageVenue() {
+		super(NAME, VERSION);
 		urlPattern = Pattern.compile("^http://img[0-9]+\\.([a-z]+[0-9]+\\.)?imagevenue\\.com/(img|view)\\.php\\?(loc=loc[0-9]+\\&image|image)=.*");
 		regexImage.setSearch("(?m)(?s)<img.*?id=\"thepic\".*?(src|SRC)=\"(.*?)\"");
 		regexImage.setReplace("$2");
@@ -129,16 +126,6 @@ public class HostImageVenue extends Host implements IHoster {
 	}
 
 	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -168,22 +155,5 @@ public class HostImageVenue extends Host implements IHoster {
 				upo.setCorrectedFilename(correctFilename(result));
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

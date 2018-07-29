@@ -21,8 +21,6 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
-import ch.supertomcat.bh.hoster.HostRules;
-import ch.supertomcat.bh.hoster.HostSortImages;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.ISettingsListener;
@@ -52,42 +50,31 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	 * Constructor
 	 */
 	public HosterTableModel() {
-		super();
 		this.addColumn("Hoster");
 		this.addColumn("Version");
+		this.addColumn("Type");
 		this.addColumn("Settings");
 		this.addColumn("Enabled");
 		SettingsManager.instance().addSettingsListener(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
-	 */
 	@Override
 	public boolean isCellEditable(int row, int column) {
-		if (column == 2 && this.getValueAt(row, 2) instanceof JPanel) {
+		if (column == 3 && this.getValueAt(row, 3) instanceof JPanel) {
 			return true;
 		}
 
-		String name = (String)this.getValueAt(row, 0);
-
-		if (column == 3 && !name.equals(HostSortImages.NAME) && !name.equals(HostRules.NAME)) {
+		Host host = (Host)this.getValueAt(row, 0);
+		if (column == 4 && host.canBeDisabled()) {
 			return true;
 		}
 
 		return false;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
-		if (columnIndex == 3) {
+		if (columnIndex == 4) {
 			return Boolean.class;
 		}
 		return super.getColumnClass(columnIndex);
@@ -99,21 +86,27 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	 * @param host Host
 	 */
 	public void addRow(final Host host) {
-		Object data[] = new Object[4];
-
-		if (host.getName().equals("HostDefaultFiles")) {
-			data[0] = host.getName() + " (" + Localization.getString("DirectLinkedFiles") + ")";
-		} else {
-			if (host.isDeveloper()) {
-				data[0] = "Developer: " + host.getName();
-			} else {
-				data[0] = host.getName();
-			}
-		}
-
+		Object data[] = new Object[5];
+		data[0] = host;
 		data[1] = host.getVersion();
-		Method mx = null;
+		if (host.isDeveloper()) {
+			data[2] = "Developer Host";
+		} else {
+			data[2] = "Host";
+		}
+		JPanel optionPanel = createOptionPanelForHost(host);
+		data[3] = optionPanel != null ? optionPanel : "";
+		panels.add(optionPanel);
+		data[4] = host.isEnabled();
+		this.addRow(data);
+	}
 
+	/**
+	 * @param host Host
+	 * @return Option-Panel for host or null if not available
+	 */
+	private JPanel createOptionPanelForHost(Host host) {
+		Method mx = null;
 		if (HostManager.instance().hasInterface(host, "ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions")) {
 			try {
 				mx = host.getClass().getDeclaredMethod("openOptionsDialog");
@@ -122,34 +115,29 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 			}
 		}
 
-		final Method mOpen;
-		if (mx != null) {
-			mOpen = mx;
-			JButton btn = new JButton(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
-			btn.addActionListener(new ActionListener() {
-				@Override
-				public void actionPerformed(ActionEvent e) {
-					if (DownloadQueueManager.instance().isDownloading()) {
-						JOptionPane.showMessageDialog(Main.instance(), Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-						return;
-					}
-					try {
-						mOpen.invoke(host, new Object[] {});
-					} catch (Exception ex) {
-						logger.error(ex.getMessage(), ex);
-					}
-				}
-			});
-			JPanel pnl = new JPanel();
-			pnl.add(btn);
-			data[2] = pnl;
-			panels.add(pnl);
-		} else {
-			data[2] = "";
-			panels.add(null);
+		if (mx == null) {
+			return null;
 		}
-		data[3] = host.isEnabled();
-		this.addRow(data);
+
+		final Method mOpen = mx;
+		JButton btn = new JButton(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
+		btn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				if (DownloadQueueManager.instance().isDownloading()) {
+					JOptionPane.showMessageDialog(Main.instance(), Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+				try {
+					mOpen.invoke(host);
+				} catch (Exception ex) {
+					logger.error(ex.getMessage(), ex);
+				}
+			}
+		});
+		JPanel pnl = new JPanel();
+		pnl.add(btn);
+		return pnl;
 	}
 
 	/**
@@ -158,16 +146,19 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	 * @param redirect Redirect
 	 */
 	public void addRow(final IRedirect redirect) {
-		Object data[] = new Object[4];
-
 		if (redirect == HostManager.instance().getHr()) {
+			/*
+			 * Prevent double insertion of HostRules, because it is a Host, but also a IRedirect
+			 */
 			return;
 		}
 
-		data[0] = "Redirect: " + redirect.getName();
+		Object data[] = new Object[5];
+		data[0] = redirect;
 		data[1] = redirect.getVersion();
-		data[2] = "";
-		data[3] = redirect.isEnabled();
+		data[2] = "Redirect";
+		data[3] = "";
+		data[4] = redirect.isEnabled();
 		panels.add(null);
 		this.addRow(data);
 	}

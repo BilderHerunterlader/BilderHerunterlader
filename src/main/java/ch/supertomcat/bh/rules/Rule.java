@@ -1283,6 +1283,11 @@ public class Rule extends Hoster {
 		SettingsManager.instance().writeSettings(true);
 	}
 
+	@Override
+	public boolean canBeDisabled() {
+		return true;
+	}
+
 	/**
 	 * Returns the reducePathLength
 	 * 
@@ -1345,14 +1350,9 @@ public class Rule extends Hoster {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.hoster.Hoster#toString()
-	 */
 	@Override
 	public String toString() {
-		return this.name;
+		return name;
 	}
 
 	/**

@@ -7,21 +7,19 @@ import ch.supertomcat.bh.hoster.ContainerPage;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.URLParseObject;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
 /**
  * Host class for ImageShack
  * 
- * @version 3.6
+ * @version 3.7
  */
 public class HostImageShack extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.6";
+	public static final String VERSION = "3.7";
 
 	/**
 	 * Name dieser Klasse
@@ -42,12 +40,11 @@ public class HostImageShack extends Host implements IHoster {
 
 	private RuleRegExp regexCompleteAlternate;
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Konstruktor
 	 */
 	public HostImageShack() {
+		super(NAME, VERSION);
 		urlPattern = Pattern.compile("^http://(img[0-9]+\\.)?(imageshack\\.us|exs\\.cx)/(my\\.php\\?(loc=img[0-9]+\\&)?image=|i/|photo/my-images/[0-9]+/).+?[/]?");
 		urlPatternDirectLinked = Pattern.compile("^http://img[0-9]+\\.(imageshack\\.us|exs\\.cx)/img[0-9]+/[0-9]+/.*");
 
@@ -127,16 +124,6 @@ public class HostImageShack extends Host implements IHoster {
 	}
 
 	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -164,22 +151,5 @@ public class HostImageShack extends Host implements IHoster {
 				upo.setCorrectedFilename(correctFilename(s));
 			}
 		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

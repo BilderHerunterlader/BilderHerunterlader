@@ -42,7 +42,6 @@ import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.URLParseObject;
 import ch.supertomcat.bh.hoster.URLParseObjectFile;
-import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOverrideDirectoryOption;
 import ch.supertomcat.bh.hoster.hosteroptions.OverrideDirectoryOption;
@@ -66,7 +65,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * Host class for Youtube
  * 
- * @version 7.7
+ * @version 7.8
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
@@ -77,7 +76,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "7.7";
+	public static final String VERSION = "7.8";
 
 	/**
 	 * Name dieser Klasse
@@ -139,8 +138,6 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 	private OverrideDirectoryOption overrideDirectoryOption = new OverrideDirectoryOption(NAME);
 
-	private DeactivateOption deactivateOption = new DeactivateOption(NAME);
-
 	/**
 	 * Beschraenkung
 	 */
@@ -150,6 +147,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	 * Konstruktor
 	 */
 	public HostYoutube() {
+		super(NAME, VERSION);
 		/**
 		 * Name, Container Format, Video Format, Aspect Ratio, Max Video Resolution,
 		 * Audio Format, Audio Channels, Sampling Rate (kHz), File-Extension, QUALITY_...
@@ -664,16 +662,6 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	}
 
 	@Override
-	public String getVersion() {
-		return VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return NAME;
-	}
-
-	@Override
 	public String getFilenameFromURL(String url) {
 		if (!isFromThisHoster(url)) {
 			return "";
@@ -886,11 +874,6 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	}
 
 	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
 	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
 		if (overrideDirectoryOption.isPathOverride()) {
 			url.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
@@ -995,17 +978,5 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			return links;
 		}
 		return null;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivateOption.isDeactivated();
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivateOption.setDeactivated(!enabled);
-		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
 	}
 }

@@ -27,13 +27,13 @@ import ch.supertomcat.supertomcattools.httptools.HTTPTool;
 /**
  * Host-Klasse fuer beliebige Dateien und speziell fuer Bilder die nicht auf einem Image-Hoster gehostet sind.
  * 
- * @version 3.6
+ * @version 3.7
  */
 public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.6";
+	public static final String VERSION = "3.7";
 
 	/**
 	 * Name dieser Klasse
@@ -61,8 +61,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 */
 	private List<Pattern> urlPatterns = new ArrayList<>();
 
-	private boolean deactivated = false;
-
 	private boolean checkContentType = false;
 
 	private boolean allFileTypes = false;
@@ -79,6 +77,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 * Konstruktor
 	 */
 	public HostzDefaultFiles() {
+		super(NAME, VERSION);
 		String strImages = "(?:bmp|gif|jpe|jpg|jpeg|png|tif|tiff)";
 		String strVideo = "(?:3g2|3gp|3gp2|3gpp|amr|asf|divx|evo|flv|hdmov|m2t|m2ts|m2v|m4v|mkv|m1v|mov|mp2v|mp4|mpe|mpeg|mpg|mts|ogm|ogv|pva|pss|qt|rm|ram|rpm|rmm|ts|tp|tpr|vob|wmv|wmp)";
 		String strAudio = "(?:aac|ac3|au|dts|flac|m1a|m2a|m4a|m4b|mid|midi|mka|mp2|mp3|mpa|oga|ogg|ra|rmi|snd|wav|wma)";
@@ -92,16 +91,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 
 		File file = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts/HostzDefaultImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
-
-		try {
-			deactivated = getBooleanOptionValue("Hosts.LoadDefaultImages");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("Hosts.LoadDefaultImages", false);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
-			}
-		}
 
 		try {
 			checkContentType = getBooleanOptionValue("Hosts.CheckContentTypeDefaultImages");
@@ -187,7 +176,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 * @throws HostException
 	 */
 	private boolean isDefaultFile(String url, boolean checkType) throws HostException {
-		if (deactivated) {
+		if (!isEnabled()) {
 			return false;
 		}
 
@@ -235,16 +224,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		}
 
 		return false;
-	}
-
-	@Override
-	public String getVersion() {
-		return HostzDefaultFiles.VERSION;
-	}
-
-	@Override
-	public String getName() {
-		return HostzDefaultFiles.NAME;
 	}
 
 	@Override
@@ -367,27 +346,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 			if (!urlPatterns.isEmpty()) {
 				upo.getPic().setRenameWithContentDisposition(true);
 			}
-		}
-	}
-
-	@Override
-	public String toString() {
-		return NAME;
-	}
-
-	@Override
-	public boolean isEnabled() {
-		return !deactivated;
-	}
-
-	@Override
-	public void setEnabled(boolean enabled) {
-		deactivated = !enabled;
-		try {
-			setBooleanOptionValue("Hosts.LoadDefaultImages", deactivated);
-			SettingsManager.instance().writeSettings(true);
-		} catch (Exception ex) {
-			logger.error(ex.getMessage(), ex);
 		}
 	}
 }
