@@ -9,40 +9,25 @@ import javax.swing.table.TableCellRenderer;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
 
-
 /**
  * QueueColorRowRenderer
  */
 public class QueueColorRowRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6810509128294034334L;
+	private static final long serialVersionUID = 1L;
 
-	/* (non-Javadoc)
-	 * @see ch.supertomcat.bh.gui.renderer.DefaultColorRowRenderer#prepareForegroundColor(java.awt.Component, javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
-	 */
 	@Override
 	public void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		Color cf = table.getForeground();
+		Color cf;
 		if (isSelected) {
 			cf = table.getSelectionForeground();
-		}
-		
-		Object progressValue = table.getValueAt(row,  3);
-		if (progressValue instanceof Pic) {
-			Pic p = (Pic)table.getValueAt(row, 3);
-			if (p.isDeactivated()) {
-				if (isSelected) {
-					comp.setForeground(Color.BLACK);
-				} else {
-					comp.setForeground(Color.RED);
-				}
-			} else {
-				comp.setForeground(cf);
-			}
 		} else {
-			comp.setForeground(cf);
+			Object progressValue = table.getModel().getValueAt(table.convertRowIndexToModel(row), 3);
+			if (progressValue instanceof Pic && ((Pic)progressValue).isDeactivated()) {
+				cf = Color.RED;
+			} else {
+				cf = table.getForeground();
+			}
 		}
+		comp.setForeground(cf);
 	}
 }

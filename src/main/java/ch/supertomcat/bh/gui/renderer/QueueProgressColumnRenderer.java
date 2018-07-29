@@ -7,20 +7,13 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
 
 /**
  * QueueProgressColumnRenderer
  */
-public class QueueProgressColumnRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6810509128294034334L;
+public class QueueProgressColumnRenderer extends QueueColorRowRenderer implements TableCellRenderer {
+	private static final long serialVersionUID = 1L;
 
-	/* (non-Javadoc)
-	 * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
-	 */
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		if (value instanceof JProgressBar) {
@@ -31,16 +24,16 @@ public class QueueProgressColumnRenderer extends DefaultStringColorRowRenderer i
 			Pic pic = (Pic)value;
 			prepareForegroundColor(this, table, value, isSelected, hasFocus, row, column);
 			prepareBackgroundColor(this, table, value, isSelected, hasFocus, row, column);
-			
+
 			this.setText(pic.getStatusText());
-			
+
 			String errMsg = pic.getErrMsg();
-			if (errMsg != null && errMsg.length() > 0) {
+			if (errMsg != null && !errMsg.isEmpty()) {
 				this.setToolTipText(errMsg);
 			} else {
 				this.setToolTipText(pic.getStatusText());
 			}
-			
+
 			this.setOpaque(true);
 			return this;
 		} else {
