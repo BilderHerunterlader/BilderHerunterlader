@@ -23,7 +23,7 @@ public class KeywordCellEditor extends AbstractCellEditor implements TableCellEd
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
 		kcec.setText(value.toString());
-		kcec.setRelative(column == 3);
+		kcec.setRelative(table.convertColumnIndexToModel(column) == 3);
 		return kcec;
 	}
 

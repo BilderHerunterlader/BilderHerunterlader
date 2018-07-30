@@ -4,39 +4,28 @@ import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.keywords.Keyword;
 
-
 /**
  * TableModel for Keywords
  */
 public class KeywordsTableModel extends DefaultTableModel {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 7776217313342054743L;
-	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
 	 */
 	public KeywordsTableModel() {
-		super();
 		this.addColumn("Title");
 		this.addColumn("Keywords");
 		this.addColumn("Folder");
 		this.addColumn("RelativeFolder");
 		this.addColumn("RelativPath");
 	}
-	
-	/* (non-Javadoc)
-	 * @see javax.swing.table.DefaultTableModel#isCellEditable(int, int)
-	 */
+
 	@Override
 	public boolean isCellEditable(int row, int column) {
 		return false;
 	}
 
-	/* (non-Javadoc)
-	 * @see javax.swing.table.AbstractTableModel#getColumnClass(int)
-	 */
 	@Override
 	public Class<?> getColumnClass(int columnIndex) {
 		if (columnIndex < 0 || columnIndex >= getColumnCount() || getRowCount() <= 0) {
@@ -44,9 +33,10 @@ public class KeywordsTableModel extends DefaultTableModel {
 		}
 		return getValueAt(0, columnIndex).getClass();
 	}
-	
+
 	/**
 	 * Adds a row
+	 * 
 	 * @param k Keyword
 	 */
 	public void addRow(Keyword k) {
@@ -58,9 +48,10 @@ public class KeywordsTableModel extends DefaultTableModel {
 		data[4] = k.isRelativePath();
 		this.addRow(data);
 	}
-	
+
 	/**
 	 * Inserts a row
+	 * 
 	 * @param k Keyword
 	 * @param position Position
 	 */
@@ -73,7 +64,7 @@ public class KeywordsTableModel extends DefaultTableModel {
 		data[4] = k.isRelativePath();
 		this.insertRow(position, data);
 	}
-	
+
 	/**
 	 * Removes all rows
 	 */

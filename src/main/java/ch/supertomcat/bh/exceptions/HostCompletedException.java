@@ -9,13 +9,11 @@ package ch.supertomcat.bh.exceptions;
  * again and write it to a file.
  */
 public class HostCompletedException extends HostException {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 1846879131264654095L;
-	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
+	 * 
 	 * @param s Message
 	 */
 	public HostCompletedException(String s) {

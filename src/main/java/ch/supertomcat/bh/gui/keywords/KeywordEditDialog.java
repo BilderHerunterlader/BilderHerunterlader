@@ -30,7 +30,7 @@ import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyA
 /**
  * Dialog for editing a new keyword
  */
-public class KeywordEditDialog extends JDialog implements ActionListener {
+public class KeywordEditDialog extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -170,8 +170,20 @@ public class KeywordEditDialog extends JDialog implements ActionListener {
 		pnlButtons.add(btnOK);
 		pnlButtons.add(btnCancel);
 		setLayout(new BorderLayout());
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				okPressed = true;
+				dispose();
+			}
+		});
+		btnCancel.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				okPressed = false;
+				dispose();
+			}
+		});
 		add(pnlLabels, BorderLayout.NORTH);
 		add(pnlButtons, BorderLayout.SOUTH);
 		setModal(true);
@@ -255,22 +267,6 @@ public class KeywordEditDialog extends JDialog implements ActionListener {
 	 */
 	public Keyword getKeyword() {
 		return new Keyword(txtTitle.getText(), txtKeywords.getText(), txtPath.getPath(), chkBRPath.isSelected(), txtRPath.getPath());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed = true;
-			this.dispose();
-		} else if (e.getSource() == btnCancel) {
-			okPressed = false;
-			this.dispose();
-		}
 	}
 
 	/**

@@ -2,12 +2,12 @@ package ch.supertomcat.bh.gui.log;
 
 import java.awt.BorderLayout;
 import java.awt.Desktop;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.EventQueue;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -37,7 +37,6 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.log.ILogManagerListener;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
-import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.fileiotools.FileTool;
 import ch.supertomcat.supertomcattools.guitools.FileExplorerTool;
@@ -48,16 +47,13 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColor
 /**
  * Panel containing Logs
  */
-public class Log extends JPanel implements ActionListener, MouseListener, TableColumnModelListener, ISettingsListener, ILogManagerListener {
+public class Log extends JPanel implements ILogManagerListener {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Logger for this class
 	 */
 	private static Logger logger = LoggerFactory.getLogger(Log.class);
-
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5907100131845566233L;
 
 	/**
 	 * Table
@@ -153,7 +149,28 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 		jtLog.getColumn("Size").setMinWidth(100);
 		jtLog.getColumn("Size").setMaxWidth(150);
 		updateColWidthsFromSettingsManager();
-		jtLog.getColumnModel().addColumnModelListener(this);
+		jtLog.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+			}
+		});
 		jtLog.getTableHeader().setReorderingAllowed(false);
 		jtLog.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		jtLog.setRowHeight(TableTool.calculateRowHeight(jtLog, false, true));
@@ -161,10 +178,26 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 		JScrollPane jsp = new JScrollPane(jtLog);
 		add(jsp, BorderLayout.CENTER);
 
-		btnFirst.addActionListener(this);
-		btnPrevious.addActionListener(this);
-		btnNext.addActionListener(this);
-		btnLast.addActionListener(this);
+		btnFirst.addActionListener(e -> {
+			updateIndexAndStatus(LogManager.instance().readLogs(1, model));
+			last = false;
+		});
+		btnPrevious.addActionListener(e -> {
+			if (currentStart > 100) {
+				updateIndexAndStatus(LogManager.instance().readLogs(currentStart - 100, model));
+			} else {
+				updateIndexAndStatus(LogManager.instance().readLogs(1, model));
+			}
+			last = false;
+		});
+		btnNext.addActionListener(e -> {
+			updateIndexAndStatus(LogManager.instance().readLogs(currentStart + 100, model));
+			last = false;
+		});
+		btnLast.addActionListener(e -> {
+			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+			last = true;
+		});
 
 		pnlButtons.add(btnFirst);
 		pnlButtons.add(btnPrevious);
@@ -185,16 +218,31 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 		popupMenu.add(menuItemCopyURL);
 		popupMenu.add(menuItemOpenURL);
 		popupMenu.add(menuItemOpenDirectory);
-		menuItemCopyURL.addActionListener(this);
-		menuItemOpenURL.addActionListener(this);
-		menuItemOpenDirectory.addActionListener(this);
+		menuItemCopyURL.addActionListener(e -> actionCopyURLs());
+		menuItemOpenURL.addActionListener(e -> actionOpenURLs());
+		menuItemOpenDirectory.addActionListener(e -> actionOpenDirectories());
 
-		jtLog.addMouseListener(this);
+		jtLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger() && !DownloadQueueManager.instance().isDownloading() && jtLog.getSelectedRowCount() > 0) {
+					SwingUtilities.updateComponentTreeUI(popupMenu);
+					popupMenu.show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger() && !DownloadQueueManager.instance().isDownloading() && jtLog.getSelectedRowCount() > 0) {
+					SwingUtilities.updateComponentTreeUI(popupMenu);
+					popupMenu.show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+		});
 
 		crr = new DefaultStringColorRowRenderer();
 		jtLog.setDefaultRenderer(Object.class, crr);
 
-		SettingsManager.instance().addSettingsListener(this);
 		LogManager.instance().addLogManagerListener(this);
 	}
 
@@ -293,38 +341,6 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnFirst) {
-			updateIndexAndStatus(LogManager.instance().readLogs(1, model));
-			last = false;
-		} else if (e.getSource() == btnPrevious) {
-			if (currentStart > 100) {
-				updateIndexAndStatus(LogManager.instance().readLogs(currentStart - 100, model));
-			} else {
-				updateIndexAndStatus(LogManager.instance().readLogs(1, model));
-			}
-			last = false;
-		} else if (e.getSource() == btnNext) {
-			updateIndexAndStatus(LogManager.instance().readLogs(currentStart + 100, model));
-			last = false;
-		} else if (e.getSource() == btnLast) {
-			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
-			last = true;
-		} else if (e.getSource() == menuItemCopyURL) {
-			actionCopyURLs();
-		} else if (e.getSource() == menuItemOpenURL) {
-			actionOpenURLs();
-		} else if (e.getSource() == menuItemOpenDirectory) {
-			actionOpenDirectories();
-		}
-	}
-
 	/**
 	 * Reload logs
 	 */
@@ -333,55 +349,6 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
 			changed = false;
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if ((e.getButton() == 3) && (!DownloadQueueManager.instance().isDownloading()) && (jtLog.getSelectedRowCount() > 0)) { // Rightclick
-			SwingUtilities.updateComponentTreeUI(popupMenu);
-			popupMenu.show(e.getComponent(), e.getX(), e.getY());
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e) {
 	}
 
 	/**
@@ -405,83 +372,37 @@ public class Log extends JPanel implements ActionListener, MouseListener, TableC
 		TableTool.applyColWidths(jtLog, SettingsManager.instance().getColWidthsLog());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.settings.ISettingsListener#settingsChanged()
-	 */
-	@Override
-	public void settingsChanged() {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.log.ILogManagerListener#logChanged()
-	 */
 	@Override
 	public void logChanged() {
-		changed = true;
-		if (changed && last && Main.instance().isTabSelected(this)) {
-			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
-			changed = false;
+		if (EventQueue.isDispatchThread()) {
+			changed = true;
+			reloadLogs();
+		} else {
+			try {
+				EventQueue.invokeAndWait(() -> {
+					changed = true;
+					reloadLogs();
+				});
+			} catch (InvocationTargetException | InterruptedException e) {
+				logger.error("Could not read logs", e);
+			}
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.log.ILogManagerListener#currentLogFileChanged()
-	 */
 	@Override
 	public void currentLogFileChanged() {
-		updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
-		last = true;
+		if (EventQueue.isDispatchThread()) {
+			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+			last = true;
+		} else {
+			try {
+				EventQueue.invokeAndWait(() -> {
+					updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+					last = true;
+				});
+			} catch (InvocationTargetException | InterruptedException e) {
+				logger.error("Could not read logs", e);
+			}
+		}
 	}
 }

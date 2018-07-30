@@ -18,11 +18,8 @@ import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyA
 /**
  * Editor-Component for Keywords
  */
-public class KeywordCellEditorComponent extends JPanel implements ActionListener {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -1695172104892889362L;
+public class KeywordCellEditorComponent extends JPanel {
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * TextField
@@ -44,7 +41,21 @@ public class KeywordCellEditorComponent extends JPanel implements ActionListener
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtPath);
 		txtPath.setEditable(false);
-		btnPath.addActionListener(this);
+		btnPath.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				String dir = txtPath.getText();
+				File fDir = new File(dir);
+				if (!(fDir.exists() && fDir.isDirectory())) {
+					dir = SettingsManager.instance().getSavePath();
+				}
+				File file = FileDialogTool.showFolderDialog(KeywordCellEditorComponent.this, dir, null);
+				if (file != null) {
+					String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+					txtPath.setText(folder);
+				}
+			}
+		});
 	}
 
 	/**
@@ -80,33 +91,7 @@ public class KeywordCellEditorComponent extends JPanel implements ActionListener
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnPath) {
-			String dir = txtPath.getText();
-			File fDir = new File(dir);
-			if ((fDir.exists() && fDir.isDirectory()) == false) {
-				dir = SettingsManager.instance().getSavePath();
-			}
-			fDir = null;
-			File file = FileDialogTool.showFolderDialog(this, dir, null);
-			if (file != null) {
-				String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
-				txtPath.setText(folder);
-				file = null;
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.Component#toString()
-	 */
-	@Override
 	public String toString() {
-		String newPath = txtPath.getText();
-		newPath = BHUtil.filterPath(newPath);
-		newPath = FileTool.reducePathLength(newPath);
-		return newPath;
+		return getPath();
 	}
 }

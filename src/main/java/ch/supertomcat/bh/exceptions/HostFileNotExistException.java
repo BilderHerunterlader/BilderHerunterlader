@@ -8,13 +8,11 @@ package ch.supertomcat.bh.exceptions;
  * a normal HostException should be thrown.
  */
 public class HostFileNotExistException extends HostException {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 1846879131264654095L;
-	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
+	 * 
 	 * @param s Message
 	 */
 	public HostFileNotExistException(String s) {

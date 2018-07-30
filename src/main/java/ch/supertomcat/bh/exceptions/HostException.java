@@ -4,13 +4,11 @@ package ch.supertomcat.bh.exceptions;
  * This exception will be thrown by hostclasses
  */
 public class HostException extends Exception {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 6546559027650371022L;
-	
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Constructor
+	 * 
 	 * @param message Message
 	 */
 	public HostException(String message) {
@@ -19,6 +17,7 @@ public class HostException extends Exception {
 
 	/**
 	 * Constructor
+	 * 
 	 * @param message Message
 	 * @param cause Cause
 	 */

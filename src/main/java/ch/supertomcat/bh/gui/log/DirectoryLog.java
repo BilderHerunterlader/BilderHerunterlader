@@ -2,17 +2,17 @@ package ch.supertomcat.bh.gui.log;
 
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.HashSet;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -51,28 +51,30 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColo
 import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
 
 /**
- * 
+ * Directory Log
  */
-public class DirectoryLog extends JPanel implements ActionListener, IProgressObserver, MouseListener {
+public class DirectoryLog extends JPanel {
+	private static final long serialVersionUID = 1L;
+
 	/**
-	 * UID
+	 * Date Format
 	 */
-	private static final long serialVersionUID = 5907100131845566233L;
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
 
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(DirectoryLog.class);
-
-	/**
-	 * Table
-	 */
-	private JTable jtLog = null;
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * TabelModel
 	 */
 	private DirectoryLogTableModel model = new DirectoryLogTableModel();
+
+	/**
+	 * Table
+	 */
+	private JTable jtLog = new JTable(model);
 
 	/**
 	 * Label
@@ -139,7 +141,7 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 	/**
 	 * DefaultStringColorRowRenderer
 	 */
-	private DefaultStringColorRowRenderer crr;
+	private DefaultStringColorRowRenderer crr = new DefaultStringColorRowRenderer();
 
 	private boolean initialized = false;
 
@@ -147,7 +149,6 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 	 * Constructor
 	 */
 	public DirectoryLog() {
-		jtLog = new JTable(model);
 		TableTool.internationalizeColumns(jtLog);
 		setLayout(new BorderLayout());
 		jtLog.getColumn("DateTime").setMinWidth(100);
@@ -160,7 +161,7 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 		jtLog.setRowHeight(TableTool.calculateRowHeight(jtLog, false, true));
 
 		popupMenu.add(menuItemOpenDirectory);
-		menuItemOpenDirectory.addActionListener(this);
+		menuItemOpenDirectory.addActionListener(e -> actionOpenDirectories());
 
 		TitledBorder brdFilter = BorderFactory.createTitledBorder(Localization.getString("Filter"));
 		pnlFilter.setBorder(brdFilter);
@@ -199,7 +200,7 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 		pgStatus.setVisible(false);
 
 		JPanel pnlInternalButtons = new JPanel();
-		btnReload.addActionListener(this);
+		btnReload.addActionListener(e -> reloadLogs());
 		pnlInternalButtons.add(btnReload);
 		pnlInternalButtons.add(btnFilter);
 
@@ -216,14 +217,29 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 		JScrollPane jsp = new JScrollPane(jtLog);
 		add(jsp, BorderLayout.CENTER);
 
-		btnFilterApply.addActionListener(this);
+		btnFilterApply.addActionListener(e -> reloadLogs());
 
 		add(pnlP, BorderLayout.NORTH);
 
-		crr = new DefaultStringColorRowRenderer();
 		jtLog.setDefaultRenderer(Object.class, crr);
 
-		jtLog.addMouseListener(this);
+		jtLog.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.isPopupTrigger() && jtLog.getSelectedRowCount() > 0) {
+					SwingUtilities.updateComponentTreeUI(popupMenu);
+					popupMenu.show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.isPopupTrigger() && jtLog.getSelectedRowCount() > 0) {
+					SwingUtilities.updateComponentTreeUI(popupMenu);
+					popupMenu.show(e.getComponent(), e.getX(), e.getY());
+				}
+			}
+		});
 	}
 
 	/**
@@ -274,42 +290,16 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 		t = null;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnFilterApply || e.getSource() == btnReload) {
-			try {
-				int dirCount = Integer.parseInt(txtDirCount.getText());
-				SettingsManager.instance().setDirectoryLogDirCount(dirCount);
-			} catch (NumberFormatException nfe) {
-				txtDirCount.setText(String.valueOf(SettingsManager.instance().getDirectoryLogDirCount()));
-			}
-			SettingsManager.instance().setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
-			SettingsManager.instance().writeSettings(true);
-			readLogs();
-		} else if (e.getSource() == menuItemOpenDirectory) {
-			actionOpenDirectories();
+	private void reloadLogs() {
+		try {
+			int dirCount = Integer.parseInt(txtDirCount.getText());
+			SettingsManager.instance().setDirectoryLogDirCount(dirCount);
+		} catch (NumberFormatException nfe) {
+			txtDirCount.setText(String.valueOf(SettingsManager.instance().getDirectoryLogDirCount()));
 		}
-	}
-
-	/**
-	 * Get-Method
-	 * 
-	 * @param dateTime DateTime
-	 * @return Formatted date and time
-	 */
-	private String getDateTime(long dateTime) {
-		String retval = "";
-		if (dateTime < 0) {
-			return retval;
-		}
-		DateFormat df = new SimpleDateFormat();
-		retval = df.format(new Date(dateTime));
-		return retval;
+		SettingsManager.instance().setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
+		SettingsManager.instance().writeSettings(true);
+		readLogs();
 	}
 
 	/**
@@ -319,7 +309,6 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-
 				lblStatus.setText(Localization.getString("DirectoryLogLoading"));
 
 				model.removeAllRows();
@@ -341,7 +330,8 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 					}
 				}
 				ProgressObserver progress = new ProgressObserver();
-				progress.addProgressListener(DirectoryLog.this);
+				DirectoryLogProgressObserver progressListener = new DirectoryLogProgressObserver();
+				progress.addProgressListener(progressListener);
 				List<DirectoryLogObject> dirs = LogManager.instance().readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
 				if (dirs != null) {
 
@@ -350,7 +340,8 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 					int maxSize = dirs.size() < maxDirs ? dirs.size() : maxDirs;
 
 					for (int i = dirs.size() - maxSize; i < dirs.size(); i++) {
-						model.addRow(getDateTime(dirs.get(i).getDateTime()), dirs.get(i).getDirectory(), dirs.get(i).isExists());
+						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dirs.get(i).getDateTime()), ZoneId.systemDefault());
+						model.addRow(dateTime.format(DATE_FORMAT), dirs.get(i).getDirectory(), dirs.get(i).isExists());
 					}
 					String status = Localization.getString("OnlyTheLastFilesAreShownDirectoryLog");
 					status = status.replaceAll("\\$DIRCOUNT", String.valueOf(maxDirs));
@@ -358,87 +349,69 @@ public class DirectoryLog extends JPanel implements ActionListener, IProgressObs
 				} else {
 					lblStatus.setText(Localization.getString("DirectoryLogLoadingFailed"));
 				}
+				progress.removeProgressListener(progressListener);
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
 
-	@Override
-	public void progressChanged(final int val) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				pgStatus.setValue(val);
-			}
-		});
-	}
-
-	@Override
-	public void progressChanged(final int min, final int max, final int val) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				pgStatus.setMinimum(min);
-				pgStatus.setMaximum(max);
-				pgStatus.setValue(val);
-			}
-		});
-	}
-
-	@Override
-	public void progressChanged(final String text) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				pgStatus.setString(text);
-			}
-		});
-	}
-
-	@Override
-	public void progressChanged(final boolean visible) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				pgStatus.setVisible(visible);
-			}
-		});
-	}
-
-	@Override
-	public void progressIncreased() {
-	}
-
-	@Override
-	public void progressModeChanged(boolean indeterminate) {
-	}
-
-	@Override
-	public void progressCompleted() {
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if ((e.getButton() == 3) && (jtLog.getSelectedRowCount() > 0)) { // Rightclick
-			SwingUtilities.updateComponentTreeUI(popupMenu);
-			popupMenu.show(e.getComponent(), e.getX(), e.getY());
+	/**
+	 * Progress Observer for reading log
+	 */
+	private class DirectoryLogProgressObserver implements IProgressObserver {
+		@Override
+		public void progressIncreased() {
 		}
-	}
 
-	@Override
-	public void mousePressed(MouseEvent e) {
-	}
+		@Override
+		public void progressChanged(int val) {
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					pgStatus.setValue(val);
+				}
+			});
+		}
 
-	@Override
-	public void mouseReleased(MouseEvent e) {
-	}
+		@Override
+		public void progressChanged(int min, int max, int val) {
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					pgStatus.setMinimum(min);
+					pgStatus.setMaximum(max);
+					pgStatus.setValue(val);
+				}
+			});
+		}
 
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
+		@Override
+		public void progressChanged(String text) {
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					pgStatus.setString(text);
+				}
+			});
+		}
 
-	@Override
-	public void mouseExited(MouseEvent e) {
+		@Override
+		public void progressChanged(boolean visible) {
+			EventQueue.invokeLater(new Runnable() {
+				@Override
+				public void run() {
+					pgStatus.setVisible(visible);
+				}
+			});
+		}
+
+		@Override
+		public void progressModeChanged(boolean indeterminate) {
+		}
+
+		@Override
+		public void progressCompleted() {
+		}
 	}
 }

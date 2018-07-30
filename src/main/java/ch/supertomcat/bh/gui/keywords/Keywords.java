@@ -61,7 +61,7 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColo
 /**
  * Panel containing the Keywords-Table
  */
-public class Keywords extends JPanel implements ActionListener, MouseListener, TableColumnModelListener {
+public class Keywords extends JPanel implements ActionListener, MouseListener {
 	/**
 	 * UID
 	 */
@@ -240,7 +240,28 @@ public class Keywords extends JPanel implements ActionListener, MouseListener, T
 		jtKeywords.getColumn("Folder").setMinWidth(200);
 		jtKeywords.getColumn("RelativeFolder").setMinWidth(200);
 		updateColWidthsFromSettingsManager();
-		jtKeywords.getColumnModel().addColumnModelListener(this);
+		jtKeywords.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+			}
+		});
 		jtKeywords.setRowHeight(TableTool.calculateRowHeight(jtKeywords, true, true));
 		jtKeywords.getTableHeader().setReorderingAllowed(false);
 		jtKeywords.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
@@ -512,11 +533,6 @@ public class Keywords extends JPanel implements ActionListener, MouseListener, T
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (running) {
@@ -738,51 +754,5 @@ public class Keywords extends JPanel implements ActionListener, MouseListener, T
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
 			TableTool.applyColWidths(jtKeywords, SettingsManager.instance().getColWidthsKeywords());
 		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
 	}
 }

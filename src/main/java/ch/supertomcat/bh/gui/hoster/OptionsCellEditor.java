@@ -19,7 +19,7 @@ public class OptionsCellEditor extends AbstractCellEditor implements TableCellEd
 	/**
 	 * TableModel
 	 */
-	private HosterTableModel htm = null;
+	private HosterTableModel htm;
 
 	/**
 	 * ComboBox
@@ -37,14 +37,15 @@ public class OptionsCellEditor extends AbstractCellEditor implements TableCellEd
 
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
-		pnl = htm.getOptionPanel(row);
+		pnl = htm.getOptionPanel(table.convertRowIndexToModel(row));
 		return pnl;
 	}
 
 	@Override
 	public Object getCellEditorValue() {
-		if (pnl == null)
+		if (pnl == null) {
 			return "";
+		}
 		return pnl;
 	}
 }

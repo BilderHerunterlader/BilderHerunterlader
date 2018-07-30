@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.gui.hoster;
 
 import java.awt.BorderLayout;
-import java.util.List;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -30,7 +29,7 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColo
 /**
  * Panel for Hostclasses
  */
-public class HosterPanel extends JPanel implements TableColumnModelListener {
+public class HosterPanel extends JPanel {
 	/**
 	 * UID
 	 */
@@ -42,14 +41,14 @@ public class HosterPanel extends JPanel implements TableColumnModelListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Table
-	 */
-	private JTable jtHoster;
-
-	/**
 	 * TabelModel
 	 */
 	private HosterTableModel model = new HosterTableModel();
+
+	/**
+	 * Table
+	 */
+	private JTable jtHoster = new JTable(model);
 
 	/**
 	 * Special renderer for option buttons
@@ -60,8 +59,6 @@ public class HosterPanel extends JPanel implements TableColumnModelListener {
 	 * Constructor
 	 */
 	public HosterPanel() {
-		jtHoster = new JTable(model);
-
 		TableTool.internationalizeColumns(jtHoster);
 
 		model.addTableModelListener(new TableModelListener() {
@@ -90,7 +87,28 @@ public class HosterPanel extends JPanel implements TableColumnModelListener {
 		jtHoster.getColumn("Settings").setCellRenderer(ocr);
 		jtHoster.getColumn("Settings").setCellEditor(new OptionsCellEditor(model));
 		updateColWidthsFromSettingsManager();
-		jtHoster.getColumnModel().addColumnModelListener(this);
+		jtHoster.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+			}
+		});
 		jtHoster.getTableHeader().setReorderingAllowed(false);
 		jtHoster.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtHoster.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
@@ -108,14 +126,12 @@ public class HosterPanel extends JPanel implements TableColumnModelListener {
 	 * Load hosters
 	 */
 	private void loadHoster() {
-		List<IRedirect> redirects = HostManager.instance().getRedirectManager().getRedirects();
-		for (int i = 0; i < redirects.size(); i++) {
-			model.addRow(redirects.get(i));
+		for (IRedirect redirect : HostManager.instance().getRedirectManager().getRedirects()) {
+			model.addRow(redirect);
 		}
 
-		List<Host> hosts = HostManager.instance().getHosters();
-		for (int i = 0; i < hosts.size(); i++) {
-			model.addRow(hosts.get(i));
+		for (Host host : HostManager.instance().getHosters()) {
+			model.addRow(host);
 		}
 	}
 
@@ -138,26 +154,5 @@ public class HosterPanel extends JPanel implements TableColumnModelListener {
 			return;
 		}
 		TableTool.applyColWidths(jtHoster, SettingsManager.instance().getColWidthsHosts());
-	}
-
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
 	}
 }

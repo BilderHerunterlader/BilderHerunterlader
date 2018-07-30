@@ -17,8 +17,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -94,14 +96,14 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private Object syncObject = new Object();
 
 	/**
-	 * Table
-	 */
-	private JTable jtQueue = null;
-
-	/**
 	 * TabelModel
 	 */
 	private QueueTableModel model = new QueueTableModel();
+
+	/**
+	 * Table
+	 */
+	private JTable jtQueue = new JTable(model);
 
 	/**
 	 * Renderer for ProgressBars
@@ -229,20 +231,18 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	/**
 	 * Scrollpane
 	 */
-	private JScrollPane jsp;
+	private JScrollPane jsp = new JScrollPane(jtQueue);
 
 	/**
 	 * QueueColorRowRenderer
 	 */
-	private QueueColorRowRenderer crr;
+	private QueueColorRowRenderer crr = new QueueColorRowRenderer();
 
 	/**
 	 * Constructor
 	 */
 	public Queue() {
 		setLayout(new BorderLayout());
-
-		jtQueue = new JTable(model);
 
 		TableTool.internationalizeColumns(jtQueue);
 
@@ -267,7 +267,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		jtQueue.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		jtQueue.setRowHeight(TableTool.calculateRowHeight(jtQueue, false, true));
 
-		jsp = new JScrollPane(jtQueue);
 		add(jsp, BorderLayout.CENTER);
 
 		btnStart.setMnemonic(KeyEvent.VK_S);
@@ -324,7 +323,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		menuImport.add(itemExportQueue);
 		menuImport.add(itemSort);
 
-		crr = new QueueColorRowRenderer();
 		jtQueue.setDefaultRenderer(Object.class, crr);
 
 		// Load downloadqueue
@@ -376,12 +374,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 * Start
 	 */
 	private void actionStart() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				QueueManager.instance().startDownload();
-			}
-		});
+		Thread t = new Thread(() -> QueueManager.instance().startDownload());
 		t.start();
 	}
 
@@ -389,12 +382,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 * Stop
 	 */
 	private void actionStop() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				QueueManager.instance().stopDownload();
-			}
-		});
+		Thread t = new Thread(() -> QueueManager.instance().stopDownload());
 		t.start();
 	}
 
@@ -402,15 +390,13 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 * CopyURLs
 	 */
 	private void actionCopyURLs() {
-		int s[] = jtQueue.getSelectedRows();
-		StringBuilder content = new StringBuilder("");
-		for (int i = 0; i < s.length; i++) {
-			content.append((String)model.getValueAt(s[i], 0));
-			if (s.length > 1) {
-				content.append("\n");
+		StringJoiner content = new StringJoiner("\n");
+		synchronized (syncObject) {
+			for (int selectedRow : jtQueue.getSelectedRows()) {
+				content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
 			}
 		}
-		if (s.length > 0) {
+		if (content.length() > 0) {
 			ClipboardObserver.instance().setClipboardContent(content.toString());
 		}
 	}
@@ -419,10 +405,11 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 * OpenURLs
 	 */
 	private void actionOpenURLs() {
-		final ArrayList<String> urls = new ArrayList<>();
-		int s[] = jtQueue.getSelectedRows();
-		for (int i = 0; i < s.length; i++) {
-			urls.add((String)model.getValueAt(s[i], 0));
+		final List<String> urls = new ArrayList<>();
+		synchronized (syncObject) {
+			for (int selectedRow : jtQueue.getSelectedRows()) {
+				urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
+			}
 		}
 
 		Thread t = new Thread(new Runnable() {
@@ -443,24 +430,24 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	/**
 	 * OpenThreadURLs
 	 */
 	private void actionOpenThreadURLs() {
-		final ArrayList<String> urls = new ArrayList<>();
-		int s[] = jtQueue.getSelectedRows();
-		String url;
-		for (int i = 0; i < s.length; i++) {
-			try {
-				url = QueueManager.instance().getPicByIndex(s[i]).getThreadURL();
-				if (url.length() > 0) {
-					urls.add(url);
+		final List<String> urls = new ArrayList<>();
+		synchronized (QueueManager.instance().getSyncObject()) {
+			synchronized (syncObject) {
+				for (int selectedRow : jtQueue.getSelectedRows()) {
+					Pic pic = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
+					if (pic != null) {
+						String url = pic.getThreadURL();
+						if (!url.isEmpty()) {
+							urls.add(url);
+						}
+					}
 				}
-			} catch (NullPointerException e) {
-				logger.error("No Thread-URL found for " + model.getValueAt(s[i], 0));
 			}
 		}
 
@@ -507,8 +494,13 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 					pg.progressChanged(Localization.getString("DeleteEntries"));
 					synchronized (QueueManager.instance().getSyncObject()) {
 						synchronized (syncObject) {
-							int s[] = jtQueue.getSelectedRows();
-							QueueManager.instance().removePics(s);
+							int[] selectedRows = jtQueue.getSelectedRows();
+							int[] selectedModelRows = new int[selectedRows.length];
+							for (int i = 0; i < selectedRows.length; i++) {
+								selectedModelRows[i] = jtQueue.convertRowIndexToModel(selectedRows[i]);
+							}
+							Arrays.sort(selectedModelRows);
+							QueueManager.instance().removePics(selectedModelRows);
 						}
 					}
 					Main.instance().removeProgressObserver(pg);
@@ -623,6 +615,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetByInput() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
+				// TODO convertRowIndexToModel
 				int s[] = jtQueue.getSelectedRows();
 				String defaultPath = SettingsManager.instance().getSavePath();
 				if (s.length == 1) {
@@ -658,6 +651,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetBySelection() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
+				// TODO convertRowIndexToModel
 				File file = FileDialogTool.showFolderDialog(this, SettingsManager.instance().getSavePath(), null);
 				if (file != null) {
 					String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
@@ -682,6 +676,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetFilename() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
+				// TODO convertRowIndexToModel
 				String defaultvalue = "";
 				int s[] = jtQueue.getSelectedRows();
 				if (s.length > 0) {
@@ -747,6 +742,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionActivate() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
+				// TODO convertRowIndexToModel
 				int s[] = jtQueue.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
 					QueueManager.instance().getPicByIndex(s[i]).setDeactivated(false);
@@ -763,6 +759,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionDeactivate() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
+				// TODO convertRowIndexToModel
 				int s[] = jtQueue.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
 					QueueManager.instance().getPicByIndex(s[i]).setDeactivated(true);
@@ -791,11 +788,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		btnParseLinks.setEnabled(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnStart) {
@@ -929,11 +921,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 				+ overallDownloadedBytes + " (" + sessionDownloadedBytes + ") | " + Localization.getString("DownloadBitrate") + ": " + downloadRate);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IQueueDataListener#sessionDownloadedBytesChanged(long)
-	 */
 	@Override
 	public void sessionDownloadedBytesChanged(long count) {
 		EventQueue.invokeLater(new Runnable() {
@@ -944,11 +931,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IQueueDataListener#sessionDownloadedFilesChanged(int)
-	 */
 	@Override
 	public void sessionDownloadedFilesChanged(int count) {
 		EventQueue.invokeLater(new Runnable() {
@@ -959,11 +941,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		});
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IDownloadQueueManagerListener#totalDownloadRateCalculated(double)
-	 */
 	@Override
 	public void totalDownloadRateCalculated(double downloadRate) {
 		EventQueue.invokeLater(new Runnable() {
@@ -995,57 +972,27 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		TableTool.applyColWidths(jtQueue, SettingsManager.instance().getColWidthsQueue());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
 	@Override
 	public void columnMarginChanged(ChangeEvent e) {
 		updateColWidthsToSettingsManager();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picAdded(ch.supertomcat.bh.pic.Pic)
-	 */
 	@Override
 	public void picAdded(final Pic pic) {
 		synchronized (syncObject) {
@@ -1070,11 +1017,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picRemoved(ch.supertomcat.bh.pic.Pic, int)
-	 */
 	@Override
 	public void picRemoved(final Pic pic, final int index) {
 		synchronized (syncObject) {
@@ -1100,11 +1042,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picsAdded(java.util.List)
-	 */
 	@Override
 	public void picsAdded(final List<Pic> pics) {
 		synchronized (syncObject) {
@@ -1133,11 +1070,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picsRemoved(int[])
-	 */
 	@Override
 	public void picsRemoved(final int[] removedIndeces) {
 		synchronized (syncObject) {
@@ -1148,6 +1080,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						model.removeRow(removedIndeces[i]);
 					}
 					model.fireTableDataChanged();
+					// TODO convertRowIndexToView
 					if (removedIndeces[0] < jtQueue.getRowCount()) {
 						jtQueue.setRowSelectionInterval(removedIndeces[0], removedIndeces[0]);
 					} else if ((removedIndeces[0] - 1) > -1) {
@@ -1170,12 +1103,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picProgressBarChanged(ch.supertomcat.bh.pic.Pic, int, int, int, java.lang.String, java.lang.String,
-	 * int)
-	 */
 	@Override
 	public void picProgressBarChanged(final Pic pic, final int min, final int max, final int val, final String s, final String errMsg, final int index) {
 		synchronized (syncObject) {
@@ -1186,9 +1113,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 					if ((row > -1) && (model.getRowCount() > row)) {
 						// force cell to be updated
 						Object o = model.getValueAt(row, 3);
-						if (o == null) {
-							return;
-						}
 
 						boolean valueIsAlreadyProgressBar = o instanceof JProgressBar;
 						boolean picIsNotDownloading = pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING
@@ -1240,11 +1164,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picSizeChanged(ch.supertomcat.bh.pic.Pic, int)
-	 */
 	@Override
 	public void picSizeChanged(final Pic pic, final int index) {
 		synchronized (syncObject) {
@@ -1278,11 +1197,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picTargetChanged(ch.supertomcat.bh.pic.Pic, int)
-	 */
 	@Override
 	public void picTargetChanged(final Pic pic, final int index) {
 		synchronized (syncObject) {
@@ -1311,11 +1225,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picStatusChanged(ch.supertomcat.bh.pic.Pic, int)
-	 */
 	@Override
 	public void picStatusChanged(final Pic pic, final int index) {
 		synchronized (syncObject) {
@@ -1346,11 +1255,6 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.QueueManagerListener#picDeactivatedChanged(ch.supertomcat.bh.pic.Pic, int)
-	 */
 	@Override
 	public void picDeactivatedChanged(Pic pic, final int index) {
 		synchronized (syncObject) {

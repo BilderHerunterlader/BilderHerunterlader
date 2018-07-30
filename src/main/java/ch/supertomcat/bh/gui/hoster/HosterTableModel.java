@@ -31,15 +31,12 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
  * TableModel for Hostclasses
  */
 public class HosterTableModel extends DefaultTableModel implements ISettingsListener {
+	private static final long serialVersionUID = 1L;
+
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(HosterTableModel.class);
-
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 1L;
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Panels
@@ -89,11 +86,15 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 		Object data[] = new Object[5];
 		data[0] = host;
 		data[1] = host.getVersion();
+		StringBuilder sbType = new StringBuilder();
 		if (host.isDeveloper()) {
-			data[2] = "Developer Host";
-		} else {
-			data[2] = "Host";
+			sbType.append("Developer ");
 		}
+		sbType.append("Host");
+		if (host instanceof IRedirect) {
+			sbType.append(" / Redirect");
+		}
+		data[2] = sbType.toString();
 		JPanel optionPanel = createOptionPanelForHost(host);
 		data[3] = optionPanel != null ? optionPanel : "";
 		panels.add(optionPanel);

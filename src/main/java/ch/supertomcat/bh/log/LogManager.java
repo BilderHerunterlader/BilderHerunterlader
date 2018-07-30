@@ -11,10 +11,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -42,6 +44,11 @@ import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver
  * Class for reading and writing log of downloaded URLs
  */
 public class LogManager implements ISettingsListener {
+	/**
+	 * Date Format
+	 */
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
+
 	/**
 	 * Singleton
 	 */
@@ -355,88 +362,85 @@ public class LogManager implements ISettingsListener {
 	 * @return long array: 0 -&gt; currentStart, 1 -&gt; end, 2 -&gt; lineCount
 	 */
 	public synchronized long[] readLogs(long start, LogTableModel model) {
-		try {
-			if (start > 0) {
-				start--;
-			}
-			File file = new File(logFile);
-			if (file.exists() == false) {
-				file.createNewFile();
-			}
-			file = null;
+		File file = new File(logFile);
+		if (!file.exists()) {
+			model.removeAllRows();
+			return new long[] { 1, 0, 0 };
+		}
 
-			// Count lines
-			long lineCount = 0;
-			try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-				while (br.readLine() != null) {
-					lineCount++;
-				}
-			}
-			if (lineCount > 0) {
-				lineCount--;
-			}
+		if (start > 0) {
+			start--;
+		}
 
-			long end;
-			if (start < 0) {
-				end = lineCount;
-				start = end - 99;
-				if (start < 0) {
-					start = 0;
-				}
-			} else {
-				end = start + 99;
-				if (end > (lineCount)) {
-					end = lineCount;
-				}
-				if ((start + 99) > end) {
-					start = (end - 99);
-				}
-			}
-
-			if (lineCount < 100) {
-				model.removeAllRows();
-			}
-
-			try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-				long lineCounter = 0;
-				String line;
-				while ((line = br.readLine()) != null) {
-					if (lineCounter >= start && lineCounter <= end) {
-						String arr[] = line.split("\t");
-						if (arr.length >= 3) {
-							try {
-								long dateTime = Long.parseLong(arr[0]);
-								String strDateTime = "";
-								if (dateTime >= 0) {
-									DateFormat df = new SimpleDateFormat();
-									strDateTime = df.format(new Date(dateTime));
-								}
-								String containerURL = arr[1];
-								String target = arr[2];
-								long filesize = 0;
-								if (arr.length >= 4) {
-									filesize = Long.parseLong(arr[3]);
-								}
-								String strFilesize = Localization.getString("Unkown");
-								if (filesize > 0) {
-									strFilesize = UnitFormatTool.getSizeString(filesize, SettingsManager.instance().getSizeView());
-								}
-
-								model.addRow(containerURL, target, strDateTime, strFilesize);
-							} catch (NumberFormatException nfe) {
-								logger.error(nfe.getMessage(), nfe);
-							}
-						}
-					}
-					lineCounter++;
-				}
-				if (start >= 0) {
-					start++;
-				}
-				return new long[] { start, end, lineCount };
+		// Count lines
+		long lineCount = 0;
+		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+			while (br.readLine() != null) {
+				lineCount++;
 			}
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+			logger.error("Could not count log lines in file: {}", logFile, e);
+			return new long[] { 1, 0, 0 };
+		}
+		if (lineCount > 0) {
+			lineCount--;
+		}
+
+		long end;
+		if (start < 0) {
+			end = lineCount;
+			start = end - 99;
+			if (start < 0) {
+				start = 0;
+			}
+		} else {
+			end = start + 99;
+			if (end > lineCount) {
+				end = lineCount;
+			}
+			if ((start + 99) > end) {
+				start = (end - 99);
+			}
+		}
+
+		if (lineCount < 100) {
+			model.removeAllRows();
+		}
+
+		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+			long lineCounter = 0;
+			String line;
+			while ((line = br.readLine()) != null) {
+				if (lineCounter >= start && lineCounter <= end) {
+					String arr[] = line.split("\t");
+					if (arr.length >= 3) {
+						try {
+							long timestamp = Long.parseLong(arr[0]);
+							LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+							String strDateTime = dateTime.format(DATE_FORMAT);
+							String containerURL = arr[1];
+							String target = arr[2];
+							String strFilesize;
+							if (arr.length >= 4) {
+								long filesize = Long.parseLong(arr[3]);
+								strFilesize = UnitFormatTool.getSizeString(filesize, SettingsManager.instance().getSizeView());
+							} else {
+								strFilesize = Localization.getString("Unkown");
+							}
+							model.addRow(containerURL, target, strDateTime, strFilesize);
+						} catch (NumberFormatException nfe) {
+							logger.error("Could not parse timestamp or filesize on line: {}", lineCounter, nfe);
+						}
+					}
+				}
+				lineCounter++;
+			}
+			if (start >= 0) {
+				start++;
+			}
+			return new long[] { start, end, lineCount };
+		} catch (IOException e) {
+			logger.error("Could not read log lines in file: {}", logFile, e);
 			return new long[] { 1, 0, 0 };
 		}
 	}
