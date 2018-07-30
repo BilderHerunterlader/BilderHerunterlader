@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.rules;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.jdom2.Element;
@@ -9,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 
@@ -83,19 +82,19 @@ public abstract class RulePipeline {
 	public static final int RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE = 10;
 
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(RulePipeline.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Mode
 	 */
-	int mode = Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
+	protected int mode = Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
 
 	/**
 	 * RuleRegExps
 	 */
-	List<RuleRegExp> regexps = new ArrayList<>();
+	protected List<RuleRegExp> regexps = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -120,18 +119,15 @@ public abstract class RulePipeline {
 			}
 		} catch (Exception ex) {
 		}
-		List<Element> childs = e.getChildren("regexp");
-		RuleRegExp regexp;
-		String search = "";
-		String replace = "";
-		for (int i = 0; i < childs.size(); i++) {
+
+		for (Element child : e.getChildren("regexp")) {
 			try {
-				search = childs.get(i).getAttributeValue("search");
-				replace = childs.get(i).getAttributeValue("replace");
-				regexp = new RuleRegExp(search, replace);
+				String search = child.getAttributeValue("search");
+				String replace = child.getAttributeValue("replace");
+				RuleRegExp regexp = new RuleRegExp(search, replace);
 				regexps.add(regexp);
 			} catch (Exception ex) {
-				logger.error(ex.getMessage());
+				logger.error("Could not parse regexp: {}", child, ex);
 			}
 		}
 	}
@@ -144,15 +140,10 @@ public abstract class RulePipeline {
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
 		e.setAttribute("mode", String.valueOf(this.mode));
-		Iterator<RuleRegExp> it = regexps.iterator();
-		RuleRegExp child;
-		while (it.hasNext()) {
-			child = it.next();
-
+		for (RuleRegExp regexp : regexps) {
 			Element elRegex = new Element("regexp");
-			elRegex.setAttribute("search", child.getSearch());
-			elRegex.setAttribute("replace", child.getReplace());
-
+			elRegex.setAttribute("search", regexp.getSearch());
+			elRegex.setAttribute("replace", regexp.getReplace());
 			e.addContent(elRegex);
 		}
 		return e;

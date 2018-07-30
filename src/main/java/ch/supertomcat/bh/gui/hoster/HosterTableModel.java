@@ -147,7 +147,7 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	 * @param redirect Redirect
 	 */
 	public void addRow(final IRedirect redirect) {
-		if (redirect == HostManager.instance().getHr()) {
+		if (redirect == HostManager.instance().getHostRules()) {
 			/*
 			 * Prevent double insertion of HostRules, because it is a Host, but also a IRedirect
 			 */

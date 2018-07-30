@@ -179,7 +179,7 @@ public class Rules extends JPanel {
 				if (rme.getCanceled()) {
 					return;
 				}
-				hm.getHr().addRule(r);
+				hm.getHostRules().addRule(r);
 				r.writeRule();
 				model.addRow(r);
 				sorter.sort();
@@ -236,7 +236,7 @@ public class Rules extends JPanel {
 						}
 					}
 					model.removeRow(rowModelIndex);
-					hm.getHr().removeRule(r);
+					hm.getHostRules().removeRule(r);
 				}
 			}
 		});
@@ -248,7 +248,7 @@ public class Rules extends JPanel {
 					Main.instance().addProgressObserver(pg);
 					pg.progressChanged(-1, -1, -1);
 					pg.progressChanged(Localization.getString("SavingRules"));
-					if (hm.getHr().saveAllRules()) {
+					if (hm.getHostRules().saveAllRules()) {
 						Main.instance().setMessage(Localization.getString("RulesSaved"));
 					} else {
 						Main.instance().setMessage(Localization.getString("RulesSaveFailed"));
@@ -272,7 +272,7 @@ public class Rules extends JPanel {
 	 * Load Rules
 	 */
 	private void loadRules() {
-		List<Rule> rules = HostManager.instance().getHr().getRules();
+		List<Rule> rules = HostManager.instance().getHostRules().getRules();
 		for (Rule rule : rules) {
 			model.addRow(rule);
 		}

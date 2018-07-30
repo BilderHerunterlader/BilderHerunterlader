@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.urlchecker;
 
 import java.util.List;
 
@@ -8,7 +8,7 @@ import ch.supertomcat.bh.pic.URL;
  * Listener for the Adder-Panel to detect when the URLs
  * are parsed or to update the Progressbar.
  */
-public interface IHostURLCheckerListener {
+public interface HostURLCheckerListener {
 	/**
 	 * URLs are parsed
 	 * 

@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.hostimpl;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.IHoster;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
 import ch.supertomcat.supertomcattools.httptools.HTTPTool;

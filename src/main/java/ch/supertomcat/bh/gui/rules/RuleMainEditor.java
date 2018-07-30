@@ -223,7 +223,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 			chkDeveloper.setEnabled(false);
 		}
 
-		chkDeveloper.setVisible(HostManager.instance().getHr().isDeveloperRulesEnabled());
+		chkDeveloper.setVisible(HostManager.instance().getHostRules().isDeveloperRulesEnabled());
 
 		pnlGeneral.setLayout(gbl);
 

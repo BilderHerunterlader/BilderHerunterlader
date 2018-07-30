@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.supertomcat.bh.hoster.classloader.HostClassesLoader;
+import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.pic.URL;
 
 /**
@@ -13,14 +14,12 @@ public class RedirectManager {
 	/**
 	 * Redirects
 	 */
-	private List<IRedirect> redirects = null;
+	private List<IRedirect> redirects = HostClassesLoader.loadRedirectClasses();
 
 	/**
 	 * Constructor
 	 */
 	public RedirectManager() {
-		// Load the redirect-classes
-		redirects = HostClassesLoader.loadRedirectClasses();
 	}
 
 	/**
@@ -47,7 +46,7 @@ public class RedirectManager {
 	 * @return Rule
 	 */
 	public IRedirect getRedirect(int index) {
-		if (index >= redirects.size()) {
+		if (index < 0 || index >= redirects.size()) {
 			return null;
 		}
 		return redirects.get(index);
@@ -60,9 +59,9 @@ public class RedirectManager {
 	 * @return Version
 	 */
 	public String getRedirectVersion(String name) {
-		for (int i = 0; i < redirects.size(); i++) {
-			if (redirects.get(i).getName().equals(name)) {
-				return redirects.get(i).getVersion();
+		for (IRedirect redirect : redirects) {
+			if (redirect.getName().equals(name)) {
+				return redirect.getVersion();
 			}
 		}
 		return "";
@@ -76,9 +75,9 @@ public class RedirectManager {
 	 * @return Container-URL
 	 */
 	public String checkURLForRedirect(URL url) {
-		for (int o = 0; o < redirects.size(); o++) {
-			if (redirects.get(o).isEnabled() && redirects.get(o).isFromThisRedirect(url)) {
-				return redirects.get(o).getURL(url);
+		for (IRedirect redirect : redirects) {
+			if (redirect.isEnabled() && redirect.isFromThisRedirect(url)) {
+				return redirect.getURL(url);
 			}
 		}
 		return url.getURL();

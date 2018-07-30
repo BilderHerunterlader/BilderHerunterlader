@@ -23,7 +23,7 @@ import ch.supertomcat.bh.gui.queue.DownloadAddDialog;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.pic.URL;

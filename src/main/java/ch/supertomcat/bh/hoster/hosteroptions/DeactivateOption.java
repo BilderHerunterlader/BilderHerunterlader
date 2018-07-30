@@ -6,9 +6,9 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * OverrideDirectoryOption
  */
 public class DeactivateOption {
-	private String optionPrefix = "";
+	private final String optionPrefix;
 
-	private boolean deactivated = false;
+	private boolean deactivated;
 
 	/**
 	 * Constructor

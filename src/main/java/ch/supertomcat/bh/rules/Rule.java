@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.rules;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -9,7 +8,6 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.SortedMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -25,10 +23,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.hoster.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.Hoster;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
@@ -572,16 +570,7 @@ public class Rule extends Hoster {
 	 * @return Available
 	 */
 	private boolean isEncodingAvailable(String encoding) {
-		SortedMap<String, Charset> encodings = Charset.availableCharsets();
-		Iterator<String> ite = encodings.keySet().iterator();
-		Charset charset = null;
-		while (ite.hasNext()) {
-			charset = encodings.get(ite.next());
-			if (charset.name().equals(encoding)) {
-				return true;
-			}
-		}
-		return false;
+		return Charset.availableCharsets().containsKey(encoding);
 	}
 
 	private String getFilenamePart(String url) {
@@ -843,29 +832,18 @@ public class Rule extends Hoster {
 	 */
 	public boolean writeRule() {
 		File settingsPath = new File(ApplicationProperties.getProperty("ApplicationPath") + "rules");
-		try {
-			// If the directory does not exist, create it
-			if (settingsPath.exists() == false) {
-				settingsPath.mkdirs();
-			}
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+
+		// If the directory does not exist, create it
+		if (!settingsPath.exists()) {
+			settingsPath.mkdirs();
 		}
-		settingsPath = null;
 
 		// Get the the Element
 		Element root = getXmlElement();
 		// Create new document
 		Document doc = new Document(root);
 		File file = new File(strFile);
-		try {
-			if (file.exists() == false) {
-				// If the file does not exist, create it
-				file.createNewFile();
-			}
-
-			// Open the outputstream
-			FileOutputStream fos = new FileOutputStream(file);
+		try (FileOutputStream fos = new FileOutputStream(file)) {
 			// Create new outputter
 			XMLOutputter serializer = new XMLOutputter();
 			// This will create nice formated xml-file
@@ -874,22 +852,11 @@ public class Rule extends Hoster {
 			serializer.output(doc, fos);
 			// Close the file
 			fos.flush();
-			fos.close();
-			serializer = null;
-			fos = null;
-			doc = null;
-			root = null;
-			file = null;
 			return true;
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-		} catch (Exception e) {
-			logger.error(e.getMessage(), e);
+			logger.error("Could not save rule {} {}: {}", name, version, file.getAbsolutePath(), e);
+			return false;
 		}
-		file = null;
-		return false;
 	}
 
 	/**
@@ -1261,21 +1228,11 @@ public class Rule extends Hoster {
 		this.sendCookies = sendCookies;
 	}
 
-	/**
-	 * Returns the enabled
-	 * 
-	 * @return enabled
-	 */
 	@Override
 	public boolean isEnabled() {
 		return !deactivateOption.isDeactivated();
 	}
 
-	/**
-	 * Sets the enabled
-	 * 
-	 * @param enabled enabled
-	 */
 	@Override
 	public void setEnabled(boolean enabled) {
 		deactivateOption.setDeactivated(!enabled);
@@ -1324,11 +1281,6 @@ public class Rule extends Hoster {
 		this.reduceFilenameLength = reduceFilenameLength;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.hoster.Hoster#removeDuplicateEqualsMethod(ch.supertomcat.bh.pic.URL, ch.supertomcat.bh.pic.URL)
-	 */
 	@Override
 	public boolean removeDuplicateEqualsMethod(URL url1, URL url2) {
 		boolean sameURL = super.removeDuplicateEqualsMethod(url1, url2);

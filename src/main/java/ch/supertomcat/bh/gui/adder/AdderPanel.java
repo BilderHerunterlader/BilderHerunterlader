@@ -84,11 +84,11 @@ import ch.supertomcat.bh.gui.queue.FileRenameDialog;
 import ch.supertomcat.bh.gui.queue.PathRenameDialog;
 import ch.supertomcat.bh.gui.renderer.AdderColorRowRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
-import ch.supertomcat.bh.hoster.HostURLChecker;
 import ch.supertomcat.bh.hoster.Hoster;
-import ch.supertomcat.bh.hoster.IHostURLCheckerListener;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOverrideDirectoryOption;
 import ch.supertomcat.bh.hoster.hosteroptions.OverrideDirectoryOption;
+import ch.supertomcat.bh.hoster.urlchecker.HostURLCheckerListener;
+import ch.supertomcat.bh.hoster.urlchecker.HostURLCheckerRunnable;
 import ch.supertomcat.bh.importexport.Tsv;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -490,9 +490,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private JMenuItem menuItemTableHeaderTargetFolderOverrideValue = new JCheckBoxMenuItem(Localization.getString("TargetFolderOverrideValue"), false);
 
 	/**
-	 * HostURLChecker
+	 * HostURLCheckerRunnable
 	 */
-	private HostURLChecker huc = null;
+	private HostURLCheckerRunnable huc = null;
 
 	private AdderHostURLCheckerListener hostURLCheckerListener = new AdderHostURLCheckerListener();
 
@@ -962,7 +962,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		this.setPGText(Localization.getString("CheckingLinks") + "...");
 		this.setPGEnabled(true);
 		setComponentsEnabled(false, true);
-		huc = new HostURLChecker(urlList);
+		huc = new HostURLCheckerRunnable(urlList);
 		huc.addHMListener(hostURLCheckerListener);
 		huc.checkURLs();
 	}
@@ -2065,7 +2065,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	/**
 	 * Listener for URL Checking
 	 */
-	private class AdderHostURLCheckerListener implements IHostURLCheckerListener {
+	private class AdderHostURLCheckerListener implements HostURLCheckerListener {
 		@Override
 		public void linksChecked(List<URL> urls) {
 			if (huc != null) {
@@ -2082,7 +2082,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 			/*
 			 * We have to use the removeDuplicates-Method here again, because
-			 * new links could have been added by HostURLChecker.
+			 * new links could have been added by HostURLCheckerRunnable.
 			 */
 			setComponentsEnabled(false, false);
 			ProgressObserver progress = new ProgressObserver();

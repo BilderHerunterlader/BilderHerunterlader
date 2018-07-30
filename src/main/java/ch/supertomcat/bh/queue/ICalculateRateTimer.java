@@ -1,8 +1,7 @@
 package ch.supertomcat.bh.queue;
 
 /**
- * 
- *
+ * Interface for download rate calculation
  */
 public interface ICalculateRateTimer {
 	/**

@@ -12,24 +12,25 @@ public class OverrideDirectoryOption {
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(OverrideDirectoryOption.class);
-	
-	private String optionPrefix = "";
-	
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	private final String optionPrefix;
+
 	private boolean pathOverride = false;
-	
+
 	private String pathOverrideVal = SettingsManager.instance().getSavePath();
-	
+
 	private boolean pathOverrideSubdirsAllowed = true;
-	
+
 	/**
 	 * Constructor
+	 * 
 	 * @param optionPrefix Prefix
 	 */
 	public OverrideDirectoryOption(String optionPrefix) {
 		optionPrefix = optionPrefix.replaceAll("[.]+$", "");
 		this.optionPrefix = optionPrefix;
-		
+
 		try {
 			pathOverride = SettingsManager.instance().getBooleanValue(optionPrefix + ".pathOverride");
 		} catch (Exception e) {
@@ -61,6 +62,7 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Returns the pathOverride
+	 * 
 	 * @return pathOverride
 	 */
 	public boolean isPathOverride() {
@@ -69,6 +71,7 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Sets the pathOverride
+	 * 
 	 * @param pathOverride pathOverride
 	 */
 	public void setPathOverride(boolean pathOverride) {
@@ -77,6 +80,7 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Returns the pathOverrideVal
+	 * 
 	 * @return pathOverrideVal
 	 */
 	public String getPathOverrideVal() {
@@ -85,6 +89,7 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Sets the pathOverrideVal
+	 * 
 	 * @param pathOverrideVal pathOverrideVal
 	 */
 	public void setPathOverrideVal(String pathOverrideVal) {
@@ -93,6 +98,7 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Returns the pathOverrideSubdirsAllowed
+	 * 
 	 * @return pathOverrideSubdirsAllowed
 	 */
 	public boolean isPathOverrideSubdirsAllowed() {
@@ -101,20 +107,22 @@ public class OverrideDirectoryOption {
 
 	/**
 	 * Sets the pathOverrideSubdirsAllowed
+	 * 
 	 * @param pathOverrideSubdirsAllowed pathOverrideSubdirsAllowed
 	 */
 	public void setPathOverrideSubdirsAllowed(boolean pathOverrideSubdirsAllowed) {
 		this.pathOverrideSubdirsAllowed = pathOverrideSubdirsAllowed;
 	}
-	
+
 	/**
 	 * Returns the optionPrefix
+	 * 
 	 * @return optionPrefix
 	 */
 	public String getOptionPrefix() {
 		return optionPrefix;
 	}
-	
+
 	/**
 	 * Save Options
 	 */

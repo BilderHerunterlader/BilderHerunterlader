@@ -28,10 +28,14 @@ import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver
 import ch.supertomcat.supertomcattools.httptools.HTTPTool;
 
 /**
- * 
- *
+ * Utility class for image extraction
  */
-public abstract class ImageExtract {
+public final class ImageExtract {
+	/**
+	 * Constructor
+	 */
+	private ImageExtract() {
+	}
 
 	/**
 	 * Adds links to the vector
@@ -67,9 +71,9 @@ public abstract class ImageExtract {
 		for (int i = 0; i < nl.getLength(); i++) {
 			Node n = nl.item(i);
 			String link = getAttributeValueFromNode(n, "src");
-			if (link != null && link.length() > 0) {
+			if (link != null && !link.isEmpty()) {
 				URL extractedURL = new URL(link);
-				if (link.startsWith("http://") == false && link.startsWith("https://") == false) {
+				if (!link.startsWith("http://") && !link.startsWith("https://")) {
 					// If the link was relative we have to correct that
 					extractedURL = convertURLFromRelativeToAbsolute(url, extractedURL);
 				}

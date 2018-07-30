@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.containerpage;
 
 /**
  * Options for downloading container page

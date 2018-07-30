@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.urlchecker;
 
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
@@ -13,7 +13,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * Thread for removing duplicates from download-selection
  */
-public class RemoveDuplicatesThread implements Runnable {
+public class RemoveDuplicatesRunnable implements Runnable {
 	/**
 	 * Logger for this class
 	 */
@@ -41,7 +41,7 @@ public class RemoveDuplicatesThread implements Runnable {
 	 * @param currentRow Current Row
 	 * @param barrier Barrier
 	 */
-	public RemoveDuplicatesThread(List<URL> originalUrls, int threadNumber, int threadCount, OptionBoolean bContains, int currentRow, CyclicBarrier barrier) {
+	public RemoveDuplicatesRunnable(List<URL> originalUrls, int threadNumber, int threadCount, OptionBoolean bContains, int currentRow, CyclicBarrier barrier) {
 		this.originalUrls = originalUrls;
 		this.threadNumber = threadNumber;
 		this.threadCount = threadCount;

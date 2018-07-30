@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
-import ch.supertomcat.bh.hoster.HostRules;
+import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
@@ -15,9 +15,9 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
  */
 public class RulePipelineURLRegex extends RulePipeline {
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(RulePipelineURLRegex.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * URL-Mode (Only used when mode is 0)
@@ -86,11 +86,6 @@ public class RulePipelineURLRegex extends RulePipeline {
 		}
 	}
 
-	/**
-	 * Returns the Element for creating the XML-File
-	 * 
-	 * @return Element
-	 */
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
@@ -104,21 +99,11 @@ public class RulePipelineURLRegex extends RulePipeline {
 		return e;
 	}
 
-	/**
-	 * Returns the UrlMode
-	 * 
-	 * @return UrlMode
-	 */
 	@Override
 	public int getURLMode() {
 		return urlMode;
 	}
 
-	/**
-	 * Sets the UrlMode
-	 * 
-	 * @param urlMode UrlMode
-	 */
 	@Override
 	public void setURLMode(int urlMode) {
 		if ((urlMode == RULEPIPELINE_MODE_CONTAINER_URL) || (urlMode == RULEPIPELINE_MODE_THUMBNAIL_URL)) {
@@ -126,16 +111,6 @@ public class RulePipelineURLRegex extends RulePipeline {
 		}
 	}
 
-	/**
-	 * Returns parsed URL
-	 * 
-	 * @param url Container-URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
-	 * @param pic Pic
-	 * @return URL
-	 * @throws HostException
-	 */
 	@Override
 	public String getURL(String url, String thumbURL, String htmlcode, Pic pic) throws HostException {
 		String retval = "";
@@ -167,7 +142,7 @@ public class RulePipelineURLRegex extends RulePipeline {
 			}
 			retval = result;
 		}
-		if (retval.equals("")) {
+		if (retval.isEmpty()) {
 			if (this.urlMode == RULEPIPELINE_MODE_THUMBNAIL_URL && thumbURL.isEmpty()) {
 				throw new HostImageUrlNotFoundException(HostRules.NAME + ": " + Localization.getString("ErrorImageURLThumbMissing"));
 			} else {
@@ -177,21 +152,11 @@ public class RulePipelineURLRegex extends RulePipeline {
 		return retval;
 	}
 
-	/**
-	 * Returns the waitBeforeExecute
-	 * 
-	 * @return waitBeforeExecute
-	 */
 	@Override
 	public int getWaitBeforeExecute() {
 		return waitBeforeExecute;
 	}
 
-	/**
-	 * Sets the waitBeforeExecute
-	 * 
-	 * @param waitBeforeExecute waitBeforeExecute
-	 */
 	@Override
 	public void setWaitBeforeExecute(int waitBeforeExecute) {
 		this.waitBeforeExecute = waitBeforeExecute;

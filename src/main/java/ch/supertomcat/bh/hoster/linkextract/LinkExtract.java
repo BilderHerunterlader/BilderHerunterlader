@@ -28,10 +28,14 @@ import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver
 import ch.supertomcat.supertomcattools.httptools.HTTPTool;
 
 /**
- * 
- *
+ * Utility class for link extraction
  */
-public abstract class LinkExtract {
+public final class LinkExtract {
+	/**
+	 * Constructor
+	 */
+	private LinkExtract() {
+	}
 
 	/**
 	 * Adds links to the vector
@@ -60,8 +64,8 @@ public abstract class LinkExtract {
 	 * @param node Document
 	 */
 	public static void addLinks(String url, ILinkExtractFilter filter, List<URL> extractedURLs, Document node) {
-		String tagNames[] = { "a", "button" };
 		// button is used for youtube-search
+		String tagNames[] = { "a", "button" };
 
 		/*
 		 * Get the links
@@ -73,7 +77,7 @@ public abstract class LinkExtract {
 				String link = getAttributeValueFromNode(n, "href");
 				if (link != null && link.length() > 0) {
 					URL extractedURL = new URL(link);
-					if (link.startsWith("http://") == false && link.startsWith("https://") == false) {
+					if (!link.startsWith("http://") && !link.startsWith("https://")) {
 						// If the link was relative we have to correct that
 						extractedURL = convertURLFromRelativeToAbsolute(url, extractedURL);
 					}

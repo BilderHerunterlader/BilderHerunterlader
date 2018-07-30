@@ -1,10 +1,12 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.parser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
 
@@ -234,11 +236,11 @@ public class URLParseObject {
 	}
 
 	/**
-	 * Set the last Host which parsed the URL
+	 * Add the last Host which parsed the URL
 	 * 
 	 * @param hoster the lastHost to set
 	 */
-	protected synchronized void addHoster(Hoster hoster) {
+	public synchronized void addHoster(Hoster hoster) {
 		hosterStackTrace.add(hoster);
 	}
 
@@ -343,7 +345,7 @@ public class URLParseObject {
 	 * 
 	 * @return True if object is parsed in a loop
 	 */
-	protected boolean isLoop() {
+	public boolean isLoop() {
 		if (hosterStackTrace.size() > 50) {
 			return true;
 		}

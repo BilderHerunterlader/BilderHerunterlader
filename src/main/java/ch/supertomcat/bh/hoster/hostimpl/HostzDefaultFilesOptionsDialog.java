@@ -1,12 +1,8 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.hostimpl;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -20,8 +16,8 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
 /**
  * HostzDefaultFilesOptionsDialog
  */
-public class HostzDefaultFilesOptionsDialog extends JDialog implements ActionListener, ItemListener {
-	private static final long serialVersionUID = 1391940632265954571L;
+public class HostzDefaultFilesOptionsDialog extends JDialog {
+	private static final long serialVersionUID = 1L;
 
 	private JPanel pnlButtons = new JPanel();
 
@@ -81,7 +77,13 @@ public class HostzDefaultFilesOptionsDialog extends JDialog implements ActionLis
 		cbAudio.setToolTipText(strAudio);
 		cbArchive.setToolTipText(strArchive);
 
-		cbAllTypes.addItemListener(this);
+		cbAllTypes.addItemListener(e -> {
+			cbContentType.setEnabled(!cbAllTypes.isSelected());
+			cbImages.setEnabled(!cbAllTypes.isSelected());
+			cbVideo.setEnabled(!cbAllTypes.isSelected());
+			cbAudio.setEnabled(!cbAllTypes.isSelected());
+			cbArchive.setEnabled(!cbAllTypes.isSelected());
+		});
 		cbContentType.setEnabled(!cbAllTypes.isSelected());
 		cbImages.setEnabled(!cbAllTypes.isSelected());
 		cbVideo.setEnabled(!cbAllTypes.isSelected());
@@ -100,8 +102,14 @@ public class HostzDefaultFilesOptionsDialog extends JDialog implements ActionLis
 		txtAddPatterns.setFont(new Font("Dialog.plain", Font.PLAIN, 12));
 		pnlCenter.add(txtAddPatterns);
 
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> {
+			okPressed = true;
+			dispose();
+		});
+		btnCancel.addActionListener(e -> {
+			okPressed = false;
+			dispose();
+		});
 
 		setLayout(new BorderLayout());
 		add(pnlButtons, BorderLayout.SOUTH);
@@ -173,36 +181,5 @@ public class HostzDefaultFilesOptionsDialog extends JDialog implements ActionLis
 	 */
 	public boolean isOkPressed() {
 		return okPressed;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed = true;
-			this.dispose();
-		} else if (e.getSource() == btnCancel) {
-			this.dispose();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == cbAllTypes) {
-			cbContentType.setEnabled(!cbAllTypes.isSelected());
-			cbImages.setEnabled(!cbAllTypes.isSelected());
-			cbVideo.setEnabled(!cbAllTypes.isSelected());
-			cbAudio.setEnabled(!cbAllTypes.isSelected());
-			cbArchive.setEnabled(!cbAllTypes.isSelected());
-		}
 	}
 }

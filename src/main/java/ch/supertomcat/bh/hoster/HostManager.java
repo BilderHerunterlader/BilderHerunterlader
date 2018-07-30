@@ -15,6 +15,11 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.classloader.HostClassesLoader;
+import ch.supertomcat.bh.hoster.hostimpl.HostRules;
+import ch.supertomcat.bh.hoster.hostimpl.HostSortImages;
+import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
+import ch.supertomcat.bh.hoster.urlchecker.RemoveDuplicatesRunnable;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -46,33 +51,33 @@ public class HostManager {
 	/**
 	 * RedirectManager
 	 */
-	private RedirectManager rm = new RedirectManager();
+	private RedirectManager redirectManager = new RedirectManager();
 
 	/**
 	 * HostRules
 	 */
-	private HostRules hr = new HostRules();
+	private HostRules hostRules = new HostRules();
 
 	/**
 	 * HostSortImages
 	 */
-	private HostSortImages si = new HostSortImages();
+	private HostSortImages hostSortImages = new HostSortImages();
 
 	/**
 	 * Constructor
 	 */
 	private HostManager() {
 		// Load the hostclasses
-		List<Host> vresult = HostClassesLoader.loadHostClasses();
-		vresult.add(hr);
-		vresult.add(si);
+		List<Host> loadedHosts = HostClassesLoader.loadHostClasses();
+		loadedHosts.add(hostRules);
+		loadedHosts.add(hostSortImages);
 
-		hosts = vresult;
+		hosts = loadedHosts;
+
+		redirectManager.setHR(hostRules);
 
 		// Now we have a unsorted array, so we have to sort it
 		reInitHosterList();
-
-		rm.setHR(hr);
 	}
 
 	/**
@@ -102,21 +107,21 @@ public class HostManager {
 			@Override
 			public int compare(Host o1, Host o2) {
 
-				if (o2.getName().equals("HostDefaultFiles")) {
+				if (o2.getName().equals(HostzDefaultFiles.NAME)) {
 					// HostDefaultImages has to be at the end of the array!
 					return -1;
-				} else if (o1.getName().equals("HostDefaultFiles")) {
+				} else if (o1.getName().equals(HostzDefaultFiles.NAME)) {
 					// HostDefaultImages has to be at the end of the array!
 					return 1;
 				}
 
-				if (o2 == si) {
+				if (o2 == hostSortImages) {
 					return -1;
-				} else if (o1 == si) {
+				} else if (o1 == hostSortImages) {
 					return 1;
 				}
 
-				if (o2 == hr) {
+				if (o2 == hostRules) {
 					/*
 					 * When rules have higher priority than other hostclasses, then
 					 * HostRules has to be at the begin of the array
@@ -126,7 +131,7 @@ public class HostManager {
 					} else {
 						return -1;
 					}
-				} else if (o1 == hr) {
+				} else if (o1 == hostRules) {
 					/*
 					 * When rules have higher priority than other hostclasses, then
 					 * HostRules has to be at the begin of the array
@@ -150,89 +155,21 @@ public class HostManager {
 	}
 
 	/**
-	 * Parses the URL by a hostclass and return the parsed URL
+	 * Return the HostRules-hostclass
 	 * 
-	 * @param upo URLParseObject
-	 * @return URLParseObject or null
-	 * @throws HostException
+	 * @return HostRules
 	 */
-	public URLParseObject parseURL(URLParseObject upo) throws HostException {
-		if (upo == null) {
-			return null;
-		}
-		String url = upo.getContainerURL();
-
-		for (int i = 0; i < hosts.size(); i++) {
-			/*
-			 * Check if the hostclass accepts the URL.
-			 * Also check if the last Host is the same as this one, then
-			 * don't parse the URL because this could be a endless loop.
-			 * So if a hostclass will parse the url again, then it must
-			 * set the last Host to null.
-			 * So a endless loop is still possible, i don't think i can
-			 * really avoid them completely, but this simple check is better
-			 * then nothing.
-			 * The HostRules-hostclass has multiple "classes" (Rules), so
-			 * if the lastHost is HostRules and this one also, then let them
-			 * parse, because HostRules itselfs checks if the lastRule is the
-			 * same as this time.
-			 */
-			if (hosts.get(i).isEnabled() && hosts.get(i).isFromThisHoster(url)) {
-				if (upo.isLoop() == false) {
-					// parse the URL
-					upo.addHoster(hosts.get(i));
-					hosts.get(i).parseURLAndFilename(upo);
-					return upo;
-				} else {
-					logger.error("Parsing terminated for URL '" + upo.getContainerURL() + "' because upo seems to be parsed in a endless loop!");
-					return null;
-				}
-			}
-		}
-		return upo;
+	public HostRules getHostRules() {
+		return hostRules;
 	}
 
 	/**
-	 * Check if a hostclass accepts the url and return a nice filename for the url.
-	 * If there is no hostclass available which would accept the url then null is
-	 * returned
+	 * Returns the RedirectManager
 	 * 
-	 * @param urlObject URL-Object
-	 * @param bOK Flag if there is a Hoster for this url
-	 * @param progress ProgessObserver
-	 * @return Array of URL-Objects or null
+	 * @return RedirectManager
 	 */
-	public List<URL> checkURL(URL urlObject, OptionBoolean bOK, ProgressObserver progress) {
-		List<URL> retval = null;
-
-		for (int i = 0; i < hosts.size(); i++) {
-			// Check if the hostclass accepts the url
-			if (hosts.get(i).isEnabled() && hosts.get(i).isFromThisHoster(urlObject.getURL())) {
-
-				// Get a nice filename from the url
-				String filename = hosts.get(i).getFilenameFromURL(urlObject.getURL());
-				if ((filename != null) && (filename.length() > 0)) {
-					urlObject.setFilenameCorrected(filename);
-				}
-
-				bOK.setValue(true);
-
-				if (checkForIHosterURLAdderInterface(hosts.get(i)) != null) {
-					IHosterURLAdder ihua = (IHosterURLAdder)hosts.get(i);
-					try {
-						List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
-						if (additionalURLs != null && additionalURLs.size() > 0) {
-							retval = additionalURLs;
-						}
-					} catch (Exception e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-
-				break;
-			}
-		}
-		return retval;
+	public RedirectManager getRedirectManager() {
+		return redirectManager;
 	}
 
 	/**
@@ -242,9 +179,9 @@ public class HostManager {
 	 * @return Version
 	 */
 	public String getHostVersion(String name) {
-		for (int i = 0; i < hosts.size(); i++) {
-			if (hosts.get(i).getName().equals(name)) {
-				String version = hosts.get(i).getVersion();
+		for (Host host : hosts) {
+			if (host.getName().equals(name)) {
+				String version = host.getVersion();
 				if (version == null) {
 					return "";
 				}
@@ -270,7 +207,7 @@ public class HostManager {
 	 * @return Rule
 	 */
 	public Host getHost(int index) {
-		if (index >= hosts.size()) {
+		if (index < 0 || index >= hosts.size()) {
 			return null;
 		}
 		return hosts.get(index);
@@ -283,17 +220,157 @@ public class HostManager {
 	 * @return Hoster or null
 	 */
 	public Hoster getHosterForURL(String url) {
-		for (int i = 0; i < hosts.size(); i++) {
+		for (Host host : hosts) {
 			// Check if the hostclass accepts the url
-			if (hosts.get(i).isEnabled() && hosts.get(i).isFromThisHoster(url)) {
-				if (hosts.get(i) == this.hr) {
-					return this.hr.getRuleForURL(url);
+			if (host.isEnabled() && host.isFromThisHoster(url)) {
+				if (host == hostRules) {
+					return hostRules.getRuleForURL(url);
 				} else {
-					return hosts.get(i);
+					return host;
 				}
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Check if a hostclass accepts the url and return a nice filename for the url.
+	 * If there is no hostclass available which would accept the url then null is
+	 * returned
+	 * 
+	 * @param urlObject URL-Object
+	 * @param bOK Flag if there is a Hoster for this url
+	 * @param progress ProgessObserver
+	 * @return List of URL-Objects if additional URLs were added or null
+	 */
+	public List<URL> checkURL(URL urlObject, OptionBoolean bOK, ProgressObserver progress) {
+		for (Host host : hosts) {
+			// Check if the hostclass accepts the url
+			if (host.isEnabled() && host.isFromThisHoster(urlObject.getURL())) {
+				// Get a nice filename from the url
+				String filename = host.getFilenameFromURL(urlObject.getURL());
+				if (filename != null && !filename.isEmpty()) {
+					urlObject.setFilenameCorrected(filename);
+				}
+
+				bOK.setValue(true);
+
+				if (checkForIHosterURLAdderInterface(host) != null) {
+					IHosterURLAdder ihua = (IHosterURLAdder)host;
+					try {
+						List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
+						if (additionalURLs != null && !additionalURLs.isEmpty()) {
+							return additionalURLs;
+						}
+					} catch (Exception e) {
+						logger.error("Could not add additional URLs in host: {} {}", host.getName(), host.getVersion(), e);
+					}
+				}
+
+				return null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Parses the URL by a hostclass and return the parsed URL
+	 * 
+	 * @param upo URLParseObject
+	 * @return URLParseObject or null
+	 * @throws HostException
+	 */
+	public URLParseObject parseURL(URLParseObject upo) throws HostException {
+		if (upo == null) {
+			return null;
+		}
+		String url = upo.getContainerURL();
+
+		for (Host host : hosts) {
+			/*
+			 * Check if the hostclass accepts the URL.
+			 * Also check if the last Host is the same as this one, then
+			 * don't parse the URL because this could be a endless loop.
+			 * So if a hostclass will parse the url again, then it must
+			 * set the last Host to null.
+			 * So a endless loop is still possible, i don't think i can
+			 * really avoid them completely, but this simple check is better
+			 * then nothing.
+			 * The HostRules-hostclass has multiple "classes" (Rules), so
+			 * if the lastHost is HostRules and this one also, then let them
+			 * parse, because HostRules itselfs checks if the lastRule is the
+			 * same as this time.
+			 */
+			if (host.isEnabled() && host.isFromThisHoster(url)) {
+				if (upo.isLoop()) {
+					logger.error("Parsing terminated for URL '" + upo.getContainerURL() + "' because upo seems to be parsed in a endless loop!: {}", upo.getHosterStackTrace());
+					return null;
+				}
+
+				// parse the URL
+				upo.addHoster(host);
+				host.parseURLAndFilename(upo);
+				return upo;
+			}
+		}
+		return upo;
+	}
+
+	/**
+	 * Returns the method or null if not found
+	 * 
+	 * @param host Host-Class
+	 * @return Method or null
+	 */
+	private Method checkForIHosterURLAdderInterface(Host host) {
+		if (host == null) {
+			return null;
+		}
+
+		boolean bIFace = false;
+		for (Class<?> iface : host.getClass().getInterfaces()) {
+			if (iface.getName().equals("ch.supertomcat.bh.hoster.IHosterURLAdder")) {
+				bIFace = true;
+				break;
+			}
+		}
+		if (bIFace == false) {
+			return null;
+		}
+
+		for (Method method : host.getClass().getMethods()) {
+			if (method.getName().equals("isFromThisHoster")) {
+				if (method.getParameterTypes().length == 3 && method.getParameterTypes()[0].getName().equals("ch.supertomcat.bh.pic.URL")
+						&& method.getParameterTypes()[1].getName().equals("ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean")
+						&& method.getParameterTypes()[2].getName().equals("ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver")
+						&& method.getReturnType().getName().equals("java.util.List")) {
+					return method;
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns true if the object has the interface
+	 * Checks not if the methods really are implemented
+	 * 
+	 * @param obj Object
+	 * @param fullyQualifiedInterfaceName Fully qualified interface name
+	 * @return true if the object has the interface
+	 */
+	public boolean hasInterface(Object obj, String fullyQualifiedInterfaceName) {
+		if (obj == null) {
+			return false;
+		}
+
+		for (Class<?> iface : obj.getClass().getInterfaces()) {
+			if (iface.getName().equals(fullyQualifiedInterfaceName)) {
+				return true;
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -319,9 +396,9 @@ public class HostManager {
 
 		OptionBoolean bContains = new OptionBoolean("", false);
 
-		RemoveDuplicatesThread rdt[] = new RemoveDuplicatesThread[threadCount];
+		RemoveDuplicatesRunnable rdt[] = new RemoveDuplicatesRunnable[threadCount];
 		for (int t = 0; t < threadCount; t++) {
-			rdt[t] = new RemoveDuplicatesThread(originalUrls, t, threadCount, bContains, 0, barrier);
+			rdt[t] = new RemoveDuplicatesRunnable(originalUrls, t, threadCount, bContains, 0, barrier);
 		}
 
 		if (progress != null) {
@@ -371,83 +448,5 @@ public class HostManager {
 			progress.progressChanged(false);
 		}
 		threadPool.shutdown();
-	}
-
-	/**
-	 * Return the HostRules-hostclass
-	 * 
-	 * @return HostRules
-	 */
-	public HostRules getHr() {
-		return hr;
-	}
-
-	/**
-	 * Returns the method or null if not found
-	 * 
-	 * @param host Host-Class
-	 * @return Method or null
-	 */
-	private Method checkForIHosterURLAdderInterface(Host host) {
-		if (host == null) {
-			return null;
-		}
-
-		boolean bIFace = false;
-		Class<?>[] iface = host.getClass().getInterfaces();
-		for (int i = 0; i < iface.length; i++) {
-			if (iface[i].getName().equals("ch.supertomcat.bh.hoster.IHosterURLAdder")) {
-				bIFace = true;
-				break;
-			}
-		}
-		if (bIFace == false) {
-			return null;
-		}
-
-		Method m[] = host.getClass().getMethods();
-		for (int i = 0; i < m.length; i++) {
-			if (m[i].getName().equals("isFromThisHoster")) {
-				if ((m[i].getParameterTypes().length == 3) && (m[i].getParameterTypes()[0].getName().equals("ch.supertomcat.bh.pic.URL"))
-						&& (m[i].getParameterTypes()[1].getName().equals("ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean"))
-						&& (m[i].getParameterTypes()[2].getName().equals("ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver"))
-						&& m[i].getReturnType().getName().equals("java.util.List")) {
-					return m[i];
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns true if the object has the interface
-	 * Checks not if the methods really are implemented
-	 * 
-	 * @param obj Object
-	 * @param fullyQualifiedInterfaceName Fully qualified interface name
-	 * @return true if the object has the interface
-	 */
-	public boolean hasInterface(Object obj, String fullyQualifiedInterfaceName) {
-		if (obj == null) {
-			return false;
-		}
-
-		Class<?>[] ifaces = obj.getClass().getInterfaces();
-		for (int i = 0; i < ifaces.length; i++) {
-			if (ifaces[i].getName().equals(fullyQualifiedInterfaceName)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
-	 * Returns the RedirectManager
-	 * 
-	 * @return RedirectManager
-	 */
-	public RedirectManager getRedirectManager() {
-		return rm;
 	}
 }

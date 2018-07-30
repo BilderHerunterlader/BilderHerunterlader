@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.hostimpl;
 
 import java.io.File;
 import java.nio.charset.Charset;
@@ -15,7 +15,10 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostWrongContentTypeException;
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;

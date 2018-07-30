@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
-import ch.supertomcat.bh.hoster.HostRules;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.hostimpl.HostRules;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
 /**
@@ -27,9 +27,9 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
  */
 public class RulePipelineURLJavascript extends RulePipeline {
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(RulePipelineURLJavascript.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Make Package for logging accessable in javascript
@@ -106,11 +106,6 @@ public class RulePipelineURLJavascript extends RulePipeline {
 		}
 	}
 
-	/**
-	 * Returns the Element for creating the XML-File
-	 * 
-	 * @return Element
-	 */
 	@Override
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
@@ -132,10 +127,7 @@ public class RulePipelineURLJavascript extends RulePipeline {
 		context.setClassShutter(new ClassShutter() {
 			@Override
 			public boolean visibleToScripts(String className) {
-				if (className.equals("ch.supertomcat.bh.rules.JavascriptMethodProvider")) {
-					return true;
-				}
-				return false;
+				return JavascriptMethodProvider.class.getName().equals(className);
 			}
 		});
 		try {

@@ -5,8 +5,6 @@ import java.awt.Color;
 import java.awt.Dialog;
 import java.awt.FlowLayout;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
@@ -26,11 +24,8 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
 /**
  * Klasse for Catpcha-Dialogs
  */
-public class CaptchaDialog extends JDialog implements ActionListener {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -5510073612761276760L;
+public class CaptchaDialog extends JDialog {
+	private static final long serialVersionUID = 1L;
 
 	private JPanel pnlButtons = new JPanel();
 
@@ -96,7 +91,7 @@ public class CaptchaDialog extends JDialog implements ActionListener {
 		pnlCenter.setLayout(new FlowLayout());
 		pnlCenter.add(lblCaptcha);
 		pnlCenter.add(txtCaptcha);
-		btnOK.addActionListener(this);
+		btnOK.addActionListener(e -> dispose());
 
 		this.setLayout(new BorderLayout());
 		this.add(pnlButtons, BorderLayout.SOUTH);
@@ -106,12 +101,5 @@ public class CaptchaDialog extends JDialog implements ActionListener {
 		setLocationRelativeTo(getOwner());
 		setVisible(true);
 		return txtCaptcha.getText();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			this.dispose();
-		}
 	}
 }

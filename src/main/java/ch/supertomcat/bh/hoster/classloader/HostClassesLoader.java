@@ -5,10 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ch.supertomcat.bh.hoster.Host;
-import ch.supertomcat.bh.hoster.HostzDefaultFiles;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.classloader.impl.HostClassLoader;
 import ch.supertomcat.bh.hoster.classloader.impl.RedirectClassLoader;
+import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
 import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
 
 /**

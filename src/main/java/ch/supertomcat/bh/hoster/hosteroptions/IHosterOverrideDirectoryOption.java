@@ -6,7 +6,6 @@ package ch.supertomcat.bh.hoster.hosteroptions;
  * Examples are HostRapidshare, HostMegaupload, HostFilesTo, HostUploadedTo
  */
 public interface IHosterOverrideDirectoryOption extends IHosterOptions {
-	
 	/**
 	 * @return OverrideDirectoryOption
 	 */

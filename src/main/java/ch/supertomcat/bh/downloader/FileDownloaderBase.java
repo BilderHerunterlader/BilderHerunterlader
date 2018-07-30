@@ -23,7 +23,7 @@ import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.HostManager;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;

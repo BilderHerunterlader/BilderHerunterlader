@@ -3,6 +3,8 @@ package ch.supertomcat.bh.hoster;
 import org.apache.http.impl.client.CloseableHttpClient;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.settings.SettingsManager;
 

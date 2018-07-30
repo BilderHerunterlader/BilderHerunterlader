@@ -4,27 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import ch.supertomcat.bh.pic.URL;
 
 /**
- * 
- *
+ * Extract Configuration Whitelist
  */
 public class ExtractConfigWhitelist {
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(ExtractConfigWhitelist.class);
+	private final Pattern patternContainerURL;
 
-	private Pattern patternContainerURL = null;
-	private List<Pattern> patternsLinksToExtract = new ArrayList<>();
+	private final List<Pattern> patternsLinksToExtract = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -33,18 +25,9 @@ public class ExtractConfigWhitelist {
 	 * @param linksToExtractPatterns Links To Extract Patterns
 	 */
 	public ExtractConfigWhitelist(String containerURLPattern, List<String> linksToExtractPatterns) {
-		try {
-			patternContainerURL = Pattern.compile(containerURLPattern);
-		} catch (PatternSyntaxException pse) {
-			logger.error(pse.getMessage(), pse);
-		}
-
+		patternContainerURL = Pattern.compile(containerURLPattern);
 		for (String str : linksToExtractPatterns) {
-			try {
-				patternsLinksToExtract.add(Pattern.compile(str));
-			} catch (PatternSyntaxException pse) {
-				logger.error(pse.getMessage(), pse);
-			}
+			patternsLinksToExtract.add(Pattern.compile(str));
 		}
 	}
 

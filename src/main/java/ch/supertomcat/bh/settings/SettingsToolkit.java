@@ -1,25 +1,41 @@
 package ch.supertomcat.bh.settings;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.jdom2.Element;
 
 /**
  * Class which provides methods needed by SettingsManager
  */
 public class SettingsToolkit {
+	private static final Set<String> SUPPORTED_TYPES = new HashSet<>();
+
+	static {
+		SUPPORTED_TYPES.add("boolean");
+		SUPPORTED_TYPES.add("int");
+		SUPPORTED_TYPES.add("long");
+		SUPPORTED_TYPES.add("string");
+		SUPPORTED_TYPES.add("byte");
+		SUPPORTED_TYPES.add("short");
+		SUPPORTED_TYPES.add("float");
+		SUPPORTED_TYPES.add("double");
+	}
+
 	/**
 	 * @param value Wert
 	 * @param defVal Standard-Wert
 	 * @return Wert
 	 */
 	protected static int parseIntValue(String value, int defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		int retval = defVal;
-		try {
-			retval = Integer.parseInt(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Integer.parseInt(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
 	}
 
 	/**
@@ -28,14 +44,14 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static long parseLongValue(String value, long defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		long retval = defVal;
-		try {
-			retval = Long.parseLong(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Long.parseLong(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
 	}
 
 	/**
@@ -44,11 +60,10 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static boolean parseBooleanValue(String value, boolean defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		boolean retval = defVal;
-		retval = Boolean.parseBoolean(value);
-		return retval;
+		}
+		return Boolean.parseBoolean(value);
 	}
 
 	/**
@@ -57,14 +72,14 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static short parseShortValue(String value, short defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		short retval = defVal;
-		try {
-			retval = Short.parseShort(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Short.parseShort(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
 	}
 
 	/**
@@ -73,14 +88,14 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static byte parseByteValue(String value, byte defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		byte retval = defVal;
-		try {
-			retval = Byte.parseByte(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Byte.parseByte(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
 	}
 
 	/**
@@ -89,14 +104,14 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static float parseFloatValue(String value, float defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		float retval = defVal;
-		try {
-			retval = Float.parseFloat(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Float.parseFloat(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
 	}
 
 	/**
@@ -105,14 +120,22 @@ public class SettingsToolkit {
 	 * @return Wert
 	 */
 	protected static double parseDoubleValue(String value, double defVal) {
-		if (value == null)
+		if (value == null) {
 			return defVal;
-		double retval = defVal;
-		try {
-			retval = Double.parseDouble(value);
-		} catch (NumberFormatException e) {
 		}
-		return retval;
+		try {
+			return Double.parseDouble(value);
+		} catch (NumberFormatException e) {
+			return defVal;
+		}
+	}
+
+	private static String[] getPathArray(String path) {
+		if (path.contains(".")) {
+			return path.split("\\.");
+		} else {
+			return new String[] { path };
+		}
 	}
 
 	/**
@@ -126,12 +149,8 @@ public class SettingsToolkit {
 		if (path.isEmpty()) {
 			return null;
 		}
-		String pathArr[];
-		if (path.contains(".")) {
-			pathArr = path.split("\\.");
-		} else {
-			pathArr = new String[] { path };
-		}
+		String[] pathArr = getPathArray(path);
+
 		Element e = root;
 		for (int i = 0; i < pathArr.length; i++) {
 			Element ex = e.getChild(pathArr[i]);
@@ -164,14 +183,7 @@ public class SettingsToolkit {
 	 */
 	protected static int readIntValue(String path, Element root, int defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		int retval = defVal;
-		try {
-			retval = Integer.parseInt(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseIntValue(result, defVal);
 	}
 
 	/**
@@ -182,14 +194,7 @@ public class SettingsToolkit {
 	 */
 	protected static long readLongValue(String path, Element root, long defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		long retval = defVal;
-		try {
-			retval = Long.parseLong(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseLongValue(result, defVal);
 	}
 
 	/**
@@ -200,8 +205,9 @@ public class SettingsToolkit {
 	 */
 	protected static String readStringValue(String path, Element root, String defVal) {
 		String retval = readValue(path, root);
-		if (retval == null)
+		if (retval == null) {
 			return defVal;
+		}
 		return retval;
 	}
 
@@ -213,11 +219,7 @@ public class SettingsToolkit {
 	 */
 	protected static boolean readBooleanValue(String path, Element root, boolean defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		boolean retval = defVal;
-		retval = Boolean.parseBoolean(result);
-		return retval;
+		return parseBooleanValue(result, defVal);
 	}
 
 	/**
@@ -228,14 +230,7 @@ public class SettingsToolkit {
 	 */
 	protected static float readFloatValue(String path, Element root, float defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		float retval = defVal;
-		try {
-			retval = Float.parseFloat(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseFloatValue(result, defVal);
 	}
 
 	/**
@@ -246,14 +241,7 @@ public class SettingsToolkit {
 	 */
 	protected static double readDoubleValue(String path, Element root, double defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		double retval = defVal;
-		try {
-			retval = Double.parseDouble(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseDoubleValue(result, defVal);
 	}
 
 	/**
@@ -264,14 +252,7 @@ public class SettingsToolkit {
 	 */
 	protected static short readShortValue(String path, Element root, short defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		short retval = defVal;
-		try {
-			retval = Short.parseShort(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseShortValue(result, defVal);
 	}
 
 	/**
@@ -282,14 +263,7 @@ public class SettingsToolkit {
 	 */
 	protected static byte readByteValue(String path, Element root, byte defVal) {
 		String result = readValue(path, root);
-		if (result == null)
-			return defVal;
-		byte retval = defVal;
-		try {
-			retval = Byte.parseByte(result);
-		} catch (NumberFormatException e) {
-		}
-		return retval;
+		return parseByteValue(result, defVal);
 	}
 
 	/**
@@ -299,19 +273,12 @@ public class SettingsToolkit {
 	 * @param datatype Data Type
 	 */
 	protected static void addElement(String path, String val, Element root, String datatype) {
-		if (path.equals(""))
-			return;
-		if (datatype.equals("boolean") == false && datatype.equals("int") == false && datatype.equals("long") == false && datatype.equals("string") == false && datatype.equals("byte") == false
-				&& datatype.equals("short") == false && datatype.equals("float") == false && datatype.equals("double") == false) {
+		if (path.isEmpty() || !SUPPORTED_TYPES.contains(datatype)) {
 			return;
 		}
-		String pathArr[];
-		if (path.contains(".")) {
-			pathArr = path.split("\\.");
-		} else {
-			pathArr = new String[1];
-			pathArr[0] = path;
-		}
+
+		String[] pathArr = getPathArray(path);
+
 		Element e = root;
 		for (int i = 0; i < pathArr.length; i++) {
 			Element child = e.getChild(pathArr[i]);
@@ -333,16 +300,12 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addSubElement(String path, Element val, Element root) {
-		if (path.equals(""))
+		if (path.isEmpty()) {
 			return;
-
-		String pathArr[];
-		if (path.contains(".")) {
-			pathArr = path.split("\\.");
-		} else {
-			pathArr = new String[1];
-			pathArr[0] = path;
 		}
+
+		String[] pathArr = getPathArray(path);
+
 		Element e = root;
 		for (int i = 0; i < pathArr.length; i++) {
 			Element child = e.getChild(pathArr[i]);
@@ -363,8 +326,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addIntValue(String path, int val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "int");
+		addElement(path, String.valueOf(val), root, "int");
 	}
 
 	/**
@@ -373,8 +335,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addLongValue(String path, long val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "long");
+		addElement(path, String.valueOf(val), root, "long");
 	}
 
 	/**
@@ -383,8 +344,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addByteValue(String path, byte val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "byte");
+		addElement(path, String.valueOf(val), root, "byte");
 	}
 
 	/**
@@ -393,8 +353,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addShortValue(String path, short val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "short");
+		addElement(path, String.valueOf(val), root, "short");
 	}
 
 	/**
@@ -403,8 +362,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addFloatValue(String path, float val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "float");
+		addElement(path, String.valueOf(val), root, "float");
 	}
 
 	/**
@@ -413,8 +371,7 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addDoubleValue(String path, double val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "double");
+		addElement(path, String.valueOf(val), root, "double");
 	}
 
 	/**
@@ -432,7 +389,6 @@ public class SettingsToolkit {
 	 * @param root Root
 	 */
 	protected static void addBooleanValue(String path, boolean val, Element root) {
-		String s = String.valueOf(val);
-		addElement(path, s, root, "boolean");
+		addElement(path, String.valueOf(val), root, "boolean");
 	}
 }

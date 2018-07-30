@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.hoster;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 
 /**
  * Interface which all host-classes have to implement

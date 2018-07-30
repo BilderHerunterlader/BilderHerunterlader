@@ -6,21 +6,19 @@ import java.util.regex.PatternSyntaxException;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.supertomcattools.regextools.RegexReplace;
 
-
 /**
  * Search and Replace by Regexp
  */
 public class RuleRegExp extends RegexReplace {
-	
 	/**
 	 * Constructor
 	 */
 	public RuleRegExp() {
-		super();
 	}
 
 	/**
 	 * Constructor
+	 * 
 	 * @param search Search
 	 * @param replace Replace
 	 * @throws PatternSyntaxException
@@ -28,99 +26,86 @@ public class RuleRegExp extends RegexReplace {
 	public RuleRegExp(String search, String replace) throws PatternSyntaxException {
 		super(search, replace);
 	}
-	
+
 	/**
 	 * Search-Method for Pagesourcecodes
 	 * Returns the start-position when found the pattern
 	 * Returns -1 if not found the pattern or an error occured
+	 * 
 	 * @param htmlcode Sourcecode
 	 * @param start Startposition
 	 * @return Found position
 	 */
 	public int doFailureSearch(String htmlcode, int start) {
-		//If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null) return -1;
-		if (search.length() == 0) return -1;
-		if (htmlcode.length() == 0) return -1;
-		if (start > htmlcode.length()) return -1;
-		
-		try {
-			//Now we search for the position
-			Matcher matcher = pattern.matcher(htmlcode);
-			if (matcher.find(start)) {
-				int position = matcher.start();
-				return position;
-			}
-		} catch (Exception e) {
+		// If pattern is not compiled or url is empty we return an empty String
+		if (pattern == null || search.isEmpty() || htmlcode.isEmpty() || start < 0 || start > htmlcode.length()) {
 			return -1;
+		}
+
+		// Now we search for the position
+		Matcher matcher = pattern.matcher(htmlcode);
+		if (matcher.find(start)) {
+			return matcher.start();
 		}
 		return -1;
 	}
-	
+
 	/**
 	 * @param htmlcode Sourcecode
 	 * @param start Startposition
 	 * @return Found position
 	 */
 	public String doFailureLastSearch(String htmlcode, int start) {
-		//If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null) return "";
-		if (search.length() == 0) return "";
-		if (htmlcode.length() == 0) return "";
-		if (start > htmlcode.length()) return "";
-		
-		try {
-			//Now we search for the position
-			Matcher matcher = pattern.matcher(htmlcode);
-			if (matcher.find(start)) {
-				return htmlcode.substring(matcher.start(), matcher.end());
-			}
-		} catch (Exception e) {
+		// If pattern is not compiled or url is empty we return an empty String
+		if (pattern == null || search.isEmpty() || htmlcode.isEmpty() || start < 0 || start > htmlcode.length()) {
 			return "";
+		}
+
+		// Now we search for the position
+		Matcher matcher = pattern.matcher(htmlcode);
+		if (matcher.find(start)) {
+			return matcher.group();
 		}
 		return "";
 	}
-	
+
 	/**
 	 * Replace-Method for URLs
+	 * 
 	 * @param url URL
 	 * @param pic Pic
 	 * @return URL
 	 */
 	public String doURLReplace(String url, Pic pic) {
-		//If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null) return "";
-		if (search.length() == 0) return "";
-		if (url.length() == 0) return "";
-		
-		//Now we replace the variables if the user defined some in the Replace-String
-		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
-		
-		try {
-			//Now we replace
-			Matcher matcher = pattern.matcher(url);
-			String result = matcher.replaceAll(dReplace);
-			return result;
-		} catch (Exception e) {
+		// If pattern is not compiled or url is empty we return an empty String
+		if (pattern == null || search.isEmpty() || url.isEmpty()) {
 			return "";
 		}
+
+		// Now we replace the variables if the user defined some in the Replace-String
+		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
+
+		// Now we replace
+		return pattern.matcher(url).replaceAll(dReplace);
 	}
-	
+
 	/**
 	 * Search-Method for Pagesourcecodes
 	 * Returns the start-position when found the pattern
 	 * Returns -1 if not found the pattern or an error occured
+	 * 
 	 * @param htmlcode Sourcecode
 	 * @param start Startposition
 	 * @return Found position
 	 */
 	public int doPageSourcecodeSearch(String htmlcode, int start) {
-		return super.doSearch(htmlcode, start);
+		return doSearch(htmlcode, start);
 	}
-	
+
 	/**
 	 * Replace-Method for Pagesourcecodes
 	 * Returns an empty String if the pattern was not found
+	 * 
 	 * @param htmlcode Sourcecode
 	 * @param start Startposition
 	 * @param url Container-URL
@@ -128,34 +113,31 @@ public class RuleRegExp extends RegexReplace {
 	 * @return URL
 	 */
 	public String doPageSourcecodeReplace(String htmlcode, int start, String url, Pic pic) {
-		//If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null) return "";
-		if (search.length() == 0) return "";
-		if (url.length() == 0) return "";
-		if (start > htmlcode.length()) return "";
-		if (start < 0) return "";
-		
-		//Now we replace the variables if the user defined some in the Replace-String
-		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
-		
-		try {
-			//Now we replace
-			Matcher matcher = pattern.matcher(htmlcode);
-			Matcher smatcher;
-			String result = "";
-			if (matcher.find(start)) {
-				smatcher = pattern.matcher(htmlcode.substring(matcher.start(), matcher.end()));
-				result = smatcher.replaceAll(dReplace);
-			}
-			return result;
-		} catch (Exception e) {
+		// If pattern is not compiled or url is empty we return an empty String
+		if (pattern == null || search.isEmpty() || url.isEmpty() || start < 0 || start > htmlcode.length()) {
 			return "";
 		}
+
+		// Now we replace the variables if the user defined some in the Replace-String
+		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
+
+		// Now we replace
+		Matcher matcher = pattern.matcher(htmlcode);
+		if (matcher.find(start)) {
+			/*
+			 * Here we replace only the region that was matched and also return only the matched region. Instead of returning the whole input with parts
+			 * replaced.
+			 */
+			Matcher matchRegionMatcher = pattern.matcher(matcher.group());
+			return matchRegionMatcher.replaceAll(dReplace);
+		}
+		return "";
 	}
-	
+
 	/**
-	 * The user can use variables in the replace-String of a rule, 
+	 * The user can use variables in the replace-String of a rule,
 	 * so here we replace the variables
+	 * 
 	 * @param replace Replace-String
 	 * @param url Container-URL
 	 * @param pic Pic
@@ -190,39 +172,39 @@ public class RuleRegExp extends RegexReplace {
 			dDIR = pic.getTargetPath();
 			dFILE = pic.getTargetFilename();
 		}
-		
+
 		if (url.matches("^https?://.+\\..+/.*")) {
 			int startIndex = url.startsWith("https") ? 8 : 7;
 			dSRV = url.substring(0, url.indexOf("/", startIndex) + 1);
 			dSRVT = dSRV.substring(0, dSRV.length() - 1);
 		}
-		
+
 		int last = url.lastIndexOf("/");
 		if (last > -1) {
 			dURL = url.substring(0, last + 1);
 			dURLT = dURL.substring(0, dURL.length() - 1);
 		}
-		
-		//Now we replace the variables if the user defined some in the Replace-String
-		if (dSRV.length() > 0) {
+
+		// Now we replace the variables if the user defined some in the Replace-String
+		if (!dSRV.isEmpty()) {
 			retval = retval.replace("$SRV", dSRV);
 		}
-		if (dSRVT.length() > 0) {
+		if (!dSRVT.isEmpty()) {
 			retval = retval.replace("$SRVT", dSRVT);
 		}
-		if (dURL.length() > 0) {
+		if (!dURL.isEmpty()) {
 			retval = retval.replace("$URL", dURL);
 		}
-		if (dURLT.length() > 0) {
+		if (!dURLT.isEmpty()) {
 			retval = retval.replace("$URLT", dURLT);
 		}
-		if (dFURL.length() > 0) {
+		if (!dFURL.isEmpty()) {
 			retval = retval.replace("$FURL", dFURL);
 		}
-		if (dFURL.length() > 0) {
+		if (!dFURL.isEmpty()) {
 			retval = retval.replace("$DIR", dDIR);
 		}
-		if (dFURL.length() > 0) {
+		if (!dFURL.isEmpty()) {
 			retval = retval.replace("$FILE", dFILE);
 		}
 		return retval;

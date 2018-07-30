@@ -10,13 +10,12 @@ import org.mozilla.javascript.WrapFactory;
  * Class containing classes for setting up the Rhino javascript context
  */
 public class JavascriptContext {
-
 	static {
 		ContextFactory.initGlobal(new JavascriptContext.SandboxContextFactory());
 	}
 
 	/**
-	 * 
+	 * Sandbox ContextFactory
 	 */
 	public static class SandboxContextFactory extends ContextFactory {
 		@Override
@@ -30,7 +29,7 @@ public class JavascriptContext {
 	}
 
 	/**
-	 * 
+	 * Sandbox WrapFactory
 	 */
 	public static class SandboxWrapFactory extends WrapFactory {
 		@Override
@@ -40,7 +39,7 @@ public class JavascriptContext {
 	}
 
 	/**
-	 * 
+	 * Sandbox NativeJavaObject
 	 */
 	public static class SandboxNativeJavaObject extends NativeJavaObject {
 		private static final long serialVersionUID = 1L;

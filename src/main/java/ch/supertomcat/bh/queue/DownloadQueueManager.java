@@ -19,7 +19,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * @see ch.supertomcat.bh.queue.Restriction
  */
 public class DownloadQueueManager implements ISettingsListener, ICalculateRateTimer {
-
 	/**
 	 * Listener
 	 */
@@ -48,17 +47,17 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	/**
 	 * Maximum connection count
 	 */
-	private int connectionCount = 4;
+	private int connectionCount = SettingsManager.instance().getConnections();
 
 	/**
 	 * Maximum connection count per host
 	 */
-	private int connectionCountPerHost = 0;
+	private int connectionCountPerHost = SettingsManager.instance().getConnectionsPerHost();
 
 	/**
 	 * Free download slots
 	 */
-	private int openDownloadSlots = 4;
+	private int openDownloadSlots = connectionCount;
 
 	/**
 	 * Downloaded files since application started
@@ -91,9 +90,6 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	 * Constructor
 	 */
 	private DownloadQueueManager() {
-		connectionCount = SettingsManager.instance().getConnections();
-		connectionCountPerHost = SettingsManager.instance().getConnectionsPerHost();
-		openDownloadSlots = connectionCount;
 		SettingsManager.instance().addSettingsListener(this);
 	}
 
@@ -173,7 +169,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 		 * If the queue is empty, its a good point to check
 		 * if the open download slots are set correct ;-)
 		 */
-		if (queue.size() == 0) {
+		if (queue.isEmpty()) {
 			if (openDownloadSlots != connectionCount) {
 				openDownloadSlots = connectionCount;
 			}
@@ -183,9 +179,8 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 				calculateRateTimerTask.addCalculateRateListener(this);
 			}
 		}
-		String domain;
-		Restriction re;
-		for (int i = 0; i < queue.size(); i++) {
+
+		for (IDownloadListener download : queue) {
 			if (openDownloadSlots <= 0) {
 				// If there are now no open download slots we can just return
 				return;
@@ -194,7 +189,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 				boolean bAllowed = true;
 
 				// Now we check if there are a counter and a restriction for the domain
-				domain = getDomainFromURL(queue.get(i).getContainerURL());
+				String domain = getDomainFromURL(download.getContainerURL());
 
 				int countForDomain = 0;
 				Integer cfd = counters.get(domain);
@@ -202,7 +197,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 					countForDomain = cfd;
 				}
 
-				re = getRestrictionForDomain(domain);
+				Restriction re = getRestrictionForDomain(domain);
 
 				if (re != null) {
 					if (re.getMaxSimultaneousDownloads() > 0) {
@@ -238,9 +233,9 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 				}
 
 				// Allow the download and check if the listener really started the download
-				boolean b = queue.get(i).downloadAllowed();
+				boolean b = download.downloadAllowed();
 				if (b == true) {
-					calculateRateListeners.add(queue.get(i));
+					calculateRateListeners.add(download);
 					// Only if the listener has started the download, we decrease open download slots
 					setOpenDownloadSlots(openDownloadSlots - 1);
 					// And increase the counter
@@ -302,7 +297,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 			}
 			// Run the mangageDLSlots-Method, which will allow the download
 			manageDLSlots();
-			if (queue.size() == 0) {
+			if (queue.isEmpty()) {
 				// If the queue is now empty, it is a good time to commit the database
 				QueueManager.instance().saveDatabase();
 				if (calculateRateTimerTask != null) {
@@ -392,7 +387,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 			int cc = SettingsManager.instance().getConnections();
 			// Calculate the difference between the new max connection value and the old
 			int diff = cc - this.connectionCount;
-			if (diff > 0 || diff < 0) {
+			if (diff != 0) {
 				/*
 				 * If the value has changed set openDownloadSlots
 				 * Note: Because diff could be a negative value, we
@@ -489,19 +484,27 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	 * @return Domain
 	 */
 	private String getDomainFromURL(String url) {
-		try {
-			String domain = url;
-			domain = domain.substring(domain.indexOf("://") + 3);
-			domain = domain.substring(0, domain.indexOf("/"));
-			int lastPoint = domain.lastIndexOf(".");
-			int lastBeforeLastPoint = domain.lastIndexOf(".", lastPoint - 1);
-			if (lastBeforeLastPoint > -1) {
-				domain = domain.substring(lastBeforeLastPoint + 1);
-			}
-			return domain;
-		} catch (Exception e) {
+		int protocolPos = url.indexOf("://");
+		if (protocolPos == -1) {
 			return "";
 		}
+		String urlWithoutProtocol = url.substring(protocolPos + 3);
+		int pathPos = urlWithoutProtocol.indexOf("/");
+		if (pathPos == -1) {
+			return "";
+		}
+
+		String domain = urlWithoutProtocol.substring(0, pathPos);
+
+		int lastPoint = domain.lastIndexOf(".");
+		if (lastPoint == -1) {
+			return domain;
+		}
+		int lastBeforeLastPoint = domain.lastIndexOf(".", lastPoint - 1);
+		if (lastBeforeLastPoint == -1) {
+			return domain;
+		}
+		return domain.substring(lastBeforeLastPoint + 1);
 	}
 
 	/**
@@ -532,8 +535,8 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	 */
 	private int getCurrentCount(List<String> domains) {
 		int count = 0;
-		for (int i = 0; i < domains.size(); i++) {
-			Integer cfd = counters.get(domains.get(i));
+		for (String domain : domains) {
+			Integer cfd = counters.get(domain);
 			if (cfd != null) {
 				count += cfd;
 			}
@@ -550,11 +553,6 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 		return downloadBitrate;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.ICalculateRateTimer#totalDownloadRateCalculated(double)
-	 */
 	@Override
 	public void totalDownloadRateCalculated(double downloadRate) {
 		this.downloadBitrate = downloadRate;

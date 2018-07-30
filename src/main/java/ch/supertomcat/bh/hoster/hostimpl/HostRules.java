@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.hostimpl;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -12,6 +12,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.Host;
+import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.hoster.IHoster;
+import ch.supertomcat.bh.hoster.IRedirect;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.Rule;

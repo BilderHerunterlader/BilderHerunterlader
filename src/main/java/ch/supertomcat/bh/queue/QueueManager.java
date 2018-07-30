@@ -25,7 +25,7 @@ public class QueueManager implements IPicListener {
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(QueueManager.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Singleton
@@ -340,11 +340,6 @@ public class QueueManager implements IPicListener {
 		return syncObject;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.pic.IPicListener#progressBarChanged(ch.supertomcat.bh.pic.Pic, int, int, int, java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void progressBarChanged(Pic pic, int min, int max, int val, String s, String errMsg) {
 		synchronized (syncObject) {
@@ -355,11 +350,6 @@ public class QueueManager implements IPicListener {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.pic.IPicListener#sizeChanged(ch.supertomcat.bh.pic.Pic)
-	 */
 	@Override
 	public void sizeChanged(Pic pic) {
 		synchronized (syncObject) {
@@ -370,11 +360,6 @@ public class QueueManager implements IPicListener {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.pic.IPicListener#targetChanged(ch.supertomcat.bh.pic.Pic)
-	 */
 	@Override
 	public void targetChanged(Pic pic) {
 		synchronized (syncObject) {
@@ -385,11 +370,6 @@ public class QueueManager implements IPicListener {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.pic.IPicListener#statusChanged(ch.supertomcat.bh.pic.Pic)
-	 */
 	@Override
 	public void statusChanged(Pic pic) {
 		synchronized (syncObject) {
@@ -411,11 +391,6 @@ public class QueueManager implements IPicListener {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.pic.IPicListener#deactivatedChanged(ch.supertomcat.bh.pic.Pic)
-	 */
 	@Override
 	public void deactivatedChanged(Pic pic) {
 		synchronized (syncObject) {

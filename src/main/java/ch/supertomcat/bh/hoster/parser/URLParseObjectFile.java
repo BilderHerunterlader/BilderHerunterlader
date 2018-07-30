@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.parser;
 
 /**
  * Represents a file to be downloaded

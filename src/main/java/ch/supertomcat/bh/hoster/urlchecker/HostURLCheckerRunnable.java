@@ -1,9 +1,10 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.urlchecker;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.supertomcattools.guitools.Localization;
@@ -14,17 +15,16 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 /**
  * This class is for checking multiple URLs
  */
-public class HostURLChecker implements Runnable, IProgressObserver {
-
+public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 	/**
 	 * URLs
 	 */
-	private URLList urlList;
+	private final URLList urlList;
 
 	/**
 	 * Checked URLs
 	 */
-	private ArrayList<URL> v;
+	private ArrayList<URL> v = null;
 
 	/**
 	 * ProgressObserver
@@ -34,7 +34,7 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 	/**
 	 * Listeners
 	 */
-	private List<IHostURLCheckerListener> listeners = new CopyOnWriteArrayList<>();
+	private List<HostURLCheckerListener> listeners = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Is the thread running
@@ -56,7 +56,7 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 	 * 
 	 * @param urlList URLList
 	 */
-	public HostURLChecker(URLList urlList) {
+	public HostURLCheckerRunnable(URLList urlList) {
 		this.stop = false;
 		this.urlList = urlList;
 		progress.addProgressListener(this);
@@ -75,11 +75,6 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Runnable#run()
-	 */
 	@Override
 	public void run() {
 		running = true;
@@ -156,7 +151,7 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 	 * @param urls URLs
 	 */
 	private void linksChecked(List<URL> urls) {
-		for (IHostURLCheckerListener listener : listeners) {
+		for (HostURLCheckerListener listener : listeners) {
 			listener.linksChecked(urls);
 		}
 	}
@@ -166,7 +161,7 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 	 * 
 	 * @param l Listener
 	 */
-	public void addHMListener(IHostURLCheckerListener l) {
+	public void addHMListener(HostURLCheckerListener l) {
 		if (!listeners.contains(l)) {
 			listeners.add(l);
 		}
@@ -177,80 +172,45 @@ public class HostURLChecker implements Runnable, IProgressObserver {
 	 * 
 	 * @param l Listener
 	 */
-	public void removeHMListener(IHostURLCheckerListener l) {
+	public void removeHMListener(HostURLCheckerListener l) {
 		if (listeners.contains(l)) {
 			listeners.remove(l);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.gui.progressmonitor.IProgressObserver#progressChanged(int)
-	 */
 	@Override
 	public void progressChanged(int val) {
-		for (IHostURLCheckerListener listener : listeners) {
+		for (HostURLCheckerListener listener : listeners) {
 			listener.progressChanged(val);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.gui.progressmonitor.IProgressObserver#progressChanged(int, int, int)
-	 */
 	@Override
 	public void progressChanged(int min, int max, int val) {
-		for (IHostURLCheckerListener listener : listeners) {
+		for (HostURLCheckerListener listener : listeners) {
 			listener.progressChanged(min, max, val);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.gui.progressmonitor.IProgressObserver#progressChanged(java.lang.String)
-	 */
 	@Override
 	public void progressChanged(String text) {
-		for (IHostURLCheckerListener listener : listeners) {
+		for (HostURLCheckerListener listener : listeners) {
 			listener.progressChanged(text);
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.gui.progressmonitor.IProgressObserver#progressChanged(boolean)
-	 */
 	@Override
 	public void progressChanged(boolean visible) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver#progressIncreased()
-	 */
 	@Override
 	public void progressIncreased() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver#progressModeChanged(boolean)
-	 */
 	@Override
 	public void progressModeChanged(boolean indeterminate) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver#progressCompleted()
-	 */
 	@Override
 	public void progressCompleted() {
 	}

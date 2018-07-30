@@ -3,14 +3,14 @@ package ch.supertomcat.bh.hoster.linkextract;
 import java.util.List;
 
 /**
- * 
- *
+ * Extract Configuration
  */
 public class ExtractConfig {
-	private List<ExtractConfigWhitelist> whitelists = null;
-	
+	private final List<ExtractConfigWhitelist> whitelists;
+
 	/**
 	 * Constructor
+	 * 
 	 * @param whitelists Whitelists
 	 */
 	public ExtractConfig(List<ExtractConfigWhitelist> whitelists) {
@@ -19,6 +19,7 @@ public class ExtractConfig {
 
 	/**
 	 * Returns the whitelists
+	 * 
 	 * @return Whitelists
 	 */
 	public List<ExtractConfigWhitelist> getWhitelists() {

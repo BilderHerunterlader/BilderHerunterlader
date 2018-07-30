@@ -403,11 +403,11 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		}
 
 		// Rules
-		int sizer = HostManager.instance().getHr().getRules().size();
+		int sizer = HostManager.instance().getHostRules().getRules().size();
 
 		// We create first an array with name and version of all rules
 		String ruleVersions[][] = new String[sizer][2];
-		Iterator<Rule> it = HostManager.instance().getHr().getRules().iterator();
+		Iterator<Rule> it = HostManager.instance().getHostRules().getRules().iterator();
 		int ir = 0;
 		Rule r;
 		while (it.hasNext()) {

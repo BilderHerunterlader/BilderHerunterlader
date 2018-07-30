@@ -15,7 +15,7 @@ import ch.supertomcat.bh.hoster.Hoster;
 /**
  * Class which provides Java methods to Javascript
  */
-public class JavascriptMethodProvider {
+public final class JavascriptMethodProvider {
 	/**
 	 * Logger for this class
 	 */
@@ -26,12 +26,43 @@ public class JavascriptMethodProvider {
 	 */
 	private static Map<String, Method> javaMethods = new HashMap<>();
 
+	/**
+	 * Dummy Hoster used for downloading container page
+	 */
+	private static Hoster dummyHoster = new Hoster() {
+		@Override
+		public String toString() {
+			return "JavascriptMethodProviderDummyHoster";
+		}
+
+		@Override
+		public void setEnabled(boolean enabled) {
+			// Nothing to do
+		}
+
+		@Override
+		public boolean isEnabled() {
+			return true;
+		}
+
+		@Override
+		public boolean canBeDisabled() {
+			return false;
+		}
+	};
+
 	static {
 		try {
 			javaMethods.put("downloadContainerPage", JavascriptMethodProvider.class.getMethod("downloadContainerPage", String.class, String.class));
 		} catch (NoSuchMethodException | SecurityException e) {
 			throw new RuntimeException("Could not initialize JavascriptMethodProvider", e);
 		}
+	}
+
+	/**
+	 * Constructor
+	 */
+	private JavascriptMethodProvider() {
 	}
 
 	/**
@@ -73,29 +104,7 @@ public class JavascriptMethodProvider {
 	 * @throws HostException
 	 */
 	public static String downloadContainerPage(String url, String referrer) throws HostException {
-		Hoster hoster = new Hoster() {
-
-			@Override
-			public String toString() {
-				return "JavascriptMethodProviderDummyHoster";
-			}
-
-			@Override
-			public void setEnabled(boolean enabled) {
-				// Nothing to do
-			}
-
-			@Override
-			public boolean isEnabled() {
-				return true;
-			}
-
-			@Override
-			public boolean canBeDisabled() {
-				return false;
-			}
-		};
-		return hoster.downloadContainerPage("JavascriptMethodProviderDummyHoster", url, referrer);
+		return dummyHoster.downloadContainerPage("JavascriptMethodProviderDummyHoster", url, referrer);
 	}
 
 	/**

@@ -9,8 +9,8 @@ import java.awt.SystemTray;
 import java.awt.TrayIcon;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 
 import javax.swing.JOptionPane;
 
@@ -38,7 +38,7 @@ import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
 /**
  * Class which handles the SystemTray
  */
-public class SystemTrayTool implements ActionListener, IDownloadQueueManagerListener, MouseListener, ISettingsListener {
+public class SystemTrayTool implements ActionListener, IDownloadQueueManagerListener, ISettingsListener {
 	/**
 	 * Logger for this class
 	 */
@@ -170,7 +170,19 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 			itemUpdate.addActionListener(this);
 			itemExit.addActionListener(this);
 
-			trayIcon.addMouseListener(this);
+			trayIcon.addMouseListener(new MouseAdapter() {
+				@Override
+				public void mouseClicked(MouseEvent e) {
+					if (e.getClickCount() == 1 && e.getButton() == 1) {
+						if (!Main.instance().isVisible()) {
+							Main.instance().setVisible(true);
+							Main.instance().toFront();
+						} else {
+							GuiEvent.instance().hideWindow();
+						}
+					}
+				}
+			});
 
 			try {
 				tray.add(trayIcon);
@@ -220,11 +232,6 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == itemOpen) {
@@ -285,11 +292,6 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IQueueDataListener#queueChanged(int, int, int)
-	 */
 	@Override
 	public void queueChanged(int queue, int openSlots, int maxSlots) {
 		if (trayIcon != null) {
@@ -297,11 +299,6 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IDownloadQueueManagerListener#downloadsComplete(int, int, int)
-	 */
 	@Override
 	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
 		if (SettingsManager.instance().isDownloadsCompleteNotification()) {
@@ -310,64 +307,6 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if ((e.getClickCount() == 1) && e.getButton() == 1) {
-			if (!Main.instance().isVisible()) {
-				Main.instance().setVisible(true);
-				Main.instance().toFront();
-			} else {
-				GuiEvent.instance().hideWindow();
-			}
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mousePressed(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
-	@Override
-	public void mouseReleased(MouseEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.settings.ISettingsListener#settingsChanged()
-	 */
 	@Override
 	public void settingsChanged() {
 		if (trayIcon != null) {
@@ -375,29 +314,14 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IQueueDataListener#sessionDownloadedBytesChanged(long)
-	 */
 	@Override
 	public void sessionDownloadedBytesChanged(long count) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IQueueDataListener#sessionDownloadedFilesChanged(int)
-	 */
 	@Override
 	public void sessionDownloadedFilesChanged(int count) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.queue.IDownloadQueueManagerListener#totalDownloadRateCalculated(double)
-	 */
 	@Override
 	public void totalDownloadRateCalculated(double downloadRate) {
 		if (trayIcon != null) {

@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.hoster;
+package ch.supertomcat.bh.hoster.containerpage;
 
 import org.apache.http.StatusLine;
 

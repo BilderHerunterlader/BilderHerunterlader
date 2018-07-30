@@ -16,7 +16,7 @@ import javax.swing.JTextField;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.hoster.URLParseObject;
+import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;

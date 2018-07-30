@@ -18,6 +18,8 @@ import org.apache.http.util.EntityUtils;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
+import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -28,7 +30,7 @@ import ch.supertomcat.supertomcattools.httptools.HTTPTool;
  * Host and Rule extends this class, so we have a class
  * which could be a Host or a Rule. We need this on the URLParseObject
  * 
- * @see ch.supertomcat.bh.hoster.URLParseObject
+ * @see ch.supertomcat.bh.hoster.parser.URLParseObject
  */
 public abstract class Hoster {
 	private boolean developer = false;
