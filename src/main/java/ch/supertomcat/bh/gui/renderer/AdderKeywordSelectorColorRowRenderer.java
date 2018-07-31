@@ -13,10 +13,7 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColor
  * TableCellRenderer for AdderKeywordSelectorTitle
  */
 public class AdderKeywordSelectorColorRowRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -2648400607543076623L;
+	private static final long serialVersionUID = 1L;
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -44,7 +41,7 @@ public class AdderKeywordSelectorColorRowRenderer extends DefaultStringColorRowR
 		}
 		this.setBackground(c);
 
-		if (column == 1) {
+		if (table.convertColumnIndexToModel(column) == 1) {
 			String valueText = matchType.getText();
 			prepareValueText(this, table, valueText, isSelected, hasFocus, row, column);
 		} else {
