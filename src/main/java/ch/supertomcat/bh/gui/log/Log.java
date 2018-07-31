@@ -7,7 +7,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashSet;
@@ -378,14 +377,10 @@ public class Log extends JPanel implements ILogManagerListener {
 			changed = true;
 			reloadLogs();
 		} else {
-			try {
-				EventQueue.invokeAndWait(() -> {
-					changed = true;
-					reloadLogs();
-				});
-			} catch (InvocationTargetException | InterruptedException e) {
-				logger.error("Could not read logs", e);
-			}
+			EventQueue.invokeLater(() -> {
+				changed = true;
+				reloadLogs();
+			});
 		}
 	}
 
@@ -395,14 +390,10 @@ public class Log extends JPanel implements ILogManagerListener {
 			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
 			last = true;
 		} else {
-			try {
-				EventQueue.invokeAndWait(() -> {
-					updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
-					last = true;
-				});
-			} catch (InvocationTargetException | InterruptedException e) {
-				logger.error("Could not read logs", e);
-			}
+			EventQueue.invokeLater(() -> {
+				updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+				last = true;
+			});
 		}
 	}
 }
