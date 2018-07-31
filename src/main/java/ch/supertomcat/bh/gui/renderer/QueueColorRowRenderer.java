@@ -17,17 +17,15 @@ public class QueueColorRowRenderer extends DefaultStringColorRowRenderer impleme
 
 	@Override
 	public void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		Color cf;
 		if (isSelected) {
-			cf = table.getSelectionForeground();
+			super.prepareForegroundColor(comp, table, value, isSelected, hasFocus, row, column);
 		} else {
 			Object progressValue = table.getModel().getValueAt(table.convertRowIndexToModel(row), 3);
 			if (progressValue instanceof Pic && ((Pic)progressValue).isDeactivated()) {
-				cf = Color.RED;
+				comp.setForeground(Color.RED);
 			} else {
-				cf = table.getForeground();
+				super.prepareForegroundColor(comp, table, value, isSelected, hasFocus, row, column);
 			}
 		}
-		comp.setForeground(cf);
 	}
 }

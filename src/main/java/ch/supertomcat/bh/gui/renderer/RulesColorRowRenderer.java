@@ -13,7 +13,6 @@ import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColor
  * RulesColorRowRenderer
  */
 public class RulesColorRowRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
-
 	private static final long serialVersionUID = 1L;
 
 	private static final Color REDIRECT_COLOR = Color.decode("#FF4500");
@@ -45,6 +44,5 @@ public class RulesColorRowRenderer extends DefaultStringColorRowRenderer impleme
 			}
 		}
 		comp.setForeground(cf);
-
 	}
 }

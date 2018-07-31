@@ -12,16 +12,8 @@ import javax.swing.table.TableCellRenderer;
  * Renderer to display option buttons for hostclasses
  */
 public class HosterOptionsColumnRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = -6810509128294034334L;
+	private static final long serialVersionUID = 1L;
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.table.TableCellRenderer#getTableCellRendererComponent(javax.swing.JTable, java.lang.Object, boolean, boolean, int, int)
-	 */
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		Component comp = null;
@@ -50,7 +42,7 @@ public class HosterOptionsColumnRenderer extends DefaultTableCellRenderer implem
 	 * @param row Index of the row
 	 * @param column Index of the Column
 	 */
-	public void prepareBackgroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	protected void prepareBackgroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		Color c = Color.WHITE;
 		if ((row % 2) != 0) {
 			c = Color.decode("#F0F8FF");
@@ -72,7 +64,7 @@ public class HosterOptionsColumnRenderer extends DefaultTableCellRenderer implem
 	 * @param row Index of the row
 	 * @param column Index of the Column
 	 */
-	public void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+	protected void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		Color cf = table.getForeground();
 		if (isSelected) {
 			cf = table.getSelectionForeground();
