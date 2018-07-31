@@ -757,6 +757,15 @@ public class SettingsManager {
 	 * @param strSettingsFilename Settings Filename
 	 */
 	private SettingsManager(String strSettingsFolder, final String strSettingsFilename) {
+		// If path for downloads are overridden by directories.properties file, then we need to set the path here
+		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
+		if (portableDownloadPath != null) {
+			if (!portableDownloadPath.endsWith("/") && !portableDownloadPath.endsWith("\\")) {
+				portableDownloadPath += FileTool.FILE_SEPERATOR;
+			}
+			savePath = portableDownloadPath;
+		}
+
 		strSettingsPath = strSettingsFolder;
 		strSettingsFile = strSettingsPath + strSettingsFilename;
 		strSettingsFileBackup = strSettingsFile + ".backup";
@@ -816,7 +825,6 @@ public class SettingsManager {
 	 */
 	public synchronized static SettingsManager instance() {
 		if (instance == null) {
-
 			instance = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
 		}
 		return instance;

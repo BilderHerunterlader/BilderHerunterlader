@@ -193,15 +193,6 @@ public class BH {
 		}
 		Localization.init("ch.supertomcat.bh.BH", language, country);
 
-		// If path for downloads are overridden by directories.properties file, then we need to set the path in SettingsManager here
-		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
-		if (portableDownloadPath != null) {
-			if (!portableDownloadPath.endsWith("/") && !portableDownloadPath.endsWith("\\")) {
-				portableDownloadPath += FileTool.FILE_SEPERATOR;
-			}
-			SettingsManager.instance().setSavePath(portableDownloadPath);
-		}
-
 		// Initialize Managers
 		DownloadQueueManager.instance(); // Don't initialize this parallel, because HostManager will access it.
 		LogManager.instance(); // Initalized too fast as it would be worth to execute parallel
