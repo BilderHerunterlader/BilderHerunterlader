@@ -32,25 +32,31 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		TableModel model = table.getModel();
-		if (table instanceof JXTable) {
+		Color fc;
+		if (!isSelected && table instanceof JXTable) {
 			JXTable jtAdder = (JXTable)table;
 			int modelRowIndex = table.convertRowIndexToModel(row);
 
 			if ((Boolean)model.getValueAt(modelRowIndex, jtAdder.getColumnExt("AlreadyDownloaded").getModelIndex())) {
-				setForeground(alreadyDownloadedColor);
+				fc = alreadyDownloadedColor;
 			} else {
-				setForeground(notAlreadyDownloadedColor);
+				fc = notAlreadyDownloadedColor;
 			}
 
-			if (column == 3) {
+			if (table.convertColumnIndexToModel(column) == 3) {
 				boolean keywordFound = model.getValueAt(modelRowIndex, jtAdder.getColumnExt("Keyword").getModelIndex()) != null;
 				if (keywordFound) {
-					setForeground(keywordFoundColor);
+					fc = keywordFoundColor;
 				}
 			}
 		} else {
-			setForeground(table.getForeground());
+			if (isSelected) {
+				fc = table.getSelectionForeground();
+			} else {
+				fc = table.getForeground();
+			}
 		}
+		setForeground(fc);
 
 		prepareBackgroundColor(this, table, value, isSelected, hasFocus, row, column);
 		this.setOpaque(true);
@@ -86,13 +92,18 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 	 * @param row Index of the row
 	 * @param column Index of the Column
 	 */
-	public void prepareBackgroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		Color c = table.getBackground();
-		if ((row % 2) != 0) {
-			c = Color.decode("#F0F8FF");
-		}
+	protected void prepareBackgroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+		Color c;
 		if (isSelected) {
 			c = table.getSelectionBackground();
+		} else {
+			if ((row % 2) != 0) {
+				c = Color.decode("#F0F8FF");
+			} else if (table instanceof JXTable) {
+				c = Color.WHITE;
+			} else {
+				c = table.getBackground();
+			}
 		}
 		comp.setBackground(c);
 	}

@@ -4,7 +4,6 @@ import static ch.supertomcat.supertomcattools.fileiotools.FileTool.*;
 import static ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool.*;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -591,10 +590,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 		jtAdder.getColumnExt("AlreadyDownloaded").setVisible(false);
 
 		jtAdder.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtAdder.setBackground(Color.WHITE);
-		jtAdder.setForeground(Color.BLACK);
-		jtAdder.setSelectionBackground(new Color(0xDFDFDF));
-		jtAdder.setSelectionForeground(Color.BLACK);
 
 		jtAdder.setDefaultRenderer(Object.class, crr);
 		DefaultBooleanColorRowRenderer dbcrr = new DefaultBooleanColorRowRenderer();
