@@ -37,7 +37,7 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 
 	/**
 	 * Thread URL set, when URL's are added over the download add dialog.
-	 * TODO Why was this necessary?
+	 * Some host classes check over this value, how the URL was added.
 	 */
 	public static final String DOWNLOAD_ADD_DIALOG_THREAD_URL = "DownloadAddDialog";
 
