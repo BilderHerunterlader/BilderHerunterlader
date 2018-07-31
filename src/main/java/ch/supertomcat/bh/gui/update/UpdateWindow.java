@@ -223,16 +223,17 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		TableTool.internationalizeColumns(table);
 
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
+		int updateActionTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateAction"), 20);
 		table.getColumn("UpdateAction").setCellRenderer(uacr);
-		table.getColumn("UpdateAction").setWidth(50);
-		table.getColumn("UpdateAction").setPreferredWidth(50);
-		table.getColumn("UpdateAction").setMaxWidth(50);
-		table.getColumn("UpdateType").setWidth(100);
-		table.getColumn("UpdateType").setPreferredWidth(100);
-		table.getColumn("UpdateType").setMaxWidth(100);
-		table.getColumn("Version").setWidth(70);
-		table.getColumn("Version").setPreferredWidth(70);
-		table.getColumn("Version").setMaxWidth(70);
+		table.getColumn("UpdateAction").setPreferredWidth(updateActionTableHeaderWidth);
+		int updateTypeTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateType"), 20);
+		table.getColumn("UpdateType").setPreferredWidth(updateTypeTableHeaderWidth);
+		int updateNameTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("Name"), 50);
+		table.getColumn("Name").setPreferredWidth(updateNameTableHeaderWidth);
+		int updateVersionTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("Version"), 15);
+		table.getColumn("Version").setPreferredWidth(updateVersionTableHeaderWidth);
+		int updateSourceNoteTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateSourceNote"), 15);
+		table.getColumn("UpdateSourceNote").setPreferredWidth(updateSourceNoteTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
 		table.getColumnModel().addColumnModelListener(this);
 		table.getTableHeader().setReorderingAllowed(false);
