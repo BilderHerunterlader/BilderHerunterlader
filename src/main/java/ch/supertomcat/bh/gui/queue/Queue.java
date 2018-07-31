@@ -3,7 +3,6 @@ package ch.supertomcat.bh.gui.queue;
 import static ch.supertomcat.supertomcattools.fileiotools.FileTool.*;
 
 import java.awt.BorderLayout;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -17,7 +16,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
@@ -247,23 +245,15 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		TableTool.internationalizeColumns(jtQueue);
 
 		jtQueue.getColumn("Progress").setCellRenderer(pcr);
-		jtQueue.getColumn("URL").setPreferredWidth(300);
-		jtQueue.getColumn("URL").setWidth(300);
-		jtQueue.getColumn("Target").setPreferredWidth(300);
-		jtQueue.getColumn("Target").setWidth(300);
+
+		int urlOrTargetTableHeaderWidth = TableTool.calculateColumnHeaderWidth(jtQueue, jtQueue.getColumn("URL"), 47);
+		jtQueue.getColumn("URL").setPreferredWidth(urlOrTargetTableHeaderWidth);
+		jtQueue.getColumn("Target").setPreferredWidth(urlOrTargetTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
 		jtQueue.getColumnModel().addColumnModelListener(this);
 		jtQueue.addMouseListener(this);
 		jtQueue.getTableHeader().setReorderingAllowed(false);
 
-		jtQueue.setBackground(Color.WHITE);
-		jtQueue.setForeground(Color.BLACK);
-		/*
-		 * TODO If I set selection foreground, I should also set selection background. But maybe I should not set them at all and use the default from the
-		 * operating system. not only for selection, but also for foreground and background. However the problem will be, that then also red foreground color
-		 * for disabled downloads might not work very well for every user. I should at least think about all this...
-		 */
-		jtQueue.setSelectionForeground(Color.WHITE);
 		jtQueue.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		jtQueue.setRowHeight(TableTool.calculateRowHeight(jtQueue, false, true));
 
@@ -495,11 +485,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 					synchronized (QueueManager.instance().getSyncObject()) {
 						synchronized (syncObject) {
 							int[] selectedRows = jtQueue.getSelectedRows();
-							int[] selectedModelRows = new int[selectedRows.length];
-							for (int i = 0; i < selectedRows.length; i++) {
-								selectedModelRows[i] = jtQueue.convertRowIndexToModel(selectedRows[i]);
-							}
-							Arrays.sort(selectedModelRows);
+							int[] selectedModelRows = TableTool.convertRowIndexToModel(jtQueue, selectedRows, true);
 							QueueManager.instance().removePics(selectedModelRows);
 						}
 					}
@@ -615,11 +601,10 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetByInput() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				// TODO convertRowIndexToModel
-				int s[] = jtQueue.getSelectedRows();
+				int[] s = jtQueue.getSelectedRows();
 				String defaultPath = SettingsManager.instance().getSavePath();
 				if (s.length == 1) {
-					defaultPath = QueueManager.instance().getPicByIndex(s[0]).getTargetPath();
+					defaultPath = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[0])).getTargetPath();
 				}
 				String input = PathRenameDialog.showPathRenameDialog(Main.instance(), defaultPath);
 				if ((input != null) && (input.length() > 2)) {
@@ -633,7 +618,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						newPath = BHUtil.filterPath(newPath);
 						newPath = FileTool.reducePathLength(newPath);
 
-						Pic pic = QueueManager.instance().getPicByIndex(s[i]);
+						Pic pic = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
 						if (pic != null) {
 							pic.setTargetPath(newPath);
 							QueueManager.instance().updatePic(pic);
@@ -651,13 +636,12 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetBySelection() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				// TODO convertRowIndexToModel
 				File file = FileDialogTool.showFolderDialog(this, SettingsManager.instance().getSavePath(), null);
 				if (file != null) {
 					String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
 					int s[] = jtQueue.getSelectedRows();
 					for (int i = 0; i < s.length; i++) {
-						Pic pic = QueueManager.instance().getPicByIndex(s[i]);
+						Pic pic = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
 						if (pic != null) {
 							pic.setTargetPath(folder);
 							QueueManager.instance().updatePic(pic);
@@ -676,11 +660,10 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetFilename() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				// TODO convertRowIndexToModel
 				String defaultvalue = "";
 				int s[] = jtQueue.getSelectedRows();
 				if (s.length > 0) {
-					defaultvalue = (String)model.getValueAt(s[0], 1);
+					defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), 1);
 					defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileTool.FILE_SEPERATOR) + 1);
 					String input[] = FileRenameDialog.showFileRenameDialog(Main.instance(), "", defaultvalue, s.length);
 					if ((input != null)) {
@@ -689,18 +672,19 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						boolean keepOriginal = (input[5].length() > 0);
 						boolean clearFilename = (input[6].length() > 0);
 						for (int i = 0; i < s.length; i++) {
+							int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
 							String out = "";
 							if (clearFilename == false) {
 								String fname = input[0];
 								if (keepOriginal) {
-									fname = (String)model.getValueAt(s[i], 1);
+									fname = (String)model.getValueAt(modelIndex, 1);
 									fname = fname.substring(fname.lastIndexOf(FileTool.FILE_SEPERATOR) + 1);
 								}
 								fname = input[3] + fname + input[4];
 								out = getNumberedFilename(fname, index);
 							}
 
-							Pic pic = QueueManager.instance().getPicByIndex(s[i]);
+							Pic pic = QueueManager.instance().getPicByIndex(modelIndex);
 							if (pic != null) {
 								pic.setTargetFilename(out);
 								QueueManager.instance().updatePic(pic);
@@ -742,10 +726,9 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionActivate() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				// TODO convertRowIndexToModel
 				int s[] = jtQueue.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
-					QueueManager.instance().getPicByIndex(s[i]).setDeactivated(false);
+					QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(false);
 				}
 				model.fireTableDataChanged();
 				QueueManager.instance().asyncSaveDatabase();
@@ -759,10 +742,9 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionDeactivate() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				// TODO convertRowIndexToModel
 				int s[] = jtQueue.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
-					QueueManager.instance().getPicByIndex(s[i]).setDeactivated(true);
+					QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(true);
 				}
 				model.fireTableDataChanged();
 				QueueManager.instance().asyncSaveDatabase();
@@ -1076,15 +1058,20 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 			Runnable r = new Runnable() {
 				@Override
 				public void run() {
+					// Convert first removed row index, before removing any rows
+					int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(removedIndeces[0]);
+
 					for (int i = removedIndeces.length - 1; i > -1; i--) {
 						model.removeRow(removedIndeces[i]);
 					}
 					model.fireTableDataChanged();
-					// TODO convertRowIndexToView
-					if (removedIndeces[0] < jtQueue.getRowCount()) {
-						jtQueue.setRowSelectionInterval(removedIndeces[0], removedIndeces[0]);
-					} else if ((removedIndeces[0] - 1) > -1) {
-						jtQueue.setRowSelectionInterval(removedIndeces[0] - 1, removedIndeces[0] - 1);
+
+					int rowCount = jtQueue.getRowCount();
+					int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
+					if (firstRemovedRowViewIndex < rowCount) {
+						jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
+					} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
+						jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
 					}
 					updateStatus();
 				}
