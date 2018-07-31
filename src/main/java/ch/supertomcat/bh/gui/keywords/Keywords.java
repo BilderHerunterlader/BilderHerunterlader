@@ -11,7 +11,6 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
 
@@ -562,13 +561,8 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 						pg.progressModeChanged(true);
 
 						int[] selectedRows = jtKeywords.getSelectedRows();
-						int[] selectedModelRows = new int[selectedRows.length];
+						int[] selectedModelRows = TableTool.convertRowIndexToModel(jtKeywords, selectedRows, true);
 
-						for (int i = 0; i < selectedRows.length; i++) {
-							selectedModelRows[i] = jtKeywords.convertRowIndexToModel(selectedRows[i]);
-						}
-
-						Arrays.sort(selectedModelRows);
 						KeywordManager.instance().removeKeywords(selectedModelRows);
 
 						lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
