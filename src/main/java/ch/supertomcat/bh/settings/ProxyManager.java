@@ -81,10 +81,6 @@ public class ProxyManager {
 		readFromSettings();
 
 		RegistryBuilder<ConnectionSocketFactory> registryBuilder = RegistryBuilder.<ConnectionSocketFactory>create();
-		// TODO How to do the ports in httpclient 4.3?? Maybe clientBuilder.setSchemePortResolver?
-		// clientBuilder.setSchemePortResolver(schemePortResolver)
-		// schemeRegistry.register(new Scheme("http", 80, PlainSocketFactory.getSocketFactory()));
-		// schemeRegistry.register(new Scheme("https", 443, SSLConnectionSocketFactory.getSocketFactory()));
 		registryBuilder.register("http", PlainConnectionSocketFactory.getSocketFactory());
 		registryBuilder.register("https", SSLConnectionSocketFactory.getSocketFactory());
 		Registry<ConnectionSocketFactory> registry = registryBuilder.build();
