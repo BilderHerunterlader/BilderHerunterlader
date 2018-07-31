@@ -193,6 +193,15 @@ public class BH {
 		}
 		Localization.init("ch.supertomcat.bh.BH", language, country);
 
+		// If path for downloads are overridden by directories.properties file, then we need to set the path in SettingsManager here
+		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
+		if (portableDownloadPath != null) {
+			if (!portableDownloadPath.endsWith("/") && !portableDownloadPath.endsWith("\\")) {
+				portableDownloadPath += FileTool.FILE_SEPERATOR;
+			}
+			SettingsManager.instance().setSavePath(portableDownloadPath);
+		}
+
 		// Initialize Managers
 		DownloadQueueManager.instance(); // Don't initialize this parallel, because HostManager will access it.
 		LogManager.instance(); // Initalized too fast as it would be worth to execute parallel
@@ -499,18 +508,22 @@ public class BH {
 		String settingsDir = directoriesProperties.getProperty("SettingsPath");
 		String downloadLogDir = directoriesProperties.getProperty("DownloadLogPath");
 		String logsDir = directoriesProperties.getProperty("LogsPath");
+		String downloadDir = directoriesProperties.getProperty("DownloadPath");
 
-		if (databaseDir != null && databaseDir.length() > 0) {
+		if (databaseDir != null && !databaseDir.isEmpty()) {
 			ApplicationProperties.setProperty("DatabasePath", databaseDir);
 		}
-		if (settingsDir != null && settingsDir.length() > 0) {
+		if (settingsDir != null && !settingsDir.isEmpty()) {
 			ApplicationProperties.setProperty("SettingsPath", settingsDir);
 		}
-		if (downloadLogDir != null && downloadLogDir.length() > 0) {
+		if (downloadLogDir != null && !downloadLogDir.isEmpty()) {
 			ApplicationProperties.setProperty("DownloadLogPath", downloadLogDir);
 		}
-		if (logsDir != null && logsDir.length() > 0) {
+		if (logsDir != null && !logsDir.isEmpty()) {
 			ApplicationProperties.setProperty("LogsPath", logsDir);
+		}
+		if (downloadDir != null && !downloadDir.isEmpty()) {
+			ApplicationProperties.setProperty("DownloadPath", downloadDir);
 		}
 	}
 
