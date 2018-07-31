@@ -109,7 +109,7 @@ public class RulePipelineURLJavascript extends RulePipeline {
 	@Override
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
-		e.setAttribute("mode", String.valueOf(this.mode));
+		e.setAttribute("mode", String.valueOf(this.mode.getValue()));
 		e.setAttribute("waitBeforeExecute", String.valueOf(this.waitBeforeExecute));
 		e.setAttribute("urlDecodeResult", String.valueOf(urlDecodeResult));
 		e.setAttribute("sendCookies", String.valueOf(sendCookies));
