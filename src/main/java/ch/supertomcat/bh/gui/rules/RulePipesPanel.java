@@ -19,6 +19,7 @@ import javax.swing.event.ListSelectionListener;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
@@ -111,7 +112,7 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 
 		originalPipelines = this.rule.getPipelines();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
-			if (originalPipelines.get(iPipe).getMode() == Rule.RULE_MODE_JAVASCRIPT) {
+			if (originalPipelines.get(iPipe).getMode() == RuleMode.RULE_MODE_JAVASCRIPT) {
 				RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, originalPipelines.get(iPipe), owner);
 				pnlPipelines.add(pnlPipe);
 				modelPipelines.addElement("Javascript Pipeline");
@@ -201,13 +202,13 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnPipelineRegexNew) {
-			RulePipeline pipe = new RulePipelineURLRegex(Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
-			RulePipelinePanel pnlPipe = new RulePipelinePanel(Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL, this.rule, pipe, owner);
+			RulePipeline pipe = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
+			RulePipelinePanel pnlPipe = new RulePipelinePanel(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL, this.rule, pipe, owner);
 			pnlPipelines.add(pnlPipe);
 			modelPipelines.addElement("Regex Pipeline");
 			pipelines.add(pipe);
 		} else if (e.getSource() == btnPipelineJavascriptNew) {
-			RulePipeline pipe = new RulePipelineURLJavascript(Rule.RULE_MODE_JAVASCRIPT);
+			RulePipeline pipe = new RulePipelineURLJavascript(RuleMode.RULE_MODE_JAVASCRIPT);
 			RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, pipe, owner);
 			pnlPipelines.add(pnlPipe);
 			modelPipelines.addElement("Javascript Pipeline");

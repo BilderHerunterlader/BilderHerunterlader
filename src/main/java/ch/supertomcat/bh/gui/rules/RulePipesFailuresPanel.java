@@ -19,6 +19,7 @@ import javax.swing.event.ListSelectionListener;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineFailures;
 import ch.supertomcat.supertomcattools.guitools.Localization;
@@ -179,7 +180,7 @@ public class RulePipesFailuresPanel extends JPanel implements ActionListener, Li
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnPipelineNew) {
-			RulePipeline pipe = new RulePipelineFailures(Rule.RULE_MODE_FAILURES);
+			RulePipeline pipe = new RulePipelineFailures(RuleMode.RULE_MODE_FAILURES);
 			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, pipe, owner);
 			pnlPipelines.add(pnlPipe);
 			modelPipelines.addElement("Pipeline");

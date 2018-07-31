@@ -18,19 +18,19 @@ public class RulePipelineFilename extends RulePipeline {
 	/**
 	 * Defines which source for filename search and replace should be used (Only used when mode is 2)
 	 */
-	private int filenameMode = RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART;
+	private RuleFilenameMode filenameMode = RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART;
 
 	/**
 	 * Defines which source for filename for download selection search and replace should be used (Only used when mode is 3)
 	 */
-	private int filenameDownloadSelectionMode = RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART;
+	private RuleFilenameMode filenameDownloadSelectionMode = RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param mode Rule-Mode
 	 */
-	public RulePipelineFilename(int mode) {
+	public RulePipelineFilename(RuleMode mode) {
 		super(mode);
 	}
 
@@ -41,14 +41,14 @@ public class RulePipelineFilename extends RulePipeline {
 	 */
 	public RulePipelineFilename(Element e) {
 		super(e);
-		if (this.mode == Rule.RULE_MODE_FILENAME) {
+		if (this.mode == RuleMode.RULE_MODE_FILENAME) {
 			try {
-				this.setFilenameMode(Integer.parseInt(e.getAttributeValue("filenamemode")));
+				this.setFilenameMode(RuleFilenameMode.getByValue(Integer.parseInt(e.getAttributeValue("filenamemode"))));
 			} catch (Exception exx) {
 			}
-		} else if (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+		} else if (this.mode == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
 			try {
-				this.setFilenameDownloadSelectionMode(Integer.parseInt(e.getAttributeValue("filenameDownloadSelectionMode")));
+				this.setFilenameDownloadSelectionMode(RuleFilenameMode.getByValue(Integer.parseInt(e.getAttributeValue("filenameDownloadSelectionMode"))));
 			} catch (Exception exx) {
 			}
 		}
@@ -57,50 +57,45 @@ public class RulePipelineFilename extends RulePipeline {
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
-		if (this.mode == Rule.RULE_MODE_FILENAME) {
-			e.setAttribute("filenamemode", String.valueOf(this.filenameMode));
-		} else if (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
-			e.setAttribute("filenameDownloadSelectionMode", String.valueOf(this.filenameDownloadSelectionMode));
+		if (this.mode == RuleMode.RULE_MODE_FILENAME) {
+			e.setAttribute("filenamemode", String.valueOf(this.filenameMode.getValue()));
+		} else if (this.mode == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+			e.setAttribute("filenameDownloadSelectionMode", String.valueOf(this.filenameDownloadSelectionMode.getValue()));
 		}
 		return e;
 	}
 
 	@Override
-	public int getFilenameMode() {
+	public RuleFilenameMode getFilenameMode() {
 		return filenameMode;
 	}
 
 	@Override
-	public void setFilenameMode(int filenameMode) {
-		if ((filenameMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) || (filenameMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_URL)
-				|| (filenameMode == RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) || (filenameMode == RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL)
-				|| (filenameMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE) || (filenameMode == RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL)
-				|| (filenameMode == RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART) || (filenameMode == RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL)
-				|| (filenameMode == RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART) || (filenameMode == RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
-			this.filenameMode = filenameMode;
-		}
+	public void setFilenameMode(RuleFilenameMode filenameMode) {
+		this.filenameMode = filenameMode;
 	}
 
 	@Override
-	public int getFilenameDownloadSelectionMode() {
+	public RuleFilenameMode getFilenameDownloadSelectionMode() {
 		return filenameDownloadSelectionMode;
 	}
 
 	@Override
-	public void setFilenameDownloadSelectionMode(int filenameDownloadSelectionMode) {
-		if (filenameDownloadSelectionMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART || filenameDownloadSelectionMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_URL) {
+	public void setFilenameDownloadSelectionMode(RuleFilenameMode filenameDownloadSelectionMode) {
+		if (filenameDownloadSelectionMode == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART
+				|| filenameDownloadSelectionMode == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL) {
 			this.filenameDownloadSelectionMode = filenameDownloadSelectionMode;
 		}
 	}
 
 	@Override
 	public String getCorrectedFilename(String url, String thumbURL, String htmlcode, Pic pic) {
-		if (this.mode == Rule.RULE_MODE_FILENAME) {
+		if (this.mode == RuleMode.RULE_MODE_FILENAME) {
 			String result = url;
 			boolean bSourcecode = false;
-			if ((this.filenameMode == RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) || (this.filenameMode == RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL)) {
+			if ((this.filenameMode == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) || (this.filenameMode == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL)) {
 				result = thumbURL;
-			} else if (this.filenameMode == RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE) {
+			} else if (this.filenameMode == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE) {
 				result = htmlcode;
 				bSourcecode = true;
 			}
@@ -132,7 +127,7 @@ public class RulePipelineFilename extends RulePipeline {
 
 	@Override
 	public String getCorrectedFilenameOnDownloadSelection(String url) {
-		if (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+		if (this.mode == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
 			String result = url;
 			for (int i = 0; i < regexps.size(); i++) {
 				result = regexps.get(i).doURLReplace(result, null);

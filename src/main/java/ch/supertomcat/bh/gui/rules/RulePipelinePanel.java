@@ -30,8 +30,10 @@ import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.rules.RuleURLMode;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 import ch.supertomcat.supertomcattools.guitools.TableTool;
@@ -75,7 +77,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * Mode
 	 */
-	private int mode = 0;
+	private RuleMode mode = RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
 
 	/**
 	 * ButtonGroup
@@ -95,7 +97,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * URL-Mode
 	 */
-	private int urlMode = 0;
+	private RuleURLMode urlMode = RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL;
 
 	/**
 	 * ButtonGroup
@@ -174,7 +176,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 */
-	public RulePipelinePanel(int mode, Rule rule, RulePipeline pipe, JDialog owner) {
+	public RulePipelinePanel(RuleMode mode, Rule rule, RulePipeline pipe, JDialog owner) {
 		super();
 		this.owner = owner;
 		this.rule = rule;
@@ -208,7 +210,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		sp = new JScrollPane(table);
 
-		boolean bMode = (mode == 0);
+		boolean bMode = (mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
 		rbModeZero.setSelected(bMode);
 		rbModeOne.setSelected(!bMode);
 		bgMode.add(rbModeZero);
@@ -220,8 +222,8 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		bgURLMode.add(rbURLModeZero);
 		bgURLMode.add(rbURLModeOne);
 
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
-			boolean b = (urlMode == 0);
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+			boolean b = (urlMode == RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL);
 			rbURLModeZero.setSelected(b);
 			rbURLModeOne.setSelected(!b);
 		}
@@ -279,30 +281,34 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		if (e.getSource() == btnNew) {
 			RuleRegExp rre = new RuleRegExp();
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.addRow(rre.getSearch(), rre.getReplace());
 			pipe.addRegExp(rre);
 		} else if (e.getSource() == btnEdit) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			RuleRegExp rre = pipe.getRegexp(row);
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.setValueAt(rre.getSearch(), row, 0);
 			model.setValueAt(rre.getReplace(), row, 1);
 		} else if (e.getSource() == btnDelete) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			model.removeRow(row);
 			pipe.removeRegExp(row);
 		} else if (e.getSource() == rbModeZero || e.getSource() == rbModeOne) {
 			rbURLModeZero.setEnabled(rbModeZero.isSelected());
 			rbURLModeOne.setEnabled(rbModeZero.isSelected());
-			mode = rbModeZero.isSelected() ? 0 : 1;
+			mode = rbModeZero.isSelected() ? RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL : RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE;
 		} else if (e.getSource() == btnUp) {
 			int row = table.getSelectedRow();
 			if (row > 0) {
@@ -326,11 +332,11 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	@Override
 	public void apply() {
 		pipe.setMode(mode);
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
 			if (rbURLModeZero.isSelected()) {
-				pipe.setURLMode(0);
+				pipe.setURLMode(RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL);
 			} else {
-				pipe.setURLMode(1);
+				pipe.setURLMode(RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL);
 			}
 		}
 		int waitBeforeExecute = 0;
@@ -347,8 +353,9 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		SettingsManager.instance().setColWidthsRulesEditor(TableTool.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
@@ -357,8 +364,9 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
 	}
 

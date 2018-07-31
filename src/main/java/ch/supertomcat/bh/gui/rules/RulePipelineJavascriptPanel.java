@@ -21,6 +21,7 @@ import javax.swing.border.TitledBorder;
 
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 import de.sciss.syntaxpane.DefaultSyntaxKit;
@@ -162,7 +163,7 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 	 */
 	@Override
 	public void apply() {
-		pipe.setMode(Rule.RULE_MODE_JAVASCRIPT);
+		pipe.setMode(RuleMode.RULE_MODE_JAVASCRIPT);
 		pipe.setJavascript(txtJavascript.getText());
 		int waitBeforeExecute = 0;
 		try {

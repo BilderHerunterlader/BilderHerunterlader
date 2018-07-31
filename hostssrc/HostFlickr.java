@@ -9,7 +9,7 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
@@ -146,7 +146,7 @@ public class HostFlickr extends Host implements IHoster {
 		this.regexTitle.setSearch("<meta name=\"title\" content=\"(.+?)\"[^>]*>");
 		this.regexTitle.setReplace("$1");
 
-		pipeOriginalDateTime = new RulePipelineURLRegex(Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+		pipeOriginalDateTime = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
 
 		// TODO not working anymore
 		this.regexOriginalDateTime1 = new RuleRegExp();

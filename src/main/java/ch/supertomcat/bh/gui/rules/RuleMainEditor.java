@@ -35,6 +35,7 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
 import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
@@ -261,8 +262,8 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 
 		pnlPipesFailures = new RulePipesFailuresPanel(this.rule, this);
 
-		pnlFilename = new RulePipelineFilenamePanel(Rule.RULE_MODE_FILENAME, this.rule, this.rule.getPipelineFilename(), this);
-		pnlFilenameDownloadSelection = new RulePipelineFilenamePanel(Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION, this.rule, this.rule.getPipelineFilenameDownloadSelection(), this);
+		pnlFilename = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME, this.rule, this.rule.getPipelineFilename(), this);
+		pnlFilenameDownloadSelection = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION, this.rule, this.rule.getPipelineFilenameDownloadSelection(), this);
 
 		pnlRuleOptions = new RuleOptionsPanel(this.rule);
 		pnlConnections = new RuleConnectionsPanel(this.rule);

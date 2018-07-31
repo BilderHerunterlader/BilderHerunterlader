@@ -19,6 +19,8 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
+import ch.supertomcat.bh.rules.RuleURLMode;
 import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
@@ -209,7 +211,8 @@ public class RuleTest extends JDialog implements ActionListener {
 			this.dispose();
 		} else if (e.getSource() == btnTest) {
 			txtMessage.setText("");
-			if (rule.getPipelines().size() > 0 && rule.getPipelines().get(0).getMode() == 0 && rule.getPipelines().get(0).getURLMode() == 1 && txtThumbnail.getText().length() == 0) {
+			if (rule.getPipelines().size() > 0 && rule.getPipelines().get(0).getMode() == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL
+					&& rule.getPipelines().get(0).getURLMode() == RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL && txtThumbnail.getText().length() == 0) {
 				txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
 				return;
 			}

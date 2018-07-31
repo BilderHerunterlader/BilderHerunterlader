@@ -11,6 +11,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import ch.supertomcat.bh.rules.DuplicateRemoveMode;
+import ch.supertomcat.bh.rules.ReferrerMode;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
 import ch.supertomcat.supertomcattools.guitools.Localization;
@@ -114,15 +116,15 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysLast"));
 		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysFirst"));
 		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysLast"));
-		cbDuplicateRemoveMode.setSelectedIndex(rule.getDuplicateRemoveMode());
+		cbDuplicateRemoveMode.setSelectedIndex(rule.getDuplicateRemoveMode().getValue());
 
 		cbReferrerMode.addItem(Localization.getString("ReferrerNoReferrer"));
 		cbReferrerMode.addItem(Localization.getString("ReferrerLastContainerURL"));
 		cbReferrerMode.addItem(Localization.getString("ReferrerFirstContainerURL"));
 		cbReferrerMode.addItem(Localization.getString("ReferrerOriginPage"));
 		cbReferrerMode.addItem(Localization.getString("ReferrerCustom"));
-		cbReferrerMode.setSelectedIndex(rule.getReferrerMode());
-		if (cbReferrerMode.getSelectedIndex() == Rule.REFERRER_CUSTOM) {
+		cbReferrerMode.setSelectedIndex(rule.getReferrerMode().getValue());
+		if (cbReferrerMode.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
 			txtCustomReferrer.setEnabled(true);
 		} else {
 			txtCustomReferrer.setEnabled(false);
@@ -134,8 +136,8 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 		cbReferrerModeDownload.addItem(Localization.getString("ReferrerFirstContainerURL"));
 		cbReferrerModeDownload.addItem(Localization.getString("ReferrerOriginPage"));
 		cbReferrerModeDownload.addItem(Localization.getString("ReferrerCustom"));
-		cbReferrerModeDownload.setSelectedIndex(rule.getReferrerModeDownload());
-		if (cbReferrerModeDownload.getSelectedIndex() == Rule.REFERRER_CUSTOM) {
+		cbReferrerModeDownload.setSelectedIndex(rule.getReferrerModeDownload().getValue());
+		if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
 			txtCustomReferrerDownload.setEnabled(true);
 		} else {
 			txtCustomReferrerDownload.setEnabled(false);
@@ -181,11 +183,11 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	 */
 	public void applyRuleOptions() {
 		rule.setSendCookies(chkSendCookies.isSelected());
-		rule.setReferrerMode(cbReferrerMode.getSelectedIndex());
-		rule.setReferrerModeDownload(cbReferrerModeDownload.getSelectedIndex());
+		rule.setReferrerMode(ReferrerMode.getByValue(cbReferrerMode.getSelectedIndex()));
+		rule.setReferrerModeDownload(ReferrerMode.getByValue(cbReferrerModeDownload.getSelectedIndex()));
 		rule.setCustomReferrer(txtCustomReferrer.getText());
 		rule.setCustomReferrerDownload(txtCustomReferrerDownload.getText());
-		rule.setDuplicateRemoveMode(cbDuplicateRemoveMode.getSelectedIndex());
+		rule.setDuplicateRemoveMode(DuplicateRemoveMode.getByValue(cbDuplicateRemoveMode.getSelectedIndex()));
 	}
 
 	/*
@@ -196,13 +198,13 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() == cbReferrerMode) {
-			if (cbReferrerMode.getSelectedIndex() == Rule.REFERRER_CUSTOM) {
+			if (cbReferrerMode.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
 				txtCustomReferrer.setEnabled(true);
 			} else {
 				txtCustomReferrer.setEnabled(false);
 			}
 		} else if (e.getSource() == cbReferrerModeDownload) {
-			if (cbReferrerModeDownload.getSelectedIndex() == Rule.REFERRER_CUSTOM) {
+			if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
 				txtCustomReferrerDownload.setEnabled(true);
 			} else {
 				txtCustomReferrerDownload.setEnabled(false);
@@ -225,7 +227,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 		txtCustomReferrerDownload.setEnabled(!enabled);
 
 		if (!enabled) {
-			if (cbReferrerModeDownload.getSelectedIndex() == Rule.REFERRER_CUSTOM) {
+			if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
 				txtCustomReferrerDownload.setEnabled(true);
 			} else {
 				txtCustomReferrerDownload.setEnabled(false);

@@ -69,7 +69,7 @@ public class RulePipelineURLJavascript extends RulePipeline {
 	 * 
 	 * @param mode Rule-Mode
 	 */
-	public RulePipelineURLJavascript(int mode) {
+	public RulePipelineURLJavascript(RuleMode mode) {
 		super(mode);
 	}
 

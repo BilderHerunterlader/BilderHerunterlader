@@ -22,7 +22,7 @@ public class RulePipelineURLRegex extends RulePipeline {
 	/**
 	 * URL-Mode (Only used when mode is 0)
 	 */
-	private int urlMode = RULEPIPELINE_MODE_CONTAINER_URL;
+	private RuleURLMode urlMode = RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL;
 
 	/**
 	 * Amount of milliseconds to wait before getURL is executed
@@ -44,7 +44,7 @@ public class RulePipelineURLRegex extends RulePipeline {
 	 * 
 	 * @param mode Rule-Mode
 	 */
-	public RulePipelineURLRegex(int mode) {
+	public RulePipelineURLRegex(RuleMode mode) {
 		super(mode);
 	}
 
@@ -55,16 +55,16 @@ public class RulePipelineURLRegex extends RulePipeline {
 	 */
 	public RulePipelineURLRegex(Element e) {
 		super(e);
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
 			String strURLMode = e.getAttributeValue("urlmode");
 			try {
-				this.setURLMode(Integer.parseInt(strURLMode));
+				this.setURLMode(RuleURLMode.getByValue(Integer.parseInt(strURLMode)));
 			} catch (NumberFormatException ex) {
 				logger.error("Could not parse urlmode: {}", strURLMode, ex);
 			}
 		}
 
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL || this.mode == Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL || this.mode == RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
 			String strWaitBeforeExecute = e.getAttributeValue("waitBeforeExecute");
 			if (strWaitBeforeExecute != null) {
 				try {
@@ -89,10 +89,10 @@ public class RulePipelineURLRegex extends RulePipeline {
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
-			e.setAttribute("urlmode", String.valueOf(this.urlMode));
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+			e.setAttribute("urlmode", String.valueOf(this.urlMode.getValue()));
 			e.setAttribute("waitBeforeExecute", String.valueOf(this.waitBeforeExecute));
-		} else if (this.mode == Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
+		} else if (this.mode == RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
 			e.setAttribute("waitBeforeExecute", String.valueOf(this.waitBeforeExecute));
 		}
 		e.setAttribute("urlDecodeResult", String.valueOf(urlDecodeResult));
@@ -100,23 +100,21 @@ public class RulePipelineURLRegex extends RulePipeline {
 	}
 
 	@Override
-	public int getURLMode() {
+	public RuleURLMode getURLMode() {
 		return urlMode;
 	}
 
 	@Override
-	public void setURLMode(int urlMode) {
-		if ((urlMode == RULEPIPELINE_MODE_CONTAINER_URL) || (urlMode == RULEPIPELINE_MODE_THUMBNAIL_URL)) {
-			this.urlMode = urlMode;
-		}
+	public void setURLMode(RuleURLMode urlMode) {
+		this.urlMode = urlMode;
 	}
 
 	@Override
 	public String getURL(String url, String thumbURL, String htmlcode, Pic pic) throws HostException {
 		String retval = "";
-		if (this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
 			String result = url;
-			if (this.urlMode == RULEPIPELINE_MODE_THUMBNAIL_URL) {
+			if (this.urlMode == RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL) {
 				result = thumbURL;
 			}
 			for (int i = 0; i < regexps.size(); i++) {
@@ -143,7 +141,7 @@ public class RulePipelineURLRegex extends RulePipeline {
 			retval = result;
 		}
 		if (retval.isEmpty()) {
-			if (this.urlMode == RULEPIPELINE_MODE_THUMBNAIL_URL && thumbURL.isEmpty()) {
+			if (this.urlMode == RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL && thumbURL.isEmpty()) {
 				throw new HostImageUrlNotFoundException(HostRules.NAME + ": " + Localization.getString("ErrorImageURLThumbMissing"));
 			} else {
 				throw new HostImageUrlNotFoundException(HostRules.NAME + ": " + Localization.getString("ErrorImageURL"));

@@ -17,71 +17,6 @@ import ch.supertomcat.bh.pic.PicState;
  */
 public abstract class RulePipeline {
 	/**
-	 * Replace in Container-URL
-	 */
-	public static final int RULEPIPELINE_MODE_CONTAINER_URL = 0;
-
-	/**
-	 * Replace in Thumbnail-URL
-	 */
-	public static final int RULEPIPELINE_MODE_THUMBNAIL_URL = 1;
-
-	/**
-	 * Use Container-URL-Filename-Part for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART = 0;
-
-	/**
-	 * Use Container-URL for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_CONTAINER_URL = 1;
-
-	/**
-	 * Use Thumbnail-URL-Filename-Part for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART = 2;
-
-	/**
-	 * Use Thumbnail-URL for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL = 3;
-
-	/**
-	 * Use Container-Page-Sourcecode from first URL for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE = 4;
-
-	/**
-	 * Use Download-URL for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL = 5;
-
-	/**
-	 * Use Download-URL-Filename-Part for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART = 6;
-
-	/**
-	 * Use Last Container-URL-Filename-Part for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART = 7;
-
-	/**
-	 * Use Last Container-URL for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL = 8;
-
-	/**
-	 * Use First Container-Page-Sourcecode for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE = 9;
-
-	/**
-	 * Use Last Container-Page-Sourcecode for Filename Search and Replace
-	 */
-	public static final int RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE = 10;
-
-	/**
 	 * Logger
 	 */
 	private Logger logger = LoggerFactory.getLogger(getClass());
@@ -89,7 +24,7 @@ public abstract class RulePipeline {
 	/**
 	 * Mode
 	 */
-	protected int mode = Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
+	protected RuleMode mode = RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
 
 	/**
 	 * RuleRegExps
@@ -101,7 +36,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @param mode Rule-Mode
 	 */
-	public RulePipeline(int mode) {
+	public RulePipeline(RuleMode mode) {
 		this.mode = mode;
 	}
 
@@ -112,11 +47,7 @@ public abstract class RulePipeline {
 	 */
 	public RulePipeline(Element e) {
 		try {
-			this.mode = Integer.parseInt(e.getAttributeValue("mode"));
-			if (!((this.mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) || (this.mode == Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE) || (this.mode == Rule.RULE_MODE_FILENAME)
-					|| (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) || (this.mode == Rule.RULE_MODE_FAILURES) || (this.mode == Rule.RULE_MODE_JAVASCRIPT))) {
-				mode = Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
-			}
+			this.mode = RuleMode.getByValue(Integer.parseInt(e.getAttributeValue("mode")));
 		} catch (Exception ex) {
 		}
 
@@ -139,7 +70,7 @@ public abstract class RulePipeline {
 	 */
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
-		e.setAttribute("mode", String.valueOf(this.mode));
+		e.setAttribute("mode", String.valueOf(this.mode.getValue()));
 		for (RuleRegExp regexp : regexps) {
 			Element elRegex = new Element("regexp");
 			elRegex.setAttribute("search", regexp.getSearch());
@@ -154,7 +85,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @return Mode
 	 */
-	public int getMode() {
+	public RuleMode getMode() {
 		return mode;
 	}
 
@@ -163,11 +94,8 @@ public abstract class RulePipeline {
 	 * 
 	 * @param mode Mode
 	 */
-	public void setMode(int mode) {
-		if ((mode == Rule.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) || (mode == Rule.RULE_MODE_CONTAINER_PAGE_SOURCECODE) || (mode == Rule.RULE_MODE_FILENAME)
-				|| (mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) || (mode == Rule.RULE_MODE_FAILURES) || (mode == Rule.RULE_MODE_JAVASCRIPT)) {
-			this.mode = mode;
-		}
+	public void setMode(RuleMode mode) {
+		this.mode = mode;
 	}
 
 	/*
@@ -267,8 +195,8 @@ public abstract class RulePipeline {
 	 * 
 	 * @return UrlMode
 	 */
-	public int getURLMode() {
-		return -1;
+	public RuleURLMode getURLMode() {
+		return null;
 	}
 
 	/**
@@ -276,7 +204,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @param urlMode UrlMode
 	 */
-	public void setURLMode(int urlMode) {
+	public void setURLMode(RuleURLMode urlMode) {
 	}
 
 	/**
@@ -373,8 +301,8 @@ public abstract class RulePipeline {
 	 * 
 	 * @return filenameMode
 	 */
-	public int getFilenameMode() {
-		return -1;
+	public RuleFilenameMode getFilenameMode() {
+		return null;
 	}
 
 	/**
@@ -382,7 +310,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @param filenameMode filenameMode
 	 */
-	public void setFilenameMode(int filenameMode) {
+	public void setFilenameMode(RuleFilenameMode filenameMode) {
 	}
 
 	/**
@@ -390,8 +318,8 @@ public abstract class RulePipeline {
 	 * 
 	 * @return filenameDownloadSelectionMode
 	 */
-	public int getFilenameDownloadSelectionMode() {
-		return -1;
+	public RuleFilenameMode getFilenameDownloadSelectionMode() {
+		return null;
 	}
 
 	/**
@@ -399,7 +327,7 @@ public abstract class RulePipeline {
 	 * 
 	 * @param filenameDownloadSelectionMode filenameDownloadSelectionMode
 	 */
-	public void setFilenameDownloadSelectionMode(int filenameDownloadSelectionMode) {
+	public void setFilenameDownloadSelectionMode(RuleFilenameMode filenameDownloadSelectionMode) {
 	}
 
 	/**

@@ -53,99 +53,9 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionString;
  */
 public class Rule extends Hoster {
 	/**
-	 * Replace in Container-URL or Thumbnail-URL
-	 */
-	public static final int RULE_MODE_CONTAINER_OR_THUMBNAIL_URL = 0;
-
-	/**
-	 * Replace in Container-Page-Sourcecode
-	 */
-	public static final int RULE_MODE_CONTAINER_PAGE_SOURCECODE = 1;
-
-	/**
-	 * Replace Filename
-	 */
-	public static final int RULE_MODE_FILENAME = 2;
-
-	/**
-	 * Replace Filename
-	 */
-	public static final int RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION = 3;
-
-	/**
-	 * RULE_MODE_FAILURES
-	 */
-	public static final int RULE_MODE_FAILURES = 4;
-
-	/**
-	 * RULE_MODE_JAVASCRIPT
-	 */
-	public static final int RULE_MODE_JAVASCRIPT = 5;
-
-	/**
-	 * No referrer
-	 */
-	public static final int REFERRER_NO_REFERRER = 0;
-
-	/**
-	 * Last Container-URL as referrer
-	 */
-	public static final int REFERRER_LAST_CONTAINER_URL = 1;
-
-	/**
-	 * Last Container-URL as referrer
-	 */
-	public static final int REFERRER_FIRST_CONTAINER_URL = 2;
-
-	/**
-	 * Origin-Page (Referrer-URL) as referrer
-	 */
-	public static final int REFERRER_ORIGIN_PAGE = 3;
-
-	/**
-	 * Custom string as referrer
-	 */
-	public static final int REFERRER_CUSTOM = 4;
-
-	/**
-	 * DUPLICATES_BH_DEFAULT
-	 */
-	public static final int DUPLICATES_BH_DEFAULT = 0;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_ONLY
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_ONLY = 1;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_AND_THUMBNAIL_URL
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_AND_THUMBNAIL_URL = 2;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST = 3;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST = 4;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST = 5;
-
-	/**
-	 * DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST
-	 */
-	public static final int DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST = 6;
-
-	/**
 	 * Logger for this class
 	 */
-	public static Logger logger = LoggerFactory.getLogger(Rule.class);
+	public Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Name
@@ -179,12 +89,12 @@ public class Rule extends Hoster {
 	/**
 	 * Referrer-Mode
 	 */
-	private int referrerMode = REFERRER_NO_REFERRER;
+	private ReferrerMode referrerMode = ReferrerMode.REFERRER_NO_REFERRER;
 
 	/**
 	 * referrerModeDownload
 	 */
-	private int referrerModeDownload = REFERRER_LAST_CONTAINER_URL;
+	private ReferrerMode referrerModeDownload = ReferrerMode.REFERRER_LAST_CONTAINER_URL;
 
 	/**
 	 * Custom referrer
@@ -234,7 +144,7 @@ public class Rule extends Hoster {
 	/**
 	 * duplicateRemoveMode
 	 */
-	private int duplicateRemoveMode = DUPLICATES_BH_DEFAULT;
+	private DuplicateRemoveMode duplicateRemoveMode = DuplicateRemoveMode.DUPLICATES_BH_DEFAULT;
 
 	/**
 	 * maxConnection
@@ -296,8 +206,8 @@ public class Rule extends Hoster {
 		this.pattern = pattern;
 		this.urlPattern = Pattern.compile(this.pattern);
 		// Create Pipelines
-		pipelineFilename = new RulePipelineFilename(RULE_MODE_FILENAME);
-		pipelineFilenameDownloadSelection = new RulePipelineFilename(RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
+		pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
+		pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
 		this.strFile = file;
 		deactivateOption = new DeactivateOption(FileTool.getFilename(this.strFile));
 	}
@@ -400,7 +310,7 @@ public class Rule extends Hoster {
 				}
 			}
 			boolean sendCookies = pipelines.get(i).isSendCookies();
-			if (pipelines.get(i).getMode() == RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
+			if (pipelines.get(i).getMode() == RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
 				htmlcode = downloadContainerPage(this.name, pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
 				if (pagesourcecode != null) {
 					pagesourcecode.setValue(htmlcode);
@@ -478,37 +388,37 @@ public class Rule extends Hoster {
 
 		if (pipelineFilename != null && retval[0].length() > 0 && pipelineFilename.getRegexps().size() > 0) {
 			// First Container-URL
-			if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
+			if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(url);
 				if (filename.length() > 0) {
 					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 				}
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
 
 				// Thumbnail-URL
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) {
 				String filename = getFilenamePart(thumbURL);
 				if (filename.length() > 0) {
 					retval[1] = pipelineFilename.getCorrectedFilename(url, filename, "", pic);
 				}
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
 
 				// Container-Page-Sourcecode
-			} else if ((pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)
-					|| (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)
-					|| (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
+			} else if ((pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)
+					|| (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)
+					|| (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
 				String filenamePageSourceURL = url;
 				String filenamePageSourceReferrer = getReferrer(upo);
 
-				if (bHtmlCodeFromFirstURL && (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)) {
+				if (bHtmlCodeFromFirstURL && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeFromFirstURL;
-				} else if (bHtmlCodeFirst && (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)) {
+				} else if (bHtmlCodeFirst && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeFirst;
 					filenamePageSourceURL = htmlCodeFirstURL;
 					filenamePageSourceReferrer = htmlCodeFirstReferrer;
-				} else if (bHtmlCodeLast && (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
+				} else if (bHtmlCodeLast && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeLast;
 					filenamePageSourceURL = htmlCodeLastURL;
 					filenamePageSourceReferrer = htmlCodeLastReferrer;
@@ -532,9 +442,9 @@ public class Rule extends Hoster {
 				}
 
 				// Download-URL
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(retval[0], thumbURL, "", pic);
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART) {
 				int pos = retval[0].lastIndexOf("/");
 				if (pos > -1) {
 					String filename = retval[0].substring(pos + 1);
@@ -542,12 +452,12 @@ public class Rule extends Hoster {
 				}
 
 				// Last Container-URL
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(pipelineURL);
 				if (filename.length() > 0) {
 					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 				}
-			} else if (pipelineFilename.getFilenameMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL) {
+			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(pipelineURL, thumbURL, "", pic);
 			}
 		}
@@ -623,7 +533,7 @@ public class Rule extends Hoster {
 	 */
 	public String getFilename(String url) {
 		String retval = url;
-		if (pipelineFilenameDownloadSelection.getFilenameDownloadSelectionMode() == RulePipeline.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
+		if (pipelineFilenameDownloadSelection.getFilenameDownloadSelectionMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
 			retval = getFilenamePart(url);
 		}
 		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval);
@@ -700,14 +610,14 @@ public class Rule extends Hoster {
 				try {
 					int iRef = Integer.parseInt(root.getAttributeValue("referrermode"));
 					if (iRef >= 0 && iRef <= 4) {
-						this.referrerMode = iRef;
+						this.referrerMode = ReferrerMode.getByValue(iRef);
 					}
 				} catch (Exception exc) {
 				}
 				try {
 					int iRef = Integer.parseInt(root.getAttributeValue("referrermodedownload"));
 					if (iRef >= 0 && iRef <= 4) {
-						this.referrerModeDownload = iRef;
+						this.referrerModeDownload = ReferrerMode.getByValue(iRef);
 					}
 				} catch (Exception exc) {
 				}
@@ -726,9 +636,7 @@ public class Rule extends Hoster {
 				try {
 					if (root.getAttributeValue("duplicateRemoveMode") != null) {
 						int iDuplicateRemoveMode = Integer.parseInt(root.getAttributeValue("duplicateRemoveMode"));
-						if (iDuplicateRemoveMode >= 0 && iDuplicateRemoveMode <= 6) {
-							this.duplicateRemoveMode = iDuplicateRemoveMode;
-						}
+						this.duplicateRemoveMode = DuplicateRemoveMode.getByValue(iDuplicateRemoveMode);
 					}
 				} catch (Exception exc) {
 				}
@@ -750,10 +658,11 @@ public class Rule extends Hoster {
 					currentElement = it.next();
 					currentMode = currentElement.getAttributeValue("mode");
 					if (currentMode != null) {
-						if (currentMode.equals(String.valueOf(RULE_MODE_CONTAINER_OR_THUMBNAIL_URL)) || currentMode.equals(String.valueOf(RULE_MODE_CONTAINER_PAGE_SOURCECODE))) {
+						if (currentMode.equals(String.valueOf(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL.getValue()))
+								|| currentMode.equals(String.valueOf(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE.getValue()))) {
 							RulePipeline rp = new RulePipelineURLRegex(currentElement);
 							pipelines.add(rp);
-						} else if (currentMode.equals(String.valueOf(RULE_MODE_JAVASCRIPT))) {
+						} else if (currentMode.equals(String.valueOf(RuleMode.RULE_MODE_JAVASCRIPT.getValue()))) {
 							RulePipeline rp = new RulePipelineURLJavascript(currentElement);
 							pipelines.add(rp);
 						}
@@ -778,18 +687,18 @@ public class Rule extends Hoster {
 			Iterator<Element> it = li.iterator();
 			while (it.hasNext()) {
 				RulePipeline rp = new RulePipelineFilename(it.next());
-				if (rp.getMode() == RULE_MODE_FILENAME) {
+				if (rp.getMode() == RuleMode.RULE_MODE_FILENAME) {
 					pipelineFilename = rp;
-				} else if (rp.getMode() == RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+				} else if (rp.getMode() == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
 					pipelineFilenameDownloadSelection = rp;
 				}
 			}
 
 			if (pipelineFilename == null) {
-				pipelineFilename = new RulePipelineFilename(RULE_MODE_FILENAME);
+				pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
 			}
 			if (pipelineFilenameDownloadSelection == null) {
-				pipelineFilenameDownloadSelection = new RulePipelineFilename(RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
+				pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
 			}
 
 			Element ep = root.getChild("urlpattern");
@@ -873,11 +782,11 @@ public class Rule extends Hoster {
 		e.setAttribute("usecontentdisposition", String.valueOf(this.useContentDisposition));
 		e.setAttribute("reducePathLength", String.valueOf(this.reducePathLength));
 		e.setAttribute("reduceFilenameLength", String.valueOf(this.reduceFilenameLength));
-		e.setAttribute("referrermode", String.valueOf(this.referrerMode));
-		e.setAttribute("referrermodedownload", String.valueOf(this.referrerModeDownload));
+		e.setAttribute("referrermode", String.valueOf(this.referrerMode.getValue()));
+		e.setAttribute("referrermodedownload", String.valueOf(this.referrerModeDownload.getValue()));
 		e.setAttribute("customreferrer", this.customReferrer);
 		e.setAttribute("customreferrerdownload", this.customReferrerDownload);
-		e.setAttribute("duplicateRemoveMode", String.valueOf(this.duplicateRemoveMode));
+		e.setAttribute("duplicateRemoveMode", String.valueOf(this.duplicateRemoveMode.getValue()));
 		e.setAttribute("sendCookies", String.valueOf(this.sendCookies));
 		Element eup = new Element("urlpattern");
 		eup.setText(this.pattern);
@@ -1080,7 +989,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return referrerMode
 	 */
-	public int getReferrerMode() {
+	public ReferrerMode getReferrerMode() {
 		return referrerMode;
 	}
 
@@ -1089,10 +998,8 @@ public class Rule extends Hoster {
 	 * 
 	 * @param referrerMode referrerMode
 	 */
-	public void setReferrerMode(int referrerMode) {
-		if (referrerMode >= REFERRER_NO_REFERRER && referrerMode <= REFERRER_CUSTOM) {
-			this.referrerMode = referrerMode;
-		}
+	public void setReferrerMode(ReferrerMode referrerMode) {
+		this.referrerMode = referrerMode;
 	}
 
 	/**
@@ -1100,7 +1007,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return referrerModeDownload
 	 */
-	public int getReferrerModeDownload() {
+	public ReferrerMode getReferrerModeDownload() {
 		return referrerModeDownload;
 	}
 
@@ -1109,10 +1016,8 @@ public class Rule extends Hoster {
 	 * 
 	 * @param referrerModeDownload referrerModeDownload
 	 */
-	public void setReferrerModeDownload(int referrerModeDownload) {
-		if (referrerModeDownload >= REFERRER_NO_REFERRER && referrerModeDownload <= REFERRER_CUSTOM) {
-			this.referrerModeDownload = referrerModeDownload;
-		}
+	public void setReferrerModeDownload(ReferrerMode referrerModeDownload) {
+		this.referrerModeDownload = referrerModeDownload;
 	}
 
 	/**
@@ -1194,7 +1099,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return duplicateRemoveMode
 	 */
-	public int getDuplicateRemoveMode() {
+	public DuplicateRemoveMode getDuplicateRemoveMode() {
 		return duplicateRemoveMode;
 	}
 
@@ -1203,10 +1108,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @param duplicateRemoveMode duplicateRemoveMode
 	 */
-	public void setDuplicateRemoveMode(int duplicateRemoveMode) {
-		if (duplicateRemoveMode < 0 || duplicateRemoveMode > 6) {
-			return;
-		}
+	public void setDuplicateRemoveMode(DuplicateRemoveMode duplicateRemoveMode) {
 		this.duplicateRemoveMode = duplicateRemoveMode;
 	}
 

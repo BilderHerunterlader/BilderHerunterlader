@@ -28,6 +28,8 @@ import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleFilenameMode;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -72,7 +74,7 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	/**
 	 * Mode
 	 */
-	private int mode = Rule.RULE_MODE_FILENAME;
+	private RuleMode mode = RuleMode.RULE_MODE_FILENAME;
 
 	/**
 	 * CheckBox
@@ -152,7 +154,7 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 */
-	public RulePipelineFilenamePanel(int mode, Rule rule, RulePipeline pipe, JDialog owner) {
+	public RulePipelineFilenamePanel(RuleMode mode, Rule rule, RulePipeline pipe, JDialog owner) {
 		super();
 		this.owner = owner;
 		this.rule = rule;
@@ -181,7 +183,7 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 		Dimension preferredScrollableTableSize = new Dimension(table.getPreferredScrollableViewportSize().width, 15 * table.getRowHeight());
 		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		sp = new JScrollPane(table);
-		if (this.mode == Rule.RULE_MODE_FILENAME) {
+		if (this.mode == RuleMode.RULE_MODE_FILENAME) {
 			cbFilenameMode.addItem(Localization.getString("filenameContainerUrlFilenamePart"));
 			cbFilenameMode.addItem(Localization.getString("filenameContainerUrl"));
 			cbFilenameMode.addItem(Localization.getString("filenameThumbnailUrlFilenamePart"));
@@ -193,7 +195,7 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 			cbFilenameMode.addItem(Localization.getString("filenameLastContainerUrl"));
 			cbFilenameMode.addItem(Localization.getString("filenameFirstContainerPageSourcecode"));
 			cbFilenameMode.addItem(Localization.getString("filenameLastContainerPageSourcecode"));
-			cbFilenameMode.setSelectedIndex(pipe.getFilenameMode());
+			cbFilenameMode.setSelectedIndex(pipe.getFilenameMode().getValue());
 			chkUseContentDisposition.setSelected(rule.isUseContentDisposition());
 			chkReducePathLength.setSelected(rule.isReducePathLength());
 			chkReduceFilenameLength.setSelected(rule.isReduceFilenameLength());
@@ -214,10 +216,10 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 			pnlRB.add(chkReduceFilenameLength);
 			pnlRB.add(pnlFilenameMode);
 			add(pnlRB, BorderLayout.NORTH);
-		} else if (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+		} else if (this.mode == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
 			cbFilenameDownloadSelectionMode.addItem(Localization.getString("filenameContainerUrlFilenamePart"));
 			cbFilenameDownloadSelectionMode.addItem(Localization.getString("filenameContainerUrl"));
-			cbFilenameDownloadSelectionMode.setSelectedIndex(pipe.getFilenameDownloadSelectionMode());
+			cbFilenameDownloadSelectionMode.setSelectedIndex(pipe.getFilenameDownloadSelectionMode().getValue());
 			JPanel pnlFilenameDownloadSelectionMode = new JPanel();
 			pnlFilenameDownloadSelectionMode.add(lblSource);
 			pnlFilenameDownloadSelectionMode.add(cbFilenameDownloadSelectionMode);
@@ -254,24 +256,28 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 		if (e.getSource() == btnNew) {
 			RuleRegExp rre = new RuleRegExp();
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.addRow(rre.getSearch(), rre.getReplace());
 			pipe.addRegExp(rre);
 		} else if (e.getSource() == btnEdit) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			RuleRegExp rre = pipe.getRegexp(row);
 			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.setValueAt(rre.getSearch(), row, 0);
 			model.setValueAt(rre.getReplace(), row, 1);
 		} else if (e.getSource() == btnDelete) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			model.removeRow(row);
 			pipe.removeRegExp(row);
 		} else if (e.getSource() == btnUp) {
@@ -295,13 +301,13 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	 * Apply
 	 */
 	public void apply() {
-		if (this.mode == Rule.RULE_MODE_FILENAME) {
+		if (this.mode == RuleMode.RULE_MODE_FILENAME) {
 			rule.setUseContentDisposition(chkUseContentDisposition.isSelected());
 			rule.setReducePathLength(chkReducePathLength.isSelected());
 			rule.setReduceFilenameLength(chkReduceFilenameLength.isSelected());
-			pipe.setFilenameMode(cbFilenameMode.getSelectedIndex());
-		} else if (this.mode == Rule.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
-			pipe.setFilenameDownloadSelectionMode(cbFilenameDownloadSelectionMode.getSelectedIndex());
+			pipe.setFilenameMode(RuleFilenameMode.getByValue(cbFilenameMode.getSelectedIndex()));
+		} else if (this.mode == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
+			pipe.setFilenameDownloadSelectionMode(RuleFilenameMode.getByValue(cbFilenameDownloadSelectionMode.getSelectedIndex()));
 		}
 	}
 
@@ -328,8 +334,9 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		SettingsManager.instance().setColWidthsRulesEditor(TableTool.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
@@ -338,8 +345,9 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
+		}
 		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
 	}
 

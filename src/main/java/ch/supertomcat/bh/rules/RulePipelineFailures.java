@@ -36,7 +36,7 @@ public class RulePipelineFailures extends RulePipeline {
 	 * 
 	 * @param mode Rule-Mode
 	 */
-	public RulePipelineFailures(int mode) {
+	public RulePipelineFailures(RuleMode mode) {
 		super(mode);
 	}
 
@@ -48,7 +48,7 @@ public class RulePipelineFailures extends RulePipeline {
 	public RulePipelineFailures(Element e) {
 		super(e);
 
-		if (this.mode == Rule.RULE_MODE_FAILURES) {
+		if (this.mode == RuleMode.RULE_MODE_FAILURES) {
 			try {
 				setFailureType(PicState.getByValue(Integer.parseInt(e.getAttributeValue("failureType"))));
 			} catch (Exception exx) {
@@ -71,7 +71,7 @@ public class RulePipelineFailures extends RulePipeline {
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
-		if (this.mode == Rule.RULE_MODE_FAILURES) {
+		if (this.mode == RuleMode.RULE_MODE_FAILURES) {
 			e.setAttribute("checkURL", String.valueOf(this.checkURL));
 			e.setAttribute("checkThumbURL", String.valueOf(this.checkThumbURL));
 			e.setAttribute("checkPageSourceCode", String.valueOf(this.checkPageSourceCode));

@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui.rules;
 import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.supertomcattools.guitools.Localization;
 
 /**
@@ -76,8 +77,8 @@ public class RulesTableModel extends DefaultTableModel {
 				strPipeCount = "";
 			}
 
-			int mode = rule.getPipelines().get(0).getMode();
-			if (mode == 0) {
+			RuleMode mode = rule.getPipelines().get(0).getMode();
+			if (mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
 				return strRedirect + Localization.getString("RuleModeZeroShort") + strPipeCount;
 			} else {
 				return strRedirect + Localization.getString("RuleModeOneShort") + strPipeCount;
