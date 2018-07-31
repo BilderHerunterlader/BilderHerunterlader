@@ -192,7 +192,7 @@ public class SettingsManager {
 	 * Restricted Settingspaths
 	 * This Settings can not be overwritten by the set*Value-Methods!
 	 */
-	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.DownloadSelectionWindow.Width", "GUI.DownloadSelectionWindow.Height", "GUI.DownloadSelectionWindow.X", "GUI.DownloadSelectionWindow.Y", "GUI.DownloadSelectionWindow.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "GUI.previewSize", "Keywords.FilterEnabled", "Keywords.MatchMode", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
+	private static final String RESTRICTED_PATHS[] = { "Directories.SavePath", "Directories.RememberLastUsedPath", "Directories.AutoTargetDir", "Directories.AutoTargetDirMode", "Directories.subdirsEnabled", "Directories.subdirsResolutionMode", "Connection.Connections", "Connection.connectionsPerHost", "Connection.Proxy.Mode", "Connection.Proxy.Name", "Connection.Proxy.Port", "Connection.Proxy.User", "Connection.Proxy.Passwort", "Connection.Proxy.Auth", "Connection.cookiesFromBrowser", "Connection.cookieFileOpera", "Connection.cookieFileOperaFixed", "Connection.cookieFileOperaNew", "Connection.cookieFileOperaNewFixed", "Connection.cookieFileFirefox", "Connection.cookieFileFirefoxFixed", "Connection.cookieFilePaleMoon", "Connection.cookieFilePaleMoonFixed", "Connection.userAgent", "GUI.Language", "GUI.Window.Width", "GUI.Window.Height", "GUI.Window.X", "GUI.Window.Y", "GUI.Window.State", "GUI.Window.Save", "GUI.DownloadSelectionWindow.Width", "GUI.DownloadSelectionWindow.Height", "GUI.DownloadSelectionWindow.X", "GUI.DownloadSelectionWindow.Y", "GUI.DownloadSelectionWindow.Save", "GUI.colWidthsQueue", "GUI.colWidthsLog", "GUI.colWidthsKeywords", "GUI.colWidthsRules", "GUI.colWidthsRulesEditor", "GUI.colWidthsHosts", "GUI.colWidthsSubdirs", "GUI.colWidthsUpdate", "GUI.colWidthsAdder", "GUI.colWidthsAdderKeywordSelectorFilename", "GUI.saveTableColumnSizes", "GUI.tableSortOrdersKeywords", "GUI.saveTableSortOrders", "GUI.Size", "GUI.Progress", "GUI.Bitrate", "GUI.LAF", "GUI.LogDays", "GUI.currentDownloadLogFile", "GUI.AlwaysAddTitle", "GUI.adderAdd", "GUI.DeselectNoKeyword", "GUI.DeleteNoKeyword", "GUI.targetDirChangeHistory", "GUI.FilenameChangeHistory", "GUI.FilenameChangePrefix", "GUI.AppendPrefixFilenameChange", "GUI.FilenameChangeAppendix", "GUI.AppendAppendixFilenameChange", "GUI.filenameChangeKeepOriginal", "GUI.DownloadRate", "GUI.downloadsCompleteNotification", "GUI.directoryLog.FilterEnabled", "GUI.directoryLog.DirCount", "GUI.directoryLog.OnlyExisting", "GUI.lastUsedImportDialogPath", "GUI.lastUsedExportDialogPath", "GUI.downloadPreviews", "GUI.previewSize", "Keywords.FilterEnabled", "Keywords.MatchMode", "Keywords.displayKeywordsWhenNoMatches", "Hosts.RulesBeforeClasses", "Downloads.AutoStartDownloads", "Downloads.DownloadedBytes", "Downloads.DownloadedFiles", "Downloads.SaveLogs", "Downloads.useOldDownloadLogMode", "Downloads.MaxFailedCount", "Downloads.MinFilesize", "Downloads.Timeout", "Downloads.sortDownloadsOnStart", "Downloads.autoRetryAfterDownloadsComplete", "Other.Updates", "Other.CheckClipboard", "Other.WebExtensionPort", "Other.allowedFilenameChars", "Other.backupDbOnStart", "Other.defragDBOnStart", "Other.defragMinFilesize", "Other.debugLevel", "Other.threadCount" };
 
 	/**
 	 * Restricted Settingspaths and subpaths
@@ -324,6 +324,11 @@ public class SettingsManager {
 	 * Mode of Keyword-Search
 	 */
 	private int keywordMatchMode = KeywordManager.MATCH_ALL_STRICT;
+
+	/**
+	 * Display Keywords When No Matches were found
+	 */
+	private boolean displayKeywordsWhenNoMatches = true;
 
 	/**
 	 * LAF
@@ -1074,6 +1079,8 @@ public class SettingsManager {
 				this.keywordMatchMode = kmm;
 			}
 
+			this.displayKeywordsWhenNoMatches = readBooleanValue("Keywords.displayKeywordsWhenNoMatches", root, this.displayKeywordsWhenNoMatches);
+
 			/* Hosts */
 			// Rules
 			this.rulesBeforeClasses = readBooleanValue("Hosts.RulesBeforeClasses", root, this.rulesBeforeClasses);
@@ -1378,6 +1385,7 @@ public class SettingsManager {
 
 		// KeywordSearch
 		addIntValue("Keywords.MatchMode", this.keywordMatchMode, root);
+		addBooleanValue("Keywords.displayKeywordsWhenNoMatches", this.displayKeywordsWhenNoMatches, root);
 
 		/* Hosts */
 		// Rules
@@ -2475,6 +2483,24 @@ public class SettingsManager {
 		if (checkIntValue(0, 2, keywordMatchMode)) {
 			this.keywordMatchMode = keywordMatchMode;
 		}
+	}
+
+	/**
+	 * Returns the displayKeywordsWhenNoMatches
+	 * 
+	 * @return displayKeywordsWhenNoMatches
+	 */
+	public boolean isDisplayKeywordsWhenNoMatches() {
+		return displayKeywordsWhenNoMatches;
+	}
+
+	/**
+	 * Sets the displayKeywordsWhenNoMatches
+	 * 
+	 * @param displayKeywordsWhenNoMatches displayKeywordsWhenNoMatches
+	 */
+	public void setDisplayKeywordsWhenNoMatches(boolean displayKeywordsWhenNoMatches) {
+		this.displayKeywordsWhenNoMatches = displayKeywordsWhenNoMatches;
 	}
 
 	/**

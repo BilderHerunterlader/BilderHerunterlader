@@ -491,6 +491,16 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * Label
 	 */
+	private JLabel lblDisplayKeywordsWhenNoMatches = new JLabel(Localization.getString("KeywordSearch"));
+
+	/**
+	 * Checkbox
+	 */
+	private JCheckBox chkDisplayKeywordsWhenNoMatches = new JCheckBox(Localization.getString("DisplayKeywordsWhenNoMatches"), true);
+
+	/**
+	 * Label
+	 */
 	private JLabel lblLAF = new JLabel(Localization.getString("LookAndFeel"));
 
 	/**
@@ -1341,6 +1351,11 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, chkDeselectNoKeyword, pnlKeywords);
 		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, lblDisplayKeywordsWhenNoMatches, pnlKeywords);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, chkDisplayKeywordsWhenNoMatches, pnlKeywords);
+		i++;
 
 		// Download
 		i = 0;
@@ -1576,6 +1591,8 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		chkAlwaysAddTitle.setSelected(sm.isAlwaysAddTitle());
 
 		chkDeselectNoKeyword.setSelected(sm.isDeselectNoKeyword());
+
+		chkDisplayKeywordsWhenNoMatches.setSelected(sm.isDisplayKeywordsWhenNoMatches());
 
 		chkRulesBefore.setSelected(sm.isRulesBeforeClasses());
 
@@ -1843,6 +1860,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		sm.setSaveLastPath(chkRememberLastUsedPath.isSelected());
 		sm.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
 		sm.setDeselectNoKeyword(chkDeselectNoKeyword.isSelected());
+		sm.setDisplayKeywordsWhenNoMatches(chkDisplayKeywordsWhenNoMatches.isSelected());
 		sm.setDefragDBOnStart(chkDefragDB.isSelected());
 		sm.setBackupDbOnStart(chkBackupDB.isSelected());
 		sm.setSubdirsEnabled(chkSubdirsEnabled.isSelected());

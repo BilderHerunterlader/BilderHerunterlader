@@ -78,10 +78,9 @@ public class KeywordSearchThread extends Thread {
 	private boolean localFiles = false;
 
 	/**
-	 * TODO read from settings
 	 * Display dialog to select keyword, when no matches where found
 	 */
-	private boolean displayKeywordsWhenNoMatches = true;
+	private boolean displayKeywordsWhenNoMatches = SettingsManager.instance().isDisplayKeywordsWhenNoMatches();
 
 	/**
 	 * Constructor for a Single Searchstring
