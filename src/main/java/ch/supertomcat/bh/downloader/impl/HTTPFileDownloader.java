@@ -104,7 +104,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				}
 
 				boolean lastURL = count == directLinksSize;
-				if (!executeFileDownload(pic, directLink.getDirectLink(), currentTargetFilename, result, referrer, firstURL, lastURL)) {
+				if (!executeFileDownload(pic, directLink.getDirectLink(), currentTargetFilename, result, referrer, firstURL, lastURL, count, directLinksSize)) {
 					break;
 				}
 				firstURL = false;
@@ -126,9 +126,11 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @param referrer Referrer
 	 * @param firstURL First URL
 	 * @param lastURL Last URL
+	 * @param currentURL Current URL Index
+	 * @param urlCount Count of URLs
 	 * @return True if download was successful, false otherwise
 	 */
-	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL) {
+	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL, int currentURL, int urlCount) {
 		String target = pic.getTargetPath() + correctedFilename;
 
 		// Get the cookies for the url
@@ -323,7 +325,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						if (nReads > 12) {
 							nReads = 0;
 							// change the progressbar
-							pic.progressBarChanged(iBW, getProgressString(iBW, size) + bitrate);
+							pic.progressBarChanged(iBW, getProgressString(iBW, size, currentURL, urlCount) + bitrate);
 						}
 						if (pic.isRecalcutateRate() && downloadRate) {
 							// the flag is set to true, so we recalculate the download rate
@@ -472,25 +474,29 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * 
 	 * @param size Number of bytes read
 	 * @param max Filesize
+	 * @param currentURL Current URL Index
+	 * @param urlCount Count of URLs
 	 * @return Progress-String
 	 */
-	private String getProgressString(long size, long max) {
-		String retval = "";
+	private String getProgressString(long size, long max, int currentURL, int urlCount) {
 		int progressView = SettingsManager.instance().getProgessView();
+		String urlIndexString;
+		if (urlCount == 1) {
+			urlIndexString = "";
+		} else {
+			urlIndexString = currentURL + "/" + urlCount + " ";
+		}
 		if (max >= size) {
-			if (progressView == SettingsManager.PROGRESSBAR_PERCENT) {
-				retval = UnitFormatTool.getPercentString(size, max);
-			} else if (progressView == SettingsManager.PROGRESSBAR_SIZE) {
-				retval = UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
-			} else if (progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
-				retval = UnitFormatTool.getPercentString(size, max);
-			} else if (progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
-				retval = UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+			if (progressView == SettingsManager.PROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
+				return urlIndexString + UnitFormatTool.getPercentString(size, max);
+			} else if (progressView == SettingsManager.PROGRESSBAR_SIZE || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
+				return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+			} else {
+				return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
 			}
 		} else {
-			retval = UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+			return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
 		}
-		return retval;
 	}
 
 	@Override
