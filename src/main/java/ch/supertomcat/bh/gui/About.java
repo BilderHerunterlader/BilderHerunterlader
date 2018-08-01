@@ -170,6 +170,10 @@ public class About extends JDialog implements ActionListener, WindowListener {
 		aboutProgram.append(System.getProperty("java.home"));
 		aboutProgram.append("\n\n");
 
+		aboutProgram.append("E-Mail: ");
+		aboutProgram.append(ApplicationProperties.getProperty("MailAddress"));
+		aboutProgram.append("\n\n");
+
 		String licenseName = ApplicationProperties.getProperty("LicenseName");
 		if (licenseName.length() > 0) {
 			aboutProgram.append("License:\n");
