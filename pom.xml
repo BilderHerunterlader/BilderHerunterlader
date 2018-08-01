@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.supertomcat</groupId>
 	<artifactId>bh</artifactId>
-	<version>4.9.5-SNAPSHOT</version>
+	<version>4.9.5</version>
 	<name>BilderHerunterlader</name>
 	<properties>
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
@@ -250,7 +250,8 @@
 	<scm>
 		<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
 		<connection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</connection>
-	</scm>
+	  <tag>bh-4.9.5</tag>
+  </scm>
 	<distributionManagement>
         <repository>
             <id>bh-maven-repo</id>
