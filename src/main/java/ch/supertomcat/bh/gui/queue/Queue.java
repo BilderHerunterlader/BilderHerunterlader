@@ -687,6 +687,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 							Pic pic = QueueManager.instance().getPicByIndex(modelIndex);
 							if (pic != null) {
 								pic.setTargetFilename(out);
+								pic.setFixedTargetFilename(true);
 								QueueManager.instance().updatePic(pic);
 							}
 

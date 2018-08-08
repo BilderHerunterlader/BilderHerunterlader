@@ -626,9 +626,8 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param targetFilename Filename
 	 */
 	public void setTargetFilename(String targetFilename) {
-		if (targetFilename.length() > 0) {
+		if (!targetFilename.isEmpty()) {
 			this.targetFilename = targetFilename;
-			this.fixedTargetFilename = true;
 		} else {
 			this.targetFilename = Localization.getString("Unkown");
 			this.fixedTargetFilename = false;
