@@ -54,9 +54,9 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	public static final String NAME = "HostBabesBoard";
 
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(HostBabesBoard.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompilierte Muster (Aus Text-Datei geladen)

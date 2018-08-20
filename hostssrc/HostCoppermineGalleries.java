@@ -53,11 +53,6 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostCoppermineGalleries.class);
-
-	/**
 	 * Version dieser Klasse
 	 */
 	public static final String VERSION = "4.0";
@@ -66,6 +61,11 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostCoppermineGalleries";
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

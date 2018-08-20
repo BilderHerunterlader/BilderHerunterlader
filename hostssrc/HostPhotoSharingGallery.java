@@ -45,11 +45,6 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostPhotoSharingGallery.class);
-
-	/**
 	 * Version dieser Klasse
 	 */
 	public static final String VERSION = "2.8";
@@ -58,6 +53,11 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostPhotoSharingGallery";
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

@@ -18,11 +18,6 @@ import ch.supertomcat.bh.rules.RuleRegExp;
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostImageVenue.class);
-
-	/**
 	 * Version dieser Klasse
 	 */
 	public static final String VERSION = "3.4";
@@ -31,6 +26,11 @@ public class HostImageVenue extends Host implements IHoster {
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostImageVenue";
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

@@ -69,11 +69,6 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
-	 * Logger
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostYoutube.class);
-
-	/**
 	 * Version dieser Klasse
 	 */
 	public static final String VERSION = "7.8";
@@ -92,6 +87,11 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	private static final int QUALITY_HD = 6;
 	private static final int QUALITY_FULL_HD = 7;
 	private static final int QUALITY_4K_HD = 8;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

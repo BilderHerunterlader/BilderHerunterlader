@@ -56,11 +56,6 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostGenericMultiPageLinkGrabber.class);
-
-	/**
 	 * Version dieser Klasse
 	 */
 	public static final String VERSION = "2.7";
@@ -79,6 +74,11 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	 * PHPBB
 	 */
 	private static final int SOFTWARE_PHPBB = 1;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

@@ -32,11 +32,6 @@ import ch.supertomcat.bh.rules.RuleRegExp;
  * @version 2.9
  */
 public class HostFlickr extends Host implements IHoster {
-	/**
-	 * Logger
-	 */
-	private static Logger logger = LoggerFactory.getLogger(HostFlickr.class);
-
 	/** the version of this class **/
 	public static final String VERSION = "2.9";
 
@@ -78,6 +73,11 @@ public class HostFlickr extends Host implements IHoster {
 
 	/** flickr photo size id: original (o) **/
 	private static final int SIZE_ORIGINAL = 11;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/** pattern that recognizes URLs of flickr container sites **/
 	private final Pattern containerUrlPattern;
