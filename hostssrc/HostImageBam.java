@@ -3,6 +3,8 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
@@ -18,18 +20,23 @@ import ch.supertomcat.supertomcattools.guitools.Localization;
 /**
  * Host class for ImageBam
  * 
- * @version 3.7
+ * @version 3.8
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.7";
+	public static final String VERSION = "3.8";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostImageBam";
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster
@@ -38,11 +45,15 @@ public class HostImageBam extends Host implements IHoster {
 
 	private String[] errorMessages = new String[] { "This server will be right back!" };
 
-	private RuleRegExp regexServerMaintenance = null;
+	private RuleRegExp regexServerMaintenance;
 
-	private RuleRegExp regexImage = null;
+	private RuleRegExp regexImage;
 
-	private RuleRegExp regexFilename = null;
+	private RuleRegExp regexImage2;
+
+	private RuleRegExp regexFilename;
+
+	private Pattern fileExtensionPattern = Pattern.compile(".+\\.(bmp|gif|jpe|jpg|jpeg|png|tif|tiff)$");
 
 	/**
 	 * Konstruktor
@@ -58,6 +69,10 @@ public class HostImageBam extends Host implements IHoster {
 		regexImage = new RuleRegExp();
 		regexImage.setSearch("(?i)<img.+?class=\"image\".+?id=\"i[0-9]+\".+?src=\"(.+?)\"");
 		regexImage.setReplace("$1");
+
+		regexImage2 = new RuleRegExp();
+		regexImage2.setSearch("<meta property=\"og:image\" content=\"(.+?)\"/>");
+		regexImage2.setReplace("$1");
 
 		regexFilename = new RuleRegExp();
 		regexFilename.setSearch(".+?filename=(.+)");
@@ -87,16 +102,21 @@ public class HostImageBam extends Host implements IHoster {
 
 		String downloadURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
 
-		if (downloadURL.length() == 0) {
-			for (int i = 0; i < errorMessages.length; i++) {
-				if (page.indexOf(errorMessages[i]) > -1) {
-					throw new HostFileTemporaryOfflineException(errorMessages[i]);
+		if (downloadURL.isEmpty()) {
+			for (String errorMessage : errorMessages) {
+				if (page.indexOf(errorMessage) > -1) {
+					throw new HostFileTemporaryOfflineException(errorMessage);
 				}
 			}
 
 			String errorMessage = regexServerMaintenance.doPageSourcecodeReplace(page, 0, url, null);
-			if (errorMessage.length() > 0) {
+			if (!errorMessage.isEmpty()) {
 				throw new HostFileTemporaryOfflineException(errorMessage);
+			}
+
+			downloadURL = regexImage2.doPageSourcecodeReplace(page, 0, url, null);
+			if (!downloadURL.isEmpty()) {
+				logger.info("Download-URL found with alternative pattern: {}", downloadURL);
 			}
 		}
 
@@ -114,49 +134,50 @@ public class HostImageBam extends Host implements IHoster {
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
 		if (isFromThisHoster(upo.getContainerURL())) {
-			String s = parseURL(upo.getContainerURL());
-			s = s.replaceAll("&amp;", "&");
-			if (s.length() > 0) {
-				upo.setDirectLink(s);
+			String downloadURL = parseURL(upo.getContainerURL());
+			downloadURL = downloadURL.replaceAll("&amp;", "&");
+
+			if (!downloadURL.isEmpty()) {
+				upo.setDirectLink(downloadURL);
+
 				String correctedFilename = "";
-				if (s.contains("filename")) {
-					// Read out filename from url, but we still use the filename from content-disposition if available
-					correctedFilename = regexFilename.doURLReplace(s, null);
-					URLCodec decoder = new URLCodec("utf-8");
-					try {
-						correctedFilename = decoder.decode(correctedFilename);
-					} catch (DecoderException e) {
-					}
+				// Read out filename from url
+				if (downloadURL.contains("filename")) {
+					correctedFilename = decodeFilename(regexFilename.doURLReplace(downloadURL, null));
+				} else {
+					correctedFilename = decodeFilename(getFilenamePart(downloadURL));
+				}
+
+				if (correctedFilename.isEmpty()) {
+					// Filename not found in URL, try to use content disposition
+					upo.getPic().setRenameWithContentDisposition(true);
+				} else {
 					/*
-					 * Imagebam does cut long filenames and also the extension is removed then.
+					 * Imagebam does in some cases cut long filenames and also the extension is removed then.
 					 * So we just add jpg in that case.
 					 * This is not a good fix, as it would also add jpg in case it's a png for example.
 					 * But there is not any information on the container-page or the http-header what
 					 * type it is.
 					 * So this fix is better than nothing.
 					 */
-					if (correctedFilename.length() > 0 && correctedFilename.matches(".+\\.(bmp|gif|jpe|jpg|jpeg|png|tif|tiff)$") == false) {
+					if (!correctedFilename.isEmpty() && !fileExtensionPattern.matcher(correctedFilename).matches()) {
 						correctedFilename += ".jpg";
 					}
+
 					upo.setCorrectedFilename(correctedFilename);
-				} else {
-					correctedFilename = getFilenamePart(s);
-					URLCodec decoder = new URLCodec("utf-8");
-					try {
-						correctedFilename = decoder.decode(correctedFilename);
-					} catch (DecoderException e) {
-					}
-					if (correctedFilename.length() > 0 && correctedFilename.matches(".+\\.(bmp|gif|jpe|jpg|jpeg|png|tif|tiff)$") == false) {
-						correctedFilename += ".jpg";
-					}
-					upo.setCorrectedFilename(correctedFilename);
-				}
-				if (correctedFilename.length() == 0) {
-					upo.getPic().setRenameWithContentDisposition(true);
 				}
 			} else {
 				throw new HostImageUrlNotFoundException(Localization.getString("ErrorImageURL"));
 			}
+		}
+	}
+
+	private String decodeFilename(String filename) {
+		URLCodec decoder = new URLCodec("utf-8");
+		try {
+			return decoder.decode(filename);
+		} catch (DecoderException e) {
+			return filename;
 		}
 	}
 
