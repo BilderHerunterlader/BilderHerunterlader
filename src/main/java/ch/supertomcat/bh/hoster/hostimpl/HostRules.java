@@ -137,6 +137,14 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	}
 
 	/**
+	 * @param ruleName Rule Name
+	 * @return Rule or null
+	 */
+	public synchronized Rule getRuleByName(String ruleName) {
+		return rules.stream().filter(x -> x.getName().equals(ruleName)).findFirst().orElse(null);
+	}
+
+	/**
 	 * @return Domains
 	 */
 	public List<String> getDomains() {

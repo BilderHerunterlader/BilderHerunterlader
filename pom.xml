@@ -118,6 +118,12 @@
 			<artifactId>javax.activation-api</artifactId>
 			<version>1.2.0</version>
 		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.1.0</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 	<repositories>
 		<!-- Repository inside project folder, which holds some artifacts, which are not available in public repositories -->
@@ -236,6 +242,16 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.0</version>
+				<configuration>
+					<excludes>
+						<exclude>**/manualtest/**</exclude>
+					</excludes>
+				</configuration>
+			</plugin>			
 		</plugins>
 		<pluginManagement>
 			<plugins>
