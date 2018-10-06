@@ -15,8 +15,8 @@ module ch.supertomcat.bh {
 	 */
 	requires commons.codec;
 	requires ehcache;
-	requires httpclient;
-	requires httpcore;
+	requires org.apache.httpcomponents.httpclient;
+	requires org.apache.httpcomponents.httpcore;
 	requires jdom2;
 	requires jtidy.r938;
 	requires org.apache.logging.log4j;
