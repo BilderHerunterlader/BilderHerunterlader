@@ -111,7 +111,7 @@ public class ProxyManager {
 		requestConfigBuilder.setSocketTimeout(SettingsManager.instance().getTimeout());
 		requestConfigBuilder.setConnectionRequestTimeout(SettingsManager.instance().getTimeout());
 		requestConfigBuilder.setConnectTimeout(SettingsManager.instance().getTimeout());
-		requestConfigBuilder.setCookieSpec(CookieSpecs.DEFAULT);
+		requestConfigBuilder.setCookieSpec(CookieSpecs.STANDARD);
 		return requestConfigBuilder;
 	}
 
