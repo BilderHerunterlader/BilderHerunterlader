@@ -10,8 +10,10 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.gui.SpringUtilities;
@@ -106,6 +109,8 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 	private RuleRegExp regexError;
 
+	private RuleRegExp regexErrorFileNotExist;
+
 	private RuleRegExp regexFmtUrlMap;
 
 	private RuleRegExp regexAdaptiveFmts;
@@ -113,6 +118,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	private Map<Integer, String[]> strQualities = new HashMap<>();
 	private Map<Integer, String[]> strQualitiesDASHVideo = new HashMap<>();
 	private Map<Integer, String[]> strQualitiesDASHAudio = new HashMap<>();
+	private Set<Integer> excludedFMT = new HashSet<>();
 
 	private boolean download4KHD = true;
 
@@ -196,6 +202,22 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		 * 139, 140, 141 are audio only
 		 */
 
+		/*
+		 * WEBM video formats:
+		 * 242, 243, 244, 247, 248, 278 are video only
+		 * 171, 249, 250, 251 are audio only
+		 */
+		excludedFMT.add(242);
+		excludedFMT.add(243);
+		excludedFMT.add(244);
+		excludedFMT.add(247);
+		excludedFMT.add(248);
+		excludedFMT.add(278);
+		excludedFMT.add(171);
+		excludedFMT.add(249);
+		excludedFMT.add(250);
+		excludedFMT.add(251);
+
 		urlPattern = Pattern.compile("^https?://(www\\.)?youtube\\.com/(watch\\?(.*?)?v=([^&]+).*|(.*?)?#([0-9a-zA-Z]/)+([^&]+))");
 
 		youtubeSearchPatternFirstPage = Pattern.compile("https?://(www\\.)?youtube\\.com/results\\?(&?search_sort=[^&]+|&?&filters=[^&]+|&?search_type=[^&]+|&?search_query=[^&]+){3,4}");
@@ -205,10 +227,15 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		regexTitle.setSearch("(?m)<title>(.+?) - YouTube");
 		regexTitle.setReplace("$1");
 
+		String[] errorMessages = new String[] { "url contained a malformed video id", "Confirm Birth Date", "This video is not available in your country", "This video contains content from [^,]+, who has blocked it in your country on copyright grounds" };
 		regexError = new RuleRegExp();
-		regexError
-				.setSearch("(The video you have requested is not available|no longer available|url contained a malformed video id|Confirm Birth Date|copyright claim|This video has been removed due to terms of use violation|This video is not available in your country|This video has been deleted|This video has been removed by the user|This video contains content from [^,]+, who has blocked it in your country on copyright grounds)");
+		regexError.setSearch("(" + String.join("|", errorMessages) + ")");
 		regexError.setReplace("$1");
+
+		String[] fileNotExitErrorMessages = new String[] { "The video you have requested is not available", "no longer available", "copyright claim", "This video has been removed due to terms of use violation", "This video has been deleted", "This video has been removed by the user", "This video has been removed for violating YouTube&#39;s Terms of Service" };
+		regexErrorFileNotExist = new RuleRegExp();
+		regexErrorFileNotExist.setSearch("(" + String.join("|", fileNotExitErrorMessages) + ")");
+		regexErrorFileNotExist.setReplace("$1");
 
 		regexFmtUrlMap = new RuleRegExp();
 		regexFmtUrlMap.setSearch("\"url_encoded_fmt_stream_map\": ?\"(.+?)\"");
@@ -386,6 +413,14 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			throw new HostIOException(error);
 		}
 
+		/*
+		 * Check for file not exist error messages
+		 */
+		String errorFileNotExist = regexErrorFileNotExist.doPageSourcecodeReplace(htmlCode, 0, url, null);
+		if (!errorFileNotExist.isEmpty()) {
+			throw new HostFileNotExistException(errorFileNotExist);
+		}
+
 		int statusCode = result.getStatusLine().getStatusCode();
 		if (statusCode != 200) {
 			throw new HostIOException("HTTP-Error: " + statusCode);
@@ -437,10 +472,21 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 					Map<String, String> fmtUrlMap = getVideoInfo(strFmtUrlMap);
 					try {
 						int quality = Integer.parseInt(fmtUrlMap.get("itag"));
+						logger.info("Check FMT Quality: {}. FMT-Map: {}", quality, fmtUrlMap);
 						if (isHigherQuality(quality, fmt, fmtUrlMap)) {
 							fmt = quality;
 							retvalUrl = fmtUrlMap.get("url");
 							sig = fmtUrlMap.get("sig");
+							if (sig == null) {
+								// Ciphered Signature Detected
+								String cipheredSig = fmtUrlMap.get("s");
+								/*
+								 * TODO Decrypt Ciphered Signature. Player JS needs to be downloaded and decrypt function used to decrypt the ciphered
+								 * signature.
+								 */
+								sig = cipheredSig;
+							}
+							logger.info("Higher Quality FMT chosen: {}. FMT-Map: {}", fmt, fmtUrlMap);
 						}
 						if (isHigherDashAudioQuality(quality, fmt)) {
 							dashAudioFmt = quality;
@@ -469,6 +515,9 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			if (qualityArray == null) {
 				qualityArray = strQualitiesDASHVideo.get(qualityIndex);
 				dash = qualityArray != null;
+			}
+			if (qualityArray != null) {
+				logger.info("Chosen Quality: {}, Dash: {}", Arrays.toString(qualityArray), dash);
 			}
 
 			/*
@@ -532,6 +581,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	}
 
 	private String prepareDownloadURL(String fmtURL, String fmtSig) throws DecoderException {
+		logger.info("Prepare Download URL. FMT-URL: {}, Signature: {}", fmtURL, fmtSig);
 		// Remove the application/x-www-form-urlencoded encoding
 		URLCodec urlCodec = new URLCodec("UTF-8");
 		String decodedFmtURL = urlCodec.decode(fmtURL);
@@ -588,7 +638,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			bNewIsDASH = qualityArrayNew != null;
 		}
 		if (qualityArrayNew == null) {
-			if (strQualitiesDASHAudio.get(newFmt) == null) {
+			if (strQualitiesDASHAudio.get(newFmt) == null && !excludedFMT.contains(newFmt)) {
 				logger.warn("Unrecognized Youtube fmt detected: {}. FMT-Map: {}", newFmt, fmtUrlMap);
 			}
 			return false;
