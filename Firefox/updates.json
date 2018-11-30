@@ -6,6 +6,11 @@
 					"version": "4.7",
 					"update_link": "https://www.dropbox.com/s/tzs5uah7o1enefd/bilderherunterladerwebext-4.7-an%2Bfx.xpi?dl=1",
 					"update_hash": "sha256:92862be5caff13bfebba349f156e49ed31c580b9fff3c2013cc08833ef4c557b"
+				},
+				{
+					"version": "4.8",
+					"update_link": "https://www.dropbox.com/s/94i1vfuoxej98ue/bilderherunterladerwebext-4.8-fx.xpi?dl=1",
+					"update_hash": "sha256:2c77ec57d850a6b16ddd88a63ad7b305e8222a83735845b7f8b9d4ad814f31d1"
 				}
 			]
 		}

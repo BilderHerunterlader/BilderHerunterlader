@@ -8,3 +8,4 @@
 <!ENTITY bhoptions.linkextract.frames "Extract links/images from frames">
 <!ENTITY bhoptions.linkextract.iframes "Extract links/images from iframes">
 <!ENTITY bhoptions.linkextract.dataurlattributes "Extract links from data-url attributes">
+<!ENTITY bhoptions.popupmenu.bhParsePage "Parse page with BH">

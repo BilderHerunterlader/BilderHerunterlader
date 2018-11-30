@@ -14,7 +14,7 @@
 	
 	var urlsToSend = bhGetLinksToSend(bFrames, bIFrames, bDataURLAttributes);
 
-	var bhRequestData = new BHRequestData(bhHeaderInfo, urlsToSend);
+	var bhRequestData = new BHRequestData(bhHeaderInfo, urlsToSend, true);
 
 	//console.log("BHSendString: \n" + bhRequestData.getBHSendString());
 
@@ -39,13 +39,38 @@ function bhFireDownloadImages(bFrames, bIFrames, bDataURLAttributes) {
 	
 	var urlsToSend = bhGetImagesToSend(bFrames, bIFrames, bDataURLAttributes);
 
-	var bhRequestData = new BHRequestData(bhHeaderInfo, urlsToSend);
+	var bhRequestData = new BHRequestData(bhHeaderInfo, urlsToSend, true);
 
 	//console.log("BHSendString: \n" + bhRequestData.getBHSendString());
 
 	bhSendURLsToBH(bhRequestData);
 
 	console.log("bhFireDownloadImages End");
+}
+
+function bhFireParsePage() {
+	console.log("bhFireParsePage Start");
+
+	var strPageURL = bhGetPageURL();
+	console.log("Page-URL: " + strPageURL);
+	var strPageTitle = bhGetPageTitle();
+	console.log("Page-Title: " + strPageTitle);
+
+	var bhHeaderInfo = new BHHeaderInfo(strPageURL, strPageTitle);
+	console.log("BHHeaderInfo: " + bhHeaderInfo.getLogString());
+	
+	bhPreparePageTitle(bhHeaderInfo);
+	console.log("Prepared BHHeaderInfo: " + bhHeaderInfo.getLogString());
+	
+	var urlsToSend = [];
+
+	var bhRequestData = new BHRequestData(bhHeaderInfo, urlsToSend, false);
+
+	//console.log("BHSendString: \n" + bhRequestData.getBHSendString());
+
+	bhSendURLsToBH(bhRequestData);
+
+	console.log("bhFireParsePage End");
 }
 
 /*

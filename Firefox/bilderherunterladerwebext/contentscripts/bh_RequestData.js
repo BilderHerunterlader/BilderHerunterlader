@@ -42,9 +42,10 @@ BHURLData.prototype.getBHString = function() {
 /*
 	BH Request Data
 */
-function BHRequestData(bhHeaderInfo, urlsToSend) {
+function BHRequestData(bhHeaderInfo, urlsToSend, dataAvailable) {
     this.bhHeaderInfo = bhHeaderInfo;
     this.urlsToSend = urlsToSend;
+	this.dataAvailable = dataAvailable;
 }
 
 BHRequestData.prototype.getHeaderInfo = function() {
@@ -55,6 +56,10 @@ BHRequestData.prototype.getURLsToSend = function() {
     return this.urlsToSend;
 };
 
+BHRequestData.prototype.getDataAvailable = function() {
+    return this.dataAvailable;
+};
+
 BHRequestData.prototype.getBHSendString = function() {
     var bhHeaderInfo = this.getHeaderInfo();
 	var bhURLsToSend = this.getURLsToSend();
@@ -63,14 +68,22 @@ BHRequestData.prototype.getBHSendString = function() {
 	var prefix = "BH{af2f0750-c598-4826-8e5f-bb98aab519a5}";
 	var headerData = prefix + "\n" + bhHeaderInfo.getPageTitle() + "\n" + bhHeaderInfo.getPageURL() + "\n";
 	var dataStart = "FULLLISTTHUMBS\nSOF\n";
+	if (!this.dataAvailable) {
+		dataStart = "SOF\n";
+	}
 	var dataEnd = "EOF\n";
 	
 	var bhString = dataStart;
-	bhString += headerData;
 
-	for(var xx = 0; xx < bhURLsToSend.length; xx++) {
-		var dataSend = bhURLsToSend[xx].getBHString();
-		bhString += dataSend;
+	if (!this.dataAvailable) {
+		bhString += "URL:" + bhHeaderInfo.getPageURL() + "\n";
+	} else {
+		bhString += headerData;
+		
+		for(var xx = 0; xx < bhURLsToSend.length; xx++) {
+			var dataSend = bhURLsToSend[xx].getBHString();
+			bhString += dataSend;
+		}
 	}
 	
 	bhString += dataEnd;

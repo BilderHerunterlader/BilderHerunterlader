@@ -14,6 +14,7 @@
 	<!-- firefox context menu -->
 	<popup id="contentAreaContextMenu">
 		<menuseperator/>
+		<menuitem id="ContextMenu_BilderHerunterlader_FireParsePage" label="&popupmenu.bhParsePage;" oncommand="fireParsePage();" insertafter="context-stop" />
 		<menuitem id="ContextMenu_BilderHerunterlader_FireImages" label="&popupmenu.bhImages;" oncommand="fireDownloadImages();" insertafter="context-stop" />
 		<menuitem id="ContextMenu_BilderHerunterlader_FireLinks" label="&popupmenu.bh;" oncommand="fireDownloadLinks();" key="bhLaunchKey" insertafter="context-stop" />
 		<menuseperator/>

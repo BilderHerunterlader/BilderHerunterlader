@@ -9,6 +9,7 @@
 			<preference id="pref_bhtransmitmode" name="extensions.bilderherunterlader.bhtransmitmode" type="bool" />
 			<preference id="pref_bhfireimages" name="extensions.bilderherunterlader.fireImages" type="bool" />
 			<preference id="pref_bhfirelinks" name="extensions.bilderherunterlader.fireLinks" type="bool" />
+			<preference id="pref_bhfireparsepage" name="extensions.bilderherunterlader.fireParsePage" type="bool" />
 			<preference id="pref_bhframes" name="extensions.bilderherunterlader.frames" type="bool" />
 			<preference id="pref_bhiframes" name="extensions.bilderherunterlader.iframes" type="bool" />
 			<preference id="pref_bhdataurlattributes" name="extensions.bilderherunterlader.dataurlattributes" type="bool" />
@@ -22,6 +23,7 @@
 			<caption label="&bhoptions.contextmenu.label;" />
 			<checkbox preference="pref_bhfireimages" label="&bhoptions.popupmenu.bhImages;" />
 			<checkbox preference="pref_bhfirelinks" label="&bhoptions.popupmenu.bh;" />
+			<checkbox preference="pref_bhfireparsepage" label="&bhoptions.popupmenu.bhParsePage;" />
 		</groupbox>
 		<groupbox>
 			<caption label="&bhoptions.linkextract.label;" />

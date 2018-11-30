@@ -14,9 +14,11 @@ function contextMenuDisplayed() {
 	
 	var fireImages = document.getElementById("ContextMenu_BilderHerunterlader_FireImages");
 	var fireLinks = document.getElementById("ContextMenu_BilderHerunterlader_FireLinks");
+	var fireParsePage = document.getElementById("ContextMenu_BilderHerunterlader_FireParsePage");
 	
 	fireImages.hidden = !prefManager.getBoolPref("extensions.bilderherunterlader.fireImages");
 	fireLinks.hidden = !prefManager.getBoolPref("extensions.bilderherunterlader.fireLinks");
+	fireParsePage.hidden = !prefManager.getBoolPref("extensions.bilderherunterlader.fireParsePage");
 }
 
 function sendURLsToBH(urlssend, plainText, embeddedImages) {
@@ -357,4 +359,14 @@ function fireDownloadImages() {
 	}
 	
 	sendURLsToBH(urlssend, false, true);
+}
+
+function fireParsePage() {
+	if (isBHTransmitMode() === true) {
+		launchBHTransmit(false);
+		return;
+	}
+	
+	var urlssend;
+	sendURLsToBH(urlssend, true, false);
 }
