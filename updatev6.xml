@@ -7,7 +7,7 @@
 			<mainEN>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.9.6" src="https://www.dropbox.com/s/mcz6d8p3tvgstpr/BH-4.9.5.zip?dl=1" filename="BH-4.9.6.zip" name="BilderHerunterlader" />
+	<main version="4.9.6" src="https://www.dropbox.com/s/e72slgqp5581i85/BH-4.9.6.zip?dl=1" filename="BH-4.9.6.zip" name="BilderHerunterlader" />
 	<description>
 		<mainDE>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainDE>
 		<mainEN>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainEN>
