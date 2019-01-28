@@ -107,6 +107,7 @@ public class KeywordManager {
 	public synchronized void addKeywords(List<Keyword> keywords) {
 		for (Keyword keyword : keywords) {
 			this.keywords.add(keyword);
+			keywordsSQLiteDB.insertEntry(keyword);
 		}
 		keywordsChanged();
 	}
