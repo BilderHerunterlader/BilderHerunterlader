@@ -8,4 +8,4 @@ for /f "tokens=1" %%i in (vx.txt) do set version=%%i
 del vx.txt
 
 ::version einsetzen und zip datei erstellen
-"%programfiles%\7-zip\7z.exe" a -xr@BilderHerunterlader2\excludelist.txt -tzip BilderHerunterlader2\BilderHerunterlader%version%Source.zip BilderHerunterlader2\* -r
+"%programfiles%\7-zip\7z.exe" a -xr@BilderHerunterlader\excludelist.txt -tzip BilderHerunterlader\BilderHerunterlader%version%Source.zip BilderHerunterlader\* -r
