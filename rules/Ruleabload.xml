@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rule name="abload" version="0.3" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://(www\.)?abload\.de\/(image.php\?|browseGallery.php\?gal=.+?&amp;)img=.+</urlpattern>
+<rule name="abload" version="0.4" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>https?://(www\.)?abload\.de\/(image.php\?|browseGallery.php\?gal=.+?&amp;)img=.+</urlpattern>
   <pipes>
     <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="(http://(www\.)?abload\.de\/)(image.php\?|browseGallery.php\?gal=.+?&amp;)img=(.+)" replace="$1img/$4" />
+      <regexp search="(https?://(www\.)?abload\.de\/)(image.php\?|browseGallery.php\?gal=.+?&amp;)img=(.+)" replace="$1img/$4" />
     </pipeline>
   </pipes>
   <pipesFailures />
