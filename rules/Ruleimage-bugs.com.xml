@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rule name="image-bugs.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+<rule name="image-bugs.com" version="0.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="5" sendCookies="true">
   <urlpattern>https?://(?:www\.)?image-bugs\.com/image/.+</urlpattern>
   <pipes>
     <pipeline mode="0" urlmode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="(https?://(?:www\.)?image-bugs\.com/images/.+?)\.th(\.[^.]+)$" replace="$1$2" />
+      <regexp search="(https?://(?:www\.)?image-bugs\.com/images/.+?)\.(?:th|md)(\.[^.]+)$" replace="$1$2" />
     </pipeline>
   </pipes>
   <pipesFailures />
