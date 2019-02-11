@@ -27,7 +27,7 @@
 		</host>
 		<host version="3.8" src="https://www.dropbox.com/s/q75gty3q4unex8x/HostImageBam.class?dl=1" filename="HostImageBam.class" name="HostImageBam" />
 		<host version="3.7" src="https://www.dropbox.com/s/wem0x3qhtxvgswf/HostImageShack.class?dl=1" filename="HostImageShack.class" name="HostImageShack" />
-		<host version="3.4" src="https://www.dropbox.com/s/chek2838fsgt3ma/HostImageVenue.class?dl=1" filename="HostImageVenue.class" name="HostImageVenue" />
+		<host version="3.5" src="https://www.dropbox.com/s/chek2838fsgt3ma/HostImageVenue.class?dl=1" filename="HostImageVenue.class" name="HostImageVenue" />
 		<host version="2.8" src="https://www.dropbox.com/s/l9l50m2p1t7an34/HostPhotoSharingGallery.class?dl=1" filename="HostPhotoSharingGallery.class" name="HostPhotoSharingGallery" bhminversion="3.2.0">
 			<source src="https://www.dropbox.com/s/cuc595dxoka0cn7/HostPhotoSharingGallery%241.class?dl=1" filename="HostPhotoSharingGallery$1.class" />
 			<source src="https://www.dropbox.com/s/jkw1ubnq4lf1p2u/HostPhotoSharingGallery%242.class?dl=1" filename="HostPhotoSharingGallery$2.class" />
