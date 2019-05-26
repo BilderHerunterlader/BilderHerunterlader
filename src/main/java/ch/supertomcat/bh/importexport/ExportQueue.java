@@ -96,11 +96,11 @@ public abstract class ExportQueue {
 			queue = null;
 			Main.instance().removeProgressObserver(pg);
 			Main.instance().setMessage(Localization.getString("QueueExported"));
+			JOptionPane.showMessageDialog(Main.instance(), i + " " + Localization.getString("DownloadsExported"), Localization.getString("QueueExport"), JOptionPane.INFORMATION_MESSAGE);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			Main.instance().removeProgressObserver(pg);
 			Main.instance().setMessage(Localization.getString("QueueExportFailed"));
 		}
-		JOptionPane.showMessageDialog(Main.instance(), i + " " + Localization.getString("DownloadsExported"), Localization.getString("QueueExport"), JOptionPane.INFORMATION_MESSAGE);
 	}
 }

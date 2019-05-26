@@ -245,6 +245,8 @@ public class About extends JDialog implements ActionListener, WindowListener {
 		timerMemory = new Timer();
 		timerMemory.scheduleAtFixedRate(new MemoryUpdateTimerTask(), 0, 2000);
 
+		addWindowListener(this);
+
 		pack();
 		setLocationRelativeTo(owner);
 		setVisible(true);
