@@ -13,10 +13,10 @@ module ch.supertomcat.bh {
 	/*
 	 * Autmatic Modules
 	 */
-	requires commons.codec;
 	requires ehcache;
 	requires org.apache.httpcomponents.httpclient;
 	requires org.apache.httpcomponents.httpcore;
+	requires org.apache.commons.codec;
 	requires jdom2;
 	requires jtidy.r938;
 	requires org.apache.logging.log4j;
