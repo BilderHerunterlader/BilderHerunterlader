@@ -84,6 +84,11 @@
 			<version>2.4.3</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.bilderherunterlader</groupId>
+			<artifactId>supertomcatutils</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>org.freedesktop.tango</groupId>
 			<artifactId>tango-icon-theme</artifactId>
 			<version>0.8.90</version>
@@ -266,12 +271,12 @@
 	<scm>
 		<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
 		<connection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</connection>
-	  <tag>HEAD</tag>
-  </scm>
+		<tag>HEAD</tag>
+	</scm>
 	<distributionManagement>
-        <repository>
-            <id>bh-maven-repo</id>
-            <url>file://${project.basedir}/../_Maven_Repo</url>
-        </repository>
-    </distributionManagement>
+		<repository>
+			<id>bh-maven-repo</id>
+			<url>file://${project.basedir}/../_Maven_Repo</url>
+		</repository>
+	</distributionManagement>
 </project>
