@@ -14,13 +14,13 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 /**
  * Host class for ImageVenue
  * 
- * @version 3.5
+ * @version 3.7
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.5";
+	public static final String VERSION = "3.7";
 
 	/**
 	 * Name dieser Klasse
@@ -39,6 +39,8 @@ public class HostImageVenue extends Host implements IHoster {
 
 	private RuleRegExp regexImage = new RuleRegExp();
 
+	private RuleRegExp regexContinue = new RuleRegExp();
+
 	/**
 	 * Konstruktor
 	 */
@@ -47,6 +49,8 @@ public class HostImageVenue extends Host implements IHoster {
 		urlPattern = Pattern.compile("^(https?://img[0-9]+\\.([a-z]+[0-9]+\\.)?imagevenue\\.com/)(img|view)\\.php\\?(loc=loc[0-9]+\\&image|image)=.*");
 		regexImage.setSearch("(?m)(?s)<img.+?id=[\"']thepic[\\\"'].+?(src|SRC)=[\\\"'](.+?)[\\\"']");
 		regexImage.setReplace("$2");
+
+		regexContinue.setSearch("Continue to your image");
 	}
 
 	@Override
@@ -87,6 +91,9 @@ public class HostImageVenue extends Host implements IHoster {
 				throw new HostFileNotExistException("This image does not exist on this server");
 			}
 
+			if (regexContinue.doPageSourcecodeSearch(page, 0) >= 0) {
+				page = downloadContainerPage(url, url);
+			}
 			parsedURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
 		} catch (HostFileNotExistException e) {
 			throw new HostFileNotExistException(NAME + ": Container-Page: " + e.getMessage());
