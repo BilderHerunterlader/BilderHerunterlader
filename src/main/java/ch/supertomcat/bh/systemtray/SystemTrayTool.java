@@ -1,14 +1,15 @@
 package ch.supertomcat.bh.systemtray;
 
 import java.awt.AWTException;
+import java.awt.CheckboxMenuItem;
 import java.awt.Image;
 import java.awt.Menu;
 import java.awt.MenuItem;
 import java.awt.PopupMenu;
 import java.awt.SystemTray;
 import java.awt.TrayIcon;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -38,7 +39,7 @@ import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
 /**
  * Class which handles the SystemTray
  */
-public class SystemTrayTool implements ActionListener, IDownloadQueueManagerListener, ISettingsListener {
+public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsListener {
 	/**
 	 * Logger for this class
 	 */
@@ -48,11 +49,6 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 	 * Popupmenu
 	 */
 	private PopupMenu popup = new PopupMenu();
-
-	/**
-	 * Submenu of the popupmenu
-	 */
-	private Menu submenuImport = new Menu(Localization.getString("Import"));
 
 	/**
 	 * Menuitem
@@ -68,6 +64,16 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 	 * Menuitem
 	 */
 	private MenuItem itemDlStop = new MenuItem(Localization.getString("StopDownloads"));
+
+	/**
+	 * Menuitem
+	 */
+	private CheckboxMenuItem itemClipboard = new CheckboxMenuItem(Localization.getString("Clipboard"));
+
+	/**
+	 * Submenu of the popupmenu
+	 */
+	private Menu submenuImport = new Menu(Localization.getString("Import"));
 
 	/**
 	 * Menuitem
@@ -138,6 +144,7 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 			popup.add(itemOpen);
 			popup.add(itemDlStart);
 			popup.add(itemDlStop);
+			popup.add(itemClipboard);
 			popup.add(submenuImport);
 			submenuImport.add(itemImportHTML);
 			submenuImport.add(itemImportText);
@@ -145,6 +152,8 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 			submenuImport.add(itemParseLinks);
 			popup.add(itemUpdate);
 			popup.add(itemExit);
+
+			itemClipboard.setState(SettingsManager.instance().isCheckClipboard());
 
 			// Create the TrayIcon
 			trayIcon = new TrayIcon(image, getClipboardStateText() + Localization.getString("SystemTrayTool_Sleeping"), popup);
@@ -160,15 +169,21 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 	 */
 	public void showTrayIcon() {
 		if (SystemTray.isSupported()) {
-			itemOpen.addActionListener(this);
-			itemDlStart.addActionListener(this);
-			itemDlStop.addActionListener(this);
-			itemImportLinks.addActionListener(this);
-			itemParseLinks.addActionListener(this);
-			itemImportHTML.addActionListener(this);
-			itemImportText.addActionListener(this);
-			itemUpdate.addActionListener(this);
-			itemExit.addActionListener(this);
+			itemOpen.addActionListener(e -> actionOpen());
+			itemDlStart.addActionListener(e -> actionDownloadStart());
+			itemDlStop.addActionListener(e -> actionDownloadStop());
+			itemClipboard.addItemListener(new ItemListener() {
+				@Override
+				public void itemStateChanged(ItemEvent e) {
+					actionClipboard();
+				}
+			});
+			itemImportLinks.addActionListener(e -> actionImportLinks());
+			itemParseLinks.addActionListener(e -> actionParseLinks());
+			itemImportHTML.addActionListener(e -> actionImportHTML());
+			itemImportText.addActionListener(e -> actionImportText());
+			itemUpdate.addActionListener(e -> actionUpdate());
+			itemExit.addActionListener(e -> actionExit());
 
 			trayIcon.addMouseListener(new MouseAdapter() {
 				@Override
@@ -232,64 +247,81 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		}
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == itemOpen) {
-			Main.instance().setVisible(true);
-			Main.instance().toFront();
-		} else if (e.getSource() == itemDlStart) {
-			QueueManager.instance().startDownload();
-		} else if (e.getSource() == itemDlStop) {
-			QueueManager.instance().stopDownload();
-		} else if (e.getSource() == itemUpdate) {
-			if (DownloadQueueManager.instance().isDownloading()) {
-				JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-			} else {
-				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
-				update.setVisible(true);
-				update.toFront();
-			}
-		} else if (e.getSource() == itemExit) {
-			GuiEvent.instance().exitApp(false);
-		} else if (e.getSource() == itemImportHTML) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					ImportHTML.importHTML();
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == itemImportLinks) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					DownloadAddDialog dlg = new DownloadAddDialog(Main.instance());
-					dlg.setVisible(true);
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == itemParseLinks) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					ParsePagesDialog dlg = new ParsePagesDialog(Main.instance());
-					dlg.setVisible(true);
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == itemImportText) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					ImportLinkList.importLinkList();
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
+	private void actionOpen() {
+		Main.instance().setVisible(true);
+		Main.instance().toFront();
+	}
+
+	private void actionDownloadStart() {
+		QueueManager.instance().startDownload();
+	}
+
+	private void actionDownloadStop() {
+		QueueManager.instance().stopDownload();
+	}
+
+	private void actionClipboard() {
+		SettingsManager.instance().setCheckClipboard(itemClipboard.getState());
+	}
+
+	private void actionUpdate() {
+		if (DownloadQueueManager.instance().isDownloading()) {
+			JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+		} else {
+			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
+			update.setVisible(true);
+			update.toFront();
 		}
+	}
+
+	private void actionExit() {
+		GuiEvent.instance().exitApp(false);
+	}
+
+	private void actionImportHTML() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				ImportHTML.importHTML();
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
+	private void actionImportLinks() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				DownloadAddDialog dlg = new DownloadAddDialog(Main.instance());
+				dlg.setVisible(true);
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
+	private void actionParseLinks() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				ParsePagesDialog dlg = new ParsePagesDialog(Main.instance());
+				dlg.setVisible(true);
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
+	private void actionImportText() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				ImportLinkList.importLinkList();
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
 	}
 
 	@Override
@@ -312,6 +344,7 @@ public class SystemTrayTool implements ActionListener, IDownloadQueueManagerList
 		if (trayIcon != null) {
 			trayIcon.setToolTip(getSystemTrayToolTipText());
 		}
+		itemClipboard.setState(SettingsManager.instance().isCheckClipboard());
 	}
 
 	@Override
