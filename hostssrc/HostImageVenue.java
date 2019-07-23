@@ -1,26 +1,29 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
+import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.settings.ProxyManager;
 
 /**
  * Host class for ImageVenue
  * 
- * @version 3.7
+ * @version 3.8
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.7";
+	public static final String VERSION = "3.8";
 
 	/**
 	 * Name dieser Klasse
@@ -84,19 +87,21 @@ public class HostImageVenue extends Host implements IHoster {
 	 */
 	private String parseURL(String url) throws HostException {
 		String parsedURL = "";
-		try {
-			String page = downloadContainerPage(url, url);
+		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+			String page = downloadContainerPage(url, url, null, client);
 
 			if (page.contains("This image does not exist on this server")) {
 				throw new HostFileNotExistException("This image does not exist on this server");
 			}
 
 			if (regexContinue.doPageSourcecodeSearch(page, 0) >= 0) {
-				page = downloadContainerPage(url, url);
+				page = downloadContainerPage(url, url, null, client);
 			}
 			parsedURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
 		} catch (HostFileNotExistException e) {
 			throw new HostFileNotExistException(NAME + ": Container-Page: " + e.getMessage());
+		} catch (Exception e) {
+			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
 		}
 		return parsedURL;
 	}
