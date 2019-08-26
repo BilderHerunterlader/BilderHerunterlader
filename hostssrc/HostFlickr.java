@@ -29,11 +29,11 @@ import ch.supertomcat.bh.rules.RuleRegExp;
  * If that fails (e.g. original image is not available for download) it
  * will load the embedded image from the container site.
  *
- * @version 2.9
+ * @version 3.0
  */
 public class HostFlickr extends Host implements IHoster {
 	/** the version of this class **/
-	public static final String VERSION = "2.9";
+	public static final String VERSION = "3.0";
 
 	/** the name of this class **/
 	public static final String NAME = "HostFlickr";

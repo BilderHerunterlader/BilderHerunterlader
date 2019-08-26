@@ -22,7 +22,7 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineFailures;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * 

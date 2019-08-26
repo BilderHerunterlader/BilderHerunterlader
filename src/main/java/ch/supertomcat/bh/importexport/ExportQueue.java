@@ -17,9 +17,9 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * Class for exporting the queue
@@ -36,7 +36,7 @@ public abstract class ExportQueue {
 	public static void exportQueue() {
 		File file = Import.getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", true);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedExportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportQueue(file.getAbsolutePath());
 			file = null;

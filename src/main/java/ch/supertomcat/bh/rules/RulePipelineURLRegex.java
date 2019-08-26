@@ -8,7 +8,7 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * RulePipeline

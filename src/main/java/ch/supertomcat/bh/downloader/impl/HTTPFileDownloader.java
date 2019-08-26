@@ -31,12 +31,12 @@ import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
-import ch.supertomcat.supertomcattools.imagetools.ImageInfo;
-import ch.supertomcat.supertomcattools.regextools.RegexReplacePipeline;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.image.ImageInfo;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 
 /**
  * FileDownloader for HTTP URLs
@@ -79,7 +79,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			// And replace the %20 in the filename, if there are any
 			String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "));
 			if (bReduceFilenameLength) {
-				targetFilename = FileTool.reduceFilenameLength(targetFilename);
+				targetFilename = FileUtil.reduceFilenameLength(targetFilename);
 			}
 			pic.setTargetFilename(targetFilename);
 
@@ -99,7 +99,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					// And replace the %20 in the filename, if there are any
 					currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "));
 					if (bReduceFilenameLength) {
-						currentTargetFilename = FileTool.reduceFilenameLength(currentTargetFilename);
+						currentTargetFilename = FileUtil.reduceFilenameLength(currentTargetFilename);
 					}
 				}
 
@@ -151,7 +151,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		HttpUriRequest method = null;
 		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? ProxyManager.instance().getNonMultithreadedHTTPClient() : ProxyManager.instance().getHTTPClient()) {
-			String encodedURL = HTTPTool.encodeURL(url);
+			String encodedURL = HTTPUtil.encodeURL(url);
 
 			// Create a new GetMethod or PostMethod and set timeouts, cookies, user-agent and so on
 			if (result.checkExistInfo("useMethod") && result.getInfo("useMethod") instanceof String && "POST".equals(result.getInfo("useMethod"))) {
@@ -331,9 +331,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 							// the flag is set to true, so we recalculate the download rate
 							long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
 							// get the string for the rate
-							double downloadBitrate = UnitFormatTool.getBitrate(iBWs, size, timeStarted, now);
+							double downloadBitrate = UnitFormatUtil.getBitrate(iBWs, size, timeStarted, now);
 							pic.setDownloadBitrate(downloadBitrate);
-							bitrate = " " + UnitFormatTool.getBitrateString(downloadBitrate);
+							bitrate = " " + UnitFormatUtil.getBitrateString(downloadBitrate);
 
 							/*
 							 * With this, we get always the actual download rate, not
@@ -488,20 +488,20 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 		if (max >= size) {
 			if (progressView == SettingsManager.PROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
-				return urlIndexString + UnitFormatTool.getPercentString(size, max);
+				return urlIndexString + UnitFormatUtil.getPercentString(size, max);
 			} else if (progressView == SettingsManager.PROGRESSBAR_SIZE || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
-				return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+				return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
 			} else {
-				return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+				return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
 			}
 		} else {
-			return urlIndexString + UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+			return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
 		}
 	}
 
 	@Override
 	protected String getFilenameFromURL(String url) {
-		return HTTPTool.getFilenameFromURL(url, Localization.getString("Unkown"));
+		return HTTPUtil.getFilenameFromURL(url, Localization.getString("Unkown"));
 	}
 
 	@Override
@@ -512,14 +512,14 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 */
 		String targetPath = pic.getTargetPath();
 		targetPath = BHUtil.filterPath(targetPath);
-		targetPath = FileTool.pathRTrim(targetPath);
+		targetPath = FileUtil.pathRTrim(targetPath);
 
 		boolean bReducePathLength = true;
 		if (result.checkExistInfo("ReducePathLength") && result.getInfo("ReducePathLength") instanceof Boolean) {
 			bReducePathLength = (Boolean)result.getInfo("ReducePathLength");
 		}
 		if (bReducePathLength) {
-			targetPath = FileTool.reducePathLength(targetPath);
+			targetPath = FileUtil.reducePathLength(targetPath);
 		}
 
 		pic.setTargetPath(targetPath);

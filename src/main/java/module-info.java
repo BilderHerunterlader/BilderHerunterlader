@@ -24,7 +24,7 @@ module ch.supertomcat.bh {
 	requires nanohttpd;
 	requires rhino;
 	requires slf4j.api;
-	requires supertomcattools;
+	requires supertomcatutils;
 	requires swingx.all;
 	requires syntaxpane;
 }

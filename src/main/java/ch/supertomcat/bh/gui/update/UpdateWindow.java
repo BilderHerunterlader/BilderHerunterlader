@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.gui.update;
 
-import static ch.supertomcat.supertomcattools.applicationtool.ApplicationTool.*;
-
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -50,11 +48,12 @@ import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * Update-Window
@@ -151,9 +150,9 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(1, 1, 1, 1);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(1, 1, 1, 1);
 
 	private UpdateManager updateManager = null;
 
@@ -220,25 +219,25 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 		table.setModel(model);
 
-		TableTool.internationalizeColumns(table);
+		TableUtil.internationalizeColumns(table);
 
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
-		int updateActionTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateAction"), 20);
+		int updateActionTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("UpdateAction"), 20);
 		table.getColumn("UpdateAction").setCellRenderer(uacr);
 		table.getColumn("UpdateAction").setPreferredWidth(updateActionTableHeaderWidth);
-		int updateTypeTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateType"), 20);
+		int updateTypeTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("UpdateType"), 20);
 		table.getColumn("UpdateType").setPreferredWidth(updateTypeTableHeaderWidth);
-		int updateNameTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("Name"), 50);
+		int updateNameTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("Name"), 50);
 		table.getColumn("Name").setPreferredWidth(updateNameTableHeaderWidth);
-		int updateVersionTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("Version"), 15);
+		int updateVersionTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("Version"), 15);
 		table.getColumn("Version").setPreferredWidth(updateVersionTableHeaderWidth);
-		int updateSourceNoteTableHeaderWidth = TableTool.calculateColumnHeaderWidth(table, table.getColumn("UpdateSourceNote"), 15);
+		int updateSourceNoteTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("UpdateSourceNote"), 15);
 		table.getColumn("UpdateSourceNote").setPreferredWidth(updateSourceNoteTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
 		table.getColumnModel().addColumnModelListener(this);
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		table.setRowHeight(TableTool.calculateRowHeight(table, false, true));
+		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 		Dimension preferredScrollableTableSize = new Dimension(table.getPreferredScrollableViewportSize().width, 15 * table.getRowHeight());
 		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		spTable = new JScrollPane(table);
@@ -253,15 +252,15 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc = gblt.getGBC(0, 0, 1, 1, 1.0, 0.0);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, pnlMain, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, pnlMain, this);
 		gbc = gblt.getGBC(0, 1, 1, 1, 1.0, 0.0);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, lblStatus, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, lblStatus, this);
 		gbc = gblt.getGBC(0, 2, 1, 1, 1.0, 0.7);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, pnlCenter, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, pnlCenter, this);
 		gbc = gblt.getGBC(0, 4, 1, 1, 1.0, 0.0);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, pnlProgressBar, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, pnlProgressBar, this);
 		gbc = gblt.getGBC(0, 5, 1, 1, 1.0, 0.0);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, pnlButtons, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, pnlButtons, this);
 
 		pack();
 		setLocationRelativeTo(owner);
@@ -311,7 +310,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		List<UpdateObject> updateRedirectPlugins = updateList.getRedirectPluginUpdates();
 
 		// Main
-		if (compareVersions(updateBH.getVersion(), ApplicationProperties.getProperty("ApplicationVersion")) > 0) {
+		if (ApplicationUtil.compareVersions(updateBH.getVersion(), ApplicationProperties.getProperty("ApplicationVersion")) > 0) {
 			lblMain.setText(Localization.getString("NewProgramVersion") + " (v" + updateBH.getVersion() + ")");
 			btnWebsite.setVisible(false);
 			btnChanges.setVisible(true);
@@ -348,7 +347,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			if (!v.equals("")) {
 				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
 					model.addRow(update);
-				} else if (compareVersions(update.getVersion(), v) > 0) {
+				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
 					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
 						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
 						model.addRow(update);
@@ -387,7 +386,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			if (!v.equals("")) {
 				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
 					model.addRow(update);
-				} else if (compareVersions(update.getVersion(), v) > 0) {
+				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
 					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
 						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
 						model.addRow(update);
@@ -452,7 +451,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			if (!v.equals("")) {
 				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
 					model.addRow(update);
-				} else if (compareVersions(update.getVersion(), v) > 0) {
+				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
 					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
 						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
 						model.addRow(update);
@@ -546,7 +545,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsUpdate(TableTool.serializeColWidthSetting(table));
+		SettingsManager.instance().setColWidthsUpdate(TableUtil.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -557,7 +556,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsUpdate());
+		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsUpdate());
 	}
 
 	/*

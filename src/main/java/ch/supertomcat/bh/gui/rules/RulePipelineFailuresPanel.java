@@ -29,9 +29,9 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * Rule-Pipeline-Panel
@@ -135,7 +135,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 
 		table = new JTable(model);
 
-		TableTool.internationalizeColumns(table);
+		TableUtil.internationalizeColumns(table);
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
@@ -143,7 +143,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 		table.getColumnModel().addColumnModelListener(this);
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		table.setRowHeight(TableTool.calculateRowHeight(table, false, true));
+		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 
 		Iterator<RuleRegExp> it = pipe.getRegexps().iterator();
 		while (it.hasNext()) {
@@ -250,7 +250,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsRulesEditor(TableTool.serializeColWidthSetting(table));
+		SettingsManager.instance().setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -261,7 +261,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener,
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
+		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
 	}
 
 	@Override

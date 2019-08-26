@@ -42,9 +42,9 @@ import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordMatch;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchType;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchTypeComparator;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 
 /**
  * Dialog for selecting a keyword (Search by title)
@@ -138,13 +138,13 @@ public class AdderKeywordSelectorTitle extends JDialog {
 
 		setLayout(new BorderLayout());
 
-		TableTool.internationalizeColumns(table);
+		TableUtil.internationalizeColumns(table);
 
 		table.setRowSorter(sorter);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new AdderKeywordSelectorColorRowRenderer());
-		table.setRowHeight(TableTool.calculateRowHeight(table, false, true));
-		TableTool.setVisibleRowCount(table, 20);
+		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
+		TableUtil.setVisibleRowCount(table, 20);
 
 		int selectedIndex = 0;
 

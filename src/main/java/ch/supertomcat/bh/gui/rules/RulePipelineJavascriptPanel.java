@@ -23,7 +23,7 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 import de.sciss.syntaxpane.DefaultSyntaxKit;
 
 /**

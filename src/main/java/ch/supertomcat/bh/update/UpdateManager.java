@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.update;
 
-import static ch.supertomcat.supertomcattools.applicationtool.ApplicationTool.*;
-
 import java.awt.Component;
 import java.io.File;
 import java.util.List;
@@ -16,8 +14,9 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * 
@@ -308,12 +307,12 @@ public class UpdateManager {
 		if (minVersion == null || minVersion.length() == 0) {
 			iMinVersion = 0;
 		} else {
-			iMinVersion = compareVersions(minVersion, ApplicationProperties.getProperty("ApplicationVersion"));
+			iMinVersion = ApplicationUtil.compareVersions(minVersion, ApplicationProperties.getProperty("ApplicationVersion"));
 		}
 		if (maxVersion == null || maxVersion.length() == 0) {
 			iMaxVersion = 0;
 		} else {
-			iMaxVersion = compareVersions(maxVersion, ApplicationProperties.getProperty("ApplicationVersion"));
+			iMaxVersion = ApplicationUtil.compareVersions(maxVersion, ApplicationProperties.getProperty("ApplicationVersion"));
 		}
 		return (iMinVersion <= 0) && (iMaxVersion >= 0);
 	}

@@ -2,7 +2,7 @@ package ch.supertomcat.bh.keywords;
 
 import java.util.Comparator;
 
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Keyword Match

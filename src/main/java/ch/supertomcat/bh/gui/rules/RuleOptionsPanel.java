@@ -14,8 +14,8 @@ import javax.swing.JTextField;
 import ch.supertomcat.bh.rules.DuplicateRemoveMode;
 import ch.supertomcat.bh.rules.ReferrerMode;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Rule-Referrer-Panel
@@ -92,9 +92,9 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(5, 10, 5, 5);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
 	 * Constructor
@@ -150,32 +150,32 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, chkSendCookies, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, chkSendCookies, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblDuplicateRemoveMode, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblDuplicateRemoveMode, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, cbDuplicateRemoveMode, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbDuplicateRemoveMode, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblReferrer, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblReferrer, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, cbReferrerMode, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbReferrerMode, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblCustomReferrer, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblCustomReferrer, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtCustomReferrer, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtCustomReferrer, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblReferrerDownload, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblReferrerDownload, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, cbReferrerModeDownload, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbReferrerModeDownload, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblCustomReferrerDownload, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblCustomReferrerDownload, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtCustomReferrerDownload, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtCustomReferrerDownload, this);
 	}
 
 	/**

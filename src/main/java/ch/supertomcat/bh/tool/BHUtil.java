@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -22,11 +23,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.mozilla.universalchardet.UniversalDetector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * This class provides methods, which are often used.
@@ -44,7 +46,7 @@ public class BHUtil {
 	 * @return Filtered Filename
 	 */
 	public static String filterFilename(String filename) {
-		return FileTool.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
 	}
 
 	/**
@@ -54,7 +56,45 @@ public class BHUtil {
 	 * @return Filtered path
 	 */
 	public static String filterPath(String path) {
-		return FileTool.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
+	}
+
+	/**
+	 * Returns the encoding by using UniversalDetector which reads the InputStream
+	 * to detect the encoding. If the encoding could not be detected an empty String
+	 * is returned.
+	 * If the InputStream supports mark and reset then that is also done by this method.
+	 * Reading and mark and reset will throw an IOException if something went wrong.
+	 * 
+	 * @param in InputStream
+	 * @return Encoding or null if not found
+	 * @throws IOException
+	 */
+	public static String getEncodingFromInputStream(InputStream in) throws IOException {
+		if (in.markSupported()) {
+			// Mark current position of the InputStream
+			in.mark(Integer.MAX_VALUE);
+		}
+
+		String encoding = null;
+		UniversalDetector detector = new UniversalDetector(null);
+		byte[] buffer = new byte[4096];
+		int read;
+		while ((read = in.read(buffer)) != -1 && !detector.isDone()) {
+			if (read > 0) {
+				detector.handleData(buffer, 0, read);
+			}
+		}
+		detector.dataEnd();
+		encoding = detector.getDetectedCharset();
+		detector.reset();
+
+		if (in.markSupported()) {
+			// Reset the current position of the InputStream
+			in.reset();
+		}
+
+		return encoding;
 	}
 
 	/**

@@ -18,7 +18,7 @@ import ch.supertomcat.bh.update.UpdateException;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
 import ch.supertomcat.bh.update.containers.UpdateSourceFile;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * 
@@ -64,7 +64,7 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 
 		logger.info("Download Update: Source: '" + sourceURL + "', Filename: '" + target + "'");
 
-		String encodedURL = HTTPTool.encodeURL(sourceURL);
+		String encodedURL = HTTPUtil.encodeURL(sourceURL);
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			method = new HttpGet(encodedURL);

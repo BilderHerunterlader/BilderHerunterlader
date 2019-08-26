@@ -28,8 +28,8 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Base class for File Downloaders
@@ -457,7 +457,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @throws IOException
 	 */
 	protected synchronized File moveFile(File fileToMove, File newPath) throws IOException {
-		if (FileTool.getDirectory(fileToMove.getAbsolutePath()).equals(newPath.getAbsolutePath())) {
+		if (FileUtil.getDirectory(fileToMove.getAbsolutePath()).equals(newPath.getAbsolutePath())) {
 			return fileToMove;
 		}
 

@@ -8,8 +8,8 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Editor-Component for Subdirs (Resolution)
@@ -41,9 +41,9 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(1, 1, 1, 1);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(1, 1, 1, 1);
 
 	/**
 	 * Constructor
@@ -58,11 +58,11 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 
 		GridBagConstraints gbc = new GridBagConstraints();
 		gbc = gblt.getGBC(0, 0, 1, 1, 0.475, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtValMin, pnlTextFields);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtValMin, pnlTextFields);
 		gbc = gblt.getGBC(1, 0, 1, 1, 0.05, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, new JLabel("x", JLabel.CENTER), pnlTextFields);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, new JLabel("x", JLabel.CENTER), pnlTextFields);
 		gbc = gblt.getGBC(2, 0, 1, 1, 0.475, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtValMax, pnlTextFields);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtValMax, pnlTextFields);
 
 		add(pnlTextFields, BorderLayout.CENTER);
 

@@ -32,8 +32,8 @@ import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
 /**
  * Dialog for renaming files

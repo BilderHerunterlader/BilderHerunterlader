@@ -15,9 +15,9 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.fileiotools.CopyTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.CopyUtil;
 
 /**
  * Class for Sqlite Database Connections
@@ -114,7 +114,7 @@ public abstract class SQLiteDB<T> {
 
 		// Backup
 		if (dbFile.exists()) {
-			CopyTool.copy(databaseFile, target);
+			CopyUtil.copy(databaseFile, target);
 		}
 
 		// Delete old backup-Files

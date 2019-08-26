@@ -39,11 +39,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.applicationtool.libraries.LibraryInfo;
-import ch.supertomcat.supertomcattools.applicationtool.libraries.LibraryInfoUtil;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.libraries.LibraryInfo;
+import ch.supertomcat.supertomcatutils.application.libraries.LibraryInfoUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * About-Panel
@@ -263,19 +263,19 @@ public class About extends JDialog implements ActionListener, WindowListener {
 
 		int mode = SettingsManager.instance().getSizeView();
 
-		lblMaxTotalMemory.setText(Localization.getString("MaximumAvailableMemory") + ": " + UnitFormatTool.getSizeString(max, mode));
+		lblMaxTotalMemory.setText(Localization.getString("MaximumAvailableMemory") + ": " + UnitFormatUtil.getSizeString(max, mode));
 
 		int val = (int)((used * 100.0d) / max);
 		pgMemUsed.setMinimum(0);
 		pgMemUsed.setMaximum(100);
 		pgMemUsed.setValue(val);
-		pgMemUsed.setString(Localization.getString("Used") + ": " + UnitFormatTool.getSizeString(used, mode) + " / " + UnitFormatTool.getSizeString(max, mode) + " (" + val + " %)");
+		pgMemUsed.setString(Localization.getString("Used") + ": " + UnitFormatUtil.getSizeString(used, mode) + " / " + UnitFormatUtil.getSizeString(max, mode) + " (" + val + " %)");
 
 		val = (int)((total * 100.0d) / max);
 		pgMemTotal.setMinimum(0);
 		pgMemTotal.setMaximum(100);
 		pgMemTotal.setValue(val);
-		pgMemTotal.setString(Localization.getString("CurrentlyAllocated") + ": " + UnitFormatTool.getSizeString(total, mode) + " / " + UnitFormatTool.getSizeString(max, mode) + " (" + val + " %)");
+		pgMemTotal.setString(Localization.getString("CurrentlyAllocated") + ": " + UnitFormatUtil.getSizeString(total, mode) + " / " + UnitFormatUtil.getSizeString(max, mode) + " (" + val + " %)");
 	}
 
 	@Override

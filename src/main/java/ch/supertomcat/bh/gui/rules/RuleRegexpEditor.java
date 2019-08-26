@@ -24,9 +24,9 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
 /**
  * Rule-Regexp-Editor-Dialog
@@ -113,9 +113,9 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(5, 10, 5, 5);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
 	 * Constructor
@@ -171,26 +171,26 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblNote, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblNote, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.5);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtNote, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtNote, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblError, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblError, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.5);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtError, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtError, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.2, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblSearch, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblSearch, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.8, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtSearch, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtSearch, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.2, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblReplace, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblReplace, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.8, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtReplace, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtReplace, pnlMain);
 
 		add(pnlMain, BorderLayout.CENTER);
 		add(pnlButtons, BorderLayout.SOUTH);

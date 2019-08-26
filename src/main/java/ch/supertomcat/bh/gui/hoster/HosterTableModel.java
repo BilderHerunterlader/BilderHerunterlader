@@ -25,7 +25,7 @@ import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * TableModel for Hostclasses

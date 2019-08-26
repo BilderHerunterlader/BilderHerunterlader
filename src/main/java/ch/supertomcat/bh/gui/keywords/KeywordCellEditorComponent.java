@@ -11,9 +11,9 @@ import javax.swing.JTextField;
 
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Editor-Component for Keywords
@@ -49,9 +49,9 @@ public class KeywordCellEditorComponent extends JPanel {
 				if (!(fDir.exists() && fDir.isDirectory())) {
 					dir = SettingsManager.instance().getSavePath();
 				}
-				File file = FileDialogTool.showFolderDialog(KeywordCellEditorComponent.this, dir, null);
+				File file = FileDialogUtil.showFolderOpenDialog(KeywordCellEditorComponent.this, dir, null);
 				if (file != null) {
-					String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+					String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 					txtPath.setText(folder);
 				}
 			}
@@ -86,7 +86,7 @@ public class KeywordCellEditorComponent extends JPanel {
 	public String getPath() {
 		String newPath = txtPath.getText();
 		newPath = BHUtil.filterPath(newPath);
-		newPath = FileTool.reducePathLength(newPath);
+		newPath = FileUtil.reducePathLength(newPath);
 		return newPath;
 	}
 

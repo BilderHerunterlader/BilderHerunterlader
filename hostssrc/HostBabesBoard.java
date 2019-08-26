@@ -2,6 +2,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,22 +33,20 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionInt;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host class for BabesBoard
  * 
- * @version 2.8
+ * @version 2.9
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.8";
+	public static final String VERSION = "2.9";
 
 	/**
 	 * Name dieser Klasse
@@ -148,7 +148,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	}
 
 	@Override
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
 		Matcher urlMatcherInternalContainer = urlInternalContainerPattern.matcher(url.getURL());
 		boolean bInternalContainer = urlMatcherInternalContainer.matches();
 		boolean bContainer = false;
@@ -158,11 +158,11 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 		}
 
 		if (bContainer == false && bInternalContainer == false) {
-			isFromThisHoster.setValue(true);
+			isFromThisHoster.set(true);
 			return null;
 		}
 
-		isFromThisHoster.setValue(false);
+		isFromThisHoster.set(false);
 
 		if ((bContainer == true) && (url.getThreadURL().equals(DownloadAddDialog.DOWNLOAD_ADD_DIALOG_THREAD_URL) == false)) {
 			return null;
@@ -177,12 +177,12 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 			String requestURL = regexAjaxURI.doPageSourcecodeReplace(fristPageSourceCode, 0, url.getURL(), null);
 
-			OptionInt iwMax = new OptionInt("", 0);
+			AtomicInteger iwMax = new AtomicInteger(0);
 			getLinksFromPage(requestURL, babeID, "1", imagesPerPage, iwMax, true);
 
 			List<URL> internalContainerURLs = new ArrayList<>();
 
-			for (int i = 1; i <= iwMax.getValue(); i++) {
+			for (int i = 1; i <= iwMax.get(); i++) {
 				String pageNumber = String.valueOf(i);
 				String internalContainerURL = requestURL + "babeID=" + babeID + "&pageNumber=" + pageNumber + "&imagesPerPage=" + imagesPerPage;
 				internalContainerURLs.add(new URL(internalContainerURL));
@@ -196,7 +196,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			String imagesPerPage = urlMatcherInternalContainer.replaceAll("$5");
 
 			List<URL> downloadURLs = new ArrayList<>();
-			OptionInt iwMax1 = new OptionInt("", 0);
+			AtomicInteger iwMax1 = new AtomicInteger(0);
 
 			try {
 				ArrayList<URL> urlsFromPage = getLinksFromPage(requestURL, babeID, pageNumber, imagesPerPage, iwMax1, false);
@@ -210,9 +210,9 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 		return null;
 	}
 
-	private ArrayList<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, OptionInt iwMax, boolean firstLoad) throws HostException {
+	private ArrayList<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, AtomicInteger iwMax, boolean firstLoad) throws HostException {
 		String cookies = CookieManager.getCookies(url);
-		String encodedURL = HTTPTool.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpClientBuilder clientBuilder = ProxyManager.instance().getHTTPClientBuilder();
 		clientBuilder.disableRedirectHandling();
 		HttpPost method = null;
@@ -259,7 +259,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 				} catch (NumberFormatException nfe) {
 					logger.error(nfe.getMessage(), nfe);
 				}
-				iwMax.setValue(iMax);
+				iwMax.set(iMax);
 				return null;
 			}
 
@@ -267,7 +267,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 			String strDate = regexDate.doPageSourcecodeReplace(pageCode, 0, url, null);
 
-			String strRootDir = SettingsManager.instance().getSavePath() + strBabeName + FileTool.FILE_SEPERATOR;
+			String strRootDir = SettingsManager.instance().getSavePath() + strBabeName + FileUtil.FILE_SEPERATOR;
 
 			Iterator<Keyword> it = KeywordManager.instance().getKeywords().iterator();
 			Keyword foundKeyword = null;
@@ -297,7 +297,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			if (foundKeyword != null) {
 				strRootDir = foundKeyword.getAdderDownloadPath();
 			}
-			String strDirectory = strRootDir + "BabesBoard" + FileTool.FILE_SEPERATOR + strDate + FileTool.FILE_SEPERATOR;
+			String strDirectory = strRootDir + "BabesBoard" + FileUtil.FILE_SEPERATOR + strDate + FileUtil.FILE_SEPERATOR;
 
 			ArrayList<URL> downloadURLs = new ArrayList<>();
 

@@ -7,7 +7,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * QueueColorRowRenderer

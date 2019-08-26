@@ -23,8 +23,8 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 
 /**
  * Panel for Hostclasses
@@ -59,7 +59,7 @@ public class HosterPanel extends JPanel {
 	 * Constructor
 	 */
 	public HosterPanel() {
-		TableTool.internationalizeColumns(jtHoster);
+		TableUtil.internationalizeColumns(jtHoster);
 
 		model.addTableModelListener(new TableModelListener() {
 			@Override
@@ -112,7 +112,7 @@ public class HosterPanel extends JPanel {
 		jtHoster.getTableHeader().setReorderingAllowed(false);
 		jtHoster.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtHoster.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtHoster.setRowHeight(TableTool.calculateRowHeight(jtHoster, true, true));
+		jtHoster.setRowHeight(TableUtil.calculateRowHeight(jtHoster, true, true));
 
 		setLayout(new BorderLayout());
 
@@ -142,7 +142,7 @@ public class HosterPanel extends JPanel {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsHosts(TableTool.serializeColWidthSetting(jtHoster));
+		SettingsManager.instance().setColWidthsHosts(TableUtil.serializeColWidthSetting(jtHoster));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -153,6 +153,6 @@ public class HosterPanel extends JPanel {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(jtHoster, SettingsManager.instance().getColWidthsHosts());
+		TableUtil.applyColWidths(jtHoster, SettingsManager.instance().getColWidthsHosts());
 	}
 }

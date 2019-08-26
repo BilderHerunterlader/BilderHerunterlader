@@ -51,11 +51,11 @@ import ch.supertomcat.bh.importexport.ImportKeywords;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 
 /**
  * Panel containing the Keywords-Table
@@ -232,7 +232,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 * Constructor
 	 */
 	public Keywords() {
-		TableTool.internationalizeColumns(jtKeywords);
+		TableUtil.internationalizeColumns(jtKeywords);
 
 		jtKeywords.setRowSorter(sorter);
 		setLayout(new BorderLayout());
@@ -261,7 +261,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			public void columnAdded(TableColumnModelEvent e) {
 			}
 		});
-		jtKeywords.setRowHeight(TableTool.calculateRowHeight(jtKeywords, true, true));
+		jtKeywords.setRowHeight(TableUtil.calculateRowHeight(jtKeywords, true, true));
 		jtKeywords.getTableHeader().setReorderingAllowed(false);
 		jtKeywords.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		jtKeywords.setVisibleRowCount(10);
@@ -561,7 +561,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 						pg.progressModeChanged(true);
 
 						int[] selectedRows = jtKeywords.getSelectedRows();
-						int[] selectedModelRows = TableTool.convertRowIndexToModel(jtKeywords, selectedRows, true);
+						int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtKeywords, selectedRows, true);
 
 						KeywordManager.instance().removeKeywords(selectedModelRows);
 
@@ -717,7 +717,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 */
 	private void updateTableSortOrdersToSettingsManager() {
 		if (SettingsManager.instance().isSaveTableSortOrders()) {
-			SettingsManager.instance().setTableSortOrdersKeywords(TableTool.serializeTableSortOrderSetting(jtKeywords));
+			SettingsManager.instance().setTableSortOrdersKeywords(TableUtil.serializeTableSortOrderSetting(jtKeywords));
 			SettingsManager.instance().writeSettings(true);
 		}
 	}
@@ -727,7 +727,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 */
 	private void updateTableSortOrdersFromSettingsManager() {
 		if (SettingsManager.instance().isSaveTableSortOrders()) {
-			TableTool.applyTableSortOrder(jtKeywords, SettingsManager.instance().getTableSortOrdersKeywords());
+			TableUtil.applyTableSortOrder(jtKeywords, SettingsManager.instance().getTableSortOrdersKeywords());
 		}
 	}
 
@@ -736,7 +736,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 */
 	private void updateColWidthsToSettingsManager() {
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			SettingsManager.instance().setColWidthsKeywords(TableTool.serializeColWidthSetting(jtKeywords));
+			SettingsManager.instance().setColWidthsKeywords(TableUtil.serializeColWidthSetting(jtKeywords));
 			SettingsManager.instance().writeSettings(true);
 		}
 	}
@@ -746,7 +746,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 */
 	private void updateColWidthsFromSettingsManager() {
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableTool.applyColWidths(jtKeywords, SettingsManager.instance().getColWidthsKeywords());
+			TableUtil.applyColWidths(jtKeywords, SettingsManager.instance().getColWidthsKeywords());
 		}
 	}
 }

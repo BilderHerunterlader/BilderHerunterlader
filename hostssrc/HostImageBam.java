@@ -15,18 +15,18 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Host class for ImageBam
  * 
- * @version 3.8
+ * @version 3.9
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.8";
+	public static final String VERSION = "3.9";
 
 	/**
 	 * Name dieser Klasse

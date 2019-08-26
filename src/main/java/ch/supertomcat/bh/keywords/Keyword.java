@@ -1,7 +1,7 @@
 package ch.supertomcat.bh.keywords;
 
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * A Keyword is an Object with a title, keywords, absolute DownloadPath, relative DownloadPath
@@ -127,12 +127,12 @@ public class Keyword implements Comparable<Keyword> {
 		if (relativePath) {
 			retval = SettingsManager.instance().getSavePath() + relativeDownloadPath;
 			if ((retval.endsWith("/") == false) && (retval.endsWith("\\") == false)) {
-				retval += FileTool.FILE_SEPERATOR;
+				retval += FileUtil.FILE_SEPERATOR;
 			}
 		} else {
 			retval = downloadPath;
 			if ((retval.endsWith("/") == false) && (retval.endsWith("\\") == false)) {
-				retval += FileTool.FILE_SEPERATOR;
+				retval += FileUtil.FILE_SEPERATOR;
 			}
 		}
 		return retval;

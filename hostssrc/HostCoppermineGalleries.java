@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,22 +41,21 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.0
+ * @version 4.1
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.0";
+	public static final String VERSION = "4.1";
 
 	/**
 	 * Name dieser Klasse
@@ -154,7 +154,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	private List<URL> getDirectLinkedArchives(String url) {
 		List<URL> urls = new ArrayList<>();
 		String cookies = CookieManager.getCookies(url);
-		String encodedURL = HTTPTool.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			// Verbindung oeffnen
@@ -234,7 +234,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	private List<URL> getLinks(String url) throws HostException {
 		List<URL> urls = new ArrayList<>();
 		String cookies = CookieManager.getCookies(url);
-		String encodedURL = HTTPTool.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			// Verbindung oeffnen
@@ -312,7 +312,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 							String seperatorLinkTitle = nodeVal != null ? nodeVal : "";
 							if (seperatorLinkTitle.length() > 0) {
 								seperatorLinkTitle = filterFilename(seperatorLinkTitle);
-								seperatorLinkTitle += FileTool.FILE_SEPERATOR;
+								seperatorLinkTitle += FileUtil.FILE_SEPERATOR;
 							}
 							sb.append(seperatorLinkTitle);
 						}
@@ -334,7 +334,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				rootFolder = filterFilename(rootFolder);
 			} catch (MalformedURLException mue) {
 			}
-			String targetPath = SettingsManager.instance().getSavePath() + rootFolder + FileTool.FILE_SEPERATOR + sb.toString();
+			String targetPath = SettingsManager.instance().getSavePath() + rootFolder + FileUtil.FILE_SEPERATOR + sb.toString();
 
 			/*
 			 * Get the links
@@ -590,10 +590,10 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	}
 
 	@Override
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
 		// Is Only the image
 		if (isDisplayPage(url.getURL())) {
-			isFromThisHoster.setValue(true);
+			isFromThisHoster.set(true);
 			return null;
 		}
 
@@ -602,12 +602,12 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		boolean bIndexPage = isIndexPage(url.getURL());
 
 		if (bThumbPage == false && bIndexPage == false) {
-			isFromThisHoster.setValue(false);
+			isFromThisHoster.set(false);
 			return null;
 		}
 
 		if (recursive == false) {
-			isFromThisHoster.setValue(false);
+			isFromThisHoster.set(false);
 			return null;
 		}
 
@@ -615,7 +615,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		if (threadURL != null) {
 			if (isThumbnailsPage(threadURL)) {
 				if (bIndexPage || (bThumbPage && isThumbnailsPageWithoutPageParam(url.getURL()))) {
-					isFromThisHoster.setValue(false);
+					isFromThisHoster.set(false);
 					return null;
 				}
 			}
@@ -671,7 +671,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		 * We got all urls from this page, so this page is not needed anymore.
 		 * So we set the false-flag
 		 */
-		isFromThisHoster.setValue(false);
+		isFromThisHoster.set(false);
 		return newURLs;
 	}
 }

@@ -35,10 +35,10 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * Class for reading and writing log of downloaded URLs
@@ -423,7 +423,7 @@ public class LogManager implements ISettingsListener {
 							String strFilesize;
 							if (arr.length >= 4) {
 								long filesize = Long.parseLong(arr[3]);
-								strFilesize = UnitFormatTool.getSizeString(filesize, SettingsManager.instance().getSizeView());
+								strFilesize = UnitFormatUtil.getSizeString(filesize, SettingsManager.instance().getSizeView());
 							} else {
 								strFilesize = Localization.getString("Unkown");
 							}

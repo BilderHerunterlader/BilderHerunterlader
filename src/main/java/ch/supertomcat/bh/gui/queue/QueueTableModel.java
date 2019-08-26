@@ -4,8 +4,8 @@ import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * TableModel for Queue
@@ -42,7 +42,7 @@ public class QueueTableModel extends DefaultTableModel {
 		if (size <= 0) {
 			data[2] = Localization.getString("Unkown");
 		} else {
-			data[2] = UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView());
+			data[2] = UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
 		}
 
 		data[3] = pic;

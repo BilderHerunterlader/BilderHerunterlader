@@ -17,9 +17,9 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Thread which does the download
@@ -156,11 +156,11 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param targetPath Target path
 	 */
 	public Pic(String urlContainer, String targetFilename, String targetPath) {
-		urlContainer = HTTPTool.trimURL(urlContainer);
+		urlContainer = HTTPUtil.trimURL(urlContainer);
 		this.containerURL = urlContainer;
 		this.targetPath = targetPath;
 		if ((this.targetPath.endsWith("/") == false) && (this.targetPath.endsWith("\\") == false)) {
-			this.targetPath += FileTool.FILE_SEPERATOR;
+			this.targetPath += FileUtil.FILE_SEPERATOR;
 		}
 		this.targetFilename = targetFilename;
 		this.dateTime = System.currentTimeMillis();
@@ -297,7 +297,7 @@ public class Pic implements Runnable, IDownloadListener {
 		logger.info("Downloading: {}", containerURL);
 
 		FileDownloader downloader;
-		if (HTTPTool.isURL(containerURL)) {
+		if (HTTPUtil.isURL(containerURL)) {
 			downloader = new HTTPFileDownloader();
 		} else {
 			downloader = new LocalFileDownloader();
@@ -602,7 +602,7 @@ public class Pic implements Runnable, IDownloadListener {
 	public void setTargetPath(String targetPath) {
 		this.targetPath = targetPath;
 		if ((this.targetPath.endsWith("/") == false) && (this.targetPath.endsWith("\\") == false)) {
-			this.targetPath += FileTool.FILE_SEPERATOR;
+			this.targetPath += FileUtil.FILE_SEPERATOR;
 		}
 		targetChanged();
 	}
@@ -650,7 +650,7 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param thumb Thumbnail-URL
 	 */
 	public void setThumb(String thumb) {
-		thumb = HTTPTool.trimURL(thumb);
+		thumb = HTTPUtil.trimURL(thumb);
 		this.thumb = thumb;
 	}
 
@@ -696,7 +696,7 @@ public class Pic implements Runnable, IDownloadListener {
 	 * @param threadURL ThreadURL (Referrer)
 	 */
 	public void setThreadURL(String threadURL) {
-		this.threadURL = HTTPTool.trimURL(threadURL);
+		this.threadURL = HTTPUtil.trimURL(threadURL);
 	}
 
 	/**

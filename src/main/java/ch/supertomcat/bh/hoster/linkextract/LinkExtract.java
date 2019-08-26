@@ -24,8 +24,8 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Utility class for link extraction
@@ -133,7 +133,7 @@ public final class LinkExtract {
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			String cookies = CookieManager.getCookies(url);
-			url = HTTPTool.encodeURL(url);
+			url = HTTPUtil.encodeURL(url);
 			method = new HttpGet(url);
 			// Verbindung oeffnen
 			RequestConfig.Builder requestConfigBuilder = ProxyManager.instance().getDefaultRequestConfigBuilder();

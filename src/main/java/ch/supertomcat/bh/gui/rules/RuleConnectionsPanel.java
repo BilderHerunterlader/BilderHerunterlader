@@ -17,8 +17,8 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Rule-Referrer-Panel
@@ -80,9 +80,9 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(5, 10, 5, 5);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
 	 * Constructor
@@ -109,22 +109,22 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblMaxConnections, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblMaxConnections, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtMaxConnections, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtMaxConnections, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblMaxConnectionsDomains, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblMaxConnectionsDomains, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 3.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, new JScrollPane(lstMaxConnectionsDomains), this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, new JScrollPane(lstMaxConnectionsDomains), this);
 		i++;
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, btnMaxConnectionsDomainsRemove, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, btnMaxConnectionsDomainsRemove, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtMaxConnectionsDomainsAdd, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtMaxConnectionsDomainsAdd, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, btnMaxConnectionsDomainsAdd, this);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, btnMaxConnectionsDomainsAdd, this);
 	}
 
 	/**

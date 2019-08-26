@@ -38,10 +38,10 @@ import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 
 /**
  * Rules-Panel
@@ -104,7 +104,7 @@ public class Rules extends JPanel {
 
 		jtRules = new JTable(model);
 
-		TableTool.internationalizeColumns(jtRules);
+		TableUtil.internationalizeColumns(jtRules);
 
 		jtRules.setDefaultRenderer(Object.class, new RulesColorRowRenderer());
 		jtRules.setDefaultRenderer(Boolean.class, new DefaultBooleanColorRowRenderer());
@@ -163,7 +163,7 @@ public class Rules extends JPanel {
 		jtRules.getTableHeader().setReorderingAllowed(false);
 		jtRules.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		jtRules.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtRules.setRowHeight(TableTool.calculateRowHeight(jtRules, false, true));
+		jtRules.setRowHeight(TableUtil.calculateRowHeight(jtRules, false, true));
 
 		add(new JScrollPane(jtRules), BorderLayout.CENTER);
 
@@ -286,7 +286,7 @@ public class Rules extends JPanel {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsRules(TableTool.serializeColWidthSetting(jtRules));
+		SettingsManager.instance().setColWidthsRules(TableUtil.serializeColWidthSetting(jtRules));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -295,7 +295,7 @@ public class Rules extends JPanel {
 	 */
 	private void updateColWidthsFromSettingsManager() {
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableTool.applyColWidths(jtRules, SettingsManager.instance().getColWidthsRules());
+			TableUtil.applyColWidths(jtRules, SettingsManager.instance().getColWidthsRules());
 		}
 	}
 }

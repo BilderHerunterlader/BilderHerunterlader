@@ -13,13 +13,13 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 /**
  * Host class for www.cocoimage.com
  * 
- * @version 1.4
+ * @version 1.5
  */
 public class HostCocoimage extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.4";
+	public static final String VERSION = "1.5";
 
 	/**
 	 * Name dieser Klasse

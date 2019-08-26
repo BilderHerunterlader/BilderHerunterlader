@@ -37,11 +37,11 @@ import ch.supertomcat.bh.log.ILogManagerListener;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileExplorerTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Panel containing Logs
@@ -140,7 +140,7 @@ public class Log extends JPanel implements ILogManagerListener {
 	public Log() {
 		jtLog = new JTable(model);
 
-		TableTool.internationalizeColumns(jtLog);
+		TableUtil.internationalizeColumns(jtLog);
 
 		setLayout(new BorderLayout());
 		jtLog.getColumn("DateTime").setMinWidth(100);
@@ -172,7 +172,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		});
 		jtLog.getTableHeader().setReorderingAllowed(false);
 		jtLog.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtLog.setRowHeight(TableTool.calculateRowHeight(jtLog, false, true));
+		jtLog.setRowHeight(TableUtil.calculateRowHeight(jtLog, false, true));
 
 		JScrollPane jsp = new JScrollPane(jtLog);
 		add(jsp, BorderLayout.CENTER);
@@ -309,11 +309,11 @@ public class Log extends JPanel implements ILogManagerListener {
 				String file = "";
 				for (int i = 0; i < s.length; i++) {
 					file = (String)model.getValueAt(s[i], 2);
-					file = FileTool.getPathFromFile(new File(file));
+					file = FileUtil.getPathFromFile(new File(file));
 					dirs.add(file);
 				}
 				for (String dir : dirs) {
-					FileExplorerTool.openDirectoryInFilemanager(dir);
+					FileExplorerUtil.openDirectoryInFilemanager(dir);
 				}
 			}
 		});
@@ -357,7 +357,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsLog(TableTool.serializeColWidthSetting(jtLog));
+		SettingsManager.instance().setColWidthsLog(TableUtil.serializeColWidthSetting(jtLog));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -368,7 +368,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(jtLog, SettingsManager.instance().getColWidthsLog());
+		TableUtil.applyColWidths(jtLog, SettingsManager.instance().getColWidthsLog());
 	}
 
 	@Override

@@ -44,11 +44,11 @@ import ch.supertomcat.bh.importexport.ImportIradaTsv;
 import ch.supertomcat.bh.importexport.Tsv;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Irada-Tsv-Import-Dialog
@@ -162,9 +162,9 @@ public class IradaTsvDialog extends JDialog {
 		btnFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				File file = FileDialogTool.showFileOpenDialog(owner, SettingsManager.instance().getLastUsedImportDialogPath(), new TsvFileFilter());
+				File file = FileDialogUtil.showFileOpenDialog(owner, SettingsManager.instance().getLastUsedImportDialogPath(), new TsvFileFilter());
 				if (file != null) {
-					SettingsManager.instance().setLastUsedImportDialogPath(FileTool.getPathFromFile(file));
+					SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 					txtFile.setText(file.getAbsolutePath());
 				}
 			}
@@ -281,7 +281,7 @@ public class IradaTsvDialog extends JDialog {
 	private boolean loadTsvURL() {
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
-			String encodedURL = HTTPTool.encodeURL(txtURL.getText());
+			String encodedURL = HTTPUtil.encodeURL(txtURL.getText());
 			method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
 

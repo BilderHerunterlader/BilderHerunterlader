@@ -2,8 +2,8 @@ package ch.supertomcat.bh.pic;
 
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.Hoster;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * This class is used to store information about a download,
@@ -76,7 +76,7 @@ public class URL {
 	 */
 	public URL(String url, String thumb) {
 		url = url.replaceAll("\"", "");
-		url = HTTPTool.trimURL(url);
+		url = HTTPUtil.trimURL(url);
 		this.url = url;
 		this.thumb = thumb;
 		this.filenameCorrected = Localization.getString("Unkown");
@@ -126,7 +126,7 @@ public class URL {
 	 * @param thumb the thumb to set
 	 */
 	public void setThumb(String thumb) {
-		thumb = HTTPTool.trimURL(thumb);
+		thumb = HTTPUtil.trimURL(thumb);
 		this.thumb = thumb;
 	}
 
@@ -197,7 +197,7 @@ public class URL {
 	 * @param threadURL threadURL
 	 */
 	public void setThreadURL(String threadURL) {
-		threadURL = HTTPTool.trimURL(threadURL);
+		threadURL = HTTPUtil.trimURL(threadURL);
 		ThreadURL = threadURL;
 	}
 

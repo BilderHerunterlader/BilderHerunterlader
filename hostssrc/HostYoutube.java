@@ -14,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -57,24 +58,23 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.htmltools.HTMLTool;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.html.HTMLUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host class for Youtube
  * 
- * @version 7.8
+ * @version 7.9
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "7.8";
+	public static final String VERSION = "7.9";
 
 	/**
 	 * Name dieser Klasse
@@ -526,13 +526,13 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			if (title.isEmpty()) {
 				title = videoID;
 			} else {
-				title = HTMLTool.unescapeHTML(title);
+				title = HTMLUtil.unescapeHTML(title);
 			}
 
 			/*
 			 * Generate the filename
 			 */
-			int titleEndIndex = FileTool.FILENAME_LENGTH_LIMIT - 24;
+			int titleEndIndex = FileUtil.FILENAME_LENGTH_LIMIT - 24;
 			if (titleEndIndex > title.length()) {
 				titleEndIndex = title.length();
 			}
@@ -563,7 +563,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 				if (overrideDirectoryOption.isPathOverrideSubdirsAllowed() == false) {
 					pic.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
 				} else {
-					if (FileTool.checkIsSameOrSubFolder(pic.getTargetPath(), overrideDirectoryOption.getPathOverrideVal()) == false) {
+					if (FileUtil.checkIsSameOrSubFolder(pic.getTargetPath(), overrideDirectoryOption.getPathOverrideVal()) == false) {
 						pic.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
 					}
 				}
@@ -880,10 +880,10 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 				} else if (e.getSource() == btnCancel) {
 					dialog.dispose();
 				} else if (e.getSource() == btnPathOverride) {
-					File folder = FileDialogTool.showFolderDialog(Main.instance(), txtPathOverride.getText(), null);
+					File folder = FileDialogUtil.showFolderSaveDialog(Main.instance(), txtPathOverride.getText(), null);
 					if (folder != null) {
 						if ((folder.getAbsolutePath().endsWith("\\") == false) && (folder.getAbsolutePath().endsWith("/") == false)) {
-							txtPathOverride.setText(folder.getAbsolutePath() + FileTool.FILE_SEPERATOR);
+							txtPathOverride.setText(folder.getAbsolutePath() + FileUtil.FILE_SEPERATOR);
 						} else {
 							txtPathOverride.setText(folder.getAbsolutePath());
 						}
@@ -924,15 +924,15 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	}
 
 	@Override
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
 		if (overrideDirectoryOption.isPathOverride()) {
 			url.setTargetPath(overrideDirectoryOption.getPathOverrideVal());
 		}
-		isFromThisHoster.setValue(true);
+		isFromThisHoster.set(true);
 
 		Matcher matcherSearch = youtubeSearchPatternFirstPage.matcher(url.getURL());
 		if (matcherSearch.matches()) {
-			isFromThisHoster.setValue(false);
+			isFromThisHoster.set(false);
 
 			ILinkExtractFilter filter = new ILinkExtractFilter() {
 				private Node getParentNode(int level, Node node) {
@@ -982,7 +982,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 						String filename = videoID;
 						if (title != null && title.length() > 0) {
 							title = title.replaceAll("\\\\'", "'");
-							title = HTMLTool.unescapeHTML(title);
+							title = HTMLUtil.unescapeHTML(title);
 							filename = title;
 							if (filenameIncludeVideoID) {
 								filename += "-id" + videoID;

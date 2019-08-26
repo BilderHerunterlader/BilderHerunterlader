@@ -48,10 +48,10 @@ import ch.supertomcat.bh.transmitter.TransmitterHTTP;
 import ch.supertomcat.bh.transmitter.TransmitterSocket;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationTool;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 import fi.iki.elonen.NanoHTTPD;
 
 /**
@@ -81,7 +81,7 @@ public class BH {
 	/**
 	 * Path of the folder which contains the lockfile
 	 */
-	private static String strLockFilePath = System.getProperty("user.home") + FileTool.FILE_SEPERATOR + ".BH" + FileTool.FILE_SEPERATOR;
+	private static String strLockFilePath = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + ".BH" + FileUtil.FILE_SEPERATOR;
 
 	/**
 	 * Path and filename of the lockfile
@@ -372,19 +372,19 @@ public class BH {
 
 		// Release the lockfile
 		logger.debug("Releasing Lockfile");
-		ApplicationTool.releaseLockFile();
+		ApplicationUtil.releaseLockFile();
 
 		// Restart BH
 		if (restart && ApplicationProperties.getProperty("JarFilename").length() > 0) {
 			try {
 				String bhAbsolutePath = new File(ApplicationProperties.getProperty("ApplicationPath")).getAbsolutePath();
-				if (bhAbsolutePath.endsWith(FileTool.FILE_SEPERATOR) == false) {
-					bhAbsolutePath += FileTool.FILE_SEPERATOR;
+				if (bhAbsolutePath.endsWith(FileUtil.FILE_SEPERATOR) == false) {
+					bhAbsolutePath += FileUtil.FILE_SEPERATOR;
 				}
 
 				String jre = "";
-				String jreJavaw = System.getProperty("java.home") + FileTool.FILE_SEPERATOR + "bin" + FileTool.FILE_SEPERATOR + "javaw";
-				String jreJava = System.getProperty("java.home") + FileTool.FILE_SEPERATOR + "bin" + FileTool.FILE_SEPERATOR + "java";
+				String jreJavaw = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR + "javaw";
+				String jreJava = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR + "java";
 
 				String os = System.getProperty("os.name").toLowerCase();
 
@@ -598,18 +598,18 @@ public class BH {
 			// Logger is not initialized at this point
 			System.err.println("Could not initialize application properties");
 			e.printStackTrace();
-			ApplicationTool.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not initialize application properties:\n" + formatStackTrace(e));
+			ApplicationUtil.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not initialize application properties:\n" + formatStackTrace(e));
 			System.exit(1);
 		}
 
-		String jarFilename = ApplicationTool.getThisApplicationsJarFilename(BH.class);
+		String jarFilename = ApplicationUtil.getThisApplicationsJarFilename(BH.class);
 		ApplicationProperties.setProperty("JarFilename", jarFilename);
 
 		// Geth the program directory
-		String appPath = ApplicationTool.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
+		String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
 		ApplicationProperties.setProperty("ApplicationPath", appPath);
 
-		String programUserDir = System.getProperty("user.home") + FileTool.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileTool.FILE_SEPERATOR;
+		String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileUtil.FILE_SEPERATOR;
 		ApplicationProperties.setProperty("ProfilePath", programUserDir);
 		ApplicationProperties.setProperty("DatabasePath", programUserDir);
 		ApplicationProperties.setProperty("SettingsPath", programUserDir);
@@ -629,21 +629,21 @@ public class BH {
 			// Logger is not initialized at this point
 			System.err.println("Could not read directories.properties");
 			e.printStackTrace();
-			ApplicationTool.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not read directories.properties:\n" + formatStackTrace(e));
+			ApplicationUtil.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not read directories.properties:\n" + formatStackTrace(e));
 			System.exit(1);
 		}
 
 		String logFilename = ApplicationProperties.getProperty("ApplicationShortName") + ".log";
 		// Loggers can be created after this point
-		System.setProperty("bhlog4jlogfile", ApplicationProperties.getProperty("LogsPath") + FileTool.FILE_SEPERATOR + logFilename);
+		System.setProperty("bhlog4jlogfile", ApplicationProperties.getProperty("LogsPath") + FileUtil.FILE_SEPERATOR + logFilename);
 		logger = LoggerFactory.getLogger(BH.class);
-		ApplicationTool.initializeSLF4JUncaughtExceptionHandler();
+		ApplicationUtil.initializeSLF4JUncaughtExceptionHandler();
 
 		/*
 		 * Now try to lock the file
 		 * We do this, to make sure, there is only one instance of BH runnig.
 		 */
-		if (ApplicationTool.lockLockFile(strLockFilePath, strLockFilename) == false) {
+		if (ApplicationUtil.lockLockFile(strLockFilePath, strLockFilename) == false) {
 			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
 			JFrame frame = null;
 			try {
@@ -659,10 +659,10 @@ public class BH {
 		}
 
 		// Write some useful info to the logfile
-		ApplicationTool.logApplicationInfo();
+		ApplicationUtil.logApplicationInfo();
 
 		// Delete old log files
-		ApplicationTool.deleteOldLogFiles(7, logFilename, ApplicationProperties.getProperty("LogsPath"));
+		ApplicationUtil.deleteOldLogFiles(7, logFilename, ApplicationProperties.getProperty("LogsPath"));
 
 		// Delete Updates
 		executeDeleteUpdates();

@@ -29,22 +29,23 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.exceptions.OptionException;
 import ch.supertomcat.bh.keywords.KeywordManager;
+import ch.supertomcat.bh.settings.options.Option;
+import ch.supertomcat.bh.settings.options.OptionBoolean;
+import ch.supertomcat.bh.settings.options.OptionByte;
+import ch.supertomcat.bh.settings.options.OptionDouble;
+import ch.supertomcat.bh.settings.options.OptionFloat;
+import ch.supertomcat.bh.settings.options.OptionInt;
+import ch.supertomcat.bh.settings.options.OptionLong;
+import ch.supertomcat.bh.settings.options.OptionShort;
+import ch.supertomcat.bh.settings.options.OptionString;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.cookietools.BrowserCookies;
-import ch.supertomcat.supertomcattools.fileiotools.CopyTool;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.regextools.RegexReplacePipeline;
-import ch.supertomcat.supertomcattools.settingstools.options.Option;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionByte;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionDouble;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionFloat;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionInt;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionLong;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionShort;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionString;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
+import ch.supertomcat.supertomcatutils.io.CopyUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.regex.RegexReplace;
+import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 
 /**
  * Class which handels the settings
@@ -766,7 +767,7 @@ public class SettingsManager {
 		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
 		if (portableDownloadPath != null) {
 			if (!portableDownloadPath.endsWith("/") && !portableDownloadPath.endsWith("\\")) {
-				portableDownloadPath += FileTool.FILE_SEPERATOR;
+				portableDownloadPath += FileUtil.FILE_SEPERATOR;
 			}
 			savePath = portableDownloadPath;
 		}
@@ -787,7 +788,7 @@ public class SettingsManager {
 			logger.info("Settingsfile not found in folder '{}': {}", settingsPath.getAbsolutePath(), settingsFile.getAbsolutePath());
 			if (settingsFileBackup.exists() && settingsFileBackup.length() > 0) {
 				logger.info("Restoring Settingsfile with backup: {}", settingsFileBackup.getAbsolutePath());
-				CopyTool.copy(strSettingsFileBackup, strSettingsFile);
+				CopyUtil.copy(strSettingsFileBackup, strSettingsFile);
 			} else {
 				try {
 					// If settingsfile does not exists
@@ -804,20 +805,20 @@ public class SettingsManager {
 				logger.error("Settingsfile is empty: {}", settingsFile.getAbsolutePath());
 				if (settingsFileBackup.exists() && settingsFileBackup.length() > 0) {
 					logger.info("Restoring Settingsfile with backup: {}", settingsFileBackup.getAbsolutePath());
-					CopyTool.copy(strSettingsFileBackup, strSettingsFile);
+					CopyUtil.copy(strSettingsFileBackup, strSettingsFile);
 				}
 			} else {
 				long now = System.currentTimeMillis();
 				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss-SSS");
 				String target = strSettingsFile + "-" + dateFormat.format(now);
 
-				CopyTool.copy(strSettingsFile, target);
+				CopyUtil.copy(strSettingsFile, target);
 
 				// Delete old backup-Files
 				BHUtil.deleteOldBackupFiles(settingsPath, strSettingsFilename, 3);
 
 				if (!settingsFileBackup.exists()) {
-					CopyTool.copy(strSettingsFile, strSettingsFileBackup);
+					CopyUtil.copy(strSettingsFile, strSettingsFileBackup);
 				}
 			}
 		}
@@ -853,7 +854,7 @@ public class SettingsManager {
 			// SavePath
 			this.savePath = readStringValue("Directories.SavePath", root, this.savePath);
 			if ((this.savePath.endsWith("/") == false) && (this.savePath.endsWith("\\") == false)) {
-				this.savePath += FileTool.FILE_SEPERATOR;
+				this.savePath += FileUtil.FILE_SEPERATOR;
 			}
 			this.saveLastPath = readBooleanValue("Directories.RememberLastUsedPath", root, this.saveLastPath);
 
@@ -1203,20 +1204,10 @@ public class SettingsManager {
 			}
 
 			// RegexReplaces Page-Title
-			Element eGUI = root.getChild("GUI");
-			Element eRegexReplacePageTitle = null;
-			if (eGUI != null) {
-				eRegexReplacePageTitle = eGUI.getChild("regexReplacePageTitle");
-			}
-			regexReplacePipelinePageTitle = new RegexReplacePipeline("regexReplacePageTitle", eRegexReplacePageTitle);
+			regexReplacePipelinePageTitle = new RegexReplacePipeline("regexReplacePageTitle", getRegexReplaces(root, "GUI", "regexReplacePageTitle"));
 
 			// RegexReplaces Filename
-			Element eDownloads = root.getChild("Downloads");
-			Element eRegexReplaceFilename = null;
-			if (eDownloads != null) {
-				eRegexReplaceFilename = eDownloads.getChild("regexReplaceFilename");
-			}
-			regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename", eRegexReplaceFilename);
+			regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename", getRegexReplaces(root, "Downloads", "regexReplaceFilename"));
 
 			settingsChanged();
 			doc = null;
@@ -1458,10 +1449,10 @@ public class SettingsManager {
 		}
 
 		// RegexReplaces Page-Title
-		addSubElement("GUI", regexReplacePipelinePageTitle.getXmlElement(), root);
+		addSubElement("GUI", getRegexReplaceXmlElement(regexReplacePipelinePageTitle, "regexReplacePageTitle"), root);
 
 		// RegexReplaces Filename
-		addSubElement("Downloads", regexReplacePipelineFilename.getXmlElement(), root);
+		addSubElement("Downloads", getRegexReplaceXmlElement(regexReplacePipelineFilename, "regexReplaceFilename"), root);
 
 		try {
 			settingsFile = new File(strSettingsFile);
@@ -1478,7 +1469,7 @@ public class SettingsManager {
 			root = null;
 			settingsFile = null;
 			if (noShutdown) {
-				CopyTool.copy(strSettingsFile, strSettingsFileBackup);
+				CopyUtil.copy(strSettingsFile, strSettingsFileBackup);
 			}
 			return true;
 		} catch (FileNotFoundException e) {
@@ -1505,6 +1496,44 @@ public class SettingsManager {
 			return true;
 		}
 		return false;
+	}
+
+	private List<RegexReplace> getRegexReplaces(Element root, String rootChild, String subChild) {
+		List<RegexReplace> regexps = new ArrayList<>();
+
+		Element eRootChild = root.getChild(rootChild);
+		Element eSubChild = null;
+		if (eRootChild != null) {
+			eSubChild = eRootChild.getChild(subChild);
+		}
+
+		if (eSubChild == null) {
+			return regexps;
+		}
+
+		for (Element child : eSubChild.getChildren("regexp")) {
+			try {
+				String search = child.getAttributeValue("search");
+				String replace = child.getAttributeValue("replace");
+				regexps.add(new RegexReplace(search, replace));
+			} catch (Exception ex) {
+				logger.error("Could not load regexp child from element '{}' in RegexReplacePipeline '{}': {}", eSubChild, subChild, child.toString(), ex);
+				throw ex;
+			}
+		}
+
+		return regexps;
+	}
+
+	private Element getRegexReplaceXmlElement(RegexReplacePipeline regexReplacePipeline, String elementTitle) {
+		Element e = new Element(elementTitle);
+		for (RegexReplace child : regexReplacePipeline.getRegexps()) {
+			Element elRegex = new Element("regexp");
+			elRegex.setAttribute("search", child.getSearch());
+			elRegex.setAttribute("replace", child.getReplace());
+			e.addContent(elRegex);
+		}
+		return e;
 	}
 
 	private Element getXmlElementForList(List<String> values, String title, String valuesName) {

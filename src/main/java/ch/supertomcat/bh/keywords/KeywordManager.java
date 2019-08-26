@@ -8,7 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.database.sqlite.KeywordsSQLiteDB;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
  * Class which holds the Keywords

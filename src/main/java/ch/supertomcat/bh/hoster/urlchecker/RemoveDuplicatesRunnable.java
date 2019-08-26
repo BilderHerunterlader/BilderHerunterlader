@@ -3,12 +3,12 @@ package ch.supertomcat.bh.hoster.urlchecker;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
 
 /**
  * Thread for removing duplicates from download-selection
@@ -21,7 +21,7 @@ public class RemoveDuplicatesRunnable implements Runnable {
 
 	private final List<URL> originalUrls;
 
-	private final OptionBoolean bContains;
+	private final AtomicBoolean bContains;
 
 	private int currentRow;
 
@@ -41,7 +41,7 @@ public class RemoveDuplicatesRunnable implements Runnable {
 	 * @param currentRow Current Row
 	 * @param barrier Barrier
 	 */
-	public RemoveDuplicatesRunnable(List<URL> originalUrls, int threadNumber, int threadCount, OptionBoolean bContains, int currentRow, CyclicBarrier barrier) {
+	public RemoveDuplicatesRunnable(List<URL> originalUrls, int threadNumber, int threadCount, AtomicBoolean bContains, int currentRow, CyclicBarrier barrier) {
 		this.originalUrls = originalUrls;
 		this.threadNumber = threadNumber;
 		this.threadCount = threadCount;
@@ -60,7 +60,7 @@ public class RemoveDuplicatesRunnable implements Runnable {
 		 */
 		URL currentURL = originalUrls.get(currentRow);
 		for (int x = threadNumber; x < originalUrls.size(); x += threadCount) {
-			if (bContains.getValue()) {
+			if (bContains.get()) {
 				// Another thread already found a duplicate
 				break;
 			}
@@ -70,7 +70,7 @@ public class RemoveDuplicatesRunnable implements Runnable {
 			}
 			if (currentURL.equalsRemoveDuplicates(originalUrls.get(x))) {
 				// Duplicate found
-				bContains.setValue(true);
+				bContains.set(true);
 				break;
 			}
 		}

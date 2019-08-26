@@ -6,6 +6,7 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -33,21 +34,20 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 2.8
+ * @version 2.9
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.8";
+	public static final String VERSION = "2.9";
 
 	/**
 	 * Name dieser Klasse
@@ -155,7 +155,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 									Node nx = lChilds.item(x);
 									if (nx.getNodeName().equals("a")) {
 										String titlePart = nx.getFirstChild().getNodeValue();
-										sb.append(titlePart + FileTool.FILE_SEPERATOR);
+										sb.append(titlePart + FileUtil.FILE_SEPERATOR);
 									}
 								}
 								title = sb.toString();
@@ -171,7 +171,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 
 		String dlDir = SettingsManager.instance().getSavePath();
 		if (dlDir.length() > 0 && dlDir.endsWith("/") == false && dlDir.endsWith("\\") == false) {
-			dlDir += FileTool.FILE_SEPERATOR;
+			dlDir += FileUtil.FILE_SEPERATOR;
 		}
 
 		// Get host and use it as the root folder
@@ -189,7 +189,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		} catch (MalformedURLException mue) {
 		}
 
-		String targetPath = dlDir + rootFolder + FileTool.FILE_SEPERATOR + title;
+		String targetPath = dlDir + rootFolder + FileUtil.FILE_SEPERATOR + title;
 		return targetPath;
 	}
 
@@ -280,15 +280,15 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 	}
 
 	@Override
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
 		Matcher matcher = patternPhoto.matcher(url.getURL());
 		if (matcher.matches()) {
-			isFromThisHoster.setValue(true);
+			isFromThisHoster.set(true);
 			return null;
 		}
 
 		if (recursive == false) {
-			isFromThisHoster.setValue(false);
+			isFromThisHoster.set(false);
 			return null;
 		}
 
@@ -368,7 +368,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		 * We got all urls from this page, so this page is not needed anymore.
 		 * So we set the false-flag
 		 */
-		isFromThisHoster.setValue(false);
+		isFromThisHoster.set(false);
 		return links;
 	}
 }

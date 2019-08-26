@@ -20,8 +20,8 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.importexport.Import;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
 /**
  * Dialog to add URL's to pages from which the links will be extracted by a TextArea

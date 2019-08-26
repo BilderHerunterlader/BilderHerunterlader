@@ -23,9 +23,9 @@ import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host-Klasse fuer beliebige Dateien und speziell fuer Bilder die nicht auf einem Image-Hoster gehostet sind.
@@ -231,7 +231,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 
 	@Override
 	public String getFilenameFromURL(String url) {
-		return HTTPTool.getFilenameFromURL(url, "");
+		return HTTPUtil.getFilenameFromURL(url, "");
 	}
 
 	/**
@@ -243,7 +243,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 */
 	private String requestContentType(String url) throws HostException {
 		String cookies = CookieManager.getCookies(url);
-		url = HTTPTool.encodeURL(url);
+		url = HTTPUtil.encodeURL(url);
 		HttpHead method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			method = new HttpHead(url);

@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Class for import files on the harddisk which have to be sort

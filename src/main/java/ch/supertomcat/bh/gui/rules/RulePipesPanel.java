@@ -23,7 +23,7 @@ import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * 

@@ -19,8 +19,8 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * 
@@ -52,9 +52,9 @@ public abstract class Import {
 			}
 		};
 		if (save) {
-			return FileDialogTool.showFileSaveDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileSaveDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
 		} else {
-			return FileDialogTool.showFileOpenDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileOpenDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
 		}
 	}
 
@@ -67,7 +67,7 @@ public abstract class Import {
 	 */
 	public static void importURL(String url, String referrer, boolean embeddedImages) {
 		String cookies = CookieManager.getCookies(url);
-		url = HTTPTool.encodeURL(url);
+		url = HTTPUtil.encodeURL(url);
 
 		/*
 		 * A user reported to me, that when BH is running for a while and then

@@ -5,6 +5,7 @@ import java.awt.event.ActionListener;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,11 +41,10 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host class for grabbing links from all pages of a thread from Boards
@@ -52,13 +52,13 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 2.7
+ * @version 2.8
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.7";
+	public static final String VERSION = "2.8";
 
 	/**
 	 * Name dieser Klasse
@@ -166,7 +166,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			// Verbindung oeffnen
-			String encodedURL = HTTPTool.encodeURL(url);
+			String encodedURL = HTTPUtil.encodeURL(url);
 			method = new HttpGet(encodedURL);
 
 			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
@@ -497,8 +497,8 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	}
 
 	@Override
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
-		isFromThisHoster.setValue(false);
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception {
+		isFromThisHoster.set(false);
 
 		List<URL> newURLs = new ArrayList<>();
 

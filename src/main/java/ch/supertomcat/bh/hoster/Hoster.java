@@ -23,8 +23,8 @@ import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host and Rule extends this class, so we have a class
@@ -181,7 +181,7 @@ public abstract class Hoster {
 				cookies = CookieManager.getCookies(url);
 			}
 
-			url = HTTPTool.encodeURL(url);
+			url = HTTPUtil.encodeURL(url);
 			method = new HttpGet(url);
 
 			RequestConfig.Builder requestConfigBuilder = ProxyManager.instance().getDefaultRequestConfigBuilder();
@@ -249,7 +249,7 @@ public abstract class Hoster {
 	 * @return Filtered Filename
 	 */
 	protected final String filterFilename(String filename) {
-		return FileTool.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
 	}
 
 	/**
@@ -259,7 +259,7 @@ public abstract class Hoster {
 	 * @return Filtered path
 	 */
 	protected final String filterPath(String path) {
-		return FileTool.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
 	}
 
 	/**
@@ -269,7 +269,7 @@ public abstract class Hoster {
 	 * @return Trimmed URL
 	 */
 	protected final String trimURL(String url) {
-		return HTTPTool.trimURL(url);
+		return HTTPUtil.trimURL(url);
 	}
 
 	@Override

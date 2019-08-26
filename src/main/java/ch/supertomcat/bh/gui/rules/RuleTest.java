@@ -21,10 +21,9 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RuleURLMode;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionString;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Rule-Test-Dialog
@@ -126,9 +125,9 @@ public class RuleTest extends JDialog implements ActionListener {
 	private GridBagLayout gbl = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(5, 10, 5, 5);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
 	 * Constructor
@@ -155,35 +154,35 @@ public class RuleTest extends JDialog implements ActionListener {
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblMessage, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblMessage, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtMessage, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtMessage, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblContainer, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblContainer, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtContainer, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtContainer, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblThumbnail, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblThumbnail, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtThumbnail, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtThumbnail, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblResultURL, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultURL, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtResultURL, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtResultURL, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblResultFilename, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultFilename, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, txtResultFilename, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtResultFilename, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, lblResultPageSourceCode, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultPageSourceCode, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.9, 0.5);
-		GridBagLayoutTool.addItemToPanel(gbl, gbc, scrollpane, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, scrollpane, pnlMain);
 
 		add(pnlMain, BorderLayout.CENTER);
 
@@ -220,7 +219,6 @@ public class RuleTest extends JDialog implements ActionListener {
 				txtMessage.setText(Localization.getString("ContainerURLNotMatch"));
 				return;
 			}
-			final OptionString pagesourcecode = new OptionString("");
 			Pic p = new Pic(txtContainer.getText(), "", "");
 			p.setThumb(txtThumbnail.getText());
 			final URLParseObject upo = new URLParseObject(txtContainer.getText(), txtThumbnail.getText(), p);
@@ -228,7 +226,7 @@ public class RuleTest extends JDialog implements ActionListener {
 				@Override
 				public void run() {
 					try {
-						String result[] = rule.getURLAndFilename(upo, pagesourcecode);
+						String result[] = rule.getURLAndFilename(upo, true);
 						txtResultURL.setText(result[0]);
 						txtResultFilename.setText(result[1]);
 					} catch (HostException he) {
@@ -242,7 +240,7 @@ public class RuleTest extends JDialog implements ActionListener {
 				t.join();
 			} catch (InterruptedException e1) {
 			}
-			txtResultPageSourceCode.setText(pagesourcecode.getValue());
+			txtResultPageSourceCode.setText((String)upo.getInfo("PageSourceCode"));
 		}
 	}
 

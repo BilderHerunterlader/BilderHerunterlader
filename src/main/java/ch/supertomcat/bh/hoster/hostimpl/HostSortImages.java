@@ -11,8 +11,8 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host-class for images that are on the harddisk and should be sorted.
@@ -72,7 +72,7 @@ public class HostSortImages extends Host implements IHoster {
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		if (HTTPTool.isURL(url)) {
+		if (HTTPUtil.isURL(url)) {
 			return false;
 		}
 

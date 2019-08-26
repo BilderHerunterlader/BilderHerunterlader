@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.gui.queue;
 
-import static ch.supertomcat.supertomcattools.fileiotools.FileTool.*;
-
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.EventQueue;
@@ -63,12 +61,12 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.queue.QueueManagerListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Queue-Panel
@@ -173,7 +171,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 */
 	private JLabel lblStatus = new JLabel(Localization.getString("Queue") + ": 0 | " + Localization.getString("FreeSlots") + ": " + SettingsManager.instance().getConnections() + "/"
 			+ SettingsManager.instance().getConnections() + " | " + Localization.getString("DownloadedFiles") + ": " + SettingsManager.instance().getOverallDownloadedFiles() + " (0) | "
-			+ Localization.getString("DownloadedBytes") + ": " + UnitFormatTool.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView())
+			+ Localization.getString("DownloadedBytes") + ": " + UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView())
 			+ " (0) | " + Localization.getString("DownloadBitrate") + ": " + Localization.getString("NotAvailable"));
 
 	/**
@@ -242,11 +240,11 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	public Queue() {
 		setLayout(new BorderLayout());
 
-		TableTool.internationalizeColumns(jtQueue);
+		TableUtil.internationalizeColumns(jtQueue);
 
 		jtQueue.getColumn("Progress").setCellRenderer(pcr);
 
-		int urlOrTargetTableHeaderWidth = TableTool.calculateColumnHeaderWidth(jtQueue, jtQueue.getColumn("URL"), 47);
+		int urlOrTargetTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(jtQueue, jtQueue.getColumn("URL"), 47);
 		jtQueue.getColumn("URL").setPreferredWidth(urlOrTargetTableHeaderWidth);
 		jtQueue.getColumn("Target").setPreferredWidth(urlOrTargetTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
@@ -255,7 +253,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		jtQueue.getTableHeader().setReorderingAllowed(false);
 
 		jtQueue.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtQueue.setRowHeight(TableTool.calculateRowHeight(jtQueue, false, true));
+		jtQueue.setRowHeight(TableUtil.calculateRowHeight(jtQueue, false, true));
 
 		add(jsp, BorderLayout.CENTER);
 
@@ -485,7 +483,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 					synchronized (QueueManager.instance().getSyncObject()) {
 						synchronized (syncObject) {
 							int[] selectedRows = jtQueue.getSelectedRows();
-							int[] selectedModelRows = TableTool.convertRowIndexToModel(jtQueue, selectedRows, true);
+							int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
 							QueueManager.instance().removePics(selectedModelRows);
 						}
 					}
@@ -611,12 +609,12 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 					boolean b1 = input.endsWith("/");
 					boolean b2 = input.endsWith("\\");
 					if ((b1 == false) && (b2 == false)) {
-						input += FileTool.FILE_SEPERATOR;
+						input += FileUtil.FILE_SEPERATOR;
 					}
 					for (int i = 0; i < s.length; i++) {
 						String newPath = input;
 						newPath = BHUtil.filterPath(newPath);
-						newPath = FileTool.reducePathLength(newPath);
+						newPath = FileUtil.reducePathLength(newPath);
 
 						Pic pic = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
 						if (pic != null) {
@@ -636,9 +634,9 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private void actionChangeTargetBySelection() {
 		synchronized (QueueManager.instance().getSyncObject()) {
 			synchronized (syncObject) {
-				File file = FileDialogTool.showFolderDialog(this, SettingsManager.instance().getSavePath(), null);
+				File file = FileDialogUtil.showFolderSaveDialog(this, SettingsManager.instance().getSavePath(), null);
 				if (file != null) {
-					String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+					String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 					int s[] = jtQueue.getSelectedRows();
 					for (int i = 0; i < s.length; i++) {
 						Pic pic = QueueManager.instance().getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
@@ -664,7 +662,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 				int s[] = jtQueue.getSelectedRows();
 				if (s.length > 0) {
 					defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), 1);
-					defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileTool.FILE_SEPERATOR) + 1);
+					defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 					String input[] = FileRenameDialog.showFileRenameDialog(Main.instance(), "", defaultvalue, s.length);
 					if ((input != null)) {
 						int index = Integer.parseInt(input[1]);
@@ -678,10 +676,10 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 								String fname = input[0];
 								if (keepOriginal) {
 									fname = (String)model.getValueAt(modelIndex, 1);
-									fname = fname.substring(fname.lastIndexOf(FileTool.FILE_SEPERATOR) + 1);
+									fname = fname.substring(fname.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 								}
 								fname = input[3] + fname + input[4];
-								out = getNumberedFilename(fname, index);
+								out = FileUtil.getNumberedFilename(fname, index);
 							}
 
 							Pic pic = QueueManager.instance().getPicByIndex(modelIndex);
@@ -705,7 +703,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	 */
 	private void actionSort() {
 		synchronized (syncObject) {
-			final File folder = FileDialogTool.showFolderDialog(Main.instance(), SettingsManager.instance().getSavePath(), null);
+			final File folder = FileDialogUtil.showFolderOpenDialog(Main.instance(), SettingsManager.instance().getSavePath(), null);
 			if (folder != null) {
 
 				Thread t = new Thread(new Runnable() {
@@ -821,15 +819,15 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 			@Override
 			public void run() {
 				int sessionDownloadedFiles = DownloadQueueManager.instance().getSessionDownloadedFiles();
-				String sessionDownloadedBytes = UnitFormatTool.getSizeString(DownloadQueueManager.instance().getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
-				String downloadRate = UnitFormatTool.getBitrateString(DownloadQueueManager.instance().getDownloadBitrate());
+				String sessionDownloadedBytes = UnitFormatUtil.getSizeString(DownloadQueueManager.instance().getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
+				String downloadRate = UnitFormatUtil.getBitrateString(DownloadQueueManager.instance().getDownloadBitrate());
 				if (downloadRate.isEmpty()) {
 					downloadRate = Localization.getString("NotAvailable");
 				}
 				lblStatus.setText(Localization.getString("Queue") + ": " + jtQueue.getRowCount() + " | " + Localization.getString("FreeSlots") + ": " + openSlots + "/" + maxSlots + " | "
 						+ Localization.getString("DownloadedFiles") + ": " + SettingsManager.instance().getOverallDownloadedFiles() + " (" + sessionDownloadedFiles + ") | "
 						+ Localization.getString("DownloadedBytes") + ": "
-						+ UnitFormatTool.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView()) + " (" + sessionDownloadedBytes + ") | "
+						+ UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView()) + " (" + sessionDownloadedBytes + ") | "
 						+ Localization.getString("DownloadBitrate") + ": " + downloadRate);
 			}
 		});
@@ -892,10 +890,10 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		int openDownloadSlots = queue.getOpenDownloadSlots();
 		int connectionCount = queue.getConnectionCount();
 		long overallDownloadedFiles = SettingsManager.instance().getOverallDownloadedFiles();
-		String overallDownloadedBytes = UnitFormatTool.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView());
+		String overallDownloadedBytes = UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView());
 		int sessionDownloadedFiles = queue.getSessionDownloadedFiles();
-		String sessionDownloadedBytes = UnitFormatTool.getSizeString(queue.getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
-		String downloadRate = UnitFormatTool.getBitrateString(queue.getDownloadBitrate());
+		String sessionDownloadedBytes = UnitFormatUtil.getSizeString(queue.getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
+		String downloadRate = UnitFormatUtil.getBitrateString(queue.getDownloadBitrate());
 		if (downloadRate.isEmpty()) {
 			downloadRate = Localization.getString("NotAvailable");
 		}
@@ -941,7 +939,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsQueue(TableTool.serializeColWidthSetting(jtQueue));
+		SettingsManager.instance().setColWidthsQueue(TableUtil.serializeColWidthSetting(jtQueue));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -952,7 +950,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(jtQueue, SettingsManager.instance().getColWidthsQueue());
+		TableUtil.applyColWidths(jtQueue, SettingsManager.instance().getColWidthsQueue());
 	}
 
 	@Override
@@ -1165,7 +1163,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						if (size < 1) {
 							model.setValueAt(Localization.getString("Unkown"), row, 2);
 						} else {
-							model.setValueAt(UnitFormatTool.getSizeString(size, SettingsManager.instance().getSizeView()), row, 2);
+							model.setValueAt(UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView()), row, 2);
 						}
 						model.fireTableCellUpdated(row, 2);
 					}

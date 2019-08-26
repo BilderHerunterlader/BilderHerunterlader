@@ -6,7 +6,7 @@ import javax.swing.JFrame;
 import ch.supertomcat.bh.gui.keywords.KeywordEditDialog;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Dialog for adding a new keyword to the keyword-table

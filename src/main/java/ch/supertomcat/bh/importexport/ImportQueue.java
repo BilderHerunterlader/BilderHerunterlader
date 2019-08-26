@@ -19,9 +19,10 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for import download-queues from textfiles
@@ -45,7 +46,7 @@ public abstract class ImportQueue {
 
 		File file = Import.getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedImportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
 			read(file);
 			file = null;
@@ -71,7 +72,7 @@ public abstract class ImportQueue {
 		try (FileInputStream fIn = new FileInputStream(file); InputStream in = new BufferedInputStream(fIn)) {
 			String enc = null;
 			try {
-				enc = FileTool.getEncodingFromInputStream(in);
+				enc = BHUtil.getEncodingFromInputStream(in);
 			} catch (IOException ioe) {
 				logger.error(ioe.getMessage(), ioe);
 			}

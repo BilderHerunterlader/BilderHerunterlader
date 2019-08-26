@@ -18,9 +18,9 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * Class for exporting keywords
@@ -37,7 +37,7 @@ public abstract class ExportKeywords {
 	public static void exportKeywords() {
 		File file = Import.getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedExportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportKeywords(file.getAbsolutePath());
 			file = null;

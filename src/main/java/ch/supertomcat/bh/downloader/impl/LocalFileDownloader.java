@@ -8,8 +8,8 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * "FileDownloader" for local files, which only sorts local files on the harddisk into different folders and not actually downloads anything
@@ -44,7 +44,7 @@ public class LocalFileDownloader extends FileDownloaderBase {
 				// If the file could not be moved
 				failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeMoved"));
 			} else {
-				pic.setTargetPath(FileTool.getDirectory(fMoved.getAbsolutePath()));
+				pic.setTargetPath(FileUtil.getDirectory(fMoved.getAbsolutePath()));
 				pic.setTargetFilename(fMoved.getName());
 				pic.targetChanged();
 				completeDownload(pic, pic.getSize());
@@ -56,7 +56,7 @@ public class LocalFileDownloader extends FileDownloaderBase {
 
 	@Override
 	protected String getFilenameFromURL(String url) {
-		return FileTool.getFilename(url);
+		return FileUtil.getFilename(url);
 	}
 
 	@Override

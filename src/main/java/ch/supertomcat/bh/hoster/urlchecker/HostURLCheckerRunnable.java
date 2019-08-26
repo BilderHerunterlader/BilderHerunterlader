@@ -3,14 +3,14 @@ package ch.supertomcat.bh.hoster.urlchecker;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * This class is for checking multiple URLs
@@ -106,9 +106,9 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 
 			List<URL> additionalURLs = null;
 			// Check if there is a hostclass available which accepts the url
-			OptionBoolean bOK = new OptionBoolean("", false);
+			AtomicBoolean bOK = new AtomicBoolean(false);
 			additionalURLs = hm.checkURL(urlObject, bOK, progress);
-			if (bOK.getValue()) {
+			if (bOK.get()) {
 				v.add(urlObject);
 			}
 			if (additionalURLs != null && additionalURLs.size() > 0) {

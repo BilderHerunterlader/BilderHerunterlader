@@ -4,7 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.supertomcattools.regextools.RegexReplace;
+import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 
 /**
  * Search and Replace by Regexp

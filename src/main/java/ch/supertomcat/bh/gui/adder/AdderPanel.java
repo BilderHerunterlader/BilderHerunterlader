@@ -1,8 +1,5 @@
 package ch.supertomcat.bh.gui.adder;
 
-import static ch.supertomcat.supertomcattools.fileiotools.FileTool.*;
-import static ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool.*;
-
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.Dimension;
@@ -103,19 +100,19 @@ import ch.supertomcat.bh.preview.PreviewCache.PreviewCacheListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultNumberColorRowRenderer;
-import ch.supertomcat.supertomcattools.imagetools.ImageTool;
-import ch.supertomcat.supertomcattools.regextools.RegexReplacePipeline;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultNumberColorRowRenderer;
+import ch.supertomcat.supertomcatutils.image.ImageUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 
 /**
  * Panel for selecting files to download
@@ -183,7 +180,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	/**
 	 * Class for easier usage of GridBagLayout
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool();
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil();
 
 	/**
 	 * Label
@@ -552,19 +549,19 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		int configuredPreviewHeight = SettingsManager.instance().getPreviewSize();
 		previewHeight = Integer.max(MINIMUM_PREVIEW_HEIGHT, configuredPreviewHeight);
-		imgDummy = ImageTool.generatePreviewImage(Icons.getBHImage("Dummy.png", 16), -1, previewHeight);
+		imgDummy = ImageUtil.generatePreviewImage(Icons.getBHImage("Dummy.png", 16), -1, previewHeight);
 		iconDummy = new ImageIcon(imgDummy);
 
 		jsp.getVerticalScrollBar().addAdjustmentListener(new PreviewsAdjustmentListener());
 
-		TableTool.internationalizeColumns(jtAdder);
+		TableUtil.internationalizeColumns(jtAdder);
 
-		int selectionTableHeaderWidth = TableTool.calculateColumnHeaderWidth(jtAdder, jtAdder.getColumn("Selection"), 2);
+		int selectionTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(jtAdder, jtAdder.getColumn("Selection"), 2);
 		jtAdder.getColumn("Selection").setMaxWidth(selectionTableHeaderWidth);
 		jtAdder.getColumn("Selection").setPreferredWidth(selectionTableHeaderWidth);
 		jtAdder.getColumn("Selection").setResizable(false);
 
-		int blacklistTableHeaderWidth = TableTool.calculateColumnHeaderWidth(jtAdder, jtAdder.getColumn("Blacklist"), 2);
+		int blacklistTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(jtAdder, jtAdder.getColumn("Blacklist"), 2);
 		jtAdder.getColumn("Blacklist").setMaxWidth(blacklistTableHeaderWidth);
 		jtAdder.getColumn("Blacklist").setPreferredWidth(blacklistTableHeaderWidth);
 		jtAdder.getColumn("Blacklist").setResizable(false);
@@ -602,7 +599,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		jtAdder.getTableHeader().setReorderingAllowed(false);
 
-		jtAdder.setRowHeight(TableTool.calculateRowHeight(jtAdder, false, true));
+		jtAdder.setRowHeight(TableUtil.calculateRowHeight(jtAdder, false, true));
 		defaultRowHeight = jtAdder.getRowHeight();
 
 		jtAdder.addKeyListener(new KeyAdapter() {
@@ -813,42 +810,42 @@ public class AdderPanel extends JFrame implements ActionListener {
 		GridBagConstraints gbc = new GridBagConstraints();
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, lblReferrer, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, lblReferrer, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, txtReferrer, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, txtReferrer, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, lblTitle, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, lblTitle, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, txtTitle, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, txtTitle, this);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, btnTitleUpdate, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, btnTitleUpdate, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, lblTargetDir, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, lblTargetDir, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 1.0, 0.0);
-		addItemToFrame(gbl, gbc, txtTargetDir, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, txtTargetDir, this);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, btnTargetDir, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, btnTargetDir, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, pnlDisplayOptions, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, pnlDisplayOptions, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, pnlTargetDirAuto, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, pnlTargetDirAuto, this);
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, new JLabel(), this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, new JLabel(), this);
 		i++;
 		gbc = gblt.getGBC(0, i, 3, 1, 1.0, 1.0);
-		addItemToFrame(gbl, gbc, jsp, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, jsp, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 3, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, pnlActions, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, pnlActions, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 3, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, pg, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, pg, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 3, 1, 0.0, 0.0);
-		addItemToFrame(gbl, gbc, pnlOKCancel, this);
+		GridBagLayoutUtil.addItemToFrame(gbl, gbc, pnlOKCancel, this);
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtReferrer);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtTitle);
@@ -1421,9 +1418,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 		} else if (e.getSource() == btnSelectOther) {
 			invertSelection(false);
 		} else if (e.getSource() == itemTargetBySelection) {
-			File file = FileDialogTool.showFolderDialog(this, (String)txtTargetDir.getSelectedItem(), null);
+			File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
 			if (file != null) {
-				String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 				int folderIndex = getIndexForFolder(folder);
 				if (folderIndex < 0) {
 					txtTargetDir.addItem(folder);
@@ -1443,10 +1440,10 @@ public class AdderPanel extends JFrame implements ActionListener {
 			String input = PathRenameDialog.showPathRenameDialog(this, (String)txtTargetDir.getSelectedItem());
 			if ((input != null) && (input.length() > 2)) {
 				if (!input.endsWith("/") && !input.endsWith("\\")) {
-					input += FileTool.FILE_SEPERATOR;
+					input += FileUtil.FILE_SEPERATOR;
 				}
 				input = BHUtil.filterPath(input);
-				input = FileTool.reducePathLength(input);
+				input = FileUtil.reducePathLength(input);
 				int folderIndex = getIndexForFolder(input);
 				if (folderIndex < 0) {
 					txtTargetDir.addItem(input);
@@ -1726,7 +1723,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		if (sbNewPath.length() > 0) {
 			char lastChar = sbNewPath.charAt(sbNewPath.length() - 1);
 			if (lastChar != '/' && lastChar != '\\') {
-				sbNewPath.append(FileTool.FILE_SEPERATOR);
+				sbNewPath.append(FileUtil.FILE_SEPERATOR);
 			}
 		}
 
@@ -1734,13 +1731,13 @@ public class AdderPanel extends JFrame implements ActionListener {
 			String title = BHUtil.filterFilename(txtTitle.getText());
 			if (!title.isEmpty()) {
 				sbNewPath.append(title);
-				sbNewPath.append(FileTool.FILE_SEPERATOR);
+				sbNewPath.append(FileUtil.FILE_SEPERATOR);
 			}
 		}
 
 		String newPath = sbNewPath.toString();
 		newPath = BHUtil.filterPath(newPath);
-		newPath = FileTool.reducePathLength(newPath);
+		newPath = FileUtil.reducePathLength(newPath);
 
 		int pathColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
 		model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
@@ -1752,9 +1749,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			int rowModelIndex = jtAdder.convertRowIndexToModel(i);
 			String oldPath = (String)model.getValueAt(rowModelIndex, pathColumnModelIndex);
-			String newPath = oldPath + BHUtil.filterFilename(value) + FileTool.FILE_SEPERATOR;
+			String newPath = oldPath + BHUtil.filterFilename(value) + FileUtil.FILE_SEPERATOR;
 			newPath = BHUtil.filterPath(newPath);
-			newPath = FileTool.reducePathLength(newPath);
+			newPath = FileUtil.reducePathLength(newPath);
 			model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
 		}
 		model.setFireTableCellUpdatedEnabled(true);
@@ -1863,7 +1860,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		int selectedRows[] = jtAdder.getSelectedRows();
 		if (selectedRows.length > 0) {
 			String defaultvalue = (String)model.getValueAt(jtAdder.convertRowIndexToModel(selectedRows[0]), filenameColumnModelIndex);
-			defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileTool.FILE_SEPERATOR) + 1);
+			defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 			String[] input = FileRenameDialog.showFileRenameDialog(this, "", defaultvalue, selectedRows.length);
 			if (input != null) {
 				int index = Integer.parseInt(input[1]);
@@ -1883,7 +1880,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 							filenameFormat = input[0];
 						}
 						filenameFormat = input[3] + filenameFormat + input[4];
-						newFilename = getNumberedFilename(filenameFormat, index);
+						newFilename = FileUtil.getNumberedFilename(filenameFormat, index);
 					}
 
 					if (newFilename == null || newFilename.isEmpty()) {
@@ -1916,13 +1913,13 @@ public class AdderPanel extends JFrame implements ActionListener {
 		String input = PathRenameDialog.showPathRenameDialog(this, defaultPath);
 		if (input != null && input.length() > 2) {
 			if (!input.endsWith("/") && !input.endsWith("\\")) {
-				input += FileTool.FILE_SEPERATOR;
+				input += FileUtil.FILE_SEPERATOR;
 			}
 			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 				String newPath = BHUtil.filterPath(input);
-				newPath = FileTool.reducePathLength(newPath);
+				newPath = FileUtil.reducePathLength(newPath);
 				model.setValueAt(newPath, modelIndex, folderColumnModelIndex);
 				model.setValueAt(false, modelIndex, folderOverrideColumnModelIndex);
 			}
@@ -1935,9 +1932,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * ChangeTargetBySelection
 	 */
 	private synchronized void actionChangeTargetBySelection() {
-		File file = FileDialogTool.showFolderDialog(this, (String)txtTargetDir.getSelectedItem(), null);
+		File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
 		if (file != null) {
-			String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+			String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 			int selectedRows[] = jtAdder.getSelectedRows();
 			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
@@ -2043,7 +2040,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsAdder(TableTool.serializeColWidthSetting(jtAdder));
+		SettingsManager.instance().setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -2054,7 +2051,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(jtAdder, SettingsManager.instance().getColWidthsAdder());
+		TableUtil.applyColWidths(jtAdder, SettingsManager.instance().getColWidthsAdder());
 	}
 
 	/**

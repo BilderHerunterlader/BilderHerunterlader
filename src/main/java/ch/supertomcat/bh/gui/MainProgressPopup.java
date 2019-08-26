@@ -8,8 +8,8 @@ import javax.swing.BoxLayout;
 import javax.swing.JProgressBar;
 import javax.swing.JWindow;
 
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * 

@@ -20,7 +20,7 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
  * Host-Class for Rules

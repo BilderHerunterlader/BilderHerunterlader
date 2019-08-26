@@ -33,8 +33,8 @@ import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.UnitFormatTool;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * Class which handles the SystemTray
@@ -236,7 +236,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	private String getSystemTrayToolTipText() {
 		DownloadQueueManager queue = DownloadQueueManager.instance();
 		if (queue.isDownloading()) {
-			String downloadRate = UnitFormatTool.getBitrateString(queue.getDownloadBitrate());
+			String downloadRate = UnitFormatUtil.getBitrateString(queue.getDownloadBitrate());
 			if (downloadRate.length() == 0) {
 				downloadRate = Localization.getString("NotAvailable");
 			}

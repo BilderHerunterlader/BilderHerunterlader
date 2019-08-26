@@ -64,15 +64,15 @@ import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
-import ch.supertomcat.supertomcattools.cookietools.BrowserCookies;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.FileDialogTool;
-import ch.supertomcat.supertomcattools.guitools.GridBagLayoutTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.copyandpaste.JTextComponentCopyAndPaste;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultNumberColorRowRenderer;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultNumberColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Settings-Panel
@@ -899,9 +899,9 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	private GridBagLayout gblOther = new GridBagLayout();
 
 	/**
-	 * GridBagLayoutTool
+	 * GridBagLayoutUtil
 	 */
-	private GridBagLayoutTool gblt = new GridBagLayoutTool(5, 10, 5, 5);
+	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
 	 * Settingsmanager
@@ -1119,7 +1119,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		rbHTTP.addChangeListener(this);
 		cbAuth.addChangeListener(this);
 
-		TableTool.internationalizeColumns(jtSubdirs);
+		TableUtil.internationalizeColumns(jtSubdirs);
 
 		jtSubdirs.getColumn("SubdirMinimum").setCellEditor(new SubdirCellEditor());
 		jtSubdirs.getColumn("SubdirMaximum").setCellEditor(new SubdirCellEditor());
@@ -1132,7 +1132,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		jtSubdirs.getColumn("SubdirMaximum").setCellRenderer(new DefaultNumberColorRowRenderer());
 		jtSubdirs.getColumn("SubdirResolutionMinimum").setCellRenderer(new DefaultStringColorRowRenderer());
 		jtSubdirs.getColumn("SubdirResolutionMaximum").setCellRenderer(new DefaultStringColorRowRenderer());
-		jtSubdirs.setRowHeight(TableTool.calculateRowHeight(jtSubdirs, true, true));
+		jtSubdirs.setRowHeight(TableUtil.calculateRowHeight(jtSubdirs, true, true));
 		Dimension preferredScrollableTableSize = new Dimension(jtSubdirs.getPreferredScrollableViewportSize().width, 5 * jtSubdirs.getRowHeight());
 		jtSubdirs.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		jtSubdirs.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
@@ -1173,289 +1173,289 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		// Paths
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, lblStdSavePath, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, lblStdSavePath, pnlPaths);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, txtStdSavePath, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, txtStdSavePath, pnlPaths);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, btnStdSavePath, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, btnStdSavePath, pnlPaths);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, lblRememberLastUsedPath, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, lblRememberLastUsedPath, pnlPaths);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, chkRememberLastUsedPath, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, chkRememberLastUsedPath, pnlPaths);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, lblSubdirsEnabled, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, lblSubdirsEnabled, pnlPaths);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, chkSubdirsEnabled, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, chkSubdirsEnabled, pnlPaths);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, lblSubdirsResolutionMode, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, lblSubdirsResolutionMode, pnlPaths);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, cmbSubdirsResolutionMode, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, cmbSubdirsResolutionMode, pnlPaths);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.9, 0.3);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, spSubdirs, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, spSubdirs, pnlPaths);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblPaths, gbc, pnlSubdirButtons, pnlPaths);
+		GridBagLayoutUtil.addItemToPanel(gblPaths, gbc, pnlSubdirButtons, pnlPaths);
 
 		// Connection
 		i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, rbNoProxy, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, rbNoProxy, pnlConnection);
 		gbc = gblt.getGBC(1, i, 4, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, rbHTTP, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, rbHTTP, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblProxyName, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblProxyName, pnlConnection);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtProxyName, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtProxyName, pnlConnection);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblProxyPort, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblProxyPort, pnlConnection);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtProxyPort, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtProxyPort, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, cbAuth, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, cbAuth, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblProxyUser, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblProxyUser, pnlConnection);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtProxyUser, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtProxyUser, pnlConnection);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblProxyPassword, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblProxyPassword, pnlConnection);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtProxyPassword, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtProxyPassword, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblConnectionCount, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblConnectionCount, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, sldConnectionCount, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, sldConnectionCount, pnlConnection);
 		gbc = gblt.getGBC(5, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtConnectionCount, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtConnectionCount, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblConnectionCountPerHost, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblConnectionCountPerHost, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, sldConnectionCountPerHost, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, sldConnectionCountPerHost, pnlConnection);
 		gbc = gblt.getGBC(5, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtConnectionCountPerHost, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtConnectionCountPerHost, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblTimeout, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblTimeout, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtTimeout, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtTimeout, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblCookies, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookies, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, cmbCookies, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, cmbCookies, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblCookiesOpera, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookiesOpera, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, pnlCookiesOpera, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesOpera, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblCookiesOperaNew, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookiesOperaNew, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, pnlCookiesOperaNew, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesOperaNew, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblCookiesFirefox, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookiesFirefox, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, pnlCookiesFirefox, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesFirefox, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblCookiesPaleMoon, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookiesPaleMoon, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, pnlCookiesPaleMoon, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesPaleMoon, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, lblUserAgent, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblUserAgent, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblConnection, gbc, txtUserAgent, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtUserAgent, pnlConnection);
 
 		// GUI
 		i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblLAF, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblLAF, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, cmbLAF, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbLAF, pnlGUI);
 		// i++;
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblLanguage, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblLanguage, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, cmbLanguage, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbLanguage, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblSizeView, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblSizeView, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, cmbSizeView, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbSizeView, pnlGUI);
 		// i++;
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblProgressView, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblProgressView, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, cmbProgressView, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbProgressView, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadRate, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblDownloadRate, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadRate, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkDownloadRate, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblWindowSizePos, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblWindowSizePos, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkWindowSizePos, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkWindowSizePos, pnlGUI);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadSelectionWindowSizePos, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblDownloadSelectionWindowSizePos, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadSelectionWindowSizePos, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkDownloadSelectionWindowSizePos, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblSaveTableColumnSizes, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblSaveTableColumnSizes, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkSaveTableColumnSizes, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkSaveTableColumnSizes, pnlGUI);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblSaveTableSortOrders, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblSaveTableSortOrders, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkSaveTableSortOrders, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkSaveTableSortOrders, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadsCompleteNotification, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblDownloadsCompleteNotification, pnlGUI);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadsCompleteNotification, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkDownloadsCompleteNotification, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblDownloadPreviews, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblDownloadPreviews, pnlGUI);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, chkDownloadPreviews, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, chkDownloadPreviews, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, lblPreviewSize, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblPreviewSize, pnlGUI);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, txtPreviewSize, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, txtPreviewSize, pnlGUI);
 		i++;
 		gbc = gblt.getGBC(0, i, 4, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblGUI, gbc, pnlRegexReplacePageTitle, pnlGUI);
+		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, pnlRegexReplacePageTitle, pnlGUI);
 
 		// Keywords
 		i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, lblKeywordMatchMode, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, lblKeywordMatchMode, pnlKeywords);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, cmbKeywordMatchMode, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, cmbKeywordMatchMode, pnlKeywords);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, lblDeselectNoKeyword, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, lblDeselectNoKeyword, pnlKeywords);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, chkDeselectNoKeyword, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, chkDeselectNoKeyword, pnlKeywords);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, lblDisplayKeywordsWhenNoMatches, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, lblDisplayKeywordsWhenNoMatches, pnlKeywords);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblKeywords, gbc, chkDisplayKeywordsWhenNoMatches, pnlKeywords);
+		GridBagLayoutUtil.addItemToPanel(gblKeywords, gbc, chkDisplayKeywordsWhenNoMatches, pnlKeywords);
 		i++;
 
 		// Download
 		i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblSaveLogs, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblSaveLogs, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, chkSaveLogs, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, chkSaveLogs, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblAutoStartDownloads, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblAutoStartDownloads, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, chkAutoStartDownloads, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, chkAutoStartDownloads, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblAutoRetryAfterDownloadsComplete, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblAutoRetryAfterDownloadsComplete, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, chkAutoRetryAfterDownloadsComplete, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, chkAutoRetryAfterDownloadsComplete, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblAllowedFilenameChars, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblAllowedFilenameChars, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, cmbAllowedFilenameChars, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, cmbAllowedFilenameChars, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblMaxFailedCount, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblMaxFailedCount, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, pnlMaxFailedCount, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, pnlMaxFailedCount, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblMinFilesize, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblMinFilesize, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, txtMinFilesize, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, txtMinFilesize, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, lblSortDownloadsOnStart, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblSortDownloadsOnStart, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, cmbSortDownloadsOnStart, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, cmbSortDownloadsOnStart, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblDownload, gbc, pnlRegexReplaceFilename, pnlDownload);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, pnlRegexReplaceFilename, pnlDownload);
 
 		// Other
 		i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblUpdates, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblUpdates, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkUpdates, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkUpdates, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblCheckClipboard, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblCheckClipboard, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkCheckClipboard, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkCheckClipboard, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblWebExtensionPort, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblWebExtensionPort, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, txtWebExtensionPort, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, txtWebExtensionPort, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblAlwaysAddTitle, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblAlwaysAddTitle, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkAlwaysAddTitle, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkAlwaysAddTitle, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblRulesBefore, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblRulesBefore, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkRulesBefore, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkRulesBefore, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblBackupDB, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblBackupDB, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkBackupDB, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkBackupDB, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblDefragDB, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblDefragDB, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, chkDefragDB, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, chkDefragDB, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblDefragMinFilesize, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblDefragMinFilesize, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, txtDefragMinFilesize, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, txtDefragMinFilesize, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblDebugLevel, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblDebugLevel, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, cmbDebugLevel, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, cmbDebugLevel, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, lblThreadCount, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblThreadCount, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, sldThreadCount, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, sldThreadCount, pnlOther);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER);
-		GridBagLayoutTool.addItemToPanel(gblOther, gbc, txtThreadCount, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, txtThreadCount, pnlOther);
 
 		gbc = new GridBagConstraints();
 		gbc = gblt.getGBC(0, 0, 1, 1, 1.0, 0.8);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, tp, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, tp, this);
 		gbc = gblt.getGBC(0, 1, 1, 1, 0.1, 0.0);
-		GridBagLayoutTool.addItemToDialog(gbl, gbc, pnlButtons, this);
+		GridBagLayoutUtil.addItemToDialog(gbl, gbc, pnlButtons, this);
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtCookiesFirefox);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtCookiesPaleMoon);
@@ -1650,9 +1650,9 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			SettingsManager.instance().removeSettingsListener(this);
 			this.dispose();
 		} else if (e.getSource() == btnStdSavePath) {
-			File file = FileDialogTool.showFolderDialog(this, txtStdSavePath.getText(), null);
+			File file = FileDialogUtil.showFolderSaveDialog(this, txtStdSavePath.getText(), null);
 			if (file != null) {
-				String folder = file.getAbsolutePath() + FileTool.FILE_SEPERATOR;
+				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 				txtStdSavePath.setText(folder);
 				file = null;
 			}
@@ -1683,7 +1683,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 					return "cookies4.dat";
 				}
 			};
-			File file = FileDialogTool.showFileOpenDialog(this, txtCookiesOpera.getText(), filter);
+			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOpera.getText(), filter);
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesOpera.setText(strFile);
@@ -1705,7 +1705,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 					return "Cookies";
 				}
 			};
-			File file = FileDialogTool.showFileOpenDialog(this, txtCookiesOperaNew.getText(), filter);
+			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOperaNew.getText(), filter);
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesOperaNew.setText(strFile);
@@ -1727,7 +1727,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 					return "cookies.txt, cookies.sqlite";
 				}
 			};
-			File file = FileDialogTool.showFileOpenDialog(this, txtCookiesFirefox.getText(), filter);
+			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesFirefox.getText(), filter);
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesFirefox.setText(strFile);
@@ -1749,7 +1749,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 					return "cookies.sqlite";
 				}
 			};
-			File file = FileDialogTool.showFileOpenDialog(this, txtCookiesPaleMoon.getText(), filter);
+			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesPaleMoon.getText(), filter);
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesPaleMoon.setText(strFile);
@@ -2073,7 +2073,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsSubdirs(TableTool.serializeColWidthSetting(jtSubdirs));
+		SettingsManager.instance().setColWidthsSubdirs(TableUtil.serializeColWidthSetting(jtSubdirs));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -2084,7 +2084,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableTool.applyColWidths(jtSubdirs, SettingsManager.instance().getColWidthsSubdirs());
+		TableUtil.applyColWidths(jtSubdirs, SettingsManager.instance().getColWidthsSubdirs());
 	}
 
 	@Override

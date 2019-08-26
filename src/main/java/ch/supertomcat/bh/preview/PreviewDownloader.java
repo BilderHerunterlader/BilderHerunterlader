@@ -3,7 +3,7 @@ package ch.supertomcat.bh.preview;
 import java.awt.image.BufferedImage;
 import java.util.concurrent.Callable;
 
-import ch.supertomcat.supertomcattools.imagetools.ImageTool;
+import ch.supertomcat.supertomcatutils.image.ImageUtil;
 
 /**
  * Class for downloading previews
@@ -52,11 +52,12 @@ public class PreviewDownloader implements Callable<PreviewDownloader.DownloadedP
 	 */
 	@Override
 	public DownloadedPreview call() throws Exception {
-		if (url == null)
+		if (url == null) {
 			return new DownloadedPreview(index, null, null);
-		BufferedImage imgPreview = ImageTool.downloadImage(url, null, connectTimeout, readTimeout, false);
+		}
+		BufferedImage imgPreview = ImageUtil.downloadImage(url, null, connectTimeout, readTimeout, false);
 		if (imgPreview != null) {
-			imgPreview = ImageTool.generatePreviewImage(imgPreview, -1, previewHeight);
+			imgPreview = ImageUtil.generatePreviewImage(imgPreview, -1, previewHeight);
 		}
 		return new DownloadedPreview(index, url, imgPreview);
 	}

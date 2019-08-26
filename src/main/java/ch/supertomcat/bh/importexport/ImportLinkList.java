@@ -14,8 +14,8 @@ import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Class for import links from textfiles
@@ -32,7 +32,7 @@ public abstract class ImportLinkList {
 	public static void importLinkList() {
 		File file = Import.getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedImportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
 			read(file);
 			file = null;

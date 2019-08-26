@@ -8,18 +8,18 @@ import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Host class for ImageShack
  * 
- * @version 3.7
+ * @version 3.8
  */
 public class HostImageShack extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.7";
+	public static final String VERSION = "3.8";
 
 	/**
 	 * Name dieser Klasse

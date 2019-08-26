@@ -19,8 +19,8 @@ import ch.supertomcat.bh.update.UpdateSource;
 import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateSourceFile;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * UpdateSource implementation which retrieves Updates by an xml file over HTTP
@@ -39,7 +39,7 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 		List<UpdateObject> updateHostPlugins = new ArrayList<>();
 		List<UpdateObject> updateRedirectPlugins = new ArrayList<>();
 
-		url = HTTPTool.encodeURL(url);
+		url = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
 		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
 			method = new HttpGet(url);

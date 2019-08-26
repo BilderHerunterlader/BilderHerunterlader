@@ -42,13 +42,13 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.log.DirectoryLogObject;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.FileExplorerTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.IProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultBooleanColorRowRenderer;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * Directory Log
@@ -149,7 +149,7 @@ public class DirectoryLog extends JPanel {
 	 * Constructor
 	 */
 	public DirectoryLog() {
-		TableTool.internationalizeColumns(jtLog);
+		TableUtil.internationalizeColumns(jtLog);
 		setLayout(new BorderLayout());
 		jtLog.getColumn("DateTime").setMinWidth(100);
 		jtLog.getColumn("DateTime").setMaxWidth(150);
@@ -158,7 +158,7 @@ public class DirectoryLog extends JPanel {
 		jtLog.getColumn("FolderExists").setCellRenderer(new DefaultBooleanColorRowRenderer());
 		jtLog.getTableHeader().setReorderingAllowed(false);
 		jtLog.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtLog.setRowHeight(TableTool.calculateRowHeight(jtLog, false, true));
+		jtLog.setRowHeight(TableUtil.calculateRowHeight(jtLog, false, true));
 
 		popupMenu.add(menuItemOpenDirectory);
 		menuItemOpenDirectory.addActionListener(e -> actionOpenDirectories());
@@ -281,7 +281,7 @@ public class DirectoryLog extends JPanel {
 					dirs.add(file);
 				}
 				for (String dir : dirs) {
-					FileExplorerTool.openDirectoryInFilemanager(dir);
+					FileExplorerUtil.openDirectoryInFilemanager(dir);
 				}
 			}
 		});

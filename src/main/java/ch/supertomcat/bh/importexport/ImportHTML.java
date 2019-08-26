@@ -31,10 +31,10 @@ import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Class for importing URLs from HTML
@@ -55,7 +55,7 @@ public abstract class ImportHTML {
 			Main.instance().addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("ImportingHTMLFile") + "...");
-			SettingsManager.instance().setLastUsedImportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 
 			try (FileInputStream in = new FileInputStream(file)) {
 				// Parse the inputstream by tidy
@@ -109,7 +109,7 @@ public abstract class ImportHTML {
 	 */
 	public static void importHTML(String url, String referrer, boolean embeddedImages) {
 		String cookies = CookieManager.getCookies(url);
-		url = HTTPTool.encodeURL(url);
+		url = HTTPUtil.encodeURL(url);
 
 		/*
 		 * A user reported to me, that when BH is running for a while and then

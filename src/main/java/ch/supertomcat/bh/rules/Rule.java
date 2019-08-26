@@ -32,11 +32,10 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.htmltools.HTMLTool;
-import ch.supertomcat.supertomcattools.httptools.HTTPTool;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionString;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.html.HTMLUtil;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * A Rule can be defined by the user.
@@ -183,7 +182,7 @@ public class Rule extends Hoster {
 	public Rule(String file, boolean developer) throws PatternSyntaxException {
 		this.strFile = file;
 		setDeveloper(developer);
-		deactivateOption = new DeactivateOption(FileTool.getFilename(this.strFile));
+		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile));
 		boolean b = readRule();
 		this.urlPattern = Pattern.compile(this.pattern);
 		if (!b) {
@@ -209,7 +208,7 @@ public class Rule extends Hoster {
 		pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
 		pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
 		this.strFile = file;
-		deactivateOption = new DeactivateOption(FileTool.getFilename(this.strFile));
+		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile));
 	}
 
 	/**
@@ -250,18 +249,18 @@ public class Rule extends Hoster {
 	 * @throws HostException
 	 */
 	public String[] getURLAndFilename(URLParseObject upo) throws HostException {
-		return getURLAndFilename(upo, null);
+		return getURLAndFilename(upo, false);
 	}
 
 	/**
 	 * Returns parsed URL and filename
 	 * 
 	 * @param upo URLParseObject
-	 * @param pagesourcecode Container-Page-Source-Code
+	 * @param pagesourcecode True if page source code should be set into UPO, false otherwise
 	 * @return URL and filename
 	 * @throws HostException
 	 */
-	public String[] getURLAndFilename(URLParseObject upo, OptionString pagesourcecode) throws HostException {
+	public String[] getURLAndFilename(URLParseObject upo, boolean pagesourcecode) throws HostException {
 		Pic pic = upo.getPic();
 		String url = upo.getContainerURL();
 		String thumbURL = upo.getThumbURL();
@@ -312,8 +311,8 @@ public class Rule extends Hoster {
 			boolean sendCookies = pipelines.get(i).isSendCookies();
 			if (pipelines.get(i).getMode() == RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
 				htmlcode = downloadContainerPage(this.name, pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
-				if (pagesourcecode != null) {
-					pagesourcecode.setValue(htmlcode);
+				if (pagesourcecode) {
+					upo.addInfo("PageSourceCode", htmlcode);
 				}
 				logger.debug(this.name + " -> " + url + " -> Download Container-Page done -> Result: " + htmlcode);
 				if (i == 0) {
@@ -355,7 +354,7 @@ public class Rule extends Hoster {
 				}
 			}
 
-			pipelineResult = HTTPTool.decodeURL(pipelineResult);
+			pipelineResult = HTTPUtil.decodeURL(pipelineResult);
 			logger.debug(this.name + " -> " + url + " -> pipe[" + i + "] -> Result: " + pipelineResult);
 
 			/*
@@ -424,14 +423,14 @@ public class Rule extends Hoster {
 					filenamePageSourceReferrer = htmlCodeLastReferrer;
 				} else {
 					htmlcode = downloadContainerPage(this.name, filenamePageSourceURL, filenamePageSourceReferrer);
-					if (pagesourcecode != null) {
-						pagesourcecode.setValue(htmlcode);
+					if (pagesourcecode) {
+						upo.addInfo("PageSourceCode", htmlcode);
 					}
 				}
 
 				retval[1] = pipelineFilename.getCorrectedFilename(filenamePageSourceURL, thumbURL, htmlcode, pic);
 				String encodedFilename = retval[1];
-				String encoding = HTMLTool.getEncodingFromSourceCode(htmlcode);
+				String encoding = HTMLUtil.getEncodingFromSourceCode(htmlcode);
 				if (encoding.length() > 0 && isEncodingAvailable(encoding)) {
 					try {
 						encodedFilename = new String(encodedFilename.getBytes(), encoding);

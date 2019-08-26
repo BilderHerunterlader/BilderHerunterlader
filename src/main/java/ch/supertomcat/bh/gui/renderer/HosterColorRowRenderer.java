@@ -8,7 +8,7 @@ import javax.swing.table.TableCellRenderer;
 
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IRedirect;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * HosterColorRowRenderer

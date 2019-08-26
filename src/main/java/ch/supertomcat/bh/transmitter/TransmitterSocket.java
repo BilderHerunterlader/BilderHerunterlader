@@ -12,7 +12,7 @@ import java.net.Socket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * This class is a server socket, which accepts connections from browsers
@@ -77,7 +77,7 @@ public class TransmitterSocket implements Runnable {
 	 * @param port Port-Number
 	 */
 	private void writePortFile(int port) {
-		String filename = System.getProperty("user.home") + FileTool.FILE_SEPERATOR + ".BH" + FileTool.FILE_SEPERATOR + "port.txt";
+		String filename = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + ".BH" + FileUtil.FILE_SEPERATOR + "port.txt";
 		File file = new File(filename);
 		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
 			// Write the port to the file

@@ -9,7 +9,7 @@ import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.classloader.impl.HostClassLoader;
 import ch.supertomcat.bh.hoster.classloader.impl.RedirectClassLoader;
 import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
  * Classloader for Host or Redirect Classes

@@ -2,7 +2,7 @@ package ch.supertomcat.bh.pic;
 
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Pic State Enum

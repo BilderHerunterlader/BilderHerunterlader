@@ -33,9 +33,9 @@ import ch.supertomcat.bh.keywords.KeywordFilenameMatches;
 import ch.supertomcat.bh.keywords.KeywordMatch;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchType;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
  * Dialog for selecting keywords (Search by filename)
@@ -106,7 +106,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 
 		setLayout(new BorderLayout());
 
-		TableTool.internationalizeColumns(table);
+		TableUtil.internationalizeColumns(table);
 
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
@@ -119,7 +119,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 			int preferredTableWidth = 120 * charWidth;
 			table.setPreferredScrollableViewportSize(new Dimension(preferredTableWidth, table.getPreferredScrollableViewportSize().height));
 		}
-		table.setRowHeight(TableTool.calculateRowHeight(table, true, new JComboBox<String>()));
+		table.setRowHeight(TableUtil.calculateRowHeight(table, true, new JComboBox<String>()));
 
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
@@ -307,14 +307,14 @@ public class AdderKeywordSelectorFilename extends JDialog {
 
 	private void updateColWidthsToSettingsManager() {
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			SettingsManager.instance().setColWidthsAdderKeywordSelectorFilename(TableTool.serializeColWidthSetting(table));
+			SettingsManager.instance().setColWidthsAdderKeywordSelectorFilename(TableUtil.serializeColWidthSetting(table));
 			SettingsManager.instance().writeSettings(true);
 		}
 	}
 
 	private boolean updateColWidthsFromSettingsManager() {
 		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsAdderKeywordSelectorFilename());
+			TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsAdderKeywordSelectorFilename());
 			return true;
 		}
 		return false;

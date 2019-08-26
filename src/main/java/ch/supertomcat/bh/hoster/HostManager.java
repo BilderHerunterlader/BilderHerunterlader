@@ -9,6 +9,7 @@ import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,9 +24,8 @@ import ch.supertomcat.bh.hoster.urlchecker.RemoveDuplicatesRunnable;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * Class which holds the host-classes and provides methods to
@@ -243,7 +243,7 @@ public class HostManager {
 	 * @param progress ProgessObserver
 	 * @return List of URL-Objects if additional URLs were added or null
 	 */
-	public List<URL> checkURL(URL urlObject, OptionBoolean bOK, ProgressObserver progress) {
+	public List<URL> checkURL(URL urlObject, AtomicBoolean bOK, ProgressObserver progress) {
 		for (Host host : hosts) {
 			// Check if the hostclass accepts the url
 			if (host.isEnabled() && host.isFromThisHoster(urlObject.getURL())) {
@@ -253,7 +253,7 @@ public class HostManager {
 					urlObject.setFilenameCorrected(filename);
 				}
 
-				bOK.setValue(true);
+				bOK.set(true);
 
 				if (checkForIHosterURLAdderInterface(host) != null) {
 					IHosterURLAdder ihua = (IHosterURLAdder)host;
@@ -394,7 +394,7 @@ public class HostManager {
 		CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
 		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
 
-		OptionBoolean bContains = new OptionBoolean("", false);
+		AtomicBoolean bContains = new AtomicBoolean(false);
 
 		RemoveDuplicatesRunnable rdt[] = new RemoveDuplicatesRunnable[threadCount];
 		for (int t = 0; t < threadCount; t++) {
@@ -411,7 +411,7 @@ public class HostManager {
 
 		for (int i = 0; i < originalUrls.size(); i++) {
 			// Reset Value
-			bContains.setValue(false);
+			bContains.set(false);
 
 			/*
 			 * Start all threads (runnables)
@@ -431,7 +431,7 @@ public class HostManager {
 				logger.error(e.getMessage(), e);
 			}
 
-			if (bContains.getValue() == false) {
+			if (bContains.get() == false) {
 				// Add the current URL to the result-Array
 				urls.add(originalUrls.get(i));
 			} else {

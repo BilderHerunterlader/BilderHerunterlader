@@ -3,15 +3,15 @@ package ch.supertomcat.bh.settings;
 import java.util.HashMap;
 import java.util.Map;
 
-import ch.supertomcat.supertomcattools.cookietools.BrowserCookies;
-import ch.supertomcat.supertomcattools.cookietools.firefox.FirefoxCookieStrategy;
-import ch.supertomcat.supertomcattools.cookietools.firefox.FirefoxCookies;
-import ch.supertomcat.supertomcattools.cookietools.opera.newformat.OperaNewCookieStrategy;
-import ch.supertomcat.supertomcattools.cookietools.opera.newformat.OperaNewCookies;
-import ch.supertomcat.supertomcattools.cookietools.opera.oldformat.OperaCookieStrategy;
-import ch.supertomcat.supertomcattools.cookietools.opera.oldformat.OperaCookies;
-import ch.supertomcat.supertomcattools.cookietools.palemoon.PaleMoonCookieStrategy;
-import ch.supertomcat.supertomcattools.cookietools.palemoon.PaleMoonCookies;
+import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
+import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookieStrategy;
+import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookies;
+import ch.supertomcat.supertomcatutils.http.cookies.opera.newformat.OperaNewCookieStrategy;
+import ch.supertomcat.supertomcatutils.http.cookies.opera.newformat.OperaNewCookies;
+import ch.supertomcat.supertomcatutils.http.cookies.opera.oldformat.OperaCookieStrategy;
+import ch.supertomcat.supertomcatutils.http.cookies.opera.oldformat.OperaCookies;
+import ch.supertomcat.supertomcatutils.http.cookies.palemoon.PaleMoonCookieStrategy;
+import ch.supertomcat.supertomcatutils.http.cookies.palemoon.PaleMoonCookies;
 
 /**
  * Class which provides methods to get the cookies from a browser.

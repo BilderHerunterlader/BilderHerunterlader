@@ -14,7 +14,7 @@ import ch.supertomcat.bh.gui.adder.AdderKeywordSelectorFilename;
 import ch.supertomcat.bh.gui.adder.AdderKeywordSelectorTitle;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchType;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * A Thread which searches for Keywords for Title or URLs

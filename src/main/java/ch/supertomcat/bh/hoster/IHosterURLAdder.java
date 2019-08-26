@@ -1,11 +1,10 @@
 package ch.supertomcat.bh.hoster;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
-
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
  * Interface which a host-classes can implement, but it is not needed.
@@ -21,7 +20,7 @@ import ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean;
  * The other difference to IHoster is, that the URL-Object is the argument, not only
  * the url. And so the host-class could now also change the target-path at this point.
  * 
- * When additional URLs are added, then it could be required to not accept the 
+ * When additional URLs are added, then it could be required to not accept the
  * Container-URL, so when the isFromThisHoster-Argument is set to false, then the
  * additional URLs are added, but the Container-URL is not accepted. However the
  * isFromThisHoster-Method from IHoster-Interface needs to return true, otherwise
@@ -39,7 +38,7 @@ public interface IHosterURLAdder {
 	 * @param isFromThisHoster Flag to set if url given is also accepted or not
 	 * @param progress ProgressObserver
 	 * @return Array with additional urls
-	 * @throws Exception 
+	 * @throws Exception
 	 */
-	public List<URL> isFromThisHoster(URL url, OptionBoolean isFromThisHoster, ProgressObserver progress) throws Exception;
+	public List<URL> isFromThisHoster(URL url, AtomicBoolean isFromThisHoster, ProgressObserver progress) throws Exception;
 }

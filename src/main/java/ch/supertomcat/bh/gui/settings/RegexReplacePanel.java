@@ -22,11 +22,11 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.gui.rules.RulePipelineTableModel;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.TableTool;
-import ch.supertomcat.supertomcattools.guitools.tablerenderer.DefaultStringColorRowRenderer;
-import ch.supertomcat.supertomcattools.regextools.RegexReplace;
-import ch.supertomcat.supertomcattools.regextools.RegexReplacePipeline;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
+import ch.supertomcat.supertomcatutils.regex.RegexReplace;
+import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 
 /**
  * Rule-Pipeline-Panel
@@ -99,14 +99,14 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 
 		table = new JTable(model);
 
-		TableTool.internationalizeColumns(table);
+		TableUtil.internationalizeColumns(table);
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
 		updateColWidthsFromSettingsManager();
 		table.getColumnModel().addColumnModelListener(this);
 		table.getTableHeader().setReorderingAllowed(false);
-		table.setRowHeight(TableTool.calculateRowHeight(table, false, true));
+		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 
 		Iterator<RegexReplace> it = pipe.getRegexps().iterator();
 		while (it.hasNext()) {
@@ -146,24 +146,28 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 		if (e.getSource() == btnNew) {
 			RegexReplace rrre = new RegexReplace();
 			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.addRow(rrre.getSearch(), rrre.getReplace());
 			pipe.addRegExp(rrre);
 		} else if (e.getSource() == btnEdit) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			RegexReplace rrre = pipe.getRegexp(row);
 			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
-			if (rme.getCanceled())
+			if (rme.getCanceled()) {
 				return;
+			}
 			model.setValueAt(rrre.getSearch(), row, 0);
 			model.setValueAt(rrre.getReplace(), row, 1);
 		} else if (e.getSource() == btnDelete) {
 			int row = table.getSelectedRow();
-			if (row < 0)
+			if (row < 0) {
 				return;
+			}
 			model.removeRow(row);
 			pipe.removeRegExp(row);
 		} else if (e.getSource() == btnUp) {
@@ -193,9 +197,10 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
-		SettingsManager.instance().setColWidthsRulesEditor(TableTool.serializeColWidthSetting(table));
+		}
+		SettingsManager.instance().setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
 		SettingsManager.instance().writeSettings(true);
 	}
 
@@ -203,9 +208,10 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false)
+		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
 			return;
-		TableTool.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
+		}
+		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
 	}
 
 	@Override

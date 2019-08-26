@@ -13,7 +13,7 @@ import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.applicationtool.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
  * Class which holds the Keywords

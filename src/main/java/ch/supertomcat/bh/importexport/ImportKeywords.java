@@ -20,9 +20,10 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcattools.fileiotools.FileTool;
-import ch.supertomcat.supertomcattools.guitools.Localization;
-import ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver;
+import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for importing keywords from a textfile
@@ -41,7 +42,7 @@ public abstract class ImportKeywords {
 	public static void importKeywords() {
 		File file = Import.getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedImportDialogPath(FileTool.getPathFromFile(file));
+			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			importKeywords(file.getAbsolutePath());
 			file = null;
 		}
@@ -60,7 +61,7 @@ public abstract class ImportKeywords {
 		try (FileInputStream fIn = new FileInputStream(file); InputStream in = new BufferedInputStream(fIn)) {
 			String enc = null;
 			try {
-				enc = FileTool.getEncodingFromInputStream(in);
+				enc = BHUtil.getEncodingFromInputStream(in);
 			} catch (IOException ioe) {
 				logger.error(ioe.getMessage(), ioe);
 			}
