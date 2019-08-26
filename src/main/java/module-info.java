@@ -26,5 +26,6 @@ module ch.supertomcat.bh {
 	requires slf4j.api;
 	requires supertomcatutils;
 	requires swingx.all;
+	requires juniversalchardet;
 	requires syntaxpane;
 }
