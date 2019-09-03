@@ -12,6 +12,6 @@
   <pipeline mode="2" filenamemode="4">
     <regexp search="&lt;title&gt;(.+?) / 500px&lt;/title&gt;" replace="$1.jpg" />
   </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="1" />
+  <pipeline mode="3" filenameDownloadSelectionMode="0" />
   <maxConnections value="0" />
 </rule>
