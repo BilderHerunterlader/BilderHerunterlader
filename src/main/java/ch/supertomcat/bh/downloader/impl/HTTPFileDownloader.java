@@ -6,6 +6,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -260,10 +262,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					failDownload(pic, result, true, Localization.getString("ErrorFilesizeToSmall"));
 					logger.error("Download failed (Filesize is too small): '" + pic.getContainerURL() + "'");
 					// Now we have to delete the file
-					File fileT = new File(target);
-					if (fileT.exists()) {
-						fileT.delete();
-					}
+					deleteFile(target);
 					method.abort();
 					return false;
 				}
@@ -380,10 +379,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 							logger.error("Download failed (Filesize is too small): '" + pic.getContainerURL() + "'");
 						}
 						// Now we have to delete the file
-						File fileT = new File(target);
-						if (fileT.exists()) {
-							fileT.delete();
-						}
+						deleteFile(target);
 						return false;
 					} else {
 						/*
@@ -444,10 +440,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					// If the user stopped the download
 					stopDownload(pic);
 					// Delete the file
-					File fileT = new File(target);
-					if (fileT.exists()) {
-						fileT.delete();
-					}
+					deleteFile(target);
 					return false;
 				}
 			}
@@ -457,15 +450,26 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		} catch (Exception e) {
 			failDownload(pic, result, false, e);
 			// Delete the file
-			File fileT = new File(target);
-			if (fileT.exists()) {
-				fileT.delete();
-			}
+			deleteFile(target);
 			return false;
 		} finally {
 			if (method != null) {
 				method.abort();
 			}
+		}
+	}
+
+	/**
+	 * Delete File
+	 * 
+	 * @param target Target
+	 */
+	private void deleteFile(String target) {
+		try {
+			// Delete the file
+			Files.deleteIfExists(Paths.get(target));
+		} catch (Exception e) {
+			logger.error("Could not delete file: {}", target, e);
 		}
 	}
 
