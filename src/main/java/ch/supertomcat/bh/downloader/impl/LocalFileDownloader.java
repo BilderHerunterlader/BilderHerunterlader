@@ -1,15 +1,14 @@
 package ch.supertomcat.bh.downloader.impl;
 
 import java.io.File;
-import java.io.IOException;
 
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * "FileDownloader" for local files, which only sorts local files on the harddisk into different folders and not actually downloads anything
@@ -49,7 +48,7 @@ public class LocalFileDownloader extends FileDownloaderBase {
 				pic.targetChanged();
 				completeDownload(pic, pic.getSize());
 			}
-		} catch (IOException e) {
+		} catch (Exception e) {
 			failDownload(pic, result, false, e);
 		}
 	}
