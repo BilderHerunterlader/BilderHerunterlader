@@ -17,9 +17,9 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Thread which does the download
@@ -297,7 +297,8 @@ public class Pic implements Runnable, IDownloadListener {
 		logger.info("Downloading: {}", containerURL);
 
 		FileDownloader downloader;
-		if (HTTPUtil.isURL(containerURL)) {
+		String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
+		if (HTTPUtil.isURL(encodedContainerURL)) {
 			downloader = new HTTPFileDownloader();
 		} else {
 			downloader = new LocalFileDownloader();
