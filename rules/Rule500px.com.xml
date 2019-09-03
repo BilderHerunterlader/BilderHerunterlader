@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rule name="500px.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="false" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+<rule name="500px.com" version="0.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="false" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
   <urlpattern>https://500px\.com/photo/.+?</urlpattern>
   <pipes>
     <pipeline mode="1" waitBeforeExecute="1" urlDecodeResult="true">
-      <regexp search="&quot;size&quot;:2048,&quot;url&quot;:&quot;https:\\\/\\\/(.+?)\.500px\.org\\\/photo\\\/(.+?)\\\/(.+?)\\\/(.+?)&quot;" replace="https:\/\/$1\.500px\.org\/photo\/$2\/$3\/$4" />
+      <regexp search="&lt;meta content=[&quot;'](https://.+?\.500px\.org/photo/.+?/.+?/.+?)[&quot;'] property=[&quot;']og:image[&quot;']&gt;" replace="$1" />
     </pipeline>
   </pipes>
   <pipesFailures>
     <pipeline mode="4" checkURL="true" checkThumbURL="true" checkPageSourceCode="false" failureType="6" />
   </pipesFailures>
   <pipeline mode="2" filenamemode="4">
-    <regexp search="window\.PxPreloadedData =.+?&quot;id&quot;:(.+?),&quot;user_id&quot;:(.+?),&quot;name&quot;:&quot;(.+?)&quot;.+?&quot;username&quot;:&quot;(.+?)&quot;.+?&quot;fullname&quot;:&quot;(.+?)&quot;" replace="[uid$2]-[$1]_-_[$3_by_$5($4)].jpg" />
+    <regexp search="&lt;title&gt;(.+?) / 500px&lt;/title&gt;" replace="$1.jpg" />
   </pipeline>
   <pipeline mode="3" filenameDownloadSelectionMode="1" />
   <maxConnections value="0" />
