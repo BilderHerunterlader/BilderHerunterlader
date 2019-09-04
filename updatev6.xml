@@ -7,7 +7,7 @@
 			<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.9.7" src="https://www.dropbox.com/s/e72slgqp5581i85/BH-4.9.6.zip?dl=1" filename="BH-4.9.6.zip" name="BilderHerunterlader" />
+	<main version="4.9.7" src="https://www.dropbox.com/s/i3qbkjo4ffvmzgo/BH-4.9.7.zip?dl=1" filename="BH-4.9.7.zip" name="BilderHerunterlader" />
 	<description>
 		<mainDE>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainDE>
 		<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
