@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <updates>
-	<setuprelease version="4.9.6">
+	<setuprelease version="4.9.7">
 		<description>
-			<mainDE>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainDE>
-			<mainEN>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainEN>
+			<mainDE>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainDE>
+			<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.9.6" src="https://www.dropbox.com/s/e72slgqp5581i85/BH-4.9.6.zip?dl=1" filename="BH-4.9.6.zip" name="BilderHerunterlader" />
+	<main version="4.9.7" src="https://www.dropbox.com/s/e72slgqp5581i85/BH-4.9.6.zip?dl=1" filename="BH-4.9.6.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainDE>
-		<mainEN>- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</mainEN>
+		<mainDE>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainDE>
+		<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
 	</description>
 	<redirects>
 	</redirects>
@@ -41,7 +41,7 @@
 		<!-- End of Host-Classes -->
 		<!-- Start of Rules -->
 		<host version="0.1" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" />
-		<host version="0.1" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
+		<host version="0.2" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/vsnvc3sz3qh1gmv/Ruleabload.xml?dl=1" filename="Ruleabload.xml" name="Ruleabload.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/cb76wq8dkay5t0l/Ruleallmoviephoto.com.xml?dl=1" filename="Ruleallmoviephoto.com.xml" name="Ruleallmoviephoto.com.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/92tyryl0uqu22l9/RuleAppleTrailer.xml?dl=1" filename="RuleAppleTrailer.xml" name="RuleAppleTrailer.xml" />
@@ -140,6 +140,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.9.7" lng="de">- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</changes>
+		<changes version="4.9.7" lng="en">- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</changes>		
 		<changes version="4.9.6" lng="de">- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</changes>
 		<changes version="4.9.6" lng="en">- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</changes>
 		<changes version="4.9.5" lng="de">- Size and position of Download-Selection-Window can now also be saved\n- Bug Fixed: Bitrate was calculated, even when no time has passed and therefore no calculation should be done\n- Preview Size can now be configured in Settings (Note: Setting the size high will increase memory usage and decrease performance and potentially lead to errors)\n- HostYoutube now also can download DASH files\n- Rules are now sorted after edited or new rule added\n- Added separate setting for download path for portable version (directories.properties)\n- Added option for displaying Keyword-Selection-Dialog, when no keyword matches were found\n- Moved download code from Pic to new classes HTTPFileDownloader, LocalFileDownloader, FileDownloaderBase. Separated code for downloading files and move local files.\n- Lots of code improvements and fixes\n- Moved redundant code from host classes to base class\n- Added JAXB dependencies. Therefore "--add-modules java.xml.bind" or "--add-modules ALL-SYSTEM" should not be necessary anymore to start BH in Java9 or Java10\n- Used IzPack 5.1.3 for creating the Jar-Setup (Platform independent setup), which should work with Java9 or Java10</changes>
