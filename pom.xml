@@ -130,13 +130,6 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<repositories>
-		<!-- Repository inside project folder, which holds some artifacts, which are not available in public repositories -->
-		<repository>
-			<id>project-repo</id>
-			<url>file://${project.basedir}/project-repo</url>
-		</repository>
-	</repositories>
 	<build>
 		<finalName>${jar.finalName}</finalName>
 		<plugins>
