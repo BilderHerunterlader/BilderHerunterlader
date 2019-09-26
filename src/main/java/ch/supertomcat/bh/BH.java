@@ -5,10 +5,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,7 +13,6 @@ import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -48,10 +43,10 @@ import ch.supertomcat.bh.transmitter.TransmitterHTTP;
 import ch.supertomcat.bh.transmitter.TransmitterSocket;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import fi.iki.elonen.NanoHTTPD;
 
 /**
@@ -59,9 +54,14 @@ import fi.iki.elonen.NanoHTTPD;
  */
 public class BH {
 	/**
-	 * Logger for this class
+	 * Application Main
 	 */
-	private static Logger logger;
+	private static ApplicationMain applicationMain;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * SystemTray
@@ -77,16 +77,6 @@ public class BH {
 	 * Udpate-Window
 	 */
 	private UpdateWindow update;
-
-	/**
-	 * Path of the folder which contains the lockfile
-	 */
-	private static String strLockFilePath = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + ".BH" + FileUtil.FILE_SEPERATOR;
-
-	/**
-	 * Path and filename of the lockfile
-	 */
-	private static String strLockFilename = "BH.lock";
 
 	/**
 	 * Programm completely started
@@ -157,7 +147,7 @@ public class BH {
 			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
 			JFrame frame = null;
 			try {
-				frame = createInvisibleFrame();
+				frame = ApplicationUtil.createInvisibleFrame("BH", Icons.getBHImage("BH.png"));
 				int ret = JOptionPane.showOptionDialog(frame, "Choose a language", "Language", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				if (ret == 0) {
 					SettingsManager.instance().setLanguage("en_EN");
@@ -370,51 +360,7 @@ public class BH {
 			stt.remove();
 		}
 
-		// Release the lockfile
-		logger.debug("Releasing Lockfile");
-		ApplicationUtil.releaseLockFile();
-
-		// Restart BH
-		if (restart && ApplicationProperties.getProperty("JarFilename").length() > 0) {
-			try {
-				String bhAbsolutePath = new File(ApplicationProperties.getProperty("ApplicationPath")).getAbsolutePath();
-				if (bhAbsolutePath.endsWith(FileUtil.FILE_SEPERATOR) == false) {
-					bhAbsolutePath += FileUtil.FILE_SEPERATOR;
-				}
-
-				String jre = "";
-				String jreJavaw = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR + "javaw";
-				String jreJava = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR + "java";
-
-				String os = System.getProperty("os.name").toLowerCase();
-
-				File fJreJavaw = new File(os.contains("windows") ? jreJavaw + ".exe" : jreJavaw);
-				File fJreJava = new File(os.contains("windows") ? jreJava + ".exe" : jreJava);
-
-				if (fJreJavaw.exists()) {
-					jre = "\"" + jreJavaw + "\" -jar \"" + bhAbsolutePath + ApplicationProperties.getProperty("JarFilename") + "\"";
-				} else {
-					if (fJreJava.exists()) {
-						jre = "\"" + jreJava + "\" -jar \"" + bhAbsolutePath + ApplicationProperties.getProperty("JarFilename") + "\"";
-					}
-				}
-
-				if (jre.length() > 0) {
-					List<String> lProcess = new ArrayList<>(Arrays.asList(jre.split(" ")));
-					new ProcessBuilder(lProcess).start();
-				}
-			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
-			}
-			try {
-				Thread.sleep(2000);
-			} catch (InterruptedException e) {
-			}
-		}
-
-		// Exit
-		logger.debug("Exit now!");
-		System.exit(0);
+		applicationMain.exit(restart);
 	}
 
 	private synchronized void initializeTransmitterHTTP() {
@@ -437,88 +383,8 @@ public class BH {
 		}
 	}
 
-	private static JFrame createInvisibleFrame() {
-		JFrame frame = new JFrame("BH");
-		frame.setIconImage(Icons.getBHImage("BH.png"));
-		frame.setUndecorated(true);
-		frame.setVisible(true);
-		frame.setLocationRelativeTo(null);
-		return frame;
-	}
-
-	private static void parseCommandLine(String[] args) {
-		for (String arg : args) {
-			if (arg.equalsIgnoreCase("-version")) {
-				System.out.print(ApplicationProperties.getProperty("ApplicationVersion"));
-				System.exit(0);
-			} else if (arg.equalsIgnoreCase("-versionNumber")) {
-				System.out.print(ApplicationProperties.getProperty("ApplicationVersion").replaceAll("\\.", ""));
-				System.exit(0);
-			} else if (arg.equalsIgnoreCase("-help")) {
-				String help = ApplicationProperties.getProperty("ApplicationName") + " v" + ApplicationProperties.getProperty("ApplicationVersion") + "\n\n";
-				help += "Command Line Arguments:\n";
-				help += "-version\t\tPrints the Version of BH (e.g. 1.2.0)\n\n";
-				help += "-versionNumber\t\tPrints the VersionNumber of BH (e.g. 120)\n\n";
-				System.out.print(help);
-				System.exit(0);
-			}
-		}
-	}
-
-	/**
-	 * The user can override the path of some directories, such as
-	 * Download-Path, Settings-Path and so on.
-	 * There must only be a textfile called directories.txt in
-	 * the programm folder.
-	 * 
-	 * A line in the file must look like this
-	 * Name Path
-	 * Name and Path must be seperated by a tab.
-	 * 
-	 * Available Names:
-	 * Database
-	 * Settings
-	 * Download-Log
-	 * Logs
-	 * Downloads
-	 * 
-	 * @throws IOException
-	 */
-	private static void readDirectoriesFile() throws IOException {
-		File file = new File(ApplicationProperties.getProperty("ApplicationPath") + "directories.properties");
-		if (file.exists() == false) {
-			return;
-		}
-		String content = new String(Files.readAllBytes(file.toPath()), StandardCharsets.UTF_8);
-
-		Properties directoriesProperties = new Properties();
-		// We do the replace, because load will treat backslashes as escape characters
-		directoriesProperties.load(new StringReader(content.replace("\\", "\\\\")));
-
-		String databaseDir = directoriesProperties.getProperty("DatabasePath");
-		String settingsDir = directoriesProperties.getProperty("SettingsPath");
-		String downloadLogDir = directoriesProperties.getProperty("DownloadLogPath");
-		String logsDir = directoriesProperties.getProperty("LogsPath");
-		String downloadDir = directoriesProperties.getProperty("DownloadPath");
-
-		if (databaseDir != null && !databaseDir.isEmpty()) {
-			ApplicationProperties.setProperty("DatabasePath", databaseDir);
-		}
-		if (settingsDir != null && !settingsDir.isEmpty()) {
-			ApplicationProperties.setProperty("SettingsPath", settingsDir);
-		}
-		if (downloadLogDir != null && !downloadLogDir.isEmpty()) {
-			ApplicationProperties.setProperty("DownloadLogPath", downloadLogDir);
-		}
-		if (logsDir != null && !logsDir.isEmpty()) {
-			ApplicationProperties.setProperty("LogsPath", logsDir);
-		}
-		if (downloadDir != null && !downloadDir.isEmpty()) {
-			ApplicationProperties.setProperty("DownloadPath", downloadDir);
-		}
-	}
-
 	private static void executeDeleteUpdates() {
+		Logger logger = LoggerFactory.getLogger(BH.class);
 		File deleteUpdateFile = new File(ApplicationProperties.getProperty("ApplicationPath"), "delete_update.txt");
 		if (!deleteUpdateFile.exists()) {
 			return;
@@ -574,100 +440,22 @@ public class BH {
 	}
 
 	/**
-	 * Format Stacktrace to String
-	 * 
-	 * @param throwable Throwable
-	 * @return Stacktrace as String
-	 */
-	private static String formatStackTrace(Throwable throwable) {
-		StringWriter sw = new StringWriter();
-		PrintWriter pw = new PrintWriter(sw, true);
-		throwable.printStackTrace(pw);
-		return sw.getBuffer().toString();
-	}
-
-	/**
 	 * Main-Method
 	 * 
 	 * @param args Arguments
 	 */
 	public static void main(String[] args) {
-		try {
-			ApplicationProperties.initProperties(BH.class.getResourceAsStream("/Application_Config.properties"));
-		} catch (IOException e) {
-			// Logger is not initialized at this point
-			System.err.println("Could not initialize application properties");
-			e.printStackTrace();
-			ApplicationUtil.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not initialize application properties:\n" + formatStackTrace(e));
-			System.exit(1);
-		}
+		List<String> additionalPaths = Arrays.asList("DatabasePath", "SettingsPath", "DownloadLogPath", "DownloadPath");
+		applicationMain = new ApplicationMain("BH", null, true, true, BH.class, additionalPaths) {
+			@Override
+			protected void main(String[] args) {
+				// Delete Updates
+				executeDeleteUpdates();
 
-		String jarFilename = ApplicationUtil.getThisApplicationsJarFilename(BH.class);
-		ApplicationProperties.setProperty("JarFilename", jarFilename);
-
-		// Geth the program directory
-		String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
-		ApplicationProperties.setProperty("ApplicationPath", appPath);
-
-		String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileUtil.FILE_SEPERATOR;
-		ApplicationProperties.setProperty("ProfilePath", programUserDir);
-		ApplicationProperties.setProperty("DatabasePath", programUserDir);
-		ApplicationProperties.setProperty("SettingsPath", programUserDir);
-		ApplicationProperties.setProperty("DownloadLogPath", programUserDir);
-		ApplicationProperties.setProperty("LogsPath", programUserDir);
-
-		// Parse Command Line
-		parseCommandLine(args);
-
-		/*
-		 * read the directories.txt from program folder if exists and
-		 * override paths of BH when definded in the file
-		 */
-		try {
-			readDirectoriesFile();
-		} catch (IOException e) {
-			// Logger is not initialized at this point
-			System.err.println("Could not read directories.properties");
-			e.printStackTrace();
-			ApplicationUtil.writeBasicErrorLogfile(new File("BH-Error.log"), "Could not read directories.properties:\n" + formatStackTrace(e));
-			System.exit(1);
-		}
-
-		String logFilename = ApplicationProperties.getProperty("ApplicationShortName") + ".log";
-		// Loggers can be created after this point
-		System.setProperty("bhlog4jlogfile", ApplicationProperties.getProperty("LogsPath") + FileUtil.FILE_SEPERATOR + logFilename);
-		logger = LoggerFactory.getLogger(BH.class);
-		ApplicationUtil.initializeSLF4JUncaughtExceptionHandler();
-
-		/*
-		 * Now try to lock the file
-		 * We do this, to make sure, there is only one instance of BH runnig.
-		 */
-		if (ApplicationUtil.lockLockFile(strLockFilePath, strLockFilename) == false) {
-			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
-			JFrame frame = null;
-			try {
-				frame = createInvisibleFrame();
-				// If the lockfile could not locked, we display a error-message and exit
-				JOptionPane.showMessageDialog(frame, "Another Instance of the Application is running. Application is terminating.", "Error", JOptionPane.ERROR_MESSAGE);
-			} finally {
-				if (frame != null) {
-					frame.dispose();
-				}
+				// Good, now let BH really start
+				new BH();
 			}
-			System.exit(0);
-		}
-
-		// Write some useful info to the logfile
-		ApplicationUtil.logApplicationInfo();
-
-		// Delete old log files
-		ApplicationUtil.deleteOldLogFiles(7, logFilename, ApplicationProperties.getProperty("LogsPath"));
-
-		// Delete Updates
-		executeDeleteUpdates();
-
-		// Good, now let BH really start
-		new BH();
+		};
+		applicationMain.start(args);
 	}
 }

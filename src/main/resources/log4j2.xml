@@ -4,7 +4,7 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{ISO8601} %level{length=1} [%t] %m - (%F:%L)%n" />
 		</Console>
-		<RollingFile name="DailyRollingFile" fileName="${sys:bhlog4jlogfile}" filePattern="${sys:bhlog4jlogfile}.%d{yyyy-MM-dd}" append="true" immediateFlush="true">
+		<RollingFile name="DailyRollingFile" fileName="${sys:applicationlog4jlogfile}" filePattern="${sys:applicationlog4jlogfile}.%d{yyyy-MM-dd}" append="true" immediateFlush="true">
 			<PatternLayout charset="UTF-8">
 				<Pattern>%d{ISO8601}\t%level{length=1}\t[%t]\t%m\t\t%c (%F:%L)%n</Pattern>
 			</PatternLayout>
