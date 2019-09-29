@@ -52,12 +52,7 @@ import fi.iki.elonen.NanoHTTPD;
 /**
  * Class which contains the main-Method
  */
-public class BH {
-	/**
-	 * Application Main
-	 */
-	private static ApplicationMain applicationMain;
-
+public abstract class BH {
 	/**
 	 * Logger
 	 */
@@ -100,21 +95,20 @@ public class BH {
 	private TransmitterHTTP transmitterHTTP = null;
 
 	/**
-	 * Shutdown-Thread
-	 */
-	private Thread shutdownThread = null;
-
-	/**
 	 * Constructor
 	 */
 	public BH() {
 		GuiEvent.instance().addListener(new IGuiEventListener() {
 			@Override
 			public void exitApp(boolean restart) {
-				if (started == false) {
+				if (!started) {
 					return;
 				}
-				exitBH(0, restart);
+				if (!checkExitAllowed()) {
+					return;
+				}
+				removeShutdownHook();
+				exitBH(restart);
 			}
 		});
 		GuiEvent.instance().addUpdateListener(new UpdateListener() {
@@ -302,33 +296,44 @@ public class BH {
 				update = null;
 			}
 		}
-
-		// Create and register the Shutdown-Thread
-		shutdownThread = new Thread("Shutdown-Thread") {
-			@Override
-			public void run() {
-				if (!exited) {
-					exitBH(1, false);
-				}
-			}
-		};
-		Runtime.getRuntime().addShutdownHook(shutdownThread);
 	}
 
-	private synchronized void exitBH(int mode, boolean restart) {
+	/**
+	 * Check if exit is allowed (No downloads are running)
+	 * 
+	 * @return True if exit is allowed, false otherwise
+	 */
+	private synchronized boolean checkExitAllowed() {
 		if (DownloadQueueManager.instance().isDownloading()) {
 			JOptionPane.showMessageDialog(null, Localization.getString("ExitWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-			return;
+			return false;
 		}
+		return true;
+	}
 
+	/**
+	 * Stop Downloads. This method should only be used when exiting by shutdown hook
+	 */
+	private synchronized void stopDownloads() {
+		// Call stop downloads twice for immediate stopping (stops also running downloads)
+		QueueManager.instance().stopDownload();
+		QueueManager.instance().stopDownload();
+	}
+
+	/**
+	 * Remove Shutdown Hook
+	 */
+	protected abstract void removeShutdownHook();
+
+	/**
+	 * Exit BH Now
+	 * 
+	 * @param restart True if restart, false otherwise
+	 */
+	protected abstract void exitNow(boolean restart);
+
+	private synchronized void exitBH(boolean restart) {
 		exited = true;
-
-		if (mode == 0) {
-			logger.debug("Removing Shutdownhook");
-			if (shutdownThread != null) {
-				Runtime.getRuntime().removeShutdownHook(shutdownThread);
-			}
-		}
 
 		if (transmitterSocket != null) {
 			logger.debug("Stop TransmitterSocket");
@@ -354,13 +359,13 @@ public class BH {
 			KeywordManager.instance().closeDatabase();
 		}
 
-		if (stt != null && mode == 0) {
+		if (stt != null) {
 			logger.debug("Removing Trayicon");
 			// Remove icon from SytemTray
 			stt.remove();
 		}
 
-		applicationMain.exit(restart);
+		exitNow(restart);
 	}
 
 	private synchronized void initializeTransmitterHTTP() {
@@ -446,14 +451,41 @@ public class BH {
 	 */
 	public static void main(String[] args) {
 		List<String> additionalPaths = Arrays.asList("DatabasePath", "SettingsPath", "DownloadLogPath", "DownloadPath");
-		applicationMain = new ApplicationMain("BH", null, true, true, BH.class, additionalPaths) {
+		ApplicationMain applicationMain = new ApplicationMain("BH", null, true, true, BH.class, additionalPaths) {
+			/**
+			 * BH
+			 */
+			private BH bh = null;
+
 			@Override
 			protected void main(String[] args) {
 				// Delete Updates
 				executeDeleteUpdates();
 
 				// Good, now let BH really start
-				new BH();
+				bh = new BH() {
+
+					@Override
+					protected void removeShutdownHook() {
+						removeAllShutdownHooks();
+					}
+
+					@Override
+					protected void exitNow(boolean restart) {
+						exit(restart);
+					}
+				};
+
+				// Create and register the Shutdown-Thread
+				addDefaultShutdownHook();
+			}
+
+			@Override
+			protected void shutdownHookExit() {
+				if (bh != null && !bh.exited) {
+					bh.stopDownloads();
+					bh.exitBH(false);
+				}
 			}
 		};
 		applicationMain.start(args);
