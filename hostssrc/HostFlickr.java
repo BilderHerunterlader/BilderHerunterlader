@@ -1,5 +1,7 @@
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,50 +31,153 @@ import ch.supertomcat.bh.rules.RuleRegExp;
  * If that fails (e.g. original image is not available for download) it
  * will load the embedded image from the container site.
  *
- * @version 3.0
+ * @version 3.1
  */
 public class HostFlickr extends Host implements IHoster {
 	/** the version of this class **/
-	public static final String VERSION = "3.0";
+	public static final String VERSION = "3.1";
 
 	/** the name of this class **/
 	public static final String NAME = "HostFlickr";
 
-	/** flickr photo size id: square (sq) **/
-	private static final int SIZE_SQUARE_75 = 0;
+	/**
+	 * Flickr Photo Size ID (Higher ordinal means higher size)
+	 */
+	private enum PhotoSizeID {
+		/**
+		 * Square (sq)
+		 */
+		SIZE_SQUARE_75("sq", "Square"),
 
-	/** flickr photo size id: square (q) **/
-	private static final int SIZE_SQUARE_150 = 1;
+		/**
+		 * square (q)
+		 */
+		SIZE_SQUARE_150("q", "Large Square"),
 
-	/** flickr photo size id: thumbnail (t) **/
-	private static final int SIZE_THUMBNAIL = 2;
+		/**
+		 * thumbnail (t)
+		 */
+		SIZE_THUMBNAIL("t", "Thumbnail"),
 
-	/** flickr photo size id: small (s) **/
-	private static final int SIZE_SMALL_240 = 3;
+		/**
+		 * small (s)
+		 */
+		SIZE_SMALL_240("s", "Small"),
 
-	/** flickr photo size id: small (n) **/
-	private static final int SIZE_SMALL_320 = 4;
+		/**
+		 * small (n)
+		 */
+		SIZE_SMALL_320("n", "Small 320"),
 
-	/** flickr photo size id: medium (m) **/
-	private static final int SIZE_MEDIUM_500 = 5;
+		/**
+		 * small (w)
+		 */
+		SIZE_SMALL_400("w", "Small 400"),
 
-	/** flickr photo size id: medium (z) **/
-	private static final int SIZE_MEDIUM_640 = 6;
+		/**
+		 * medium (m)
+		 */
+		SIZE_MEDIUM_500("m", "Medium"),
 
-	/** flickr photo size id: medium (c) **/
-	private static final int SIZE_MEDIUM_800 = 7;
+		/**
+		 * medium (z)
+		 */
+		SIZE_MEDIUM_640("z", "Medium 640"),
 
-	/** flickr photo size id: large (l) **/
-	private static final int SIZE_LARGE_1024 = 8;
+		/**
+		 * medium (c)
+		 */
+		SIZE_MEDIUM_800("c", "Medium 800"),
 
-	/** flickr photo size id: large (h) **/
-	private static final int SIZE_LARGE_1600 = 9;
+		/**
+		 * large (l)
+		 */
+		SIZE_LARGE_1024("l", "Large"),
 
-	/** flickr photo size id: large (k) **/
-	private static final int SIZE_LARGE_2048 = 10;
+		/**
+		 * large (h)
+		 */
+		SIZE_LARGE_1600("h", "Large 1600"),
 
-	/** flickr photo size id: original (o) **/
-	private static final int SIZE_ORIGINAL = 11;
+		/**
+		 * large (k)
+		 */
+		SIZE_LARGE_2048("k", "Large 2048"),
+
+		/**
+		 * extra large (3k)
+		 */
+		SIZE_EXTRA_LARGE_3K("3k", "X-Large 3K"),
+
+		/**
+		 * extra large (4k)
+		 */
+		SIZE_EXTRA_LARGE_4K("4k", "X-Large 4K"),
+
+		/**
+		 * extra large (5k)
+		 */
+		SIZE_EXTRA_LARGE_5K("5k", "X-Large 5K"),
+
+		/**
+		 * original (o)
+		 */
+		SIZE_ORIGINAL("o", "Original");
+
+		/**
+		 * Abbreviation used in URL
+		 */
+		private final String abbreviation;
+
+		/**
+		 * Name
+		 */
+		private final String name;
+
+		/**
+		 * Constructor
+		 * 
+		 * @param abbreviation Abbreviation used in URL
+		 * @param name Name
+		 */
+		private PhotoSizeID(String abbreviation, String name) {
+			this.abbreviation = abbreviation;
+			this.name = name;
+		}
+
+		/**
+		 * Returns the abbreviation used in URL
+		 * 
+		 * @return Abbreviation used in URL
+		 */
+		public String getAbbreviation() {
+			return abbreviation;
+		}
+
+		/**
+		 * Returns the name
+		 * 
+		 * @return name
+		 */
+		public String getName() {
+			return name;
+		}
+
+		/**
+		 * Return PhotoSizeID by Abbreviation or Name
+		 * 
+		 * @param abbreviationOrName Abbreviation or Name
+		 * @return PhotoSizeID or null if not found
+		 */
+		public static PhotoSizeID getByAbbreviationOrName(String abbreviationOrName) {
+			for (PhotoSizeID photoSizeID : PhotoSizeID.values()) {
+				if (photoSizeID.getAbbreviation().equalsIgnoreCase(abbreviationOrName) || photoSizeID.getName().equalsIgnoreCase(abbreviationOrName)) {
+					return photoSizeID;
+				}
+			}
+			return null;
+		}
+	}
 
 	/**
 	 * Logger
@@ -132,8 +237,9 @@ public class HostFlickr extends Host implements IHoster {
 	public HostFlickr() {
 		super(NAME, VERSION);
 		String container = "(https?://www\\.flickr\\.com/photos/(?!tags/)[^/]+?/([0-9]+?)/?)";
-		String size = "sizes/(sq|q|t|s|n|m|z|c|l|h|k|o)/?";
-		String inset = "(in/.+?/?)??";
+		String sizeAlternation = Arrays.stream(PhotoSizeID.values()).map(x -> x.getAbbreviation()).collect(Collectors.joining("|"));
+		String size = "sizes/(" + sizeAlternation + ")/?";
+		String inset = "(in/[^/]+?/?)?";
 
 		this.containerUrlPattern = Pattern.compile("^" + container + inset + "$", Pattern.CASE_INSENSITIVE);
 		this.subContainerUrlPattern = Pattern.compile("^" + container + size + inset + "$", Pattern.CASE_INSENSITIVE);
@@ -192,17 +298,15 @@ public class HostFlickr extends Host implements IHoster {
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		Matcher matcher = this.containerUrlPattern.matcher(url);
-		if (matcher.matches()) {
+		if (this.containerUrlPattern.matcher(url).matches()) {
 			return true;
 		}
-		matcher = this.subContainerUrlPattern.matcher(url);
-		return matcher.matches();
+		return this.subContainerUrlPattern.matcher(url).matches();
 	}
 
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
-		String baseContainerUrl = "";
+		String baseContainerUrl = null;
 		String imgID = "";
 
 		Matcher matcher = this.containerUrlPattern.matcher(upo.getContainerURL());
@@ -217,7 +321,7 @@ public class HostFlickr extends Host implements IHoster {
 			}
 		}
 
-		if (baseContainerUrl.length() > 0) {
+		if (baseContainerUrl != null && !baseContainerUrl.isEmpty()) {
 			String allSizesContainerUrl = baseContainerUrl + "/sizes/";
 			String metaContainerUrl = baseContainerUrl + "/meta/";
 
@@ -267,28 +371,25 @@ public class HostFlickr extends Host implements IHoster {
 	 * @return Biggest available version of the image and the album title if available
 	 */
 	private String parseAllSizesContainerPage(String allSizesContainerPage, String baseContainerUrl, String allSizesContainerUrl) {
-		String directLink = "";
-
 		String bestSizeSubContainerUrl = allSizesContainerUrl;
-		int minSizeID = parseSizeIDfromURL(bestSizeSubContainerUrl);
+		PhotoSizeID minSizeID = parseSizeIDFromURL(bestSizeSubContainerUrl);
 
-		int maxSizeId = this.findMaxSizeIDinPage(minSizeID, allSizesContainerPage);
-		if (maxSizeId != -1) {
-			bestSizeSubContainerUrl = baseContainerUrl + "/sizes/" + this.sizeIDtoString(maxSizeId) + "/";
+		PhotoSizeID maxSizeId = findMaxSizeIDinPage(minSizeID, allSizesContainerPage);
+		if (maxSizeId != null) {
+			bestSizeSubContainerUrl = baseContainerUrl + "/sizes/" + maxSizeId.getAbbreviation() + "/";
 		}
 
 		try {
 			if (minSizeID == maxSizeId) {
-				directLink = parseEmbeddedImage(allSizesContainerPage);
+				return parseEmbeddedImage(allSizesContainerPage);
 			} else {
 				String bestSizeSubContainerPage = downloadContainerPage(bestSizeSubContainerUrl, "");
-				directLink = parseEmbeddedImage(bestSizeSubContainerPage);
+				return parseEmbeddedImage(bestSizeSubContainerPage);
 			}
 		} catch (HostException e) {
 			logger.error(NAME + " Could not parse embedded image", e);
+			return "";
 		}
-
-		return directLink;
 	}
 
 	/**
@@ -302,110 +403,34 @@ public class HostFlickr extends Host implements IHoster {
 	 * @param subContainerUrl Sub Contrainer-URL
 	 * @return the flickr size ID of <code>subContainerUrl</code>
 	 */
-	private int parseSizeIDfromURL(String subContainerUrl) {
+	private PhotoSizeID parseSizeIDFromURL(String subContainerUrl) {
 		Matcher urlMatcher = this.subContainerUrlPattern.matcher(subContainerUrl);
 		if (urlMatcher.matches()) {
-			return this.parseSizeID(urlMatcher.replaceAll("$3"));
+			return PhotoSizeID.getByAbbreviationOrName(urlMatcher.replaceAll("$3"));
 		} else {
-			return -1;
+			return null;
 		}
 	}
 
 	/**
 	 * Returns the largest size ID of all subcontainer links in <code>page</code> that is larger than or equal to <code>minSizeId</code>.<br>
 	 *
-	 * @see #parseSizeIDfromURL(String)
+	 * @see #parseSizeIDFromURL(String)
 	 * @param minSizeId minimum flickr size id
 	 * @param page the source page to parse
 	 * @return minSizeId if there is no link to
 	 *         a subcontainer with a larger sized ID
 	 */
-	private int findMaxSizeIDinPage(int minSizeId, String page) {
-		int maxSizeId = minSizeId;
+	private PhotoSizeID findMaxSizeIDinPage(PhotoSizeID minSizeId, String page) {
+		PhotoSizeID maxSizeId = minSizeId;
 		Matcher linkMatcher = this.subContainerLinkPattern.matcher(page);
 		while (linkMatcher.find()) {
-			int sizeId = this.parseSizeID(linkMatcher.group(2));
-			if (maxSizeId < sizeId) {
+			PhotoSizeID sizeId = PhotoSizeID.getByAbbreviationOrName(linkMatcher.group(2));
+			if (sizeId != null && maxSizeId.ordinal() < sizeId.ordinal()) {
 				maxSizeId = sizeId;
 			}
 		}
 		return maxSizeId;
-	}
-
-	/**
-	 * Returns a String representation of <code>sizeID</code>.<br>
-	 * i.e. 'sq', 't', 's', 'm', 'l' or 'o'
-	 * 
-	 * @param sizeID Size ID
-	 * @return <code>null</code> if <code>int</code> argument
-	 *         is not a valid flickr size ID
-	 */
-	private String sizeIDtoString(int sizeID) {
-		switch (sizeID) {
-			case SIZE_SQUARE_75:
-				return "sq";
-			case SIZE_SQUARE_150:
-				return "q";
-			case SIZE_THUMBNAIL:
-				return "t";
-			case SIZE_SMALL_240:
-				return "s";
-			case SIZE_SMALL_320:
-				return "n";
-			case SIZE_MEDIUM_500:
-				return "m";
-			case SIZE_MEDIUM_640:
-				return "z";
-			case SIZE_MEDIUM_800:
-				return "c";
-			case SIZE_LARGE_1024:
-				return "l";
-			case SIZE_LARGE_1600:
-				return "h";
-			case SIZE_LARGE_2048:
-				return "k";
-			case SIZE_ORIGINAL:
-				return "o";
-			default:
-				return null;
-		}
-	}
-
-	/**
-	 * Parses the String argument as a flickr size ID.
-	 * 
-	 * @see #sizeIDtoString(int)
-	 * @param sizeStr Size String
-	 * @return <code>-1</code> if <code>sizeStr</code> does not represent a valid size ID
-	 */
-	private int parseSizeID(String sizeStr) {
-		if (sizeStr.compareToIgnoreCase("Square") == 0 || sizeStr.compareToIgnoreCase("sq") == 0) {
-			return SIZE_SQUARE_75;
-		} else if (sizeStr.compareToIgnoreCase("Square") == 0 || sizeStr.compareToIgnoreCase("q") == 0) {
-			return SIZE_SQUARE_150;
-		} else if (sizeStr.compareToIgnoreCase("Thumbnail") == 0 || sizeStr.compareToIgnoreCase("t") == 0) {
-			return SIZE_THUMBNAIL;
-		} else if (sizeStr.compareToIgnoreCase("Small") == 0 || sizeStr.compareToIgnoreCase("s") == 0) {
-			return SIZE_SMALL_240;
-		} else if (sizeStr.compareToIgnoreCase("Small") == 0 || sizeStr.compareToIgnoreCase("n") == 0) {
-			return SIZE_SMALL_320;
-		} else if (sizeStr.compareToIgnoreCase("Medium") == 0 || sizeStr.compareToIgnoreCase("m") == 0) {
-			return SIZE_MEDIUM_500;
-		} else if (sizeStr.compareToIgnoreCase("Medium") == 0 || sizeStr.compareToIgnoreCase("z") == 0) {
-			return SIZE_MEDIUM_640;
-		} else if (sizeStr.compareToIgnoreCase("Medium") == 0 || sizeStr.compareToIgnoreCase("c") == 0) {
-			return SIZE_MEDIUM_800;
-		} else if (sizeStr.compareToIgnoreCase("Large") == 0 || sizeStr.compareToIgnoreCase("l") == 0) {
-			return SIZE_LARGE_1024;
-		} else if (sizeStr.compareToIgnoreCase("Large") == 0 || sizeStr.compareToIgnoreCase("h") == 0) {
-			return SIZE_LARGE_1600;
-		} else if (sizeStr.compareToIgnoreCase("Large") == 0 || sizeStr.compareToIgnoreCase("k") == 0) {
-			return SIZE_LARGE_2048;
-		} else if (sizeStr.compareToIgnoreCase("Original") == 0 || sizeStr.compareToIgnoreCase("o") == 0) {
-			return SIZE_ORIGINAL;
-		} else {
-			return -1;
-		}
 	}
 
 	/**
@@ -517,22 +542,22 @@ public class HostFlickr extends Host implements IHoster {
 	 * @return Date and Time if available
 	 */
 	private String getOriginalDateTime(String metaContainerUrl) {
-		String dateTime = "";
-		String metaContainerPage = "";
+		String metaContainerPage;
 		try {
 			metaContainerPage = downloadContainerPage(metaContainerUrl, "");
 		} catch (HostException e) {
 			logger.warn(NAME + " Could not download meta container page", e);
-			return dateTime;
+			return "";
 		}
 
+		String dateTime = null;
 		try {
 			dateTime = this.pipeOriginalDateTime.getURL(metaContainerUrl, "", metaContainerPage, null);
 		} catch (HostException e) {
 			logger.warn(NAME + " Could not get date and time from meta container URL", e);
 		}
 
-		if (dateTime.isEmpty()) {
+		if (dateTime == null || dateTime.isEmpty()) {
 			dateTime = this.regexOriginalDate.doPageSourcecodeReplace(metaContainerPage, 0, metaContainerUrl, null);
 		}
 
