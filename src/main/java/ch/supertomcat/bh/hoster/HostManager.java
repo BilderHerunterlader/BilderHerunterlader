@@ -1,6 +1,5 @@
 package ch.supertomcat.bh.hoster;
 
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -255,7 +254,7 @@ public class HostManager {
 
 				bOK.set(true);
 
-				if (checkForIHosterURLAdderInterface(host) != null) {
+				if (host instanceof IHosterURLAdder) {
 					IHosterURLAdder ihua = (IHosterURLAdder)host;
 					try {
 						List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
@@ -314,63 +313,6 @@ public class HostManager {
 			}
 		}
 		return upo;
-	}
-
-	/**
-	 * Returns the method or null if not found
-	 * 
-	 * @param host Host-Class
-	 * @return Method or null
-	 */
-	private Method checkForIHosterURLAdderInterface(Host host) {
-		if (host == null) {
-			return null;
-		}
-
-		boolean bIFace = false;
-		for (Class<?> iface : host.getClass().getInterfaces()) {
-			if (iface.getName().equals("ch.supertomcat.bh.hoster.IHosterURLAdder")) {
-				bIFace = true;
-				break;
-			}
-		}
-		if (bIFace == false) {
-			return null;
-		}
-
-		for (Method method : host.getClass().getMethods()) {
-			if (method.getName().equals("isFromThisHoster")) {
-				if (method.getParameterTypes().length == 3 && method.getParameterTypes()[0].getName().equals("ch.supertomcat.bh.pic.URL")
-						&& method.getParameterTypes()[1].getName().equals("ch.supertomcat.supertomcattools.settingstools.options.OptionBoolean")
-						&& method.getParameterTypes()[2].getName().equals("ch.supertomcat.supertomcattools.guitools.progressmonitor.ProgressObserver")
-						&& method.getReturnType().getName().equals("java.util.List")) {
-					return method;
-				}
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * Returns true if the object has the interface
-	 * Checks not if the methods really are implemented
-	 * 
-	 * @param obj Object
-	 * @param fullyQualifiedInterfaceName Fully qualified interface name
-	 * @return true if the object has the interface
-	 */
-	public boolean hasInterface(Object obj, String fullyQualifiedInterfaceName) {
-		if (obj == null) {
-			return false;
-		}
-
-		for (Class<?> iface : obj.getClass().getInterfaces()) {
-			if (iface.getName().equals(fullyQualifiedInterfaceName)) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**

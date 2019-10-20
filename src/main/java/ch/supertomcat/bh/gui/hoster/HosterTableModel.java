@@ -3,7 +3,6 @@ package ch.supertomcat.bh.gui.hoster;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -14,14 +13,12 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.IRedirect;
+import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -32,11 +29,6 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
  */
 public class HosterTableModel extends DefaultTableModel implements ISettingsListener {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Logger for this class
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Panels
@@ -107,38 +99,25 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	 * @return Option-Panel for host or null if not available
 	 */
 	private JPanel createOptionPanelForHost(Host host) {
-		Method mx = null;
-		if (HostManager.instance().hasInterface(host, "ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions")) {
-			try {
-				mx = host.getClass().getDeclaredMethod("openOptionsDialog");
-			} catch (NoSuchMethodException e) {
-				logger.error("openOptionsDialog method is missing in class: {}", host.getClass().getName(), e);
-			}
-		}
+		if (host instanceof IHosterOptions) {
+			IHosterOptions hostOptions = (IHosterOptions)host;
 
-		if (mx == null) {
-			return null;
+			JButton btn = new JButton(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
+			btn.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					if (DownloadQueueManager.instance().isDownloading()) {
+						JOptionPane.showMessageDialog(Main.instance(), Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+						return;
+					}
+					hostOptions.openOptionsDialog();
+				}
+			});
+			JPanel pnl = new JPanel();
+			pnl.add(btn);
+			return pnl;
 		}
-
-		final Method mOpen = mx;
-		JButton btn = new JButton(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
-		btn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				if (DownloadQueueManager.instance().isDownloading()) {
-					JOptionPane.showMessageDialog(Main.instance(), Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-					return;
-				}
-				try {
-					mOpen.invoke(host);
-				} catch (Exception ex) {
-					logger.error(ex.getMessage(), ex);
-				}
-			}
-		});
-		JPanel pnl = new JPanel();
-		pnl.add(btn);
-		return pnl;
+		return null;
 	}
 
 	/**
