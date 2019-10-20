@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <updates>
-	<setuprelease version="4.9.7">
+	<setuprelease version="4.9.8">
 		<description>
-			<mainDE>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainDE>
-			<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
+			<mainDE>- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</mainDE>
+			<mainEN>- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.9.7" src="https://www.dropbox.com/s/i3qbkjo4ffvmzgo/BH-4.9.7.zip?dl=1" filename="BH-4.9.7.zip" name="BilderHerunterlader" />
+	<main version="4.9.8" src="https://www.dropbox.com/s/zy8caoxdbgyd1f7/BH-4.9.8.zip?dl=1" filename="BH-4.9.8.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainDE>
-		<mainEN>- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</mainEN>
+		<mainDE>- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</mainDE>
+		<mainEN>- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</mainEN>
 	</description>
 	<redirects>
 	</redirects>
@@ -142,6 +142,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.9.8" lng="de">- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</changes>
+		<changes version="4.9.8" lng="en">- Bug Fixed: IHosterURLAdder method was not called anymore, because of changed method signature.\n- Removed unnecessary reflection code (Because Host- and Redirect-Classes are checked when loading the class, no checks are needed after that and interfaces can be used directly)\n- Updated dependencies</changes>
 		<changes version="4.9.7" lng="de">- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</changes>
 		<changes version="4.9.7" lng="en">- Clipboard can be enabled/disabled in SystemTray Menu\n- Bug Fixed: BH could hang in some cases, because not all Exceptions were catched\n- Bug Fixed: LocalFileDownloader was used instead of HTTPFileDownloader for URL with special characters, because the check was done with unencoded URL\n- Updated dependencies</changes>		
 		<changes version="4.9.6" lng="de">- Bug Fixed: target filename was changed to fixed, when the filename was set, which shouldn't be the case\n- Fixed invalid cookie header log messages\n- Updated dependencies\n- Bug Fixed: Keywords were not saved to database on import (So keywords were gone after BH was closed)</changes>
