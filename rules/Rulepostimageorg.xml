@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<rule name="postimageorg" version="1.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="1" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>https?://(www\.)?post(?:image|img)\.org/image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)</urlpattern>
+<rule name="postimageorg" version="1.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="1" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
+  <urlpattern>https?://(www\.)?post(?:image|img)\.(?:org|cc)/(?:image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)|[0-9a-zA-Z]+)</urlpattern>
   <pipes>
     <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
       <regexp search="(?:&lt;img id=&quot;main-image&quot; src=&quot;(https?:).+?&quot;.+?data-full=&quot;(//.+?)&quot;|&lt;a.+?href=&quot;(.+?)\?dl=1&quot;)" replace="$1$2$3" />
@@ -9,7 +9,7 @@
   <pipesFailures />
   <pipeline mode="2" filenamemode="4" />
   <pipeline mode="3" filenameDownloadSelectionMode="0">
-    <regexp search="https?://postimg.org/image/(.+?)/" replace="$1.jpg" />
+    <regexp search="https?://post(?:image|img)\.(?:org|cc)/(?:image/)?(.+?)/" replace="$1.jpg" />
   </pipeline>
   <maxConnections value="0" />
 </rule>
