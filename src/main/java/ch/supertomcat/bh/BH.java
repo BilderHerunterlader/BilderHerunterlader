@@ -1,5 +1,6 @@
 package ch.supertomcat.bh;
 
+import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -234,17 +235,21 @@ public abstract class BH {
 			 * I can't remember exactly why i do this. But it had to do with the focus
 			 * of Download-Selection-Dialogs or the Focus of Main-Window.
 			 */
-			main.setVisible(true);
-			main.setVisible(false);
+			EventQueue.invokeLater(() -> {
+				main.setVisible(true);
+				main.setVisible(false);
+			});
 
 			// Add icon to the SystemTray
 			stt.showTrayIcon();
 		} else {
 			main = Main.instance();
 			// If SystemTray is not used bring the main window to the front and request the focus
-			main.setVisible(true);
-			main.toFront();
-			main.requestFocus();
+			EventQueue.invokeLater(() -> {
+				main.setVisible(true);
+				main.toFront();
+				main.requestFocus();
+			});
 		}
 
 		if (SettingsManager.instance().isCheckClipboard()) {
@@ -288,11 +293,15 @@ public abstract class BH {
 			update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
 			if (update.checkForUpdates()) {
 				// If Updates are available, show the Update-Window
-				update.setVisible(true);
-				update.toFront();
+				EventQueue.invokeLater(() -> {
+					update.setVisible(true);
+					update.toFront();
+				});
 			} else {
 				// If not, dispose it
-				update.dispose();
+				EventQueue.invokeLater(() -> {
+					update.dispose();
+				});
 				update = null;
 			}
 		}
