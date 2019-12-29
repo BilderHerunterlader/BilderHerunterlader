@@ -12,11 +12,22 @@ public class AdderKeywordSelectorTitleTableModel extends DefaultTableModel {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Constructor
+	 * Flag if match type column should be added to model
 	 */
-	public AdderKeywordSelectorTitleTableModel() {
+	private final boolean includeMatchType;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param includeMatchType True if match type column should be added to model, false otherwise
+	 */
+	public AdderKeywordSelectorTitleTableModel(boolean includeMatchType) {
+		this.includeMatchType = includeMatchType;
 		this.addColumn("Title");
-		this.addColumn("MatchType");
+		this.addColumn("Keywords");
+		if (includeMatchType) {
+			this.addColumn("MatchType");
+		}
 	}
 
 	@Override
@@ -34,9 +45,12 @@ public class AdderKeywordSelectorTitleTableModel extends DefaultTableModel {
 	 * @param matchType MatchType
 	 */
 	public void addRow(Keyword keyword, KeywordMatchType matchType) {
-		Object data[] = new Object[2];
+		Object data[] = new Object[includeMatchType ? 3 : 2];
 		data[0] = keyword;
-		data[1] = matchType;
+		data[1] = keyword.getKeywords();
+		if (includeMatchType) {
+			data[2] = matchType;
+		}
 		this.addRow(data);
 	}
 }

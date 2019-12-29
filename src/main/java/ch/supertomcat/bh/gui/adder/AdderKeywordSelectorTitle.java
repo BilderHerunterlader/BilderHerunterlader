@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui.adder;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -60,12 +61,22 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	/**
 	 * Label
 	 */
-	private JLabel lblFilter = new JLabel(Localization.getString("Filter"));
+	private JLabel lblFilterTitle = new JLabel(Localization.getString("Title"));
 
 	/**
 	 * TextField
 	 */
-	private JTextField txtFilter = new JTextField(70);
+	private JTextField txtFilterTitle = new JTextField(35);
+
+	/**
+	 * Label
+	 */
+	private JLabel lblFilterKeywords = new JLabel(Localization.getString("Keywords"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtFilterKeywords = new JTextField(35);
 
 	/**
 	 * cbDisplayAllKeywords
@@ -75,17 +86,17 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	/**
 	 * Tablemodel
 	 */
-	private AdderKeywordSelectorTitleTableModel model = new AdderKeywordSelectorTitleTableModel();
+	private AdderKeywordSelectorTitleTableModel model;
 
 	/**
 	 * Table
 	 */
-	private JTable table = new JTable(model);
+	private JTable table;
 
 	/**
 	 * Table Row Sorter
 	 */
-	private TableRowSorter<AdderKeywordSelectorTitleTableModel> sorter = new TableRowSorter<>(model);
+	private TableRowSorter<AdderKeywordSelectorTitleTableModel> sorter;
 
 	/**
 	 * Panel
@@ -138,11 +149,17 @@ public class AdderKeywordSelectorTitle extends JDialog {
 
 		setLayout(new BorderLayout());
 
+		boolean includeMatchType = matches != null ? true : false;
+
+		model = new AdderKeywordSelectorTitleTableModel(includeMatchType);
+		table = new JTable(model);
+		sorter = new TableRowSorter<>(model);
+
 		TableUtil.internationalizeColumns(table);
 
 		table.setRowSorter(sorter);
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		table.setDefaultRenderer(Object.class, new AdderKeywordSelectorColorRowRenderer());
+		table.setDefaultRenderer(Object.class, new AdderKeywordSelectorColorRowRenderer(includeMatchType));
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 		TableUtil.setVisibleRowCount(table, 20);
 
@@ -189,11 +206,19 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		cbDisplayAllKeywords.setSelected(!matchesFound);
 		cbDisplayAllKeywords.setEnabled(matchesFound);
 
-		sorter.setComparator(1, new KeywordMatchTypeComparator());
-
 		List<RowSorter.SortKey> sortKeys = new ArrayList<>();
-		sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
-		sortKeys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		if (includeMatchType) {
+			int matchTypeColumnModelIndex = table.getColumn("MatchType").getModelIndex();
+			sorter.setComparator(matchTypeColumnModelIndex, new KeywordMatchTypeComparator());
+			sortKeys.add(new RowSorter.SortKey(matchTypeColumnModelIndex, SortOrder.ASCENDING));
+		}
+
+		int titleColumnModelIndex = table.getColumn("Title").getModelIndex();
+		sortKeys.add(new RowSorter.SortKey(titleColumnModelIndex, SortOrder.ASCENDING));
+
+		int keywordsColumnModelIndex = table.getColumn("Keywords").getModelIndex();
+		sortKeys.add(new RowSorter.SortKey(keywordsColumnModelIndex, SortOrder.ASCENDING));
+
 		sorter.setSortKeys(sortKeys);
 		sorter.sort();
 		filterTable();
@@ -204,9 +229,18 @@ public class AdderKeywordSelectorTitle extends JDialog {
 			table.setRowSelectionInterval(selectedIndex, selectedIndex);
 		}
 
-		pnlFilter.add(lblFilter);
-		pnlFilter.add(txtFilter);
-		txtFilter.getDocument().addDocumentListener(new DocumentListener() {
+		pnlFilter.setLayout(new GridLayout(2, 3, 2, 2));
+		pnlFilter.add(lblFilterTitle);
+		pnlFilter.add(lblFilterKeywords);
+		pnlFilter.add(cbDisplayAllKeywords);
+		cbDisplayAllKeywords.addItemListener(new ItemListener() {
+			@Override
+			public void itemStateChanged(ItemEvent e) {
+				filterTable();
+			}
+		});
+		pnlFilter.add(txtFilterTitle);
+		txtFilterTitle.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
 			public void changedUpdate(DocumentEvent e) {
 				filterTable();
@@ -222,15 +256,26 @@ public class AdderKeywordSelectorTitle extends JDialog {
 				filterTable();
 			}
 		});
-		pnlFilter.add(cbDisplayAllKeywords);
-		cbDisplayAllKeywords.addItemListener(new ItemListener() {
+		pnlFilter.add(txtFilterKeywords);
+		txtFilterKeywords.getDocument().addDocumentListener(new DocumentListener() {
 			@Override
-			public void itemStateChanged(ItemEvent e) {
+			public void changedUpdate(DocumentEvent e) {
+				filterTable();
+			}
+
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				filterTable();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
 				filterTable();
 			}
 		});
-		add(pnlFilter, BorderLayout.NORTH);
 
+		add(pnlFilter, BorderLayout.NORTH);
+		pnlFilter.add(new JLabel());
 		JScrollPane sp = new JScrollPane(table);
 		add(sp, BorderLayout.CENTER);
 
@@ -269,13 +314,14 @@ public class AdderKeywordSelectorTitle extends JDialog {
 			cbChooseDefault.setVisible(false);
 		}
 
-		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtFilter);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtFilterTitle);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtFilterKeywords);
 
 		pack();
 		setLocationRelativeTo(owner);
 
 		if (table.getRowCount() > 0 && selectedIndex < table.getRowCount()) {
-			table.scrollRectToVisible(table.getCellRect(selectedIndex, 0, true));
+			table.scrollRectToVisible(table.getCellRect(selectedIndex, table.convertColumnIndexToView(titleColumnModelIndex), true));
 		}
 
 		// Enter and Escape (before setVisible(true)!)
@@ -310,7 +356,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 			btnOK.requestFocusInWindow();
 		} else {
 			btnNew.setVisible(false);
-			txtFilter.requestFocusInWindow();
+			txtFilterTitle.requestFocusInWindow();
 		}
 
 		setVisible(true);
@@ -325,8 +371,9 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		} else {
 			int tableIndex = table.getSelectedRow();
 			if (tableIndex > -1) {
-				int modelIndex = this.table.convertRowIndexToModel(this.table.getSelectedRow());
-				return (Keyword)model.getValueAt(modelIndex, 0);
+				int rowModelIndex = table.convertRowIndexToModel(this.table.getSelectedRow());
+				int columnModelIndex = table.getColumn("Title").getModelIndex();
+				return (Keyword)model.getValueAt(rowModelIndex, columnModelIndex);
 			}
 			return null;
 		}
@@ -352,19 +399,36 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	 * Filter the Table
 	 */
 	private synchronized void filterTable() {
-		String pattern = txtFilter.getText();
+		String patternTitle = txtFilterTitle.getText();
+		String patternKeywords = txtFilterKeywords.getText();
 		List<RowFilter<AdderKeywordSelectorTitleTableModel, Object>> filters = new ArrayList<>();
+
 		try {
-			RowFilter<AdderKeywordSelectorTitleTableModel, Object> filterTitle = RowFilter.regexFilter("(?i)" + pattern, 0);
+			int titleColumnModelIndex = table.getColumn("Title").getModelIndex();
+			RowFilter<AdderKeywordSelectorTitleTableModel, Object> filterTitle = RowFilter.regexFilter("(?i)" + patternTitle, titleColumnModelIndex);
 			filters.add(filterTitle);
-			txtFilter.setBackground(UIManager.getColor("TextField.background"));
-			txtFilter.repaint();
-			txtFilter.setToolTipText("");
+			txtFilterTitle.setBackground(UIManager.getColor("TextField.background"));
+			txtFilterTitle.repaint();
+			txtFilterTitle.setToolTipText("");
 		} catch (PatternSyntaxException pse) {
-			txtFilter.setBackground(Color.RED);
-			txtFilter.repaint();
-			txtFilter.setToolTipText(pse.getMessage());
+			txtFilterTitle.setBackground(Color.RED);
+			txtFilterTitle.repaint();
+			txtFilterTitle.setToolTipText(pse.getMessage());
 		}
+
+		try {
+			int keywordsColumnModelIndex = table.getColumn("Keywords").getModelIndex();
+			RowFilter<AdderKeywordSelectorTitleTableModel, Object> filterKeywords = RowFilter.regexFilter("(?i)" + patternKeywords, keywordsColumnModelIndex);
+			filters.add(filterKeywords);
+			txtFilterKeywords.setBackground(UIManager.getColor("TextField.background"));
+			txtFilterKeywords.repaint();
+			txtFilterKeywords.setToolTipText("");
+		} catch (PatternSyntaxException pse) {
+			txtFilterKeywords.setBackground(Color.RED);
+			txtFilterKeywords.repaint();
+			txtFilterKeywords.setToolTipText(pse.getMessage());
+		}
+
 		if (!cbDisplayAllKeywords.isSelected()) {
 			RowFilter<AdderKeywordSelectorTitleTableModel, Object> filterMatchType = new KeywordNoMatchTypeFilter();
 			filters.add(filterMatchType);
