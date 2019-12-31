@@ -66,6 +66,5 @@ class RulesTest {
 
 		assertEquals("https://img23.pixhost.to/images/93/81041631_090d7d124138416.jpg", resultURL);
 		assertEquals("81041631_090d7d124138416.jpg", resultFilename);
-
 	}
 }

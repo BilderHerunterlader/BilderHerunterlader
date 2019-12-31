@@ -483,12 +483,20 @@ public class Rule extends Hoster {
 	}
 
 	private String getFilenamePart(String url) {
-		int pos = url.lastIndexOf("/");
-		if (pos > -1) {
-			try {
-				return url.substring(pos + 1);
-			} catch (Exception e) {
-			}
+		String filenamePart = url;
+		int posSlash = url.lastIndexOf('/');
+		if (posSlash > -1) {
+			filenamePart = url.substring(posSlash + 1);
+		}
+
+		int posQueryString = filenamePart.lastIndexOf('?');
+		if (posQueryString > -1) {
+			filenamePart = filenamePart.substring(0, posQueryString);
+		}
+
+		int posFragment = filenamePart.lastIndexOf('#');
+		if (posFragment > -1) {
+			filenamePart = filenamePart.substring(0, posFragment);
 		}
 		return "";
 	}
