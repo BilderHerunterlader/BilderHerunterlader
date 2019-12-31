@@ -385,7 +385,7 @@ public class Rule extends Hoster {
 			pic.setTargetFilename(getFilenamePart(retval[0]));
 		}
 
-		if (pipelineFilename != null && retval[0].length() > 0) {
+		if (pipelineFilename != null && retval[0].length() > 0 && pipelineFilename.getRegexps().size() > 0) {
 			// First Container-URL
 			if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(url);
