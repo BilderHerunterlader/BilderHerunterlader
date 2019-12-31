@@ -385,7 +385,7 @@ public class Rule extends Hoster {
 			pic.setTargetFilename(getFilenamePart(retval[0]));
 		}
 
-		if (pipelineFilename != null && retval[0].length() > 0 && pipelineFilename.getRegexps().size() > 0) {
+		if (pipelineFilename != null && retval[0].length() > 0) {
 			// First Container-URL
 			if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(url);
@@ -444,18 +444,13 @@ public class Rule extends Hoster {
 			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(retval[0], thumbURL, "", pic);
 			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART) {
-				int pos = retval[0].lastIndexOf("/");
-				if (pos > -1) {
-					String filename = retval[0].substring(pos + 1);
-					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-				}
+				String filename = getFilenamePart(retval[0]);
+				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 
 				// Last Container-URL
 			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(pipelineURL);
-				if (filename.length() > 0) {
-					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-				}
+				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(pipelineURL, thumbURL, "", pic);
 			}
@@ -498,7 +493,7 @@ public class Rule extends Hoster {
 		if (posFragment > -1) {
 			filenamePart = filenamePart.substring(0, posFragment);
 		}
-		return "";
+		return filenamePart;
 	}
 
 	/**
