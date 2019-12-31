@@ -62,6 +62,11 @@ public class RuleTest extends JDialog implements ActionListener {
 	/**
 	 * Label
 	 */
+	private JLabel lblResultFilenameDownloadSelection = new JLabel(Localization.getString("FilenameDownloadSelection"));
+
+	/**
+	 * Label
+	 */
 	private JLabel lblResultPageSourceCode = new JLabel(Localization.getString("filenameContainerPageSourcecode"));
 
 	/**
@@ -83,6 +88,11 @@ public class RuleTest extends JDialog implements ActionListener {
 	 * TextField
 	 */
 	private JTextField txtResultURL = new JTextField(80);
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtResultFilenameDownloadSelection = new JTextField(80);
 
 	/**
 	 * TextField
@@ -178,6 +188,11 @@ public class RuleTest extends JDialog implements ActionListener {
 		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtResultFilename, pnlMain);
 		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.1, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultFilenameDownloadSelection, pnlMain);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.9, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtResultFilenameDownloadSelection, pnlMain);
+		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.1, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultPageSourceCode, pnlMain);
 		i++;
@@ -189,6 +204,7 @@ public class RuleTest extends JDialog implements ActionListener {
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtContainer);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtThumbnail);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtResultURL);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtResultFilenameDownloadSelection);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtResultFilename);
 
 		btnTest.addActionListener(this);
@@ -233,6 +249,9 @@ public class RuleTest extends JDialog implements ActionListener {
 						txtResultURL.setText(he.getMessage());
 						txtResultFilename.setText("");
 					}
+
+					String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL());
+					txtResultFilenameDownloadSelection.setText(resultFilenameDownloadSelection);
 				}
 			});
 			t.start();
@@ -243,5 +262,4 @@ public class RuleTest extends JDialog implements ActionListener {
 			txtResultPageSourceCode.setText((String)upo.getInfo("PageSourceCode"));
 		}
 	}
-
 }
