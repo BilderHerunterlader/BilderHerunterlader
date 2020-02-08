@@ -139,14 +139,17 @@ public class Pic implements Runnable, IDownloadListener {
 	 */
 	private boolean recalcutateRate = false;
 
-	private double downloadBitrate = -1;
-
 	/**
 	 * Date and Time
 	 */
 	private long dateTime;
 
 	private String downloadURL = "";
+
+	/**
+	 * Progress
+	 */
+	private PicProgress progress = new PicProgress();
 
 	/**
 	 * Constructor
@@ -237,7 +240,11 @@ public class Pic implements Runnable, IDownloadListener {
 		if (this.status == PicState.WAITING) {
 			stop = true;
 			setStatus(PicState.SLEEPING);
-			progressBarChanged(0, PicState.SLEEPING.getText());
+
+			progress.setBytesTotal(size);
+			progress.setBytesDownloaded(0);
+			progressUpdated();
+
 			/*
 			 * Free the download-slot
 			 * Maybe i should do this not at this point, because the user could
@@ -289,7 +296,11 @@ public class Pic implements Runnable, IDownloadListener {
 		if (stop) {
 			// Status aendern und Slot freigeben
 			setStatus(PicState.SLEEPING);
-			progressBarChanged(0, PicState.SLEEPING.getText());
+
+			progress.setBytesTotal(size);
+			progress.setBytesDownloaded(0);
+			progressUpdated();
+
 			DownloadQueueManager.instance().removeDLSlotListener(this);
 			return;
 		}
@@ -316,51 +327,6 @@ public class Pic implements Runnable, IDownloadListener {
 	public void targetChanged() {
 		for (IPicListener listener : listeners) {
 			listener.targetChanged(this);
-		}
-	}
-
-	/**
-	 * This method fires the progressBarChanged-Method on all listeners
-	 * 
-	 * @param val Value
-	 * @param s Progressbar-Text
-	 */
-	public void progressBarChanged(long val, String s) {
-		int progressView = SettingsManager.instance().getProgessView();
-		if (progressView == SettingsManager.NOPROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
-			// if the user don't want to see the visual progress, set the value to 0
-			val = 0;
-		}
-
-		long min = 0; // Set the minimum of the progressbar
-		long max = 100; // Set the maximum of the progressbar
-		if (size > 0) {
-			// if the filesize is known, we set the maximum to the amount of bytes
-			max = size;
-		} else {
-			// if not, we set the maximum to the value
-			max = val;
-		}
-
-		/*
-		 * Because the progressbar accepts only integers, we need to cast the values
-		 * First we set some values, which are used if a NumberFormatException occures
-		 * because the filesize is bigger than an integer.
-		 */
-		int iMin = 0;
-		int iMax = 2;
-		int iVal = 1;
-		try {
-			iMin = (int)min;
-			iMax = (int)max;
-			iVal = (int)val;
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-		}
-
-		// Now let all listeners know, that that they have to update their progressbar
-		for (IPicListener listener : listeners) {
-			listener.progressBarChanged(this, iMin, iMax, iVal, s, errMsg);
 		}
 	}
 
@@ -861,18 +827,28 @@ public class Pic implements Runnable, IDownloadListener {
 		this.recalcutateRate = false;
 	}
 
-	/**
-	 * Sets the downloadBitrate
-	 * 
-	 * @param downloadBitrate downloadBitrate
-	 */
-	public void setDownloadBitrate(double downloadBitrate) {
-		this.downloadBitrate = downloadBitrate;
-	}
-
 	@Override
 	public double getDownloadRate() {
-		return downloadBitrate;
+		return progress.getRate();
+	}
+
+	/**
+	 * Returns the progress
+	 * 
+	 * @return progress
+	 */
+	public PicProgress getProgress() {
+		return progress;
+	}
+
+	/**
+	 * Progress Updated
+	 */
+	public void progressUpdated() {
+		// Now let all listeners know, that that they have to update their progressbar
+		for (IPicListener listener : listeners) {
+			listener.progressChanged(this);
+		}
 	}
 
 	/**
