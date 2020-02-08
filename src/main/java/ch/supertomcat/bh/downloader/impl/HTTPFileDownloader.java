@@ -269,6 +269,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 				PicProgress picProgress = pic.getProgress();
 				picProgress.setBytesDownloaded(0);
+				picProgress.setBytesTotal(size);
 				pic.progressUpdated();
 
 				long iBW = 0; // the amount of bytes we read since started downloading
