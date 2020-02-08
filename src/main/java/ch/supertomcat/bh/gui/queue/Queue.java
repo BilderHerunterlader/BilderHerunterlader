@@ -29,7 +29,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
@@ -104,7 +103,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	/**
 	 * Renderer for ProgressBars
 	 */
-	private QueueProgressColumnRenderer pcr = new QueueProgressColumnRenderer();
+	private QueueProgressColumnRenderer pcr = new QueueProgressColumnRenderer(SettingsManager.instance());
 
 	/**
 	 * Button
@@ -1090,48 +1089,13 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	}
 
 	@Override
-	public void picProgressBarChanged(final Pic pic, final int min, final int max, final int val, final String s, final String errMsg, final int index) {
+	public void picProgressBarChanged(final Pic pic, final int index) {
 		synchronized (syncObject) {
 			Runnable r = new Runnable() {
 				@Override
 				public void run() {
 					int row = index;
 					if ((row > -1) && (model.getRowCount() > row)) {
-						// force cell to be updated
-						Object o = model.getValueAt(row, 3);
-
-						boolean valueIsAlreadyProgressBar = o instanceof JProgressBar;
-						boolean picIsNotDownloading = pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING
-								|| pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE;
-
-						if (picIsNotDownloading && !valueIsAlreadyProgressBar) {
-							model.setValueAt(pic, row, 3);
-							model.fireTableCellUpdated(row, 3);
-							return;
-						}
-
-						JProgressBar pg = null;
-						if (valueIsAlreadyProgressBar) {
-							pg = (JProgressBar)o;
-						} else {
-							pg = new JProgressBar();
-						}
-
-						pg.setMinimum(min);
-						pg.setMaximum(max);
-						pg.setValue(val);
-						pg.setStringPainted(true);
-						pg.setString(s);
-						if (errMsg != null && errMsg.length() > 0) {
-							pg.setToolTipText(errMsg);
-						} else {
-							pg.setToolTipText(s);
-						}
-
-						if (!valueIsAlreadyProgressBar) {
-							model.setValueAt(pg, row, 3);
-						}
-
 						model.fireTableCellUpdated(row, 3);
 					}
 				}

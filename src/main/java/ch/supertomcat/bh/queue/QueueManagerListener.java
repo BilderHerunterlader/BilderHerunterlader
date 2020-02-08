@@ -33,14 +33,9 @@ public interface QueueManagerListener {
 	 * ProgressBar has changed
 	 * 
 	 * @param pic Pic
-	 * @param min Minimum
-	 * @param max Maximum
-	 * @param val Value
-	 * @param s Text
-	 * @param errMsg Error-Message
 	 * @param index Index
 	 */
-	public void picProgressBarChanged(Pic pic, int min, int max, int val, String s, String errMsg, int index);
+	public void picProgressBarChanged(Pic pic, int index);
 
 	/**
 	 * Filesize has changed

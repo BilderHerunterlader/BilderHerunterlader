@@ -99,7 +99,8 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		} else {
 			pic.setStatus(status, errorMessage);
 		}
-		pic.progressBarChanged(progressBarValue, status.getText());
+		pic.getProgress().setBytesDownloaded(progressBarValue);
+		pic.progressUpdated();
 		DownloadQueueManager.instance().removeDLSlotListener(pic);
 	}
 
@@ -217,7 +218,8 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		}
 
 		pic.setStatus(PicState.DOWNLOADING);
-		pic.progressBarChanged(0, PicState.DOWNLOADING.getText());
+		pic.getProgress().setBytesDownloaded(0);
+		pic.progressUpdated();
 
 		// Create a new URLParseObject
 		URLParseObject upo = new URLParseObject(pic.getContainerURL(), pic.getThumb(), pic);

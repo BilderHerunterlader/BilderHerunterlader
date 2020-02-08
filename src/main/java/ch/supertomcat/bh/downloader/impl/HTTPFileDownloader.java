@@ -25,7 +25,7 @@ import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.parser.URLParseObjectFile;
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.bh.pic.PicState;
+import ch.supertomcat.bh.pic.PicProgress;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -267,7 +267,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					return false;
 				}
 
-				pic.progressBarChanged(0, PicState.WAITING.getText());
+				PicProgress picProgress = pic.getProgress();
+				picProgress.setBytesDownloaded(0);
+				pic.progressUpdated();
 
 				long iBW = 0; // the amount of bytes we read since started downloading
 
@@ -278,9 +280,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					byte[] buf = new byte[8192]; // The buffer
 					int iBWs = 0; // the amount of bytes read since last download rate calculation
 					int nReads = 0;
-					String bitrate = ""; // the download rate as string
 					long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
-					pic.progressBarChanged(0, PicState.DOWNLOADING.getText());
+					picProgress.setBytesDownloaded(0);
+					pic.progressUpdated();
 
 					/*
 					 * Create a new timer, which sets every 10 seconds the recalculate-flag
@@ -324,15 +326,17 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						if (nReads > 12) {
 							nReads = 0;
 							// change the progressbar
-							pic.progressBarChanged(iBW, getProgressString(iBW, size, currentURL, urlCount) + bitrate);
+							picProgress.setBytesDownloaded(iBW);
+							picProgress.setUrlCount(urlCount);
+							picProgress.setCurrentURLIndex(currentURL);
+							pic.progressUpdated();
 						}
 						if (pic.isRecalcutateRate() && downloadRate) {
 							// the flag is set to true, so we recalculate the download rate
 							long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
 							// get the string for the rate
 							double downloadBitrate = UnitFormatUtil.getBitrate(iBWs, size, timeStarted, now);
-							pic.setDownloadBitrate(downloadBitrate);
-							bitrate = " " + UnitFormatUtil.getBitrateString(downloadBitrate);
+							picProgress.setRate(downloadBitrate);
 
 							/*
 							 * With this, we get always the actual download rate, not
@@ -470,36 +474,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			Files.deleteIfExists(Paths.get(target));
 		} catch (Exception e) {
 			logger.error("Could not delete file: {}", target, e);
-		}
-	}
-
-	/**
-	 * Returns a String with the percent or size read
-	 * 
-	 * @param size Number of bytes read
-	 * @param max Filesize
-	 * @param currentURL Current URL Index
-	 * @param urlCount Count of URLs
-	 * @return Progress-String
-	 */
-	private String getProgressString(long size, long max, int currentURL, int urlCount) {
-		int progressView = SettingsManager.instance().getProgessView();
-		String urlIndexString;
-		if (urlCount == 1) {
-			urlIndexString = "";
-		} else {
-			urlIndexString = currentURL + "/" + urlCount + " ";
-		}
-		if (max >= size) {
-			if (progressView == SettingsManager.PROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
-				return urlIndexString + UnitFormatUtil.getPercentString(size, max);
-			} else if (progressView == SettingsManager.PROGRESSBAR_SIZE || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
-				return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
-			} else {
-				return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
-			}
-		} else {
-			return urlIndexString + UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
 		}
 	}
 
