@@ -341,11 +341,11 @@ public class QueueManager implements IPicListener {
 	}
 
 	@Override
-	public void progressBarChanged(Pic pic, int min, int max, int val, String s, String errMsg) {
+	public void progressChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
 			for (QueueManagerListener l : listeners) {
-				l.picProgressBarChanged(pic, min, max, val, s, errMsg, index);
+				l.picProgressBarChanged(pic, index);
 			}
 		}
 	}
