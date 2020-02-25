@@ -2,6 +2,8 @@ package ch.supertomcat.bh.update;
 
 import java.awt.Component;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -68,8 +70,11 @@ public class UpdateManager {
 		KeywordManager.instance().closeDatabase();
 
 		File fDeleteUpdate = new File(ApplicationProperties.getProperty("ApplicationPath") + "delete_update.txt");
-		fDeleteUpdate.delete();
-		fDeleteUpdate = null;
+		try {
+			Files.deleteIfExists(fDeleteUpdate.toPath());
+		} catch (IOException e) {
+			logger.error("Could not delete delete_update.txt file", e);
+		}
 
 		UpdateObject updateBH = updateList.getApplicationUpdate();
 		List<UpdateObject> updateRules = updateList.getRulesUpdates();
