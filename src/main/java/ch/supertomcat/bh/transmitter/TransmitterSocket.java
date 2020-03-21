@@ -29,9 +29,17 @@ public class TransmitterSocket implements Runnable {
 	private boolean acceptConnections = true;
 
 	/**
-	 * Constructor
+	 * Transmitter Helper
 	 */
-	public TransmitterSocket() {
+	private final TransmitterHelper transmitterHelper;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param transmitterHelper Transmitter Helper
+	 */
+	public TransmitterSocket(TransmitterHelper transmitterHelper) {
+		this.transmitterHelper = transmitterHelper;
 	}
 
 	@Override
@@ -50,7 +58,7 @@ public class TransmitterSocket implements Runnable {
 					logger.info("Accepted connection at " + socket.getLocalAddress() + ":" + socket.getLocalPort() + " from " + socket.getInetAddress() + ":" + socket.getPort());
 					if (acceptConnections) {
 						// Start new thread, which will read data from the stream
-						TransmitterThread t = new TransmitterThread(socket);
+						TransmitterThread t = new TransmitterThread(socket, transmitterHelper);
 						t.setName("TransmitterReader-" + t.getId());
 						logger.info("Handle connection by thread: " + t.getName());
 						t.start();

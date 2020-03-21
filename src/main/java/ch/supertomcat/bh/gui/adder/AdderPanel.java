@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.gui.adder;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -75,7 +76,6 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.gui.queue.FileRenameDialog;
 import ch.supertomcat.bh.gui.queue.PathRenameDialog;
 import ch.supertomcat.bh.gui.renderer.AdderColorRowRenderer;
@@ -515,24 +515,50 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private final boolean localFiles;
 
 	/**
+	 * Log Manager
+	 */
+	private final LogManager logManager;
+
+	/**
+	 * Queue Manager
+	 */
+	private final QueueManager queueManager;
+
+	/**
+	 * Clipboard Observer
+	 */
+	private final ClipboardObserver clipboardObserver;
+
+	/**
 	 * Constructor
 	 * 
+	 * @param parent Parent Component
 	 * @param urlList URLList
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(URLList urlList) {
-		this(false, urlList);
+	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+		this(parent, false, urlList, logManager, queueManager, clipboardObserver);
 	}
 
 	/**
 	 * Constructor
 	 * 
+	 * @param parent Parent Component
 	 * @param localFiles Local files
 	 * @param urlList URLList
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(boolean localFiles, URLList urlList) {
+	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
 		super(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("DownloadSelection"));
 		this.localFiles = localFiles;
 		this.urlList = urlList;
+		this.logManager = logManager;
+		this.queueManager = queueManager;
+		this.clipboardObserver = clipboardObserver;
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setIconImage(Icons.getBHImage("BH.png"));
@@ -900,7 +926,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			this.setLocation(sm.getDownloadSelectionWindowXPos(), sm.getDownloadSelectionWindowYPos());
 		} else {
 			pack();
-			setLocationRelativeTo(Main.instance());
+			setLocationRelativeTo(parent);
 		}
 
 		addComponentListener(new ComponentListener() {
@@ -990,15 +1016,15 @@ public class AdderPanel extends JFrame implements ActionListener {
 		setComponentsEnabled(false, false);
 
 		// Search for blacklisted links
-		LogManager.instance().searchBlacklist(urls, this);
+		logManager.searchBlacklist(urls, this);
 
 		// Search for already downloaded links
-		LogManager.instance().searchLogs(urls, this);
+		logManager.searchLogs(urls, this);
 
 		// URLs without blacklisted URLs
 		final List<URL> clearedUpURLs = new ArrayList<>();
 
-		List<Pic> queue = QueueManager.instance().getQueue();
+		List<Pic> queue = queueManager.getQueue();
 		for (URL url : urls) {
 			if (url.isBlacklisted()) {
 				continue;
@@ -1125,7 +1151,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 					progressChangeInterval = 1;
 				}
 				String referrer = txtReferrer.getText();
-				QueueManager qm = QueueManager.instance();
 
 				int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
 				int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
@@ -1145,7 +1170,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 					String url = (String)model.getValueAt(rowModelIndex, urlColumnModelIndex);
 
 					if (bBlacklist) {
-						LogManager.instance().addUrlToBlacklist(url);
+						logManager.addUrlToBlacklist(url);
 					} else if (bDownload) {
 						if (localFiles && (boolean)model.getValueAt(rowModelIndex, deleteColumnModelIndex)) {
 							/*
@@ -1177,7 +1202,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 									p.setFixedLastModified(true);
 								}
 							}
-							qm.addPic(p);
+							queueManager.addPic(p);
 						}
 					}
 					progressCounter++;
@@ -1189,7 +1214,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				}
 
 				dispose();
-				QueueManager.instance().saveDatabase();
+				queueManager.saveDatabase();
 				System.gc();
 			}
 		});
@@ -1965,7 +1990,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 					}
 				}
 				if (content.length() > 0) {
-					ClipboardObserver.instance().setClipboardContent(content.toString());
+					clipboardObserver.setClipboardContent(content.toString());
 				}
 			}
 		});

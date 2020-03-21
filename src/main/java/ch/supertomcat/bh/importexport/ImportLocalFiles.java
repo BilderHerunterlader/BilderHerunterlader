@@ -1,24 +1,35 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.importexport.base.AdderImportBase;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Class for import files on the harddisk which have to be sort
  */
-public abstract class ImportLocalFiles {
+public class ImportLocalFiles extends AdderImportBase {
 	/**
-	 * Logger for this class
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ImportLocalFiles.class);
+	public ImportLocalFiles(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	}
 
 	/**
 	 * "Read" the files
@@ -28,7 +39,7 @@ public abstract class ImportLocalFiles {
 	 * 
 	 * @param files Files
 	 */
-	public static void importLocalFiles(File files[]) {
+	public void importLocalFiles(File files[]) {
 		if (files == null) {
 			return;
 		}
@@ -44,8 +55,8 @@ public abstract class ImportLocalFiles {
 
 		if (urls.size() > 0) {
 			// Open Download-Selection-Dialog
-			AdderPanel adderpnl = new AdderPanel(true, new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-					+ Localization.getString("Referrer"), urls));
+			AdderPanel adderpnl = new AdderPanel(parentComponent, true, new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
+					+ Localization.getString("Referrer"), urls), logManager, queueManager, clipboardObserver);
 			adderpnl.init();
 			adderpnl = null;
 		}

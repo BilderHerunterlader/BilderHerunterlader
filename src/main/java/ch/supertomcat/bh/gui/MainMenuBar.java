@@ -3,7 +3,6 @@ package ch.supertomcat.bh.gui;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.net.URISyntaxException;
 
 import javax.swing.Box;
 import javax.swing.JComboBox;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
@@ -24,8 +24,10 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.settings.Settings;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
@@ -33,10 +35,9 @@ import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
- * 
- *
+ * Main Menu Bar
  */
-public class MainMenuBar implements ActionListener {
+public class MainMenuBar {
 	/**
 	 * Logger for this class
 	 */
@@ -104,8 +105,16 @@ public class MainMenuBar implements ActionListener {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param parentWindow Parent Window
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param downloadQueueManager Download Queue Manager
+	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 */
-	public MainMenuBar() {
+	public MainMenuBar(JFrame parentWindow, MainWindowAccess mainWindowAccess, LogManager logManager, DownloadQueueManager downloadQueueManager, QueueManager queueManager,
+			KeywordManager keywordManager) {
 		menuFile.add(itemExit);
 
 		menuSettings.add(itemSettings);
@@ -121,22 +130,51 @@ public class MainMenuBar implements ActionListener {
 		itemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.SHIFT_MASK));
 		itemTutorial.setAccelerator(KeyStroke.getKeyStroke("F1"));
 
-		itemExit.addActionListener(this);
+		itemExit.addActionListener(e -> GuiEvent.instance().exitApp(false));
 
-		itemSettings.addActionListener(this);
+		itemSettings.addActionListener(e -> new Settings(parentWindow, mainWindowAccess));
 
-		itemUpdate.addActionListener(this);
-		itemLogFolder.addActionListener(this);
-		itemTutorial.addActionListener(this);
-		itemAbout.addActionListener(this);
+		itemUpdate.addActionListener(e -> {
+			if (downloadQueueManager.isDownloading()) {
+				JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+			} else {
+				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), parentWindow, queueManager, keywordManager);
+				update.setVisible(true);
+				update.toFront();
+			}
+		});
+		itemLogFolder.addActionListener(e -> {
+			File logDir = new File(ApplicationProperties.getProperty("LogsPath"));
+			try {
+				Desktop.getDesktop().open(logDir);
+			} catch (IOException e1) {
+				logger.error("Could not open Directory: {}", logDir.getAbsolutePath(), e1);
+			}
+		});
+		itemTutorial.addActionListener(e -> {
+			String url = ApplicationProperties.getProperty("TutorialURL");
+			if (Desktop.isDesktopSupported()) {
+				try {
+					Desktop.getDesktop().browse(new URI(url));
+				} catch (IOException | URISyntaxException ex) {
+					logger.error("Could not open URL: {}", url, ex);
+				}
+			} else {
+				logger.error("Could not open URL, because Desktop is not supported: {}", url);
+			}
+		});
+		itemAbout.addActionListener(e -> new About(parentWindow));
 
-		String logFiles[] = LogManager.instance().getAvailableLogFileNames();
+		String logFiles[] = logManager.getAvailableLogFileNames();
 		for (int i = 0; i < logFiles.length; i++) {
 			cmbLogFile.addItem(logFiles[i]);
 		}
-		int currentLogFileIndex = LogManager.instance().getCurrentLogFileIndexForArray(logFiles);
+		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFiles);
 		cmbLogFile.setSelectedIndex(currentLogFileIndex);
-		cmbLogFile.addActionListener(this);
+		cmbLogFile.addActionListener(e -> {
+			SettingsManager.instance().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
+			SettingsManager.instance().writeSettings(true);
+		});
 		cmbLogFile.setMaximumSize(new Dimension(133, 20));
 		cmbLogFile.setFocusable(false);
 		if (logFiles.length == 1) {
@@ -151,51 +189,6 @@ public class MainMenuBar implements ActionListener {
 		mb.add(lblLogFile);
 		mb.add(cmbLogFile);
 		mb.add(Box.createGlue());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == itemExit) {
-			GuiEvent.instance().exitApp(false);
-		} else if (e.getSource() == itemUpdate) {
-			if (DownloadQueueManager.instance().isDownloading()) {
-				JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-			} else {
-				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
-				update.setVisible(true);
-				update.toFront();
-			}
-		} else if (e.getSource() == itemSettings) {
-			new Settings(Main.instance());
-		} else if (e.getSource() == itemAbout) {
-			new About(Main.instance());
-		} else if (e.getSource() == itemTutorial) {
-			String url = ApplicationProperties.getProperty("TutorialURL");
-			if (Desktop.isDesktopSupported()) {
-				try {
-					Desktop.getDesktop().browse(new URI(url));
-				} catch (IOException | URISyntaxException ex) {
-					logger.error("Could not open URL: {}", url, ex);
-				}
-			} else {
-				logger.error("Could not open URL, because Desktop is not supported: {}", url);
-			}
-		} else if (e.getSource() == itemLogFolder) {
-			File logDir = new File(ApplicationProperties.getProperty("LogsPath"));
-			try {
-				Desktop.getDesktop().open(logDir);
-			} catch (IOException e1) {
-				logger.error("Could not open Directory: {}", logDir.getAbsolutePath(), e1);
-			}
-		} else if (e.getSource() == cmbLogFile) {
-			SettingsManager.instance().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
-			SettingsManager.instance().writeSettings(true);
-		}
 	}
 
 	/**

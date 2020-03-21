@@ -2,7 +2,6 @@ package ch.supertomcat.bh.gui.queue;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
@@ -20,16 +19,19 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
 /**
  * Dialog to add new links to queue by a TextArea
  */
-public class DownloadAddDialog extends JDialog implements ActionListener {
+public class DownloadAddDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -67,12 +69,33 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 	private JButton btnCancel = new JButton(Localization.getString("Cancel"));
 
 	/**
+	 * Log Manager
+	 */
+	private final LogManager logManager;
+
+	/**
+	 * Queue Manager
+	 */
+	private final QueueManager queueManager;
+
+	/**
+	 * Clipboard Observer
+	 */
+	private final ClipboardObserver clipboardObserver;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	public DownloadAddDialog(JFrame owner) {
+	public DownloadAddDialog(JFrame owner, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
 		super(owner);
+		this.logManager = logManager;
+		this.queueManager = queueManager;
+		this.clipboardObserver = clipboardObserver;
 
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);
@@ -82,8 +105,8 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtLinks);
 
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> okPressed());
+		btnCancel.addActionListener(e -> cancelPressed());
 
 		add(lblDescription, BorderLayout.NORTH);
 		add(new JScrollPane(txtLinks), BorderLayout.CENTER);
@@ -122,22 +145,13 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 		am.put(windowOkKey, windowOkAction);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed();
-		} else if (e.getSource() == btnCancel) {
-			cancelPressed();
-		}
-	}
-
 	/**
 	 * Ok-Button-Pressed-Method
 	 */
 	public void okPressed() {
 		this.dispose();
-		final String links;
-		if ((links = txtLinks.getText()).length() > 0) {
+		String links = txtLinks.getText();
+		if (!links.isEmpty()) {
 
 			Thread thread = new Thread(new Runnable() {
 				@Override
@@ -156,8 +170,8 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 						urls.add(urlToAdd);
 					}
 
-					AdderPanel adderpnl = new AdderPanel(new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-							+ Localization.getString("Referrer"), urls));
+					AdderPanel adderpnl = new AdderPanel(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
+							+ Localization.getString("Referrer"), urls), logManager, queueManager, clipboardObserver);
 					adderpnl.init();
 					adderpnl = null;
 				}
@@ -170,7 +184,7 @@ public class DownloadAddDialog extends JDialog implements ActionListener {
 	/**
 	 * Cancel-Button-Pressed-Method
 	 */
-	public void cancelPressed() {
+	private void cancelPressed() {
 		this.dispose();
 	}
 }

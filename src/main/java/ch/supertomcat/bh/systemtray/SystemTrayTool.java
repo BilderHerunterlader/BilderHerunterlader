@@ -13,23 +13,27 @@ import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.queue.DownloadAddDialog;
 import ch.supertomcat.bh.gui.queue.ParsePagesDialog;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.importexport.ImportHTML;
 import ch.supertomcat.bh.importexport.ImportLinkList;
+import ch.supertomcat.bh.keywords.KeywordManager;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.ISettingsListener;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
@@ -39,7 +43,7 @@ import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 /**
  * Class which handles the SystemTray
  */
-public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsListener {
+public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettingsListener {
 	/**
 	 * Logger for this class
 	 */
@@ -121,9 +125,60 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	private SystemTray tray = null;
 
 	/**
-	 * Constructor
+	 * Main Window
 	 */
-	public SystemTrayTool() {
+	private final JFrame mainWindow;
+
+	/**
+	 * Main Window Access
+	 */
+	private final MainWindowAccess mainWindowAccess;
+
+	/**
+	 * Queue Manager
+	 */
+	private final QueueManager queueManager;
+
+	/**
+	 * Download Queue Manager
+	 */
+	private final DownloadQueueManager downloadQueueManager;
+
+	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
+	 * Log Manager
+	 */
+	private final LogManager logManager;
+
+	/**
+	 * Clipboard Observer
+	 */
+	private final ClipboardObserver clipboardObserver;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param mainWindow Main Window
+	 * @param mainWindowAccess Main Window Access
+	 * @param queueManager Queue Manager
+	 * @param downloadQueueManager Download Queue Manager
+	 * @param keywordManager Keyword Manager
+	 * @param logManager Log Manager
+	 * @param clipboardObserver Clipboard Observer
+	 */
+	public SystemTrayTool(JFrame mainWindow, MainWindowAccess mainWindowAccess, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
+			LogManager logManager, ClipboardObserver clipboardObserver) {
+		this.mainWindow = mainWindow;
+		this.mainWindowAccess = mainWindowAccess;
+		this.queueManager = queueManager;
+		this.downloadQueueManager = downloadQueueManager;
+		this.keywordManager = keywordManager;
+		this.logManager = logManager;
+		this.clipboardObserver = clipboardObserver;
 	}
 
 	/**
@@ -189,9 +244,9 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 				@Override
 				public void mouseClicked(MouseEvent e) {
 					if (e.getClickCount() == 1 && e.getButton() == 1) {
-						if (!Main.instance().isVisible()) {
-							Main.instance().setVisible(true);
-							Main.instance().toFront();
+						if (!mainWindow.isVisible()) {
+							mainWindow.setVisible(true);
+							mainWindow.toFront();
 						} else {
 							GuiEvent.instance().hideWindow();
 						}
@@ -201,7 +256,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 
 			try {
 				tray.add(trayIcon);
-				DownloadQueueManager.instance().addDownloadQueueManagerListener(this);
+				downloadQueueManager.addDownloadQueueManagerListener(this);
 				SettingsManager.instance().addSettingsListener(this);
 			} catch (AWTException e1) {
 				logger.error(e1.getMessage(), e1);
@@ -214,7 +269,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	 */
 	public void remove() {
 		tray.remove(trayIcon);
-		DownloadQueueManager.instance().removeDownloadQueueManagerListener(this);
+		downloadQueueManager.removeDownloadQueueManagerListener(this);
 	}
 
 	/**
@@ -234,7 +289,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	}
 
 	private String getSystemTrayToolTipText() {
-		DownloadQueueManager queue = DownloadQueueManager.instance();
+		DownloadQueueManager queue = downloadQueueManager;
 		if (queue.isDownloading()) {
 			String downloadRate = UnitFormatUtil.getBitrateString(queue.getDownloadBitrate());
 			if (downloadRate.length() == 0) {
@@ -248,16 +303,16 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	}
 
 	private void actionOpen() {
-		Main.instance().setVisible(true);
-		Main.instance().toFront();
+		mainWindow.setVisible(true);
+		mainWindow.toFront();
 	}
 
 	private void actionDownloadStart() {
-		QueueManager.instance().startDownload();
+		queueManager.startDownload();
 	}
 
 	private void actionDownloadStop() {
-		QueueManager.instance().stopDownload();
+		queueManager.stopDownload();
 	}
 
 	private void actionClipboard() {
@@ -265,10 +320,10 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	}
 
 	private void actionUpdate() {
-		if (DownloadQueueManager.instance().isDownloading()) {
+		if (downloadQueueManager.isDownloading()) {
 			JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 		} else {
-			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
+			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), mainWindow, queueManager, keywordManager);
 			update.setVisible(true);
 			update.toFront();
 		}
@@ -282,7 +337,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ImportHTML.importHTML();
+				new ImportHTML(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importHTML();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -293,7 +348,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				DownloadAddDialog dlg = new DownloadAddDialog(Main.instance());
+				DownloadAddDialog dlg = new DownloadAddDialog(mainWindow, logManager, queueManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -305,7 +360,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ParsePagesDialog dlg = new ParsePagesDialog(Main.instance());
+				ParsePagesDialog dlg = new ParsePagesDialog(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -317,7 +372,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ImportLinkList.importLinkList();
+				new ImportLinkList(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importLinkList();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -334,7 +389,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 	@Override
 	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
 		if (SettingsManager.instance().isDownloadsCompleteNotification()) {
-			String text = QueueManager.instance().getQueueSize() + " " + Localization.getString("DownloadsLeftInQueue");
+			String text = queueManager.getQueueSize() + " " + Localization.getString("DownloadsLeftInQueue");
 			trayIcon.displayMessage(Localization.getString("DownloadsComplete"), text, TrayIcon.MessageType.INFO);
 		}
 	}
@@ -345,6 +400,11 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, ISettingsL
 			trayIcon.setToolTip(getSystemTrayToolTipText());
 		}
 		itemClipboard.setState(SettingsManager.instance().isCheckClipboard());
+	}
+
+	@Override
+	public void lookAndFeelChanged() {
+		// Nothing to do
 	}
 
 	@Override

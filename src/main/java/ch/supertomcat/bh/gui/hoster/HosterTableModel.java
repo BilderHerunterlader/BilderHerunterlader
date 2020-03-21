@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.gui.hoster;
 
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -14,20 +15,19 @@ import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
-import ch.supertomcat.bh.settings.ISettingsListener;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * TableModel for Hostclasses
  */
-public class HosterTableModel extends DefaultTableModel implements ISettingsListener {
+public class HosterTableModel extends DefaultTableModel implements BHSettingsListener {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -36,9 +36,24 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 	private List<JPanel> panels = new ArrayList<>();
 
 	/**
-	 * Constructor
+	 * Parent Component
 	 */
-	public HosterTableModel() {
+	private final Component parentComponent;
+
+	/**
+	 * Download Queue Manager
+	 */
+	private final DownloadQueueManager downloadQueueManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param downloadQueueManager Download Queue Manager
+	 */
+	public HosterTableModel(Component parentComponent, DownloadQueueManager downloadQueueManager) {
+		this.parentComponent = parentComponent;
+		this.downloadQueueManager = downloadQueueManager;
 		this.addColumn("Hoster");
 		this.addColumn("Version");
 		this.addColumn("Type");
@@ -106,8 +121,8 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 			btn.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent e) {
-					if (DownloadQueueManager.instance().isDownloading()) {
-						JOptionPane.showMessageDialog(Main.instance(), Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+					if (downloadQueueManager.isDownloading()) {
+						JOptionPane.showMessageDialog(parentComponent, Localization.getString("HosterChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 						return;
 					}
 					hostOptions.openOptionsDialog();
@@ -170,5 +185,10 @@ public class HosterTableModel extends DefaultTableModel implements ISettingsList
 				}
 			}
 		});
+	}
+
+	@Override
+	public void lookAndFeelChanged() {
+		// Nothing to do
 	}
 }

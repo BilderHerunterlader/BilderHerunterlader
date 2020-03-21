@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,10 +12,9 @@ import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.importexport.base.EncodingSelectionDialog;
+import ch.supertomcat.bh.importexport.base.ImportExportBase;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.QueueManager;
@@ -28,23 +28,35 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * Class for import download-queues from textfiles
  * Works only with textfiles exported by BilderHerunterlader!
  */
-public abstract class ImportQueue {
+public class ImportQueue extends ImportExportBase {
 	/**
-	 * Logger for this class
+	 * Queue Manager
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ImportQueue.class);
+	private final QueueManager queueManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param queueManager Queue Manager
+	 */
+	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager) {
+		super(parentComponent, mainWindowAccess);
+		this.queueManager = queueManager;
+	}
 
 	/**
 	 * 
 	 */
-	public static void importQueue() {
+	public void importQueue() {
 		int retval = JOptionPane
-				.showConfirmDialog(Main.instance(), Localization.getString("ImportQueueWarning"), Localization.getString("QueueImport"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
+				.showConfirmDialog(parentComponent, Localization.getString("ImportQueueWarning"), Localization.getString("QueueImport"), JOptionPane.OK_CANCEL_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (retval == JOptionPane.CANCEL_OPTION) {
 			return;
 		}
 
-		File file = Import.getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
+		File file = getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
 			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
@@ -56,7 +68,7 @@ public abstract class ImportQueue {
 	/**
 	 * @param strFile File
 	 */
-	public static void importQueue(String strFile) {
+	public void importQueue(String strFile) {
 		read(new File(strFile));
 	}
 
@@ -67,7 +79,7 @@ public abstract class ImportQueue {
 	 * 
 	 * @param file File
 	 */
-	private static void read(File file) {
+	private void read(File file) {
 		ProgressObserver pg = new ProgressObserver();
 		try (FileInputStream fIn = new FileInputStream(file); InputStream in = new BufferedInputStream(fIn)) {
 			String enc = null;
@@ -78,7 +90,7 @@ public abstract class ImportQueue {
 			}
 
 			if (enc == null) {
-				EncodingSelectionDialog esd = new EncodingSelectionDialog(Main.instance());
+				EncodingSelectionDialog esd = getEncodingSelectionDialog();
 				enc = esd.getChosenEncoding();
 				if (enc == null) {
 					return;
@@ -88,7 +100,7 @@ public abstract class ImportQueue {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(in, enc))) {
 				String row = null;
 
-				Main.instance().addProgressObserver(pg);
+				mainWindowAccess.addProgressObserver(pg);
 				pg.progressChanged(-1, -1, -1);
 				pg.progressChanged(Localization.getString("QueueImporting") + "...");
 				int iRow = 0;
@@ -144,17 +156,17 @@ public abstract class ImportQueue {
 						pg.progressChanged(Localization.getString("QueueImporting") + "..." + iRow + " " + Localization.getString("DownloadsImported") + "...");
 					}
 				}
-				QueueManager.instance().addPics(picsToAdd);
-				QueueManager.instance().saveDatabase();
+				queueManager.addPics(picsToAdd);
+				queueManager.saveDatabase();
 				System.gc();
 
-				Main.instance().setMessage(Localization.getString("TextFileImported"));
+				mainWindowAccess.setMessage(Localization.getString("TextFileImported"));
 			}
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
-			Main.instance().setMessage(Localization.getString("TextFileImportFailed"));
+			mainWindowAccess.setMessage(Localization.getString("TextFileImportFailed"));
 		} finally {
-			Main.instance().removeProgressObserver(pg);
+			mainWindowAccess.removeProgressObserver(pg);
 		}
 	}
 }

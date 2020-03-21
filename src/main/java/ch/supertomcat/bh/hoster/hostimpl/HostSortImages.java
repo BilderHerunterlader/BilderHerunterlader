@@ -72,9 +72,11 @@ public class HostSortImages extends Host implements IHoster {
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		String encodedURL = HTTPUtil.encodeURL(url, true);
-		if (HTTPUtil.isURL(encodedURL)) {
-			return false;
+		if (url.startsWith("http")) {
+			String encodedURL = HTTPUtil.encodeURL(url, true);
+			if (HTTPUtil.isURL(encodedURL)) {
+				return false;
+			}
 		}
 
 		for (Pattern pattern : urlPatterns) {

@@ -37,7 +37,6 @@ import org.w3c.dom.Node;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostIOException;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
@@ -54,7 +53,6 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.parser.URLParseObjectFile;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -365,7 +363,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		}
 
 		restriction = new Restriction("youtube.com", iMaxConnections);
-		DownloadQueueManager.instance().addRestriction(restriction);
+		addRestriction(restriction);
 	}
 
 	@Override
@@ -808,7 +806,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtMaxConnections);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtPathOverride);
 
-		final JDialog dialog = new JDialog(Main.instance(), NAME, true);
+		final JDialog dialog = new JDialog(getMainWindow(), NAME, true);
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlButtons, BorderLayout.SOUTH);
 		try {
@@ -880,7 +878,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 				} else if (e.getSource() == btnCancel) {
 					dialog.dispose();
 				} else if (e.getSource() == btnPathOverride) {
-					File folder = FileDialogUtil.showFolderSaveDialog(Main.instance(), txtPathOverride.getText(), null);
+					File folder = FileDialogUtil.showFolderSaveDialog(getMainWindow(), txtPathOverride.getText(), null);
 					if (folder != null) {
 						if ((folder.getAbsolutePath().endsWith("\\") == false) && (folder.getAbsolutePath().endsWith("/") == false)) {
 							txtPathOverride.setText(folder.getAbsolutePath() + FileUtil.FILE_SEPERATOR);
@@ -907,7 +905,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		});
 
 		dialog.pack();
-		dialog.setLocationRelativeTo(Main.instance());
+		dialog.setLocationRelativeTo(getMainWindow());
 		dialog.setVisible(true);
 	}
 

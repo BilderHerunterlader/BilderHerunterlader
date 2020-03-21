@@ -6,6 +6,7 @@ import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
@@ -13,6 +14,15 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * "FileDownloader" for local files, which only sorts local files on the harddisk into different folders and not actually downloads anything
  */
 public class LocalFileDownloader extends FileDownloaderBase {
+	/**
+	 * Constructor
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
+	 */
+	public LocalFileDownloader(DownloadQueueManager downloadQueueManager) {
+		super(downloadQueueManager);
+	}
+
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
 		URLParseObject result = parseURL(pic);

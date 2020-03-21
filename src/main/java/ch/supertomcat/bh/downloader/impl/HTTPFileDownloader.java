@@ -45,6 +45,15 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
  */
 public class HTTPFileDownloader extends FileDownloaderBase {
 
+	/**
+	 * Constructor
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
+	 */
+	public HTTPFileDownloader(DownloadQueueManager downloadQueueManager) {
+		super(downloadQueueManager);
+	}
+
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
 		try {
@@ -114,7 +123,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			}
 		} finally {
 			// Give the slot back to the Queue
-			DownloadQueueManager.instance().removeDLSlotListener(pic); // important!
+			downloadQueueManager.removeDLSlotListener(pic); // important!
 		}
 	}
 

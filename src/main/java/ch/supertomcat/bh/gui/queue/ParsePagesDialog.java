@@ -2,7 +2,6 @@ package ch.supertomcat.bh.gui.queue;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
@@ -19,14 +18,18 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
-import ch.supertomcat.bh.importexport.Import;
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.importexport.ImportURL;
+import ch.supertomcat.bh.log.LogManager;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
 /**
  * Dialog to add URL's to pages from which the links will be extracted by a TextArea
  */
-public class ParsePagesDialog extends JDialog implements ActionListener {
+public class ParsePagesDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -58,12 +61,22 @@ public class ParsePagesDialog extends JDialog implements ActionListener {
 	private JButton btnCancel = new JButton(Localization.getString("Cancel"));
 
 	/**
+	 * URL Importer
+	 */
+	private final ImportURL urlImporter;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ParsePagesDialog(JFrame owner) {
+	public ParsePagesDialog(JFrame owner, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
 		super(owner);
+		this.urlImporter = new ImportURL(owner, mainWindowAccess, logManager, queueManager, clipboardObserver);
 
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);
@@ -73,8 +86,8 @@ public class ParsePagesDialog extends JDialog implements ActionListener {
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtLinks);
 
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> okPressed());
+		btnCancel.addActionListener(e -> cancelPressed());
 
 		add(lblDescription, BorderLayout.NORTH);
 		add(new JScrollPane(txtLinks), BorderLayout.CENTER);
@@ -113,27 +126,13 @@ public class ParsePagesDialog extends JDialog implements ActionListener {
 		am.put(windowOkKey, windowOkAction);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed();
-		} else if (e.getSource() == btnCancel) {
-			cancelPressed();
-		}
-	}
-
 	/**
 	 * Ok-Button-Pressed-Method
 	 */
 	public void okPressed() {
 		this.dispose();
-		final String links;
-		if ((links = txtLinks.getText()).length() > 0) {
+		final String links = txtLinks.getText();
+		if (!links.isEmpty()) {
 
 			Thread thread = new Thread(new Runnable() {
 				@Override
@@ -147,8 +146,7 @@ public class ParsePagesDialog extends JDialog implements ActionListener {
 					}
 
 					for (int i = 0; i < strArr.length; i++) {
-						// ImportHTML.importHTML(strArr[i], strArr[i], false);
-						Import.importURL(strArr[i], strArr[i], false);
+						urlImporter.importURL(strArr[i], strArr[i], false);
 					}
 				}
 			});

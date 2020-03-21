@@ -11,8 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.GuiEvent;
-import ch.supertomcat.bh.keywords.KeywordManager;
-import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
@@ -21,8 +19,7 @@ import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
- * 
- *
+ * Update Manager
  */
 public class UpdateManager {
 	/**
@@ -64,10 +61,6 @@ public class UpdateManager {
 	 */
 	public void startUpdate(UpdateList updateList, Component owner) {
 		fireUpdatesStarted();
-
-		// Save and close databases
-		QueueManager.instance().closeDatabase();
-		KeywordManager.instance().closeDatabase();
 
 		File fDeleteUpdate = new File(ApplicationProperties.getProperty("ApplicationPath") + "delete_update.txt");
 		try {

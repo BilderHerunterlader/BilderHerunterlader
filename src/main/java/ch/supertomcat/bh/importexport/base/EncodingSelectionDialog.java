@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.importexport;
+package ch.supertomcat.bh.importexport.base;
 
 import java.awt.BorderLayout;
 import java.awt.Dialog;

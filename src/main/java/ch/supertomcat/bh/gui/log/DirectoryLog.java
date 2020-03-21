@@ -146,9 +146,17 @@ public class DirectoryLog extends JPanel {
 	private boolean initialized = false;
 
 	/**
-	 * Constructor
+	 * Log Manager
 	 */
-	public DirectoryLog() {
+	private final LogManager logManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param logManager Log Manager
+	 */
+	public DirectoryLog(LogManager logManager) {
+		this.logManager = logManager;
 		TableUtil.internationalizeColumns(jtLog);
 		setLayout(new BorderLayout());
 		jtLog.getColumn("DateTime").setMinWidth(100);
@@ -332,7 +340,7 @@ public class DirectoryLog extends JPanel {
 				ProgressObserver progress = new ProgressObserver();
 				DirectoryLogProgressObserver progressListener = new DirectoryLogProgressObserver();
 				progress.addProgressListener(progressListener);
-				List<DirectoryLogObject> dirs = LogManager.instance().readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
+				List<DirectoryLogObject> dirs = logManager.readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
 				if (dirs != null) {
 
 					int maxDirs = SettingsManager.instance().getDirectoryLogDirCount();

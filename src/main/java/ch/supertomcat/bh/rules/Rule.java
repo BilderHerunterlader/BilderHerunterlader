@@ -29,7 +29,6 @@ import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -546,11 +545,11 @@ public class Rule extends Hoster {
 	 */
 	private void applyRestriction() {
 		if (restriction != null) {
-			DownloadQueueManager.instance().removeRestriction(restriction);
+			removeRestriction(restriction);
 		}
 		if (maxConnections > 0 && maxConnectionDomains.size() > 0) {
 			restriction = new Restriction(maxConnectionDomains, maxConnections);
-			DownloadQueueManager.instance().addRestriction(restriction);
+			addRestriction(restriction);
 		} else {
 			restriction = null;
 		}

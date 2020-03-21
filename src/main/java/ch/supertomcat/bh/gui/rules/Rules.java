@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -32,15 +33,15 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.RulesColorRowRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 
 /**
@@ -98,8 +99,12 @@ public class Rules extends JPanel {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param parentWindow Parent Window
+	 * @param mainWindowAccess Main Window Access
+	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public Rules() {
+	public Rules(JFrame parentWindow, MainWindowAccess mainWindowAccess, DownloadQueueManager downloadQueueManager) {
 		setLayout(new BorderLayout());
 
 		jtRules = new JTable(model);
@@ -170,12 +175,12 @@ public class Rules extends JPanel {
 		btnNew.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (DownloadQueueManager.instance().isDownloading()) {
-					JOptionPane.showMessageDialog(Main.instance(), Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+				if (downloadQueueManager.isDownloading()) {
+					JOptionPane.showMessageDialog(parentWindow, Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				Rule r = new Rule("", "0.1", "", "");
-				RuleMainEditor rme = new RuleMainEditor(Main.instance(), r);
+				RuleMainEditor rme = new RuleMainEditor(parentWindow, r);
 				if (rme.getCanceled()) {
 					return;
 				}
@@ -188,8 +193,8 @@ public class Rules extends JPanel {
 		btnEdit.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (DownloadQueueManager.instance().isDownloading()) {
-					JOptionPane.showMessageDialog(Main.instance(), Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+				if (downloadQueueManager.isDownloading()) {
+					JOptionPane.showMessageDialog(parentWindow, Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				if (jtRules.getSelectedRows().length == 1) {
@@ -198,7 +203,7 @@ public class Rules extends JPanel {
 						return;
 					}
 					Rule r = (Rule)model.getValueAt(jtRules.convertRowIndexToModel(row), 0);
-					RuleMainEditor rme = new RuleMainEditor(Main.instance(), r);
+					RuleMainEditor rme = new RuleMainEditor(parentWindow, r);
 					if (rme.getCanceled()) {
 						return;
 					}
@@ -211,12 +216,12 @@ public class Rules extends JPanel {
 		btnDelete.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				if (DownloadQueueManager.instance().isDownloading()) {
-					JOptionPane.showMessageDialog(Main.instance(), Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
+				if (downloadQueueManager.isDownloading()) {
+					JOptionPane.showMessageDialog(parentWindow, Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 				if (jtRules.getSelectedRows().length == 1) {
-					int retval = JOptionPane.showConfirmDialog(Main.instance(), Localization.getString("ReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+					int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("ReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 					if (retval == JOptionPane.NO_OPTION) {
 						return;
 					}
@@ -245,16 +250,16 @@ public class Rules extends JPanel {
 			public void actionPerformed(ActionEvent e) {
 				ProgressObserver pg = new ProgressObserver();
 				try {
-					Main.instance().addProgressObserver(pg);
+					mainWindowAccess.addProgressObserver(pg);
 					pg.progressChanged(-1, -1, -1);
 					pg.progressChanged(Localization.getString("SavingRules"));
 					if (hm.getHostRules().saveAllRules()) {
-						Main.instance().setMessage(Localization.getString("RulesSaved"));
+						mainWindowAccess.setMessage(Localization.getString("RulesSaved"));
 					} else {
-						Main.instance().setMessage(Localization.getString("RulesSaveFailed"));
+						mainWindowAccess.setMessage(Localization.getString("RulesSaveFailed"));
 					}
 				} finally {
-					Main.instance().removeProgressObserver(pg);
+					mainWindowAccess.removeProgressObserver(pg);
 				}
 			}
 		});

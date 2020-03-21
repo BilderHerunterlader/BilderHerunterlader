@@ -26,7 +26,6 @@ import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.exceptions.OptionException;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.options.Option;
@@ -209,7 +208,7 @@ public class SettingsManager {
 	/**
 	 * Listener
 	 */
-	private List<ISettingsListener> listeners = new CopyOnWriteArrayList<>();
+	private List<BHSettingsListener> listeners = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Default Download Directory
@@ -1589,7 +1588,7 @@ public class SettingsManager {
 	 * Benachrichtigung ueber Einstellungsaenderungen
 	 */
 	private void settingsChanged() {
-		for (ISettingsListener listener : listeners) {
+		for (BHSettingsListener listener : listeners) {
 			listener.settingsChanged();
 		}
 	}
@@ -1599,7 +1598,7 @@ public class SettingsManager {
 	 * 
 	 * @param l Listener
 	 */
-	public void addSettingsListener(ISettingsListener l) {
+	public void addSettingsListener(BHSettingsListener l) {
 		if (!listeners.contains(l)) {
 			listeners.add(l);
 		}
@@ -1610,7 +1609,7 @@ public class SettingsManager {
 	 * 
 	 * @param l Listener
 	 */
-	public void removeSettingsListener(ISettingsListener l) {
+	public void removeSettingsListener(BHSettingsListener l) {
 		listeners.remove(l);
 	}
 
@@ -2295,11 +2294,6 @@ public class SettingsManager {
 	 */
 	public void setCheckClipboard(boolean checkClipboard) {
 		this.checkClipboard = checkClipboard;
-		if (checkClipboard) {
-			ClipboardObserver.instance().init();
-		} else {
-			ClipboardObserver.instance().stop();
-		}
 		writeSettings(true);
 		settingsChanged();
 	}

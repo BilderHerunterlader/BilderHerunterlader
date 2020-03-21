@@ -55,12 +55,11 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.hoster.HostManager;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ISettingsListener;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
@@ -77,7 +76,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Settings-Panel
  */
-public class Settings extends JDialog implements ActionListener, ItemListener, ChangeListener, ISettingsListener, MouseListener, TableColumnModelListener, WindowListener {
+public class Settings extends JDialog implements ActionListener, ItemListener, ChangeListener, BHSettingsListener, MouseListener, TableColumnModelListener, WindowListener {
 	/**
 	 * UID
 	 */
@@ -914,11 +913,24 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	private ProxyManager pm = ProxyManager.instance();
 
 	/**
+	 * Main Window Access
+	 */
+	private final MainWindowAccess mainWindowAccess;
+
+	/**
+	 * Owner
+	 */
+	private final Window owner;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
+	 * @param mainWindowAccess Main Window Access
 	 */
-	public Settings(Window owner) {
+	public Settings(Window owner, MainWindowAccess mainWindowAccess) {
+		this.owner = owner;
+		this.mainWindowAccess = mainWindowAccess;
 		setTitle(Localization.getString("Settings"));
 		setModal(true);
 		setIconImage(Icons.getBHImage("BH.png"));
@@ -1635,12 +1647,12 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnSave) {
 			applySettings();
-			Main.instance().setMessage(Localization.getString("SavingSettings"));
+			mainWindowAccess.setMessage(Localization.getString("SavingSettings"));
 			boolean b = sm.writeSettings(true);
 			if (b) {
-				Main.instance().setMessage(Localization.getString("SettingsSaved"));
+				mainWindowAccess.setMessage(Localization.getString("SettingsSaved"));
 			} else {
-				Main.instance().setMessage(Localization.getString("SettingsSaveFailed"));
+				mainWindowAccess.setMessage(Localization.getString("SettingsSaveFailed"));
 			}
 			SettingsManager.instance().removeSettingsListener(this);
 			this.dispose();
@@ -1785,7 +1797,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 */
 	private void applySettings() {
 		SettingsManager.instance().removeSettingsListener(this);
-		Main.instance().setMessage(Localization.getString("ApplyingSettings"));
+		mainWindowAccess.setMessage(Localization.getString("ApplyingSettings"));
 		sm.setConnections(sldConnectionCount.getValue());
 		sm.setConnectionsPerHost(sldConnectionCountPerHost.getValue());
 		sm.setThreadCount(sldThreadCount.getValue());
@@ -1908,12 +1920,9 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		}
 		sm.addSubdirs(v, true);
 
-		if (DownloadQueueManager.instance().isDownloading()) {
-			chkRulesBefore.setSelected(sm.isRulesBeforeClasses());
-		} else {
-			sm.setRulesBeforeClasses(chkRulesBefore.isSelected());
-			HostManager.instance().reInitHosterList();
-		}
+		sm.setRulesBeforeClasses(chkRulesBefore.isSelected());
+		HostManager.instance().reInitHosterList();
+
 		pm.setAuth(cbAuth.isSelected());
 		if (rbNoProxy.isSelected()) {
 			pm.setMode(ProxyManager.DIRECT_CONNECTION);
@@ -1929,13 +1938,13 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		pm.setProxyuser(txtProxyUser.getText());
 		pm.setProxypassword(String.valueOf(txtProxyPassword.getPassword()));
 		ProxyManager.instance().writeToSettings();
-		Main.instance().setMessage(Localization.getString("SettingsApplied"));
+		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
 		if (cmbLAF.getSelectedIndex() != previousLookAndFeel) {
 			String strLAF = SettingsManager.LAF_CLASSPATHES[cmbLAF.getSelectedIndex()];
 			if (strLAF.length() > 0) {
 				try {
 					UIManager.setLookAndFeel(strLAF);
-					SwingUtilities.updateComponentTreeUI(Main.instance());
+					SwingUtilities.updateComponentTreeUI(owner);
 				} catch (ClassNotFoundException e1) {
 					logger.error(e1.getMessage(), e1);
 				} catch (InstantiationException e1) {
@@ -1990,6 +1999,11 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	@Override
 	public void settingsChanged() {
 		init();
+	}
+
+	@Override
+	public void lookAndFeelChanged() {
+		// Nothing to do
 	}
 
 	@Override

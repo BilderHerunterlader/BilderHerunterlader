@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -15,44 +16,54 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.hoster.linkextract.ImageExtract;
 import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
+import ch.supertomcat.bh.importexport.base.AdderImportBase;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for importing URLs from HTML
  */
-public abstract class ImportHTML {
+public class ImportHTML extends AdderImportBase {
 	/**
-	 * Logger for this class
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ImportHTML.class);
+	public ImportHTML(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	}
 
 	/**
 	 * 
 	 */
-	public static void importHTML() {
-		File file = Import.getTextFileFromFileChooserDialog(".+\\.((s|x|j|)htm(l|)|php([0-5]|)|(a|d|j)sp|cfm|ssi|(f|)cg(i|)|pl|htx)", "Supported Files", false);
+	public void importHTML() {
+		File file = getTextFileFromFileChooserDialog(".+\\.((s|x|j|)htm(l|)|php([0-5]|)|(a|d|j)sp|cfm|ssi|(f|)cg(i|)|pl|htx)", "Supported Files", false);
 		if (file != null) {
 			ProgressObserver pg = new ProgressObserver();
-			Main.instance().addProgressObserver(pg);
+			mainWindowAccess.addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("ImportingHTMLFile") + "...");
 			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
@@ -82,22 +93,22 @@ public abstract class ImportHTML {
 				}
 
 				// Open the Dialog
-				AdderPanel adderpnl = new AdderPanel(new URLList(title, "", urls));
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, clipboardObserver);
 				adderpnl.init(); // We need to do this!
 				adderpnl = null;
 
-				Main.instance().setMessage(Localization.getString("HTMLFileImported"));
+				mainWindowAccess.setMessage(Localization.getString("HTMLFileImported"));
 			} catch (FileNotFoundException e) {
 				logger.error(e.getMessage(), e);
-				Main.instance().setMessage(Localization.getString("HTMLFileImportFailed"));
+				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
 			} catch (MalformedURLException e) {
 				logger.error(e.getMessage(), e);
-				Main.instance().setMessage(Localization.getString("HTMLFileImportFailed"));
+				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
-				Main.instance().setMessage(Localization.getString("HTMLFileImportFailed"));
+				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
 			} finally {
-				Main.instance().removeProgressObserver(pg);
+				mainWindowAccess.removeProgressObserver(pg);
 			}
 		}
 	}
@@ -107,7 +118,7 @@ public abstract class ImportHTML {
 	 * @param referrer Referrer
 	 * @param embeddedImages Embedded Images
 	 */
-	public static void importHTML(String url, String referrer, boolean embeddedImages) {
+	public void importHTML(String url, String referrer, boolean embeddedImages) {
 		String cookies = CookieManager.getCookies(url);
 		url = HTTPUtil.encodeURL(url);
 
@@ -134,7 +145,7 @@ public abstract class ImportHTML {
 
 				if (statusCode != 200) {
 					method.abort();
-					JOptionPane.showMessageDialog(Main.instance(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -160,7 +171,7 @@ public abstract class ImportHTML {
 	 * @param response Response
 	 * @param method Method
 	 */
-	public static void importHTML(String url, String referrer, boolean embeddedImages, InputStream in, HttpResponse response, HttpGet method) {
+	public void importHTML(String url, String referrer, boolean embeddedImages, InputStream in, HttpResponse response, HttpGet method) {
 		ArrayList<URL> urls = new ArrayList<>();
 
 		try {
@@ -189,7 +200,7 @@ public abstract class ImportHTML {
 			}
 
 			// Open the Dialog
-			AdderPanel adderpnl = new AdderPanel(new URLList(title, referrer, urls));
+			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
 			adderpnl.init(); // We need to do this!
 			adderpnl = null;
 		} catch (MalformedURLException e) {
@@ -205,7 +216,7 @@ public abstract class ImportHTML {
 	 * @param referrer Referrer
 	 * @param title Title
 	 */
-	public static void importHTML(InputStream in, String referrer, String title) {
+	public void importHTML(InputStream in, String referrer, String title) {
 		ArrayList<URL> urls = new ArrayList<>();
 
 		// Add the urls
@@ -216,7 +227,7 @@ public abstract class ImportHTML {
 		}
 
 		// Open the Dialog
-		AdderPanel adderpnl = new AdderPanel(new URLList(title, referrer, urls));
+		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
 		adderpnl = null;
 	}
@@ -227,7 +238,7 @@ public abstract class ImportHTML {
 	 * @param documentNode Document-Node
 	 * @return Page-title
 	 */
-	private static String getPageTitle(Document documentNode) {
+	private String getPageTitle(Document documentNode) {
 		// Get the page-title
 		String title = "";
 		// Get the title-Element

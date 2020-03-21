@@ -33,7 +33,7 @@ import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.settings.ISettingsListener;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -43,16 +43,11 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 /**
  * Class for reading and writing log of downloaded URLs
  */
-public class LogManager implements ISettingsListener {
+public class LogManager implements BHSettingsListener {
 	/**
 	 * Date Format
 	 */
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
-
-	/**
-	 * Singleton
-	 */
-	private static LogManager instance = null;
 
 	/**
 	 * Logger for this class
@@ -74,7 +69,7 @@ public class LogManager implements ISettingsListener {
 	/**
 	 * Constructor
 	 */
-	private LogManager() {
+	public LogManager() {
 		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
 		if (folder.exists() == false) {
 			folder.mkdirs();
@@ -97,18 +92,6 @@ public class LogManager implements ISettingsListener {
 		}
 
 		SettingsManager.instance().addSettingsListener(this);
-	}
-
-	/**
-	 * Returns the singleton
-	 * 
-	 * @return Instance
-	 */
-	public static synchronized LogManager instance() {
-		if (instance == null) {
-			instance = new LogManager();
-		}
-		return instance;
 	}
 
 	/**
@@ -608,5 +591,10 @@ public class LogManager implements ISettingsListener {
 				listener.currentLogFileChanged();
 			}
 		}
+	}
+
+	@Override
+	public void lookAndFeelChanged() {
+		// Nothing to do
 	}
 }

@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,31 +12,42 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.importexport.base.EncodingSelectionDialog;
+import ch.supertomcat.bh.importexport.base.ImportExportBase;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for exporting keywords
  */
-public abstract class ExportKeywords {
+public class ExportKeywords extends ImportExportBase {
 	/**
-	 * Logger for this class
+	 * Keyword Manager
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ExportKeywords.class);
+	private final KeywordManager keywordManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param keywordManager Keyword Manager
+	 */
+	public ExportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
+		super(parentComponent, mainWindowAccess);
+		this.keywordManager = keywordManager;
+	}
 
 	/**
 	 * Export keywords to a tab-seperated textfile
 	 */
-	public static void exportKeywords() {
-		File file = Import.getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
+	public void exportKeywords() {
+		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
 		if (file != null) {
 			SettingsManager.instance().setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
@@ -55,15 +67,15 @@ public abstract class ExportKeywords {
 	 * 
 	 * @param file File
 	 */
-	public static void exportKeywords(String file) {
-		EncodingSelectionDialog esd = new EncodingSelectionDialog(Main.instance());
+	public void exportKeywords(String file) {
+		EncodingSelectionDialog esd = getEncodingSelectionDialog();
 		String enc = esd.getChosenEncoding();
 		if (enc == null) {
 			return;
 		}
 
 		// Get all keywords
-		List<Keyword> keyw = KeywordManager.instance().getKeywords();
+		List<Keyword> keyw = keywordManager.getKeywords();
 		// Sort them
 		Collections.sort(keyw);
 		int i = 0;
@@ -71,7 +83,7 @@ public abstract class ExportKeywords {
 		try (FileOutputStream out = new FileOutputStream(file); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, enc))) {
 			String row = null;
 
-			Main.instance().addProgressObserver(pg);
+			mainWindowAccess.addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("KeywordsExporting") + "...");
 			Iterator<Keyword> it = keyw.iterator();
@@ -79,8 +91,9 @@ public abstract class ExportKeywords {
 				row = "";
 				Keyword k = it.next();
 				String title = k.getTitle();
-				if (title.length() == 0)
+				if (title.length() == 0) {
 					continue;
+				}
 
 				String keywords = k.getKeywords();
 				if (keywords.length() == 0) {
@@ -106,13 +119,13 @@ public abstract class ExportKeywords {
 
 			bw.flush();
 			keyw = null;
-			Main.instance().removeProgressObserver(pg);
-			Main.instance().setMessage(Localization.getString("KeywordsExported"));
+			mainWindowAccess.removeProgressObserver(pg);
+			mainWindowAccess.setMessage(Localization.getString("KeywordsExported"));
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
-			Main.instance().removeProgressObserver(pg);
-			Main.instance().setMessage(Localization.getString("KeywordExportFailed"));
+			mainWindowAccess.removeProgressObserver(pg);
+			mainWindowAccess.setMessage(Localization.getString("KeywordExportFailed"));
 		}
-		JOptionPane.showMessageDialog(Main.instance(), i + " " + Localization.getString("KeywordsExported"), Localization.getString("KeywordExport"), JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(parentComponent, i + " " + Localization.getString("KeywordsExported"), Localization.getString("KeywordExport"), JOptionPane.INFORMATION_MESSAGE);
 	}
 }

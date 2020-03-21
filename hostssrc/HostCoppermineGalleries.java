@@ -30,7 +30,6 @@ import org.w3c.tidy.Tidy;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
@@ -170,7 +169,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 				if (statusCode != 200) {
 					method.abort();
-					JOptionPane.showMessageDialog(Main.instance(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return urls;
 				}
 
@@ -250,7 +249,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 				if (statusCode != 200) {
 					method.abort();
-					JOptionPane.showMessageDialog(Main.instance(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					throw new HostIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
 				}
 
@@ -421,7 +420,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		pnlCenter.add(new JLabel(Localization.getString("CoppermineAcceptedURLs1")));
 		pnlCenter.add(new JLabel(Localization.getString("CoppermineAcceptedURLs2")));
 
-		final JDialog dialog = new JDialog(Main.instance(), "Coppermine-Galleries", true);
+		final JDialog dialog = new JDialog(getMainWindow(), "Coppermine-Galleries", true);
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlButtons, BorderLayout.SOUTH);
 		dialog.add(pnlCenter, BorderLayout.CENTER);
@@ -447,7 +446,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		btnCancel.addActionListener(action);
 
 		dialog.pack();
-		dialog.setLocationRelativeTo(Main.instance());
+		dialog.setLocationRelativeTo(getMainWindow());
 		dialog.setVisible(true);
 	}
 

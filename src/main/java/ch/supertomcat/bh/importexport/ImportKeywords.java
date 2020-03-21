@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,10 +14,9 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.importexport.base.EncodingSelectionDialog;
+import ch.supertomcat.bh.importexport.base.ImportExportBase;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -30,17 +30,22 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * 
  * @see ch.supertomcat.bh.importexport.ExportKeywords
  */
-public abstract class ImportKeywords {
+public class ImportKeywords extends ImportExportBase {
 	/**
-	 * Logger for this class
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ImportKeywords.class);
+	public ImportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess) {
+		super(parentComponent, mainWindowAccess);
+	}
 
 	/**
 	 * Import keywords from a textfile
 	 */
-	public static void importKeywords() {
-		File file = Import.getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
+	public void importKeywords() {
+		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
 		if (file != null) {
 			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			importKeywords(file.getAbsolutePath());
@@ -53,7 +58,7 @@ public abstract class ImportKeywords {
 	 * 
 	 * @param file File
 	 */
-	public static void importKeywords(String file) {
+	public void importKeywords(String file) {
 		List<Keyword> keyw = KeywordManager.instance().getKeywords();
 		List<Keyword> v = new ArrayList<>();
 
@@ -67,7 +72,7 @@ public abstract class ImportKeywords {
 			}
 
 			if (enc == null) {
-				EncodingSelectionDialog esd = new EncodingSelectionDialog(Main.instance());
+				EncodingSelectionDialog esd = getEncodingSelectionDialog();
 				enc = esd.getChosenEncoding();
 				if (enc == null) {
 					return;
@@ -77,7 +82,7 @@ public abstract class ImportKeywords {
 			try (BufferedReader br = new BufferedReader(new InputStreamReader(in, enc))) {
 				String row = null;
 
-				Main.instance().addProgressObserver(pg);
+				mainWindowAccess.addProgressObserver(pg);
 				pg.progressChanged(-1, -1, -1);
 				pg.progressChanged(Localization.getString("KeywordsImporting") + "...");
 				while ((row = br.readLine()) != null) {
@@ -135,18 +140,18 @@ public abstract class ImportKeywords {
 					}
 				}
 			}
-			Main.instance().setMessage(Localization.getString("KeywordsImported"));
+			mainWindowAccess.setMessage(Localization.getString("KeywordsImported"));
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
-			Main.instance().setMessage(Localization.getString("KeywordImportFailed"));
+			mainWindowAccess.setMessage(Localization.getString("KeywordImportFailed"));
 		} finally {
-			Main.instance().removeProgressObserver(pg);
+			mainWindowAccess.removeProgressObserver(pg);
 		}
 		if (!v.isEmpty()) {
 			// Add the keywords
-			Main.instance().clearKeywordFilters();
+			mainWindowAccess.clearKeywordFilters();
 			KeywordManager.instance().addKeywords(v);
 		}
-		JOptionPane.showMessageDialog(Main.instance(), v.size() + " " + Localization.getString("KeywordsImported"), Localization.getString("KeywordImport"), JOptionPane.INFORMATION_MESSAGE);
+		JOptionPane.showMessageDialog(parentComponent, v.size() + " " + Localization.getString("KeywordsImported"), Localization.getString("KeywordImport"), JOptionPane.INFORMATION_MESSAGE);
 	}
 }

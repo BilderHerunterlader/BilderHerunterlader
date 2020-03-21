@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
 import ch.supertomcat.bh.gui.Icons;
@@ -33,14 +34,16 @@ import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.gui.update.UpdateListener;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.ISettingsListener;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.bh.transmitter.TransmitterHTTP;
+import ch.supertomcat.bh.transmitter.TransmitterHelper;
 import ch.supertomcat.bh.transmitter.TransmitterSocket;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
@@ -96,6 +99,31 @@ public abstract class BH {
 	private TransmitterHTTP transmitterHTTP = null;
 
 	/**
+	 * Queue Manager
+	 */
+	private QueueManager queueManager;
+
+	/**
+	 * Download Queue Manager
+	 */
+	private DownloadQueueManager downloadQueueManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private SettingsManager settingsManager;
+
+	/**
+	 * Keyword Manager
+	 */
+	private KeywordManager keywordManager;
+
+	/**
+	 * Host Manager
+	 */
+	private HostManager hostManager;
+
+	/**
 	 * Constructor
 	 */
 	public BH() {
@@ -110,6 +138,13 @@ public abstract class BH {
 				}
 				removeShutdownHook();
 				exitBH(restart);
+			}
+
+			@Override
+			public void hideWindow() {
+				if (main != null) {
+					main.setVisible(false);
+				}
 			}
 		});
 		GuiEvent.instance().addUpdateListener(new UpdateListener() {
@@ -135,8 +170,9 @@ public abstract class BH {
 		});
 
 		// Read the settings from settings file
-		SettingsManager.instance().readSettings();
-		if (SettingsManager.instance().isLanguageFirstRun()) {
+		settingsManager = SettingsManager.instance();
+		settingsManager.readSettings();
+		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
 			String options[] = { "English", "Deutsch" };
 			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
@@ -145,9 +181,9 @@ public abstract class BH {
 				frame = ApplicationUtil.createInvisibleFrame("BH", Icons.getBHImage("BH.png"));
 				int ret = JOptionPane.showOptionDialog(frame, "Choose a language", "Language", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				if (ret == 0) {
-					SettingsManager.instance().setLanguage("en_EN");
+					settingsManager.setLanguage("en_EN");
 				} else if (ret == 1) {
-					SettingsManager.instance().setLanguage("de_DE");
+					settingsManager.setLanguage("de_DE");
 				}
 			} finally {
 				if (frame != null) {
@@ -159,10 +195,10 @@ public abstract class BH {
 		/*
 		 * No try to change the look and feel if needed
 		 */
-		int laf = SettingsManager.instance().getLookAndFeel();
+		int laf = settingsManager.getLookAndFeel();
 		if (laf > 0) {
 			try {
-				String strLAF = SettingsManager.LAF_CLASSPATHES[SettingsManager.instance().getLookAndFeel()];
+				String strLAF = SettingsManager.LAF_CLASSPATHES[settingsManager.getLookAndFeel()];
 				UIManager.setLookAndFeel(strLAF);
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
@@ -172,21 +208,20 @@ public abstract class BH {
 		// Initialize the localized Strings
 		String language = "en";
 		String country = "EN";
-		if (SettingsManager.instance().getLanguage().equals("de_DE")) {
+		if (settingsManager.getLanguage().equals("de_DE")) {
 			language = "de";
 			country = "DE";
 		}
 		Localization.init("ch.supertomcat.bh.BH", language, country);
 
-		// Initialize Managers
-		DownloadQueueManager.instance(); // Don't initialize this parallel, because HostManager will access it.
-		LogManager.instance(); // Initalized too fast as it would be worth to execute parallel
+		// Initalized too fast as it would be worth to execute parallel
+		LogManager logManager = new LogManager();
 
-		int threadCount = SettingsManager.instance().getThreadCount();
+		int threadCount = settingsManager.getThreadCount();
 		if (threadCount < 1) {
 			threadCount = 1;
-		} else if (threadCount > 3) {
-			threadCount = 3;
+		} else if (threadCount > 2) {
+			threadCount = 2;
 		}
 
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -195,19 +230,15 @@ public abstract class BH {
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				QueueManager.instance();
+				queueManager = new QueueManager(logManager);
+				downloadQueueManager = DownloadQueueManager.instance(queueManager);
+				hostManager = new HostManager(main, downloadQueueManager);
 			}
 		}));
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				KeywordManager.instance();
-			}
-		}));
-		tasks.add(Executors.callable(new Runnable() {
-			@Override
-			public void run() {
-				HostManager.instance();
+				keywordManager = KeywordManager.instance();
 			}
 		}));
 
@@ -219,6 +250,8 @@ public abstract class BH {
 		}
 		executor.shutdown();
 
+		ClipboardObserver clipboardObserver = new ClipboardObserver(settingsManager);
+		main = new Main(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, clipboardObserver);
 		if (SystemTrayTool.isTraySupported()) {
 			/*
 			 * We can only use the SystemTray on Java 1.6 or above and the user wants this
@@ -227,9 +260,8 @@ public abstract class BH {
 			 */
 
 			// Init SystemTray
-			stt = new SystemTrayTool();
+			stt = new SystemTrayTool(main, main, queueManager, downloadQueueManager, keywordManager, logManager, clipboardObserver);
 			stt.init();
-			main = Main.instance();
 			/*
 			 * If SystemTray is used, we show the window but hide it just again.
 			 * I can't remember exactly why i do this. But it had to do with the focus
@@ -243,7 +275,6 @@ public abstract class BH {
 			// Add icon to the SystemTray
 			stt.showTrayIcon();
 		} else {
-			main = Main.instance();
 			// If SystemTray is not used bring the main window to the front and request the focus
 			EventQueue.invokeLater(() -> {
 				main.setVisible(true);
@@ -252,10 +283,20 @@ public abstract class BH {
 			});
 		}
 
-		if (SettingsManager.instance().isCheckClipboard()) {
-			// Activate Clipboard Monitoring
-			ClipboardObserver.instance();
-		}
+		clipboardObserver.addListener(new ClipboardObserverListener() {
+			/**
+			 * URL Importer
+			 */
+			private ImportURL urlImporter = new ImportURL(main, main, logManager, queueManager, clipboardObserver);
+
+			@Override
+			public void linksDetected(List<String> links) {
+				for (String link : links) {
+					// let the import class download the container page and get the links from it
+					urlImporter.importURL(link, link, false);
+				}
+			}
+		});
 
 		started = true;
 
@@ -270,27 +311,39 @@ public abstract class BH {
 		 * save the settings at program exit, but every time the settings are
 		 * changed and definitly here!
 		 */
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.writeSettings(true);
 
 		/*
 		 * Start the TransmitterSocket
 		 */
-		transmitterSocket = new TransmitterSocket();
+		TransmitterHelper transmitterHelper = new TransmitterHelper(main, main, queueManager, logManager, clipboardObserver);
+		transmitterSocket = new TransmitterSocket(transmitterHelper);
 		Thread tThread = new Thread(transmitterSocket, "TransmitterSocket-Thread");
 		tThread.start();
 
 		// Start the TransmitterHTTP
-		initializeTransmitterHTTP();
-		SettingsManager.instance().addSettingsListener(new ISettingsListener() {
+		initializeTransmitterHTTP(transmitterHelper);
+		settingsManager.addSettingsListener(new BHSettingsListener() {
 			@Override
 			public void settingsChanged() {
-				initializeTransmitterHTTP();
+				initializeTransmitterHTTP(transmitterHelper);
+				if (settingsManager.isCheckClipboard()) {
+					clipboardObserver.init();
+				} else {
+					clipboardObserver.stop();
+				}
+			}
+
+			@Override
+			public void lookAndFeelChanged() {
+				// Nothing to do
 			}
 		});
 
-		if (SettingsManager.instance().isUpdates()) {
+		if (settingsManager.isUpdates()) {
 			// If the user wants, we check if updates are available
-			update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), Main.instance());
+			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource());
+			update = new UpdateWindow(updateManager, main, queueManager, keywordManager);
 			if (update.checkForUpdates()) {
 				// If Updates are available, show the Update-Window
 				EventQueue.invokeLater(() -> {
@@ -313,7 +366,7 @@ public abstract class BH {
 	 * @return True if exit is allowed, false otherwise
 	 */
 	private synchronized boolean checkExitAllowed() {
-		if (DownloadQueueManager.instance().isDownloading()) {
+		if (downloadQueueManager != null && downloadQueueManager.isDownloading()) {
 			JOptionPane.showMessageDialog(null, Localization.getString("ExitWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
@@ -324,9 +377,11 @@ public abstract class BH {
 	 * Stop Downloads. This method should only be used when exiting by shutdown hook
 	 */
 	private synchronized void stopDownloads() {
-		// Call stop downloads twice for immediate stopping (stops also running downloads)
-		QueueManager.instance().stopDownload();
-		QueueManager.instance().stopDownload();
+		if (queueManager != null) {
+			// Call stop downloads twice for immediate stopping (stops also running downloads)
+			queueManager.stopDownload();
+			queueManager.stopDownload();
+		}
 	}
 
 	/**
@@ -360,11 +415,13 @@ public abstract class BH {
 			update.setVisible(false);
 			update.dispose();
 		}
-		Main.instance().setVisible(false);
+		main.setVisible(false);
 
 		if (restart == false) {
 			// Save and close databases
-			QueueManager.instance().closeDatabase();
+			if (queueManager != null) {
+				queueManager.closeDatabase();
+			}
 			KeywordManager.instance().closeDatabase();
 		}
 
@@ -377,7 +434,7 @@ public abstract class BH {
 		exitNow(restart);
 	}
 
-	private synchronized void initializeTransmitterHTTP() {
+	private synchronized void initializeTransmitterHTTP(TransmitterHelper transmitterHelper) {
 		int port = SettingsManager.instance().getWebExtensionPort();
 		if (transmitterHTTP != null) {
 			if (transmitterHTTP.getListeningPort() == port && transmitterHTTP.isAlive()) {
@@ -389,7 +446,7 @@ public abstract class BH {
 			transmitterHTTP.stop();
 			transmitterHTTP = null;
 		}
-		transmitterHTTP = new TransmitterHTTP(port);
+		transmitterHTTP = new TransmitterHTTP(port, transmitterHelper);
 		try {
 			transmitterHTTP.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
 		} catch (IOException e) {

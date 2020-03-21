@@ -30,6 +30,7 @@ import javax.swing.event.ChangeListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.hoster.HosterPanel;
 import ch.supertomcat.bh.gui.keywords.Keywords;
 import ch.supertomcat.bh.gui.log.DirectoryLog;
@@ -39,6 +40,9 @@ import ch.supertomcat.bh.gui.rules.Rules;
 import ch.supertomcat.bh.importexport.ImportHTML;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.keywords.KeywordManagerListener;
+import ch.supertomcat.bh.log.LogManager;
+import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -48,7 +52,7 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 /**
  * Main-Window
  */
-public class Main extends JFrame implements ChangeListener, ComponentListener, WindowListener, KeywordManagerListener, MouseListener {
+public class Main extends JFrame implements ChangeListener, ComponentListener, WindowListener, KeywordManagerListener, MouseListener, MainWindowAccess {
 	/**
 	 * UID
 	 */
@@ -57,42 +61,37 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(Main.class);
-
-	/**
-	 * Singleton
-	 */
-	private static Main instance;
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Queue-Panel
 	 */
-	private Queue queue = new Queue();
+	private Queue queue;
 
 	/**
 	 * Log-Panel
 	 */
-	private Log log = new Log();
+	private Log log;
 
 	/**
 	 * directoryLog
 	 */
-	private DirectoryLog directoryLog = new DirectoryLog();
+	private DirectoryLog directoryLog;
 
 	/**
 	 * Keywords-Panel
 	 */
-	private Keywords keywords = new Keywords();
+	private Keywords keywords;
 
 	/**
 	 * Hoster-Panel
 	 */
-	private HosterPanel hosts = new HosterPanel();
+	private HosterPanel hosts;
 
 	/**
 	 * Rules-Panel
 	 */
-	private Rules rules = new Rules();
+	private Rules rules;
 
 	/**
 	 * Tabpane
@@ -117,7 +116,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	/**
 	 * mainMenuBar
 	 */
-	private MainMenuBar mainMenuBar = new MainMenuBar();
+	private MainMenuBar mainMenuBar;
 
 	/**
 	 * mainProgressPopup
@@ -125,9 +124,30 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	private MainProgressPopup mainProgressPopup = new MainProgressPopup();
 
 	/**
-	 * Constructor
+	 * Settings Manager
 	 */
-	private Main() {
+	private SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param downloadQueueManager Download Queue Manager
+	 * @param keywordManager Keyword Manager
+	 * @param clipboardObserver Clipboard Observer
+	 */
+	public Main(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
+			ClipboardObserver clipboardObserver) {
+		this.settingsManager = settingsManager;
+		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager);
+		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, clipboardObserver);
+		this.log = new Log(logManager, downloadQueueManager, this, clipboardObserver);
+		this.directoryLog = new DirectoryLog(logManager);
+		this.keywords = new Keywords(this, this, keywordManager);
+		this.hosts = new HosterPanel(downloadQueueManager);
+		this.rules = new Rules(this, this, downloadQueueManager);
 		setIconImage(Icons.getBHImage("BH.png"));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -161,7 +181,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 								String referrer = Localization.getString("Unkown");
 								byte[] stringBytes = sbData.toString().getBytes();
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
-								ImportHTML.importHTML(bais, referrer, title);
+								new ImportHTML(Main.this, Main.this, logManager, queueManager, clipboardObserver).importHTML(bais, referrer, title);
 								br.close();
 								e.dropComplete(true);
 								return;
@@ -189,12 +209,12 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		getContentPane().add(tab, BorderLayout.CENTER);
 		getContentPane().add(pnlMessage, BorderLayout.SOUTH);
 
-		KeywordManager.instance().addListener(this);
+		keywordManager.addListener(this);
 
 		tab.addChangeListener(this);
 		this.setTitle(windowTitlePrefix + Localization.getString("Queue") + windowTitleSuffix);
 
-		SettingsManager sm = SettingsManager.instance();
+		SettingsManager sm = settingsManager;
 		if (sm.isSaveWindowSizePosition()) {
 			this.setSize(sm.getWindowWidth(), sm.getWindowHeight());
 			this.setLocation(sm.getWindowXPos(), sm.getWindowYPos());
@@ -208,23 +228,6 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		addWindowListener(this);
 	}
 
-	/**
-	 * Returns the instance
-	 * 
-	 * @return Instance
-	 */
-	public static Main instance() {
-		if (instance == null) {
-			instance = new Main();
-		}
-		return instance;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
-	 */
 	@Override
 	public void stateChanged(ChangeEvent e) {
 		String tabTitle = tab.getTitleAt(tab.getSelectedIndex());
@@ -236,80 +239,41 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ComponentListener#componentHidden(java.awt.event.ComponentEvent)
-	 */
 	@Override
 	public void componentHidden(ComponentEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ComponentListener#componentMoved(java.awt.event.ComponentEvent)
-	 */
 	@Override
 	public void componentMoved(ComponentEvent e) {
-		SettingsManager sm = SettingsManager.instance();
-		sm.setWindowXPos(this.getX());
-		sm.setWindowYPos(this.getY());
-		sm.writeSettings(true);
-		sm = null;
+		settingsManager.setWindowXPos(this.getX());
+		settingsManager.setWindowYPos(this.getY());
+		settingsManager.writeSettings(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ComponentListener#componentResized(java.awt.event.ComponentEvent)
-	 */
 	@Override
 	public void componentResized(ComponentEvent e) {
-		SettingsManager sm = SettingsManager.instance();
-		sm.setWindowWidth(this.getWidth());
-		sm.setWindowHeight(this.getHeight());
-		sm.setWindowState(this.getExtendedState());
-		sm.writeSettings(true);
-		sm = null;
+		settingsManager.setWindowWidth(this.getWidth());
+		settingsManager.setWindowHeight(this.getHeight());
+		settingsManager.setWindowState(this.getExtendedState());
+		settingsManager.writeSettings(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ComponentListener#componentShown(java.awt.event.ComponentEvent)
-	 */
 	@Override
 	public void componentShown(ComponentEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowActivated(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowActivated(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowClosed(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowClosed(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowClosing(WindowEvent e) {
 		if (!SystemTrayTool.isTraySupported()) {
-			if (JOptionPane.showConfirmDialog(Main.instance(), Localization.getString("ReallyExit"), Localization.getString("Exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+			if (JOptionPane.showConfirmDialog(this, Localization.getString("ReallyExit"), Localization.getString("Exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
 				return;
 			}
 			// If no systemtray exit application
@@ -319,71 +283,39 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowDeactivated(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowDeactivated(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowDeiconified(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowDeiconified(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowIconified(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowIconified(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowOpened(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowOpened(WindowEvent e) {
 	}
 
-	/**
-	 * Get-Method
-	 * 
-	 * @return Message
-	 */
+	@Override
 	public String getMessage() {
 		return lblMessage.getText();
 	}
 
-	/**
-	 * Set-Method
-	 * 
-	 * @param message Message
-	 */
+	@Override
 	public void setMessage(String message) {
 		this.lblMessage.setText(message);
 	}
 
-	/**
-	 * @param progress Progress
-	 */
+	@Override
 	public synchronized void addProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.addProgressObserver(progress);
 		lblProgress.setIcon(Icons.getBHIcon("animations/process-working.gif", 16));
 	}
 
-	/**
-	 * @param progress Progress
-	 */
+	@Override
 	public synchronized void removeProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.removeProgressObserver(progress);
 		if (mainProgressPopup.getProgressObserverCount() == 0) {
@@ -391,55 +323,28 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.keywords.KeywordManagerListener#keywordsChanged()
-	 */
 	@Override
 	public void keywordsChanged() {
 		keywords.reloadKeywords();
 	}
 
-	/**
-	 * Clear Keyword filters
-	 */
+	@Override
 	public void clearKeywordFilters() {
 		keywords.clearFilters();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
-	 */
 	@Override
 	public void mouseClicked(MouseEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
-	 */
 	@Override
 	public void mousePressed(MouseEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
-	 */
 	@Override
 	public void mouseReleased(MouseEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
-	 */
 	@Override
 	public void mouseEntered(MouseEvent e) {
 		if (e.getSource() instanceof JComponent) {
@@ -457,22 +362,12 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
-	 */
 	@Override
 	public void mouseExited(MouseEvent e) {
 		mainProgressPopup.setVisible(false);
 	}
 
-	/**
-	 * Checks if the tab with the given component is selected
-	 * 
-	 * @param tabComponent Tab Component
-	 * @return True if the tab with the given component is selected, false otherwise
-	 */
+	@Override
 	public boolean isTabSelected(Component tabComponent) {
 		return tab.getSelectedComponent() == tabComponent;
 	}

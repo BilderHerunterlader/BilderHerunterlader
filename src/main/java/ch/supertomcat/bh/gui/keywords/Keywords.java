@@ -16,6 +16,7 @@ import java.util.regex.PatternSyntaxException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -44,7 +45,7 @@ import org.jdesktop.swingx.sort.TableSortController;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.KeywordsStringColorRowRenderer;
 import ch.supertomcat.bh.importexport.ExportKeywords;
 import ch.supertomcat.bh.importexport.ImportKeywords;
@@ -229,9 +230,31 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	private boolean running = false;
 
 	/**
-	 * Constructor
+	 * Parent Window
 	 */
-	public Keywords() {
+	private final JFrame parentWindow;
+
+	/**
+	 * Main Window Access
+	 */
+	private final MainWindowAccess mainWindowAccess;
+
+	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentWindow Parent Window
+	 * @param mainWindowAccess Main Window Access
+	 * @param keywordManager Keyword Manager
+	 */
+	public Keywords(JFrame parentWindow, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
+		this.parentWindow = parentWindow;
+		this.mainWindowAccess = mainWindowAccess;
+		this.keywordManager = keywordManager;
 		TableUtil.internationalizeColumns(jtKeywords);
 
 		jtKeywords.setRowSorter(sorter);
@@ -345,7 +368,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		menuItemTitleToRelativeDirectory.addActionListener(this);
 		menuItemAbsoluteToRelativeDirectory.addActionListener(this);
 
-		List<Keyword> keywords = KeywordManager.instance().getKeywords();
+		List<Keyword> keywords = keywordManager.getKeywords();
 		for (Keyword k : keywords) {
 			addKeyword(k);
 		}
@@ -388,7 +411,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				enableComponents(false);
 				model.removeAllRows();
 
-				List<Keyword> keywords = KeywordManager.instance().getKeywords();
+				List<Keyword> keywords = keywordManager.getKeywords();
 				for (Keyword k : keywords) {
 					addKeyword(k);
 				}
@@ -538,12 +561,12 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			return;
 		}
 		if (e.getSource() == btnNew) {
-			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(Main.instance(), Localization.getString("Add"), "", "", SettingsManager.instance().getSavePath(), true, "");
+			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Add"), "", "", SettingsManager.instance().getSavePath(), true, "");
 			if (dialog != null) {
-				KeywordManager.instance().addKeyword(dialog.getKeyword());
+				keywordManager.addKeyword(dialog.getKeyword());
 			}
 		} else if (e.getSource() == btnDelete) {
-			int retval = JOptionPane.showConfirmDialog(Main.instance(), Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
+			int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
 					.getTangoIcon("status/dialog-warning.png", 32));
 			if (retval == JOptionPane.NO_OPTION) {
 				return;
@@ -556,18 +579,18 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				public void run() {
 					try {
 						ProgressObserver pg = new ProgressObserver();
-						Main.instance().addProgressObserver(pg);
+						mainWindowAccess.addProgressObserver(pg);
 						pg.progressChanged(Localization.getString("DeleteEntries"));
 						pg.progressModeChanged(true);
 
 						int[] selectedRows = jtKeywords.getSelectedRows();
 						int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtKeywords, selectedRows, true);
 
-						KeywordManager.instance().removeKeywords(selectedModelRows);
+						keywordManager.removeKeywords(selectedModelRows);
 
 						lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
-						Main.instance().removeProgressObserver(pg);
-						Main.instance().setMessage(Localization.getString("EntriesDeleted"));
+						mainWindowAccess.removeProgressObserver(pg);
+						mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
 					} finally {
 						enableComponents(true);
 					}
@@ -580,28 +603,28 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				return;
 			}
 			if (jtKeywords.getSelectedRowCount() > 1) {
-				JOptionPane.showMessageDialog(Main.instance(), Localization.getString("NoMultipleRowEdit"), "Edit", JOptionPane.INFORMATION_MESSAGE);
+				JOptionPane.showMessageDialog(parentWindow, Localization.getString("NoMultipleRowEdit"), "Edit", JOptionPane.INFORMATION_MESSAGE);
 				return;
 			}
 			int row = jtKeywords.getSelectedRow();
 			row = jtKeywords.convertRowIndexToModel(row);
-			Keyword k = KeywordManager.instance().getKeywordByIndex(row);
+			Keyword k = keywordManager.getKeywordByIndex(row);
 			KeywordEditDialog dialog = KeywordEditDialog
-					.openKeywordEditDialog(Main.instance(), Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k.getRelativeDownloadPath());
+					.openKeywordEditDialog(parentWindow, Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k.getRelativeDownloadPath());
 			if (dialog != null) {
 				k.setTitle(dialog.getKeywordTitle());
 				k.setKeywords(dialog.getKeywords());
 				k.setDownloadPath(dialog.getPath());
 				k.setRelativePath(dialog.isRelativePathSelected());
 				k.setRelativeDownloadPath(dialog.getRelativePath());
-				KeywordManager.instance().updateKeyword(k);
+				keywordManager.updateKeyword(k);
 			}
 		} else if (e.getSource() == btnImport) {
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					enableComponents(false);
-					ImportKeywords.importKeywords();
+					new ImportKeywords(parentWindow, mainWindowAccess).importKeywords();
 					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
 					enableComponents(true);
 				}
@@ -613,7 +636,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				@Override
 				public void run() {
 					enableComponents(false);
-					ExportKeywords.exportKeywords();
+					new ExportKeywords(parentWindow, mainWindowAccess, keywordManager).exportKeywords();
 					enableComponents(true);
 				}
 			});

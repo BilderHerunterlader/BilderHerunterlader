@@ -28,11 +28,6 @@ public class QueueManager implements IPicListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Singleton
-	 */
-	private static QueueManager instance;
-
-	/**
 	 * Synchronization Object for pics
 	 */
 	private final Object syncObject = new Object();
@@ -57,9 +52,17 @@ public class QueueManager implements IPicListener {
 	private QueueSQLiteDB queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite");
 
 	/**
-	 * Constructor
+	 * Log Manager
 	 */
-	private QueueManager() {
+	private final LogManager logManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param logManager Log Manager
+	 */
+	public QueueManager(LogManager logManager) {
+		this.logManager = logManager;
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
 			if (pic.getStatus() != PicState.COMPLETE) {
@@ -73,18 +76,6 @@ public class QueueManager implements IPicListener {
 				queueSQLiteDB.deleteEntry(pic);
 			}
 		}
-	}
-
-	/**
-	 * Returns the instance
-	 * 
-	 * @return Instance
-	 */
-	public static synchronized QueueManager instance() {
-		if (instance == null) {
-			instance = new QueueManager();
-		}
-		return instance;
 	}
 
 	/**
@@ -170,8 +161,8 @@ public class QueueManager implements IPicListener {
 			}
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
-			pic.startDownload();
-			DownloadQueueManager.instance().manageDLSlots();
+			pic.startDownload(DownloadQueueManager.instance(this));
+			DownloadQueueManager.instance(this).manageDLSlots();
 		}
 	}
 
@@ -196,9 +187,9 @@ public class QueueManager implements IPicListener {
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
 			for (Pic pic : picsAdded) {
-				pic.startDownload();
+				pic.startDownload(DownloadQueueManager.instance(this));
 			}
-			DownloadQueueManager.instance().manageDLSlots();
+			DownloadQueueManager.instance(this).manageDLSlots();
 		}
 	}
 
@@ -253,7 +244,7 @@ public class QueueManager implements IPicListener {
 	 * @param indices Indices
 	 */
 	public void removePics(int indices[]) {
-		if (DownloadQueueManager.instance().isDownloading()) {
+		if (DownloadQueueManager.instance(this).isDownloading()) {
 			return;
 		}
 
@@ -286,9 +277,9 @@ public class QueueManager implements IPicListener {
 		}
 		// request downloadslots for all pics in queue
 		for (Pic pic : list) {
-			pic.startDownload();
+			pic.startDownload(DownloadQueueManager.instance(this));
 		}
-		DownloadQueueManager.instance().manageDLSlots();
+		DownloadQueueManager.instance(this).manageDLSlots();
 	}
 
 	/**
@@ -302,7 +293,7 @@ public class QueueManager implements IPicListener {
 		}
 		// stop all downloads
 		for (Pic pic : list) {
-			pic.stopDownload();
+			pic.stopDownload(DownloadQueueManager.instance(this));
 		}
 	}
 
@@ -358,6 +349,7 @@ public class QueueManager implements IPicListener {
 				l.picSizeChanged(pic, index);
 			}
 		}
+		updatePic(pic);
 	}
 
 	@Override
@@ -378,14 +370,22 @@ public class QueueManager implements IPicListener {
 				l.picStatusChanged(pic, index);
 			}
 		}
+		if ((pic.getStatus() != PicState.SLEEPING) && (pic.getStatus() != PicState.WAITING) && (pic.getStatus() != PicState.DOWNLOADING) && (pic.getStatus() != PicState.ABORTING)) {
+			/*
+			 * We can gain some speed by only updating the status in the database in some cases.
+			 * When pics are loaded, they reset to SLEEPING if the status is one of the three in the condition above.
+			 * So we don't need to save the status in those cases.
+			 */
+			updatePic(pic);
+		}
 		if (pic.getStatus() == PicState.COMPLETE) {
 			if (SettingsManager.instance().isSaveLogs()) {
-				LogManager.instance().addPicToLog(pic);
+				logManager.addPicToLog(pic);
 			}
 			SettingsManager.instance().increaseOverallDownloadedFiles(1);
 			SettingsManager.instance().increaseOverallDownloadedBytes(pic.getSize());
-			DownloadQueueManager.instance().increaseSessionDownloadedBytes(pic.getSize());
-			DownloadQueueManager.instance().increaseSessionDownloadedFiles();
+			DownloadQueueManager.instance(this).increaseSessionDownloadedBytes(pic.getSize());
+			DownloadQueueManager.instance(this).increaseSessionDownloadedFiles();
 			SettingsManager.instance().writeSettings(true);
 			removePic(pic);
 		}
@@ -399,5 +399,6 @@ public class QueueManager implements IPicListener {
 				l.picDeactivatedChanged(pic, index);
 			}
 		}
+		updatePic(pic);
 	}
 }

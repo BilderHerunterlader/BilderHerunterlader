@@ -10,6 +10,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import javax.swing.JFrame;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,7 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
  * Class which holds the host-classes and provides methods to
  * check and parse the URLs
  * There is also a method which removes duplicates from an URL-Array
+ * TODO Optimize synchronization
  */
 public class HostManager {
 	/**
@@ -63,9 +66,20 @@ public class HostManager {
 	private HostSortImages hostSortImages = new HostSortImages();
 
 	/**
-	 * Constructor
+	 * Sync Object
 	 */
-	private HostManager() {
+	private final Object syncObject = new Object();
+
+	/**
+	 * Constructor
+	 * 
+	 * @param mainWindow MainWindow
+	 * @param downloadQueueManager Download Queue Manager
+	 */
+	public HostManager(JFrame mainWindow, DownloadQueueManager downloadQueueManager) {
+		Hoster.setMainWindow(mainWindow);
+		Hoster.setDownloadQueueManager(downloadQueueManager);
+
 		// Load the hostclasses
 		List<Host> loadedHosts = HostClassesLoader.loadHostClasses();
 		loadedHosts.add(hostRules);
@@ -77,16 +91,22 @@ public class HostManager {
 
 		// Now we have a unsorted array, so we have to sort it
 		reInitHosterList();
+
+		if (instance != null) {
+			throw new IllegalStateException("HostManager already instanced");
+		}
+		instance = this;
 	}
 
 	/**
+	 * TODO Remove singleton
 	 * Returns the singleton
 	 * 
 	 * @return Singleton
 	 */
 	public static synchronized HostManager instance() {
 		if (instance == null) {
-			instance = new HostManager();
+			throw new IllegalStateException("HostManager not yet instanced");
 		}
 		return instance;
 	}
@@ -94,63 +114,60 @@ public class HostManager {
 	/**
 	 * Create a sorted hostclass-array
 	 */
-	public synchronized void reInitHosterList() {
-		// While downloads are running we can't do this!
-		if (DownloadQueueManager.instance().isDownloading()) {
-			return;
+	public void reInitHosterList() {
+		synchronized (syncObject) {
+			Collections.sort(hosts, new Comparator<Host>() {
+				private boolean bRulesBeforeClasses = SettingsManager.instance().isRulesBeforeClasses();
+
+				@Override
+				public int compare(Host o1, Host o2) {
+
+					if (o2.getName().equals(HostzDefaultFiles.NAME)) {
+						// HostDefaultImages has to be at the end of the array!
+						return -1;
+					} else if (o1.getName().equals(HostzDefaultFiles.NAME)) {
+						// HostDefaultImages has to be at the end of the array!
+						return 1;
+					}
+
+					if (o2 == hostSortImages) {
+						return -1;
+					} else if (o1 == hostSortImages) {
+						return 1;
+					}
+
+					if (o2 == hostRules) {
+						/*
+						 * When rules have higher priority than other hostclasses, then
+						 * HostRules has to be at the begin of the array
+						 */
+						if (bRulesBeforeClasses) {
+							return 1;
+						} else {
+							return -1;
+						}
+					} else if (o1 == hostRules) {
+						/*
+						 * When rules have higher priority than other hostclasses, then
+						 * HostRules has to be at the begin of the array
+						 */
+						if (bRulesBeforeClasses) {
+							return -1;
+						} else {
+							return 1;
+						}
+					}
+
+					if (o2.isDeveloper() && o1.isDeveloper() == false) {
+						return 1;
+					} else if (o1.isDeveloper() && o2.isDeveloper() == false) {
+						return -1;
+					}
+
+					return o1.getName().compareTo(o2.getName());
+				}
+			});
 		}
-
-		Collections.sort(hosts, new Comparator<Host>() {
-			private boolean bRulesBeforeClasses = SettingsManager.instance().isRulesBeforeClasses();
-
-			@Override
-			public int compare(Host o1, Host o2) {
-
-				if (o2.getName().equals(HostzDefaultFiles.NAME)) {
-					// HostDefaultImages has to be at the end of the array!
-					return -1;
-				} else if (o1.getName().equals(HostzDefaultFiles.NAME)) {
-					// HostDefaultImages has to be at the end of the array!
-					return 1;
-				}
-
-				if (o2 == hostSortImages) {
-					return -1;
-				} else if (o1 == hostSortImages) {
-					return 1;
-				}
-
-				if (o2 == hostRules) {
-					/*
-					 * When rules have higher priority than other hostclasses, then
-					 * HostRules has to be at the begin of the array
-					 */
-					if (bRulesBeforeClasses) {
-						return 1;
-					} else {
-						return -1;
-					}
-				} else if (o1 == hostRules) {
-					/*
-					 * When rules have higher priority than other hostclasses, then
-					 * HostRules has to be at the begin of the array
-					 */
-					if (bRulesBeforeClasses) {
-						return -1;
-					} else {
-						return 1;
-					}
-				}
-
-				if (o2.isDeveloper() && o1.isDeveloper() == false) {
-					return 1;
-				} else if (o1.isDeveloper() && o2.isDeveloper() == false) {
-					return -1;
-				}
-
-				return o1.getName().compareTo(o2.getName());
-			}
-		});
 	}
 
 	/**
@@ -178,13 +195,15 @@ public class HostManager {
 	 * @return Version
 	 */
 	public String getHostVersion(String name) {
-		for (Host host : hosts) {
-			if (host.getName().equals(name)) {
-				String version = host.getVersion();
-				if (version == null) {
-					return "";
+		synchronized (syncObject) {
+			for (Host host : hosts) {
+				if (host.getName().equals(name)) {
+					String version = host.getVersion();
+					if (version == null) {
+						return "";
+					}
+					return version;
 				}
-				return version;
 			}
 		}
 		return "";
@@ -196,7 +215,9 @@ public class HostManager {
 	 * @return Hostclasses-array
 	 */
 	public List<Host> getHosters() {
-		return new ArrayList<>(hosts);
+		synchronized (syncObject) {
+			return new ArrayList<>(hosts);
+		}
 	}
 
 	/**
@@ -206,10 +227,12 @@ public class HostManager {
 	 * @return Rule
 	 */
 	public Host getHost(int index) {
-		if (index < 0 || index >= hosts.size()) {
-			return null;
+		synchronized (syncObject) {
+			if (index < 0 || index >= hosts.size()) {
+				return null;
+			}
+			return hosts.get(index);
 		}
-		return hosts.get(index);
 	}
 
 	/**
@@ -219,13 +242,15 @@ public class HostManager {
 	 * @return Hoster or null
 	 */
 	public Hoster getHosterForURL(String url) {
-		for (Host host : hosts) {
-			// Check if the hostclass accepts the url
-			if (host.isEnabled() && host.isFromThisHoster(url)) {
-				if (host == hostRules) {
-					return hostRules.getRuleForURL(url);
-				} else {
-					return host;
+		synchronized (syncObject) {
+			for (Host host : hosts) {
+				// Check if the hostclass accepts the url
+				if (host.isEnabled() && host.isFromThisHoster(url)) {
+					if (host == hostRules) {
+						return hostRules.getRuleForURL(url);
+					} else {
+						return host;
+					}
 				}
 			}
 		}
@@ -243,30 +268,32 @@ public class HostManager {
 	 * @return List of URL-Objects if additional URLs were added or null
 	 */
 	public List<URL> checkURL(URL urlObject, AtomicBoolean bOK, ProgressObserver progress) {
-		for (Host host : hosts) {
-			// Check if the hostclass accepts the url
-			if (host.isEnabled() && host.isFromThisHoster(urlObject.getURL())) {
-				// Get a nice filename from the url
-				String filename = host.getFilenameFromURL(urlObject.getURL());
-				if (filename != null && !filename.isEmpty()) {
-					urlObject.setFilenameCorrected(filename);
-				}
-
-				bOK.set(true);
-
-				if (host instanceof IHosterURLAdder) {
-					IHosterURLAdder ihua = (IHosterURLAdder)host;
-					try {
-						List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
-						if (additionalURLs != null && !additionalURLs.isEmpty()) {
-							return additionalURLs;
-						}
-					} catch (Exception e) {
-						logger.error("Could not add additional URLs in host: {} {}", host.getName(), host.getVersion(), e);
+		synchronized (syncObject) {
+			for (Host host : hosts) {
+				// Check if the hostclass accepts the url
+				if (host.isEnabled() && host.isFromThisHoster(urlObject.getURL())) {
+					// Get a nice filename from the url
+					String filename = host.getFilenameFromURL(urlObject.getURL());
+					if (filename != null && !filename.isEmpty()) {
+						urlObject.setFilenameCorrected(filename);
 					}
-				}
 
-				return null;
+					bOK.set(true);
+
+					if (host instanceof IHosterURLAdder) {
+						IHosterURLAdder ihua = (IHosterURLAdder)host;
+						try {
+							List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
+							if (additionalURLs != null && !additionalURLs.isEmpty()) {
+								return additionalURLs;
+							}
+						} catch (Exception e) {
+							logger.error("Could not add additional URLs in host: {} {}", host.getName(), host.getVersion(), e);
+						}
+					}
+
+					return null;
+				}
 			}
 		}
 		return null;
@@ -285,31 +312,33 @@ public class HostManager {
 		}
 		String url = upo.getContainerURL();
 
-		for (Host host : hosts) {
-			/*
-			 * Check if the hostclass accepts the URL.
-			 * Also check if the last Host is the same as this one, then
-			 * don't parse the URL because this could be a endless loop.
-			 * So if a hostclass will parse the url again, then it must
-			 * set the last Host to null.
-			 * So a endless loop is still possible, i don't think i can
-			 * really avoid them completely, but this simple check is better
-			 * then nothing.
-			 * The HostRules-hostclass has multiple "classes" (Rules), so
-			 * if the lastHost is HostRules and this one also, then let them
-			 * parse, because HostRules itselfs checks if the lastRule is the
-			 * same as this time.
-			 */
-			if (host.isEnabled() && host.isFromThisHoster(url)) {
-				if (upo.isLoop()) {
-					logger.error("Parsing terminated for URL '" + upo.getContainerURL() + "' because upo seems to be parsed in a endless loop!: {}", upo.getHosterStackTrace());
-					return null;
-				}
+		synchronized (syncObject) {
+			for (Host host : hosts) {
+				/*
+				 * Check if the hostclass accepts the URL.
+				 * Also check if the last Host is the same as this one, then
+				 * don't parse the URL because this could be a endless loop.
+				 * So if a hostclass will parse the url again, then it must
+				 * set the last Host to null.
+				 * So a endless loop is still possible, i don't think i can
+				 * really avoid them completely, but this simple check is better
+				 * then nothing.
+				 * The HostRules-hostclass has multiple "classes" (Rules), so
+				 * if the lastHost is HostRules and this one also, then let them
+				 * parse, because HostRules itselfs checks if the lastRule is the
+				 * same as this time.
+				 */
+				if (host.isEnabled() && host.isFromThisHoster(url)) {
+					if (upo.isLoop()) {
+						logger.error("Parsing terminated for URL '" + upo.getContainerURL() + "' because upo seems to be parsed in a endless loop!: {}", upo.getHosterStackTrace());
+						return null;
+					}
 
-				// parse the URL
-				upo.addHoster(host);
-				host.parseURLAndFilename(upo);
-				return upo;
+					// parse the URL
+					upo.addHoster(host);
+					host.parseURLAndFilename(upo);
+					return upo;
+				}
 			}
 		}
 		return upo;

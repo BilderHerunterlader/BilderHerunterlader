@@ -3,6 +3,8 @@ package ch.supertomcat.bh.hoster;
 import java.net.URI;
 import java.util.List;
 
+import javax.swing.JFrame;
+
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
@@ -15,16 +17,19 @@ import org.apache.http.protocol.BasicHttpContext;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpCoreContext;
 import org.apache.http.util.EntityUtils;
+import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
+import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host and Rule extends this class, so we have a class
@@ -33,7 +38,20 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * @see ch.supertomcat.bh.hoster.parser.URLParseObject
  */
 public abstract class Hoster {
+	/**
+	 * Developer Flag
+	 */
 	private boolean developer = false;
+
+	/**
+	 * Main Window or null
+	 */
+	private static JFrame mainWindow = null;
+
+	/**
+	 * Download Queue Manager
+	 */
+	private static DownloadQueueManager downloadQueueManager = null;
 
 	/**
 	 * Returns the developer
@@ -54,6 +72,33 @@ public abstract class Hoster {
 	}
 
 	/**
+	 * Returns the mainWindow
+	 * 
+	 * @return mainWindow
+	 */
+	public JFrame getMainWindow() {
+		return mainWindow;
+	}
+
+	/**
+	 * Sets the mainWindow
+	 * 
+	 * @param mainWindow mainWindow
+	 */
+	static void setMainWindow(JFrame mainWindow) {
+		Hoster.mainWindow = mainWindow;
+	}
+
+	/**
+	 * Sets the downloadQueueManager
+	 * 
+	 * @param downloadQueueManager downloadQueueManager
+	 */
+	static void setDownloadQueueManager(DownloadQueueManager downloadQueueManager) {
+		Hoster.downloadQueueManager = downloadQueueManager;
+	}
+
+	/**
 	 * Returns the enabled
 	 * 
 	 * @return enabled
@@ -71,6 +116,36 @@ public abstract class Hoster {
 	 * @return True if hoster can be disabled, false otherwise
 	 */
 	public abstract boolean canBeDisabled();
+
+	/**
+	 * Adds a restriction
+	 * If there is already a restriction for a domain the restriction
+	 * is not added. But the value of maximum simultanious downloads from
+	 * the restriction to add is taken and set to the existing restriction.
+	 * So this method can be used to update a restriction
+	 * 
+	 * @param restriction Restriction
+	 */
+	public void addRestriction(Restriction restriction) {
+		if (downloadQueueManager != null) {
+			downloadQueueManager.addRestriction(restriction);
+		} else {
+			LoggerFactory.getLogger(getClass()).error("Could not add restriction, because downloadQueueManager is not initialized");
+		}
+	}
+
+	/**
+	 * Removes a restriction
+	 * 
+	 * @param restriction Restriction
+	 */
+	public void removeRestriction(Restriction restriction) {
+		if (downloadQueueManager != null) {
+			downloadQueueManager.removeRestriction(restriction);
+		} else {
+			LoggerFactory.getLogger(getClass()).error("Could not remove restriction, because downloadQueueManager is not initialized");
+		}
+	}
 
 	/**
 	 * Method to compare to URLs for removing duplicate URLs

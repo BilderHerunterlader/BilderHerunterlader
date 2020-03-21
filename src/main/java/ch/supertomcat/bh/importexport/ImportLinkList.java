@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,30 +8,40 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.importexport.base.AdderImportBase;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for import links from textfiles
  */
-public abstract class ImportLinkList {
+public class ImportLinkList extends AdderImportBase {
 	/**
-	 * Logger for this class
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
 	 */
-	private static Logger logger = LoggerFactory.getLogger(ImportLinkList.class);
+	public ImportLinkList(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	}
 
 	/**
 	 * 
 	 */
-	public static void importLinkList() {
-		File file = Import.getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
+	public void importLinkList() {
+		File file = getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
 			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
@@ -43,7 +54,7 @@ public abstract class ImportLinkList {
 	 * @param strFile File
 	 * @param deleteFile Delete File
 	 */
-	public static void importLinkList(String strFile, boolean deleteFile) {
+	public void importLinkList(String strFile, boolean deleteFile) {
 		File file = new File(strFile);
 		// read the file
 		boolean ok = read(file);
@@ -59,7 +70,7 @@ public abstract class ImportLinkList {
 	 * @param file File
 	 * @return True if successful, false otherwise
 	 */
-	private static boolean read(File file) {
+	private boolean read(File file) {
 		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
 			return read(br);
 		} catch (IOException e) {
@@ -88,7 +99,7 @@ public abstract class ImportLinkList {
 	 * @param br BufferedReader
 	 * @return True if successful
 	 */
-	public static boolean read(BufferedReader br) {
+	public boolean read(BufferedReader br) {
 		try {
 			boolean raw = false;
 			String line = null;
@@ -121,7 +132,7 @@ public abstract class ImportLinkList {
 
 			if (urls.size() > 0) {
 				// Open Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(new URLList(title, referrer, urls));
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
 				adderpnl.init();
 				adderpnl = null;
 			}

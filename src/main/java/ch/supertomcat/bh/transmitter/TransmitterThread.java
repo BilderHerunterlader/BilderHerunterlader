@@ -23,22 +23,24 @@ public class TransmitterThread extends Thread {
 	/**
 	 * Socket
 	 */
-	private Socket socket;
+	private final Socket socket;
+
+	/**
+	 * Transmitter Helper
+	 */
+	private final TransmitterHelper transmitterHelper;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param socket Socket
+	 * @param transmitterHelper Transmitter Helper
 	 */
-	public TransmitterThread(Socket socket) {
+	public TransmitterThread(Socket socket, TransmitterHelper transmitterHelper) {
 		this.socket = socket;
+		this.transmitterHelper = transmitterHelper;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.lang.Thread#run()
-	 */
 	@Override
 	public void run() {
 		super.run();
@@ -54,7 +56,7 @@ public class TransmitterThread extends Thread {
 		 * by the stream (The Opera-Plugin does this)
 		 */
 		try {
-			TransmitterUtil.parseTransmitterInput(new DataInputStream(socket.getInputStream()), StandardCharsets.UTF_8);
+			transmitterHelper.parseTransmitterInput(new DataInputStream(socket.getInputStream()), StandardCharsets.UTF_8);
 		} catch (IOException e) {
 			logger.error("Could not handle connection", e);
 		} finally {

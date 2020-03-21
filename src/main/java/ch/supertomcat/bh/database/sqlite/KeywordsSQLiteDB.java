@@ -13,7 +13,6 @@ import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.keywords.Keyword;
 
 /**
@@ -133,7 +132,7 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error("Could not get Keywords from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(Main.instance(), "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
 			return new ArrayList<>();
 		}
 	}

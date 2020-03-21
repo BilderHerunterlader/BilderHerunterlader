@@ -15,7 +15,6 @@ import ch.supertomcat.bh.downloader.impl.LocalFileDownloader;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
-import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -30,7 +29,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * be downloaded.
  * And no, i'm not willing to rename this class ;-)
  */
-public class Pic implements Runnable, IDownloadListener {
+public class Pic implements IDownloadListener {
 	/**
 	 * Logger for this class
 	 */
@@ -209,20 +208,22 @@ public class Pic implements Runnable, IDownloadListener {
 
 	/**
 	 * Start the download
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public synchronized void startDownload() {
+	public synchronized void startDownload(DownloadQueueManager downloadQueueManager) {
 		// If the download is deactivated, then we don't start the download
 		if (this.deactivated) {
 			return;
 		}
 
 		// If there is not already a request for a download-slot and the status is sleeping or failed
-		if ((!(DownloadQueueManager.instance().isDLSlotListenerRegistered(this))) && ((this.status == PicState.SLEEPING) || (this.status == PicState.FAILED)
-				|| (this.status == PicState.FAILED_FILE_NOT_EXIST) || (this.status == PicState.FAILED_FILE_TEMPORARY_OFFLINE))) {
+		if ((!(downloadQueueManager.isDLSlotListenerRegistered(this))) && ((this.status == PicState.SLEEPING) || (this.status == PicState.FAILED) || (this.status == PicState.FAILED_FILE_NOT_EXIST)
+				|| (this.status == PicState.FAILED_FILE_TEMPORARY_OFFLINE))) {
 			stop = false;
 			stopOncePressed = false;
 			setStatus(PicState.WAITING); // Change the status
-			DownloadQueueManager.instance().addDLSlotListener(this); // Request a download slot
+			downloadQueueManager.addDLSlotListener(this); // Request a download slot
 		}
 	}
 
@@ -232,8 +233,10 @@ public class Pic implements Runnable, IDownloadListener {
 	 * the stop-flag to true and the download method will stop if this
 	 * flag is true.
 	 * When the download is waiting for the parsed URL, this could take some time...
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public synchronized void stopDownload() {
+	public synchronized void stopDownload(DownloadQueueManager downloadQueueManager) {
 		if (stopOncePressed) {
 			stop = true;
 		}
@@ -250,75 +253,13 @@ public class Pic implements Runnable, IDownloadListener {
 			 * Maybe i should do this not at this point, because the user could
 			 * start the download again, before it has really stopped
 			 */
-			DownloadQueueManager.instance().removeDLSlotListenerStopping(this);
+			downloadQueueManager.removeDLSlotListenerStopping(this);
 		} else if (this.status == PicState.DOWNLOADING) {
 			if (stop) {
 				setStatus(PicState.ABORTING);
 			}
 		}
 		stopOncePressed = true;
-	}
-
-	@Override
-	public void run() {
-		/*
-		 * So, first some information what happens in this method.
-		 * 
-		 * First we have a Container-URL. This is called so because when
-		 * downloading images from imagehost, there is almost always a link
-		 * to a page, which contains the image.
-		 * So we get only the link to that page.
-		 * To get the direct link to image, we ask the HostManager to parse the URL.
-		 * Note, here also it doesn't have to be an image, the kind of file is
-		 * unnessesary!
-		 * So, now the HostManager goes trough all hostclasses and checks, if
-		 * there is one, which is able to parse the URL. If there is one, the
-		 * HostManager calls this class to do that. If this worked we get from the
-		 * HostManager the parsed URL. If not we get null or and empty URL.
-		 * 
-		 * But in this process there could be problems. What happens, wenn in the method
-		 * of a hostclass an error occured? Right, the complete download thread stands still!
-		 * So, the download-slot is still been registered for this download and the
-		 * download is unable to free it.
-		 * 
-		 * I defined a new type of Exception for this.
-		 * See ch.supertomcat.bh.exceptions.HostException
-		 * Because every hostclass has to implement the IHoster interface, the method
-		 * to parse the URL of every class will throw this exception.
-		 * But to really avoid this problem, i think i must define the method in the
-		 * interface to throw all exception. Because the HostException is only thrown, when
-		 * the programmer of a hostclass, throw one.
-		 * Now wat happens, when a hostclass calls a method, which does
-		 * not throw an exception?
-		 * Right, again the Thread stands still. So, there is not really a possibillity to
-		 * avoid this completely.
-		 */
-		if (stop) {
-			// Status aendern und Slot freigeben
-			setStatus(PicState.SLEEPING);
-
-			progress.setBytesTotal(size);
-			progress.setBytesDownloaded(0);
-			progressUpdated();
-
-			DownloadQueueManager.instance().removeDLSlotListener(this);
-			return;
-		}
-
-		logger.info("Downloading: {}", containerURL);
-
-		FileDownloader downloader;
-		String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
-		if (HTTPUtil.isURL(encodedContainerURL)) {
-			downloader = new HTTPFileDownloader();
-		} else {
-			downloader = new LocalFileDownloader();
-		}
-		try {
-			downloader.downloadFile(this);
-		} catch (HostException e) {
-			// Nothing to do
-		}
 	}
 
 	/**
@@ -360,7 +301,7 @@ public class Pic implements Runnable, IDownloadListener {
 	}
 
 	@Override
-	public boolean downloadAllowed() {
+	public boolean downloadAllowed(DownloadQueueManager downloadQueueManager) {
 		/*
 		 * When the startDownload-Method is called, the download requests the
 		 * Queue for a download-slot. The Queue fires this method, as soon as there is
@@ -375,7 +316,70 @@ public class Pic implements Runnable, IDownloadListener {
 			setStatus(PicState.DOWNLOADING);
 
 			// Now we make this Pic to a thread and start it
-			Thread t = new Thread(this);
+			Thread t = new Thread(new Runnable() {
+
+				@Override
+				public void run() {
+					/*
+					 * So, first some information what happens in this method.
+					 * 
+					 * First we have a Container-URL. This is called so because when
+					 * downloading images from imagehost, there is almost always a link
+					 * to a page, which contains the image.
+					 * So we get only the link to that page.
+					 * To get the direct link to image, we ask the HostManager to parse the URL.
+					 * Note, here also it doesn't have to be an image, the kind of file is
+					 * unnessesary!
+					 * So, now the HostManager goes trough all hostclasses and checks, if
+					 * there is one, which is able to parse the URL. If there is one, the
+					 * HostManager calls this class to do that. If this worked we get from the
+					 * HostManager the parsed URL. If not we get null or and empty URL.
+					 * 
+					 * But in this process there could be problems. What happens, wenn in the method
+					 * of a hostclass an error occured? Right, the complete download thread stands still!
+					 * So, the download-slot is still been registered for this download and the
+					 * download is unable to free it.
+					 * 
+					 * I defined a new type of Exception for this.
+					 * See ch.supertomcat.bh.exceptions.HostException
+					 * Because every hostclass has to implement the IHoster interface, the method
+					 * to parse the URL of every class will throw this exception.
+					 * But to really avoid this problem, i think i must define the method in the
+					 * interface to throw all exception. Because the HostException is only thrown, when
+					 * the programmer of a hostclass, throw one.
+					 * Now wat happens, when a hostclass calls a method, which does
+					 * not throw an exception?
+					 * Right, again the Thread stands still. So, there is not really a possibillity to
+					 * avoid this completely.
+					 */
+					if (stop) {
+						// Status aendern und Slot freigeben
+						setStatus(PicState.SLEEPING);
+
+						progress.setBytesTotal(size);
+						progress.setBytesDownloaded(0);
+						progressUpdated();
+
+						downloadQueueManager.removeDLSlotListener(Pic.this);
+						return;
+					}
+
+					logger.info("Downloading: {}", containerURL);
+
+					FileDownloader downloader;
+					String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
+					if (HTTPUtil.isURL(encodedContainerURL)) {
+						downloader = new HTTPFileDownloader(downloadQueueManager);
+					} else {
+						downloader = new LocalFileDownloader(downloadQueueManager);
+					}
+					try {
+						downloader.downloadFile(Pic.this);
+					} catch (HostException e) {
+						// Nothing to do
+					}
+				}
+			});
 			t.setName("Download-Thread-" + t.getId());
 			// We set the priority to a minimum, to reduce CPU-Usage
 			t.setPriority(Thread.MIN_PRIORITY);
@@ -441,7 +445,6 @@ public class Pic implements Runnable, IDownloadListener {
 			for (IPicListener listener : listeners) {
 				listener.sizeChanged(this);
 			}
-			QueueManager.instance().updatePic(this);
 		}
 	}
 
@@ -503,14 +506,6 @@ public class Pic implements Runnable, IDownloadListener {
 		}
 		for (IPicListener listener : listeners) {
 			listener.statusChanged(this);
-		}
-		if ((status != PicState.SLEEPING) && (status != PicState.WAITING) && (status != PicState.DOWNLOADING) && (status != PicState.ABORTING)) {
-			/*
-			 * We can gain some speed by only updating the status in the database in some cases.
-			 * When pics are loaded, they reset to SLEEPING if the status is one of the three in the condition above.
-			 * So we don't need to save the status in those cases.
-			 */
-			QueueManager.instance().updatePic(this);
 		}
 	}
 
@@ -713,7 +708,6 @@ public class Pic implements Runnable, IDownloadListener {
 		for (IPicListener listener : listeners) {
 			listener.deactivatedChanged(this);
 		}
-		QueueManager.instance().updatePic(this);
 	}
 
 	/**

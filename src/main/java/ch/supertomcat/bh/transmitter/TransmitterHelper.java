@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.transmitter;
 
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,20 +12,72 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
-import ch.supertomcat.bh.importexport.Import;
 import ch.supertomcat.bh.importexport.ImportLinkList;
+import ch.supertomcat.bh.importexport.ImportURL;
+import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
+import ch.supertomcat.bh.queue.QueueManager;
 
 /**
- * Utility class for Transmitter
+ * Helper class for Transmitter
  */
-public final class TransmitterUtil {
+public class TransmitterHelper {
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(TransmitterUtil.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
+	 * Parent Component
+	 */
+	private final Component parentComponent;
+
+	/**
+	 * Main Window Access
+	 */
+	private final MainWindowAccess mainWindowAccess;
+
+	/**
+	 * Queue Manager
+	 */
+	private final QueueManager queueManager;
+
+	/**
+	 * Log Manager
+	 */
+	private final LogManager logManager;
+
+	/**
+	 * Clipboard Observer
+	 */
+	private final ClipboardObserver clipboardObserver;
+
+	/**
+	 * URL Importer
+	 */
+	private final ImportURL urlImporter;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param queueManager Queue Manager
+	 * @param logManager Log Manager
+	 * @param clipboardObserver Clipboard Observer
+	 */
+	public TransmitterHelper(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, LogManager logManager, ClipboardObserver clipboardObserver) {
+		this.parentComponent = parentComponent;
+		this.mainWindowAccess = mainWindowAccess;
+		this.queueManager = queueManager;
+		this.logManager = logManager;
+		this.clipboardObserver = clipboardObserver;
+		this.urlImporter = new ImportURL(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	}
 
 	/**
 	 * Parse Transmitter Input and open Download-Selection-Dialog
@@ -33,7 +86,7 @@ public final class TransmitterUtil {
 	 * @param encoding Encoding
 	 * @return True if successful, false otherwise
 	 */
-	public static boolean parseTransmitterInput(InputStream in, Charset encoding) {
+	public boolean parseTransmitterInput(InputStream in, Charset encoding) {
 		/*
 		 * There are 3 ways, how URLs could be transferred to BH.
 		 * The first one is to send all the URLs by the stream (The Firefox-Extension does this)
@@ -182,14 +235,14 @@ public final class TransmitterUtil {
 
 			if ((fullList == false) && (file.length() > 0) && (eof)) {
 				// If we recieved only a path to a file, we must read it
-				ImportLinkList.importLinkList(file, true);
+				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver).importLinkList(file, true);
 				logger.info("Handled Connection successfully");
 			} else if ((fullList == false) && (url.length() > 0) && (eof)) {
 				// If we recieved only a URL which contains all the URLs, we download the URL
 				if (url.matches("^https?://.*/?.*")) {
 					logger.debug("Recieved URL to Download: {}", url);
 					// ImportHTML.importHTML(url, url, imgs);
-					Import.importURL(url, url, imgs);
+					urlImporter.importURL(url, url, imgs);
 				} else {
 					logger.error("URL did not match URL-Pattern: {}", url);
 				}
@@ -198,7 +251,7 @@ public final class TransmitterUtil {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(new URLList(title, referrer, urls));
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
 				adderpnl.init();
 				logger.info("Handled Connection successfully");
 			}

@@ -39,6 +39,8 @@ import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.renderer.UpdateActionColumnRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.keywords.KeywordManager;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateException;
@@ -184,13 +186,27 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private UpdateActionColumnRenderer uacr = new UpdateActionColumnRenderer();
 
 	/**
+	 * Queue Manager
+	 */
+	private final QueueManager queueManager;
+
+	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param updateManager UpdateManager
 	 * @param owner Owner
+	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 */
-	public UpdateWindow(UpdateManager updateManager, Window owner) {
+	public UpdateWindow(UpdateManager updateManager, Window owner, QueueManager queueManager, KeywordManager keywordManager) {
 		this.updateManager = updateManager;
+		this.queueManager = queueManager;
+		this.keywordManager = keywordManager;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setIconImage(Icons.getBHImage("BH.png"));
 		addWindowListener(this);
@@ -481,6 +497,10 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	}
 
 	private void startUpdate() {
+		// Save and close databases
+		queueManager.closeDatabase();
+		keywordManager.closeDatabase();
+
 		updateRunned = true;
 		btnUpdate.setEnabled(false);
 		prgUpdate.setIndeterminate(true);

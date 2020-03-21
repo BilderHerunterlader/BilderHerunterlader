@@ -22,6 +22,7 @@ import ch.supertomcat.bh.gui.renderer.HosterOptionsColumnRenderer;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.IRedirect;
+import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
@@ -43,12 +44,12 @@ public class HosterPanel extends JPanel {
 	/**
 	 * TabelModel
 	 */
-	private HosterTableModel model = new HosterTableModel();
+	private final HosterTableModel model;
 
 	/**
 	 * Table
 	 */
-	private JTable jtHoster = new JTable(model);
+	private final JTable jtHoster;
 
 	/**
 	 * Special renderer for option buttons
@@ -57,8 +58,13 @@ public class HosterPanel extends JPanel {
 
 	/**
 	 * Constructor
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public HosterPanel() {
+	public HosterPanel(DownloadQueueManager downloadQueueManager) {
+		model = new HosterTableModel(this, downloadQueueManager);
+		jtHoster = new JTable(model);
+
 		TableUtil.internationalizeColumns(jtHoster);
 
 		model.addTableModelListener(new TableModelListener() {

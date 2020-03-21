@@ -13,7 +13,6 @@ import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 
@@ -175,7 +174,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 			}
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error("Could not get Pics from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(Main.instance(), "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
 			return new ArrayList<>();
 		}
 	}

@@ -6,7 +6,13 @@ package ch.supertomcat.bh.gui;
 public interface IGuiEventListener {
 	/**
 	 * Exit program
+	 * 
 	 * @param restart Restart
 	 */
 	public void exitApp(boolean restart);
+
+	/**
+	 * Hide Main-Window
+	 */
+	public void hideWindow();
 }

@@ -32,15 +32,14 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
-import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Rule-Main-Editor
@@ -368,7 +367,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 			return false;
 		}
 		if (txtName.getText().length() == 0) {
-			JOptionPane.showMessageDialog(Main.instance(), Localization.getString("PleaseChooseAnotherName"), "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(getOwner(), Localization.getString("PleaseChooseAnotherName"), "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		String rulename = txtName.getText();
@@ -380,7 +379,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		}
 		File f = new File(file);
 		if ((f.exists()) && (rule.getFile().getAbsoluteFile().length() == 0)) {
-			JOptionPane.showMessageDialog(Main.instance(), Localization.getString("PleaseChooseAnotherName"), "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(getOwner(), Localization.getString("PleaseChooseAnotherName"), "Error", JOptionPane.ERROR_MESSAGE);
 			return false;
 		}
 		f = null;

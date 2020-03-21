@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.hoster.hostimpl;
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Font;
 import java.awt.GridLayout;
 
@@ -10,7 +11,6 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -44,6 +44,7 @@ public class HostzDefaultFilesOptionsDialog extends JDialog {
 	/**
 	 * Constructor
 	 * 
+	 * @param parent Parent Component
 	 * @param checkContentType Check Content Type
 	 * @param allFileTypes All File Types accepted
 	 * @param images Image Files accepted
@@ -51,7 +52,7 @@ public class HostzDefaultFilesOptionsDialog extends JDialog {
 	 * @param audio Audio Files accepted
 	 * @param archive Archive Files accepted
 	 */
-	protected HostzDefaultFilesOptionsDialog(boolean checkContentType, boolean allFileTypes, boolean images, boolean video, boolean audio, boolean archive) {
+	protected HostzDefaultFilesOptionsDialog(Component parent, boolean checkContentType, boolean allFileTypes, boolean images, boolean video, boolean audio, boolean archive) {
 		setTitle(Localization.getString("DirectLinkedFiles"));
 		setModal(true);
 
@@ -116,7 +117,7 @@ public class HostzDefaultFilesOptionsDialog extends JDialog {
 		add(pnlCenter, BorderLayout.CENTER);
 
 		pack();
-		setLocationRelativeTo(Main.instance());
+		setLocationRelativeTo(parent);
 		setVisible(true);
 	}
 

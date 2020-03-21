@@ -59,6 +59,20 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
+	 * Download Queue Manager
+	 */
+	protected final DownloadQueueManager downloadQueueManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
+	 */
+	public FileDownloaderBase(DownloadQueueManager downloadQueueManager) {
+		this.downloadQueueManager = downloadQueueManager;
+	}
+
+	/**
 	 * Sets the status of the Pic and returns the download slot
 	 * 
 	 * @param pic Pic
@@ -101,7 +115,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		}
 		pic.getProgress().setBytesDownloaded(progressBarValue);
 		pic.progressUpdated();
-		DownloadQueueManager.instance().removeDLSlotListener(pic);
+		downloadQueueManager.removeDLSlotListener(pic);
 	}
 
 	/**

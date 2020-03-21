@@ -49,7 +49,9 @@ public class GuiEvent {
 	 * Hide Main-Window
 	 */
 	public void hideWindow() {
-		Main.instance().setVisible(false);
+		for (IGuiEventListener listener : listeners) {
+			listener.hideWindow();
+		}
 	}
 
 	/**

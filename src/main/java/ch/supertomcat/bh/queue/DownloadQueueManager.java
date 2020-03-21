@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import ch.supertomcat.bh.settings.ISettingsListener;
+import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
@@ -18,7 +18,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * 
  * @see ch.supertomcat.bh.queue.Restriction
  */
-public class DownloadQueueManager implements ISettingsListener, ICalculateRateTimer {
+public class DownloadQueueManager implements BHSettingsListener, ICalculateRateTimer {
 	/**
 	 * Listener
 	 */
@@ -87,9 +87,17 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	private List<IDownloadListener> queue = new ArrayList<>();
 
 	/**
-	 * Constructor
+	 * Queue Manager
 	 */
-	private DownloadQueueManager() {
+	private final QueueManager queueManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param queueManager Queue Manager
+	 */
+	private DownloadQueueManager(QueueManager queueManager) {
+		this.queueManager = queueManager;
 		SettingsManager.instance().addSettingsListener(this);
 	}
 
@@ -98,9 +106,9 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 	 * 
 	 * @return Instance
 	 */
-	public static synchronized DownloadQueueManager instance() {
+	public static synchronized DownloadQueueManager instance(QueueManager queueManager) {
 		if (instance == null) {
-			instance = new DownloadQueueManager();
+			instance = new DownloadQueueManager(queueManager);
 		}
 		return instance;
 	}
@@ -175,7 +183,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 			}
 		} else {
 			if (calculateRateTimerTask == null) {
-				timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(calculateRateListeners), 1000, 1000);
+				timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(this, calculateRateListeners), 1000, 1000);
 				calculateRateTimerTask.addCalculateRateListener(this);
 			}
 		}
@@ -233,7 +241,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 				}
 
 				// Allow the download and check if the listener really started the download
-				boolean b = download.downloadAllowed();
+				boolean b = download.downloadAllowed(this);
 				if (b == true) {
 					calculateRateListeners.add(download);
 					// Only if the listener has started the download, we decrease open download slots
@@ -299,7 +307,7 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 			manageDLSlots();
 			if (queue.isEmpty()) {
 				// If the queue is now empty, it is a good time to commit the database
-				QueueManager.instance().saveDatabase();
+				queueManager.saveDatabase();
 				if (calculateRateTimerTask != null) {
 					calculateRateTimerTask.cancel();
 					calculateRateTimerTask.removeCalculateRateListener(this);
@@ -316,8 +324,8 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 					listener.totalDownloadRateCalculated(downloadBitrate);
 				}
 			}
-			if (queueSize <= 0 && QueueManager.instance().isDownloadsStopped() == false && SettingsManager.instance().isAutoRetryAfterDownloadsComplete()) {
-				QueueManager.instance().startDownload();
+			if (queueSize <= 0 && queueManager.isDownloadsStopped() == false && SettingsManager.instance().isAutoRetryAfterDownloadsComplete()) {
+				queueManager.startDownload();
 			}
 		}
 	}
@@ -400,6 +408,11 @@ public class DownloadQueueManager implements ISettingsListener, ICalculateRateTi
 			this.connectionCount = cc;
 		}
 		this.connectionCountPerHost = SettingsManager.instance().getConnectionsPerHost();
+	}
+
+	@Override
+	public void lookAndFeelChanged() {
+		// Nothing to do
 	}
 
 	/**

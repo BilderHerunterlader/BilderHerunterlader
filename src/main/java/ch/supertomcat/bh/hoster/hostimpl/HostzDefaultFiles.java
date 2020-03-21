@@ -291,7 +291,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 
 	@Override
 	public synchronized void openOptionsDialog() {
-		HostzDefaultFilesOptionsDialog dialog = new HostzDefaultFilesOptionsDialog(checkContentType, allFileTypes, images, video, audio, archive);
+		HostzDefaultFilesOptionsDialog dialog = new HostzDefaultFilesOptionsDialog(getMainWindow(), checkContentType, allFileTypes, images, video, audio, archive);
 		if (dialog.isOkPressed()) {
 			checkContentType = dialog.isCheckContentType();
 			allFileTypes = dialog.isAllFileTypes();

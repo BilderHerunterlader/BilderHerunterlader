@@ -10,12 +10,12 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.importexport.Import;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
@@ -25,11 +25,6 @@ public class ClipboardObserver implements ClipboardOwner {
 	private static final Pattern NEW_LINE_PATTERN = Pattern.compile("\r?\n|\r");
 
 	private static final Pattern URL_PATTERN = Pattern.compile("^https?://.+");
-
-	/**
-	 * Singleton
-	 */
-	private static ClipboardObserver instance = null;
 
 	/**
 	 * Logger for this class
@@ -45,25 +40,20 @@ public class ClipboardObserver implements ClipboardOwner {
 
 	private ClipboardObserverRunnable clipboardObserverRunnable = null;
 
-	/**
-	 * Constructor
-	 */
-	private ClipboardObserver() {
-		if (SettingsManager.instance().isCheckClipboard()) {
-			init();
-		}
-	}
+	private final SettingsManager settingsManager;
+
+	private final List<ClipboardObserverListener> listeners = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Returns the singleton
+	 * Constructor
 	 * 
-	 * @return Singleton
+	 * @param settingsManager Settings Manager
 	 */
-	public static synchronized ClipboardObserver instance() {
-		if (instance == null) {
-			instance = new ClipboardObserver();
+	public ClipboardObserver(SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
+		if (settingsManager.isCheckClipboard()) {
+			init();
 		}
-		return instance;
 	}
 
 	/**
@@ -121,6 +111,26 @@ public class ClipboardObserver implements ClipboardOwner {
 		}
 	}
 
+	/**
+	 * Add Listener
+	 * 
+	 * @param listener Listener
+	 */
+	public void addListener(ClipboardObserverListener listener) {
+		if (!listeners.contains(listener)) {
+			listeners.add(listener);
+		}
+	}
+
+	/**
+	 * Remove Listener
+	 * 
+	 * @param listener Listener
+	 */
+	public void removeListener(ClipboardObserverListener listener) {
+		listeners.remove(listener);
+	}
+
 	private class ClipboardObserverRunnable implements Runnable {
 		private String previousContent = null;
 
@@ -145,7 +155,7 @@ public class ClipboardObserver implements ClipboardOwner {
 				if (ownContent) {
 					continue;
 				}
-				if (SettingsManager.instance().isCheckClipboard()) {
+				if (settingsManager.isCheckClipboard()) {
 					checkClipboard();
 				}
 			}
@@ -166,9 +176,8 @@ public class ClipboardObserver implements ClipboardOwner {
 						if (hasContentChanged(previousContent, data)) {
 							try {
 								List<String> links = getLinksFromContent(data);
-								for (String link : links) {
-									// let the import class download the container page and get the links from it
-									Import.importURL(link, link, false);
+								for (ClipboardObserverListener listener : listeners) {
+									listener.linksDetected(links);
 								}
 							} finally {
 								previousContent = data;

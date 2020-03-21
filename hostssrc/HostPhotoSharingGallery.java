@@ -22,7 +22,6 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.gui.Main;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
@@ -207,7 +206,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		pnlCenter.setLayout(new GridLayout(1, 1));
 		pnlCenter.add(cbRecursive);
 
-		final JDialog dialog = new JDialog(Main.instance(), "HostPhotoSharingGallery", true);
+		final JDialog dialog = new JDialog(getMainWindow(), "HostPhotoSharingGallery", true);
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlButtons, BorderLayout.SOUTH);
 		dialog.add(pnlCenter, BorderLayout.CENTER);
@@ -231,7 +230,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		btnCancel.addActionListener(action);
 
 		dialog.pack();
-		dialog.setLocationRelativeTo(Main.instance());
+		dialog.setLocationRelativeTo(getMainWindow());
 		dialog.setVisible(true);
 	}
 

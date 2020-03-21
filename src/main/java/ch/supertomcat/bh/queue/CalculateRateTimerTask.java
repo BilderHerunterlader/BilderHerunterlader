@@ -18,17 +18,25 @@ public class CalculateRateTimerTask extends TimerTask {
 	private List<IDownloadListener> listeners = null;
 
 	/**
+	 * Download Queue Manager
+	 */
+	private final DownloadQueueManager downloadQueueManager;
+
+	/**
 	 * Constructor
+	 * 
+	 * @param downloadQueueManager Download Queue Manager
 	 * 
 	 * @param listeners Listeners
 	 */
-	public CalculateRateTimerTask(List<IDownloadListener> listeners) {
+	public CalculateRateTimerTask(DownloadQueueManager downloadQueueManager, List<IDownloadListener> listeners) {
+		this.downloadQueueManager = downloadQueueManager;
 		this.listeners = listeners;
 	}
 
 	@Override
 	public void run() {
-		synchronized (DownloadQueueManager.instance()) {
+		synchronized (downloadQueueManager) {
 			double downloadRate = 0;
 			boolean rateChanged = false;
 			for (IDownloadListener listener : listeners) {

@@ -30,12 +30,19 @@ public class TransmitterHTTP extends NanoHTTPD {
 	private boolean acceptConnections = true;
 
 	/**
+	 * Transmitter Helper
+	 */
+	private final TransmitterHelper transmitterHelper;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param port Port
+	 * @param transmitterHelper Transmitter Helper
 	 */
-	public TransmitterHTTP(int port) {
+	public TransmitterHTTP(int port, TransmitterHelper transmitterHelper) {
 		super("localhost", port);
+		this.transmitterHelper = transmitterHelper;
 	}
 
 	/**
@@ -80,7 +87,7 @@ public class TransmitterHTTP extends NanoHTTPD {
 			}
 		}
 
-		boolean result = TransmitterUtil.parseTransmitterInput(session.getInputStream(), encoding);
+		boolean result = transmitterHelper.parseTransmitterInput(session.getInputStream(), encoding);
 		if (result) {
 			return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "text/plain", "URLs received");
 		} else {

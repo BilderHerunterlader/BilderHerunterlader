@@ -1,13 +1,12 @@
 package ch.supertomcat.bh.importexport;
 
+import java.awt.Component;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
-import javax.swing.filechooser.FileFilter;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -15,47 +14,52 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.log.LogManager;
+import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
- * 
- *
+ * Utility Class for import
  */
-public abstract class Import {
+public class ImportURL {
 	/**
-	 * Logger for this class
+	 * Logger
 	 */
-	private static Logger logger = LoggerFactory.getLogger(Import.class);
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * @param filterPattern Filter Pattern
-	 * @param description Description
-	 * @param save Save or Open
-	 * @return Text-File
+	 * Link List Importer
 	 */
-	public static File getTextFileFromFileChooserDialog(final String filterPattern, final String description, boolean save) {
-		// Choose a file
-		FileFilter filter = new FileFilter() {
-			@Override
-			public boolean accept(File f) {
-				return f.getName().matches(filterPattern) || f.isDirectory();
-			}
+	private final ImportLinkList linkListImporter;
 
-			@Override
-			public String getDescription() {
-				return description;
-			}
-		};
-		if (save) {
-			return FileDialogUtil.showFileSaveDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
-		} else {
-			return FileDialogUtil.showFileOpenDialog(Main.instance(), SettingsManager.instance().getLastUsedImportDialogPath(), filter);
-		}
+	/**
+	 * HTML Importer
+	 */
+	private final ImportHTML htmlImporter;
+
+	/**
+	 * Parent Component
+	 */
+	private final Component parentComponent;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param parentComponent Parent Component
+	 * @param mainWindowAccess Main Window Access
+	 * @param logManager Log Manager
+	 * @param queueManager Queue Manager
+	 * @param clipboardObserver Clipboard Observer
+	 */
+	public ImportURL(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+		this.parentComponent = parentComponent;
+		linkListImporter = new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+		htmlImporter = new ImportHTML(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
 	}
 
 	/**
@@ -65,7 +69,7 @@ public abstract class Import {
 	 * @param referrer Referrer
 	 * @param embeddedImages Embedded Images
 	 */
-	public static void importURL(String url, String referrer, boolean embeddedImages) {
+	public void importURL(String url, String referrer, boolean embeddedImages) {
 		String cookies = CookieManager.getCookies(url);
 		url = HTTPUtil.encodeURL(url);
 
@@ -92,7 +96,7 @@ public abstract class Import {
 
 				if (statusCode < 200 && statusCode >= 400) {
 					method.abort();
-					JOptionPane.showMessageDialog(Main.instance(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
+					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
 
@@ -100,10 +104,10 @@ public abstract class Import {
 				try (InputStream in = response.getEntity().getContent()) {
 					if ("text/plain".equals(response.getFirstHeader("Content-Type").getValue())) {
 						logger.debug("PlainText detected: Using ImportLinkList");
-						ImportLinkList.read(new BufferedReader(new InputStreamReader(in)));
+						linkListImporter.read(new BufferedReader(new InputStreamReader(in)));
 					} else {
 						logger.debug("HTML detected: Using ImportHTML");
-						ImportHTML.importHTML(url, referrer, embeddedImages, in, response, method);
+						htmlImporter.importHTML(url, referrer, embeddedImages, in, response, method);
 					}
 				}
 			}

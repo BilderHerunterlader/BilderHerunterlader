@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.log.ILogManagerListener;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
@@ -135,9 +135,33 @@ public class Log extends JPanel implements ILogManagerListener {
 	private boolean changed = true;
 
 	/**
-	 * Constructor
+	 * Log Manager
 	 */
-	public Log() {
+	private final LogManager logManager;
+
+	/**
+	 * Main Window Access
+	 */
+	private final MainWindowAccess mainWindowAccess;
+
+	/**
+	 * Clipboard Observer
+	 */
+	private final ClipboardObserver clipboardObserver;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param logManager Log Manager
+	 * @param downloadQueueManager Download Queue Manager
+	 * @param mainWindowAccess Main Window Access
+	 * @param clipboardObserver Clipboard Observer
+	 */
+	public Log(LogManager logManager, DownloadQueueManager downloadQueueManager, MainWindowAccess mainWindowAccess, ClipboardObserver clipboardObserver) {
+		this.logManager = logManager;
+		this.mainWindowAccess = mainWindowAccess;
+		this.clipboardObserver = clipboardObserver;
+
 		jtLog = new JTable(model);
 
 		TableUtil.internationalizeColumns(jtLog);
@@ -178,23 +202,23 @@ public class Log extends JPanel implements ILogManagerListener {
 		add(jsp, BorderLayout.CENTER);
 
 		btnFirst.addActionListener(e -> {
-			updateIndexAndStatus(LogManager.instance().readLogs(1, model));
+			updateIndexAndStatus(logManager.readLogs(1, model));
 			last = false;
 		});
 		btnPrevious.addActionListener(e -> {
 			if (currentStart > 100) {
-				updateIndexAndStatus(LogManager.instance().readLogs(currentStart - 100, model));
+				updateIndexAndStatus(logManager.readLogs(currentStart - 100, model));
 			} else {
-				updateIndexAndStatus(LogManager.instance().readLogs(1, model));
+				updateIndexAndStatus(logManager.readLogs(1, model));
 			}
 			last = false;
 		});
 		btnNext.addActionListener(e -> {
-			updateIndexAndStatus(LogManager.instance().readLogs(currentStart + 100, model));
+			updateIndexAndStatus(logManager.readLogs(currentStart + 100, model));
 			last = false;
 		});
 		btnLast.addActionListener(e -> {
-			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+			updateIndexAndStatus(logManager.readLogs(-1, model));
 			last = true;
 		});
 
@@ -224,7 +248,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		jtLog.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (e.isPopupTrigger() && !DownloadQueueManager.instance().isDownloading() && jtLog.getSelectedRowCount() > 0) {
+				if (e.isPopupTrigger() && !downloadQueueManager.isDownloading() && jtLog.getSelectedRowCount() > 0) {
 					SwingUtilities.updateComponentTreeUI(popupMenu);
 					popupMenu.show(e.getComponent(), e.getX(), e.getY());
 				}
@@ -232,7 +256,7 @@ public class Log extends JPanel implements ILogManagerListener {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (e.isPopupTrigger() && !DownloadQueueManager.instance().isDownloading() && jtLog.getSelectedRowCount() > 0) {
+				if (e.isPopupTrigger() && !downloadQueueManager.isDownloading() && jtLog.getSelectedRowCount() > 0) {
 					SwingUtilities.updateComponentTreeUI(popupMenu);
 					popupMenu.show(e.getComponent(), e.getX(), e.getY());
 				}
@@ -242,7 +266,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		crr = new DefaultStringColorRowRenderer();
 		jtLog.setDefaultRenderer(Object.class, crr);
 
-		LogManager.instance().addLogManagerListener(this);
+		logManager.addLogManagerListener(this);
 	}
 
 	/**
@@ -261,7 +285,7 @@ public class Log extends JPanel implements ILogManagerListener {
 					}
 				}
 				if (s.length > 0) {
-					ClipboardObserver.instance().setClipboardContent(content.toString());
+					clipboardObserver.setClipboardContent(content.toString());
 				}
 			}
 		});
@@ -344,8 +368,8 @@ public class Log extends JPanel implements ILogManagerListener {
 	 * Reload logs
 	 */
 	public void reloadLogs() {
-		if (changed && last && Main.instance().isTabSelected(this)) {
-			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+		if (changed && last && mainWindowAccess.isTabSelected(this)) {
+			updateIndexAndStatus(logManager.readLogs(-1, model));
 			changed = false;
 		}
 	}
@@ -387,11 +411,11 @@ public class Log extends JPanel implements ILogManagerListener {
 	@Override
 	public void currentLogFileChanged() {
 		if (EventQueue.isDispatchThread()) {
-			updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+			updateIndexAndStatus(logManager.readLogs(-1, model));
 			last = true;
 		} else {
 			EventQueue.invokeLater(() -> {
-				updateIndexAndStatus(LogManager.instance().readLogs(-1, model));
+				updateIndexAndStatus(logManager.readLogs(-1, model));
 				last = true;
 			});
 		}
