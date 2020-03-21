@@ -19,13 +19,13 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Host class for ImageBam
  * 
- * @version 3.9
+ * @version 4.0
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.9";
+	public static final String VERSION = "4.0";
 
 	/**
 	 * Name dieser Klasse

@@ -40,13 +40,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 2.9
+ * @version 3.0
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.9";
+	public static final String VERSION = "3.0";
 
 	/**
 	 * Name dieser Klasse

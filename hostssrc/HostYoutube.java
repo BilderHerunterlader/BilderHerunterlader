@@ -66,13 +66,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Youtube
  * 
- * @version 7.9
+ * @version 8.0
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "7.9";
+	public static final String VERSION = "8.0";
 
 	/**
 	 * Name dieser Klasse
