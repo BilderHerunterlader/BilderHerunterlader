@@ -1,19 +1,23 @@
 package ch.supertomcat.bh.queue;
 
+import java.awt.EventQueue;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.database.sqlite.QueueSQLiteDB;
+import ch.supertomcat.bh.gui.queue.QueueTableModel;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * Class which holds the Keywords
@@ -37,11 +41,6 @@ public class QueueManager implements IPicListener {
 	 */
 	private List<Pic> pics = new ArrayList<>();
 
-	/**
-	 * listeners
-	 */
-	private List<QueueManagerListener> listeners = new CopyOnWriteArrayList<>();
-
 	private boolean downloadsStopped = true;
 
 	/**
@@ -50,6 +49,11 @@ public class QueueManager implements IPicListener {
 	private int deletedObjects = 0;
 
 	private QueueSQLiteDB queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite");
+
+	/**
+	 * TabelModel
+	 */
+	private final QueueTableModel tableModel = new QueueTableModel();
 
 	/**
 	 * Log Manager
@@ -72,6 +76,7 @@ public class QueueManager implements IPicListener {
 				pic.removeAllListener();
 				pic.addPicListener(this);
 				pics.add(pic);
+				tableModel.addRow(pic);
 			} else if (pic.getStatus() == PicState.COMPLETE) {
 				queueSQLiteDB.deleteEntry(pic);
 			}
@@ -156,9 +161,14 @@ public class QueueManager implements IPicListener {
 			queueSQLiteDB.insertEntry(pic);
 			pic.removeAllListener();
 			pic.addPicListener(this);
-			for (QueueManagerListener l : listeners) {
-				l.picAdded(pic);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					tableModel.addRow(pic);
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
 			pic.startDownload(DownloadQueueManager.instance(this));
@@ -181,9 +191,16 @@ public class QueueManager implements IPicListener {
 					pic.addPicListener(this);
 				}
 			}
-			for (QueueManagerListener l : listeners) {
-				l.picsAdded(picsAdded);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					for (Pic pic : picList) {
+						tableModel.addRow(pic);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
 			for (Pic pic : picsAdded) {
@@ -226,9 +243,16 @@ public class QueueManager implements IPicListener {
 				pic.removeAllListener();
 				queueSQLiteDB.deleteEntry(pic);
 				deletedObjects++;
-				for (QueueManagerListener l : listeners) {
-					l.picRemoved(pic, index);
-				}
+
+				Runnable r = new Runnable() {
+					@Override
+					public void run() {
+						tableModel.removeRow(index);
+						// Manually called, because the model overwrites the removeRow method and does not fire the event.
+						tableModel.fireTableDataChanged();
+					}
+				};
+				executeInEventQueueThread(r);
 			}
 			if (deletedObjects > 100) {
 				saveDatabase();
@@ -259,9 +283,18 @@ public class QueueManager implements IPicListener {
 				pics.remove(indices[i]);
 			}
 
-			for (QueueManagerListener l : listeners) {
-				l.picsRemoved(indices);
-			}
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					for (int i = indices.length - 1; i > -1; i--) {
+						tableModel.removeRow(indices[i]);
+					}
+					// Manually called, because the model overwrites the removeRow method and does not fire the event.
+					tableModel.fireTableDataChanged();
+				}
+			};
+			executeInEventQueueThread(r);
+
 			deletedObjects = 0;
 		}
 	}
@@ -307,22 +340,6 @@ public class QueueManager implements IPicListener {
 	}
 
 	/**
-	 * @param l Listener
-	 */
-	public void addListener(QueueManagerListener l) {
-		if (!listeners.contains(l)) {
-			listeners.add(l);
-		}
-	}
-
-	/**
-	 * @param l Listener
-	 */
-	public void removeListener(QueueManagerListener l) {
-		listeners.remove(l);
-	}
-
-	/**
 	 * Returns the Synchronization Object for QueueMananger.pics
 	 * 
 	 * @return Synchronization Object for QueueMananger.pics
@@ -335,9 +352,16 @@ public class QueueManager implements IPicListener {
 	public void progressChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
-			for (QueueManagerListener l : listeners) {
-				l.picProgressBarChanged(pic, index);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						tableModel.fireTableCellUpdated(index, 3);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 	}
 
@@ -345,9 +369,23 @@ public class QueueManager implements IPicListener {
 	public void sizeChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
-			for (QueueManagerListener l : listeners) {
-				l.picSizeChanged(pic, index);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						// Change Cell
+						long size = pic.getSize();
+						if (size < 1) {
+							tableModel.setValueAt(Localization.getString("Unkown"), index, 2);
+						} else {
+							tableModel.setValueAt(UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView()), index, 2);
+						}
+						tableModel.fireTableCellUpdated(index, 2);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 		updatePic(pic);
 	}
@@ -356,9 +394,18 @@ public class QueueManager implements IPicListener {
 	public void targetChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
-			for (QueueManagerListener l : listeners) {
-				l.picTargetChanged(pic, index);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						// Change Cell
+						tableModel.setValueAt(pic.getTarget(), index, 1);
+						tableModel.fireTableCellUpdated(index, 1);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 	}
 
@@ -366,9 +413,20 @@ public class QueueManager implements IPicListener {
 	public void statusChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
-			for (QueueManagerListener l : listeners) {
-				l.picStatusChanged(pic, index);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if (pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING || pic.getStatus() == PicState.WAITING
+							|| pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
+						if ((index > -1) && (tableModel.getRowCount() > index)) {
+							tableModel.setValueAt(pic, index, 3);
+							tableModel.fireTableCellUpdated(index, 3);
+						}
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 		if ((pic.getStatus() != PicState.SLEEPING) && (pic.getStatus() != PicState.WAITING) && (pic.getStatus() != PicState.DOWNLOADING) && (pic.getStatus() != PicState.ABORTING)) {
 			/*
@@ -395,10 +453,45 @@ public class QueueManager implements IPicListener {
 	public void deactivatedChanged(Pic pic) {
 		synchronized (syncObject) {
 			int index = pics.indexOf(pic);
-			for (QueueManagerListener l : listeners) {
-				l.picDeactivatedChanged(pic, index);
-			}
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						tableModel.fireTableRowsUpdated(index, index);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
 		}
 		updatePic(pic);
+	}
+
+	/**
+	 * Returns the tableModel
+	 * 
+	 * @return tableModel
+	 */
+	public QueueTableModel getTableModel() {
+		return tableModel;
+	}
+
+	/**
+	 * Executes the given Runnable in EventQueue Thread
+	 * 
+	 * @param r Runnable
+	 */
+	private void executeInEventQueueThread(Runnable r) {
+		if (EventQueue.isDispatchThread()) {
+			r.run();
+		} else {
+			try {
+				EventQueue.invokeAndWait(r);
+			} catch (InvocationTargetException e) {
+				logger.error(e.getMessage(), e);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(), e);
+			}
+		}
 	}
 }

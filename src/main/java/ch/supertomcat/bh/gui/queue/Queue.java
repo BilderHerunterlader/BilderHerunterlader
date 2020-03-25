@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui.queue;
 import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.EventQueue;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -10,11 +11,9 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.StringJoiner;
 
@@ -38,6 +37,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,11 +56,9 @@ import ch.supertomcat.bh.importexport.ImportLocalFiles;
 import ch.supertomcat.bh.importexport.ImportQueue;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.queue.QueueManagerListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -72,7 +71,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Queue-Panel
  */
-public class Queue extends JPanel implements ActionListener, QueueManagerListener, IDownloadQueueManagerListener, MouseListener, TableColumnModelListener {
+public class Queue extends JPanel implements ActionListener, IDownloadQueueManagerListener, MouseListener, TableColumnModelListener {
 	/**
 	 * UID
 	 */
@@ -95,12 +94,12 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	/**
 	 * TabelModel
 	 */
-	private QueueTableModel model = new QueueTableModel();
+	private QueueTableModel model;
 
 	/**
 	 * Table
 	 */
-	private JTable jtQueue = new JTable(model);
+	private JTable jtQueue;
 
 	/**
 	 * Renderer for ProgressBars
@@ -168,12 +167,17 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	private JPanel pnlButtons = new JPanel();
 
 	/**
+	 * Label for Row Count
+	 */
+	private JLabel lblRowCount = new JLabel(Localization.getString("Queue") + ": 0 | ");
+
+	/**
 	 * Label
 	 */
-	private JLabel lblStatus = new JLabel(Localization.getString("Queue") + ": 0 | " + Localization.getString("FreeSlots") + ": " + SettingsManager.instance().getConnections() + "/"
-			+ SettingsManager.instance().getConnections() + " | " + Localization.getString("DownloadedFiles") + ": " + SettingsManager.instance().getOverallDownloadedFiles() + " (0) | "
-			+ Localization.getString("DownloadedBytes") + ": " + UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView())
-			+ " (0) | " + Localization.getString("DownloadBitrate") + ": " + Localization.getString("NotAvailable"));
+	private JLabel lblStatus = new JLabel(Localization.getString("FreeSlots") + ": " + SettingsManager.instance().getConnections() + "/" + SettingsManager.instance().getConnections() + " | "
+			+ Localization.getString("DownloadedFiles") + ": " + SettingsManager.instance().getOverallDownloadedFiles() + " (0) | " + Localization.getString("DownloadedBytes") + ": "
+			+ UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView()) + " (0) | " + Localization.getString("DownloadBitrate")
+			+ ": " + Localization.getString("NotAvailable"));
 
 	/**
 	 * PopupMenu
@@ -228,7 +232,7 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	/**
 	 * Scrollpane
 	 */
-	private JScrollPane jsp = new JScrollPane(jtQueue);
+	private JScrollPane jsp;
 
 	/**
 	 * QueueColorRowRenderer
@@ -286,6 +290,18 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 
 		setLayout(new BorderLayout());
 
+		this.model = this.queueManager.getTableModel();
+		model.addTableModelListener(new TableModelListener() {
+			@Override
+			public void tableChanged(TableModelEvent e) {
+				if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.DELETE) {
+					updateRowCountLabel();
+				}
+			}
+		});
+		jtQueue = new JTable(model);
+		jsp = new JScrollPane(jtQueue);
+
 		TableUtil.internationalizeColumns(jtQueue);
 
 		jtQueue.getColumn("Progress").setCellRenderer(pcr);
@@ -320,7 +336,10 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		pnlButtons.add(btnImportLinks);
 		pnlButtons.add(btnParseLinks);
 		add(pnlButtons, BorderLayout.SOUTH);
-		add(lblStatus, BorderLayout.NORTH);
+		JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+		pnlStatus.add(lblRowCount);
+		pnlStatus.add(lblStatus);
+		add(pnlStatus, BorderLayout.NORTH);
 		downloadQueueManager.addDownloadQueueManagerListener(this);
 
 		popupMenu.add(menuItemChangeTargetByInput);
@@ -359,14 +378,8 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 
 		jtQueue.setDefaultRenderer(Object.class, crr);
 
-		// Load downloadqueue
-		List<Pic> pics = queueManager.getQueue();
-		for (Pic pic : pics) {
-			model.addRow(pic);
-		}
+		updateRowCountLabel();
 		updateStatus();
-
-		queueManager.addListener(this);
 
 		// Register Key
 		ActionMap am = getActionMap();
@@ -530,7 +543,19 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 						synchronized (syncObject) {
 							int[] selectedRows = jtQueue.getSelectedRows();
 							int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
+
+							// Convert first removed row index, before removing any rows
+							int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
+
 							queueManager.removePics(selectedModelRows);
+
+							int rowCount = jtQueue.getRowCount();
+							int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
+							if (firstRemovedRowViewIndex < rowCount) {
+								jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
+							} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
+								jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
+							}
 						}
 					}
 					mainWindowAccess.removeProgressObserver(pg);
@@ -864,17 +889,15 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
+				long overallDownloadedFiles = SettingsManager.instance().getOverallDownloadedFiles();
+				String overallDownloadedBytes = UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView());
 				int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
 				String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
 				String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getDownloadBitrate());
 				if (downloadRate.isEmpty()) {
 					downloadRate = Localization.getString("NotAvailable");
 				}
-				lblStatus.setText(Localization.getString("Queue") + ": " + jtQueue.getRowCount() + " | " + Localization.getString("FreeSlots") + ": " + openSlots + "/" + maxSlots + " | "
-						+ Localization.getString("DownloadedFiles") + ": " + SettingsManager.instance().getOverallDownloadedFiles() + " (" + sessionDownloadedFiles + ") | "
-						+ Localization.getString("DownloadedBytes") + ": "
-						+ UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView()) + " (" + sessionDownloadedBytes + ") | "
-						+ Localization.getString("DownloadBitrate") + ": " + downloadRate);
+				updateStatus(openSlots, maxSlots, overallDownloadedFiles, overallDownloadedBytes, sessionDownloadedFiles, sessionDownloadedBytes, downloadRate);
 			}
 		});
 	}
@@ -928,10 +951,17 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 	}
 
 	/**
+	 * Update Row Count Label
+	 */
+	private void updateRowCountLabel() {
+		int queueCount = jtQueue.getRowCount();
+		lblRowCount.setText(Localization.getString("Queue") + ": " + queueCount + " | ");
+	}
+
+	/**
 	 * Updates the status-display
 	 */
 	private void updateStatus() {
-		int queueCount = jtQueue.getRowCount();
 		int openDownloadSlots = downloadQueueManager.getOpenDownloadSlots();
 		int connectionCount = downloadQueueManager.getConnectionCount();
 		long overallDownloadedFiles = SettingsManager.instance().getOverallDownloadedFiles();
@@ -942,9 +972,25 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 		if (downloadRate.isEmpty()) {
 			downloadRate = Localization.getString("NotAvailable");
 		}
-		lblStatus.setText(Localization.getString("Queue") + ": " + queueCount + " | " + Localization.getString("FreeSlots") + ": " + openDownloadSlots + "/" + connectionCount + " | "
-				+ Localization.getString("DownloadedFiles") + ": " + overallDownloadedFiles + " (" + sessionDownloadedFiles + ") | " + Localization.getString("DownloadedBytes") + ": "
-				+ overallDownloadedBytes + " (" + sessionDownloadedBytes + ") | " + Localization.getString("DownloadBitrate") + ": " + downloadRate);
+		updateStatus(openDownloadSlots, connectionCount, overallDownloadedFiles, overallDownloadedBytes, sessionDownloadedFiles, sessionDownloadedBytes, downloadRate);
+	}
+
+	/**
+	 * Updates the status-display
+	 * 
+	 * @param openDownloadSlots Open Download Slots
+	 * @param connectionCount Connection Count
+	 * @param overallDownloadedFiles Overall Downloaded Files
+	 * @param overallDownloadedBytes Overall Downloaded Bytes
+	 * @param sessionDownloadedFiles Session Downloaded Files
+	 * @param sessionDownloadedBytes Session Downloaded Bytes
+	 * @param downloadRate Download Rate
+	 */
+	private void updateStatus(int openDownloadSlots, int connectionCount, long overallDownloadedFiles, String overallDownloadedBytes, int sessionDownloadedFiles, String sessionDownloadedBytes,
+			String downloadRate) {
+		lblStatus.setText(Localization.getString("FreeSlots") + ": " + openDownloadSlots + "/" + connectionCount + " | " + Localization.getString("DownloadedFiles") + ": " + overallDownloadedFiles
+				+ " (" + sessionDownloadedFiles + ") | " + Localization.getString("DownloadedBytes") + ": " + overallDownloadedBytes + " (" + sessionDownloadedBytes + ") | "
+				+ Localization.getString("DownloadBitrate") + ": " + downloadRate);
 	}
 
 	@Override
@@ -1017,263 +1063,5 @@ public class Queue extends JPanel implements ActionListener, QueueManagerListene
 
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
-	}
-
-	@Override
-	public void picAdded(final Pic pic) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					model.addRow(pic);
-					updateStatus();
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picRemoved(final Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					model.removeRow(index);
-					model.fireTableDataChanged();
-					updateStatus();
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picsAdded(final List<Pic> pics) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					Iterator<Pic> it = pics.iterator();
-					while (it.hasNext()) {
-						Pic pic = it.next();
-						model.addRow(pic);
-					}
-					updateStatus();
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picsRemoved(final int[] removedIndeces) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					// Convert first removed row index, before removing any rows
-					int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(removedIndeces[0]);
-
-					for (int i = removedIndeces.length - 1; i > -1; i--) {
-						model.removeRow(removedIndeces[i]);
-					}
-					model.fireTableDataChanged();
-
-					int rowCount = jtQueue.getRowCount();
-					int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
-					if (firstRemovedRowViewIndex < rowCount) {
-						jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
-					} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
-						jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
-					}
-					updateStatus();
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picProgressBarChanged(final Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					int row = index;
-					if ((row > -1) && (model.getRowCount() > row)) {
-						model.fireTableCellUpdated(row, 3);
-					}
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picSizeChanged(final Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					int row = index;
-					if ((row > -1) && (model.getRowCount() > row)) {
-						// Change Cell
-						long size = pic.getSize();
-						if (size < 1) {
-							model.setValueAt(Localization.getString("Unkown"), row, 2);
-						} else {
-							model.setValueAt(UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView()), row, 2);
-						}
-						model.fireTableCellUpdated(row, 2);
-					}
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picTargetChanged(final Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					int row = index;
-					if ((row > -1) && (model.getRowCount() > row)) {
-						// Change Cell
-						model.setValueAt(pic.getTarget(), row, 1);
-						model.fireTableCellUpdated(row, 1);
-					}
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picStatusChanged(final Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if (pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING || pic.getStatus() == PicState.WAITING
-							|| pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
-						int row = index;
-						if ((row > -1) && (model.getRowCount() > row)) {
-							model.setValueAt(pic, row, 3);
-							model.fireTableCellUpdated(row, 3);
-						}
-					}
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
-	}
-
-	@Override
-	public void picDeactivatedChanged(Pic pic, final int index) {
-		synchronized (syncObject) {
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					int row = index;
-					if ((row > -1) && (model.getRowCount() > row)) {
-						model.fireTableRowsUpdated(row, row);
-					}
-				}
-			};
-			if (EventQueue.isDispatchThread()) {
-				r.run();
-			} else {
-				try {
-					EventQueue.invokeAndWait(r);
-				} catch (InvocationTargetException e) {
-					logger.error(e.getMessage(), e);
-				} catch (InterruptedException e) {
-					logger.error(e.getMessage(), e);
-				}
-			}
-		}
 	}
 }

@@ -33,7 +33,7 @@ public class QueueTableModel extends DefaultTableModel {
 	 * 
 	 * @param pic Pic
 	 */
-	protected void addRow(Pic pic) {
+	public void addRow(Pic pic) {
 		Object data[] = new Object[4];
 		data[0] = pic.getContainerURL();
 		data[1] = pic.getTarget();
