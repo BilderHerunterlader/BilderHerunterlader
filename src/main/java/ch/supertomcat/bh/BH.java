@@ -216,12 +216,13 @@ public abstract class BH {
 
 		// Initalized too fast as it would be worth to execute parallel
 		LogManager logManager = new LogManager();
+		downloadQueueManager = new DownloadQueueManager();
 
 		int threadCount = settingsManager.getThreadCount();
 		if (threadCount < 1) {
 			threadCount = 1;
-		} else if (threadCount > 2) {
-			threadCount = 2;
+		} else if (threadCount > 3) {
+			threadCount = 3;
 		}
 
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -230,15 +231,19 @@ public abstract class BH {
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				queueManager = new QueueManager(logManager);
-				downloadQueueManager = DownloadQueueManager.instance(queueManager);
+				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager);
+			}
+		}));
+		tasks.add(Executors.callable(new Runnable() {
+			@Override
+			public void run() {
 				hostManager = new HostManager(main, downloadQueueManager);
 			}
 		}));
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				keywordManager = KeywordManager.instance();
+				keywordManager = new KeywordManager();
 			}
 		}));
 
@@ -287,7 +292,7 @@ public abstract class BH {
 			/**
 			 * URL Importer
 			 */
-			private ImportURL urlImporter = new ImportURL(main, main, logManager, queueManager, clipboardObserver);
+			private ImportURL urlImporter = new ImportURL(main, main, logManager, queueManager, keywordManager, clipboardObserver);
 
 			@Override
 			public void linksDetected(List<String> links) {
@@ -316,7 +321,7 @@ public abstract class BH {
 		/*
 		 * Start the TransmitterSocket
 		 */
-		TransmitterHelper transmitterHelper = new TransmitterHelper(main, main, queueManager, logManager, clipboardObserver);
+		TransmitterHelper transmitterHelper = new TransmitterHelper(main, main, queueManager, logManager, keywordManager, clipboardObserver);
 		transmitterSocket = new TransmitterSocket(transmitterHelper);
 		Thread tThread = new Thread(transmitterSocket, "TransmitterSocket-Thread");
 		tThread.start();
@@ -422,7 +427,7 @@ public abstract class BH {
 			if (queueManager != null) {
 				queueManager.closeDatabase();
 			}
-			KeywordManager.instance().closeDatabase();
+			keywordManager.closeDatabase();
 		}
 
 		if (stt != null) {

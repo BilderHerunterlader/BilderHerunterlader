@@ -25,11 +25,6 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private List<IDownloadQueueManagerListener> listeners = new CopyOnWriteArrayList<>();
 
 	/**
-	 * Singleton
-	 */
-	private static DownloadQueueManager instance = null;
-
-	/**
 	 * timer
 	 */
 	private Timer timer = new Timer("Download-Rate-Timer");
@@ -87,30 +82,10 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private List<IDownloadListener> queue = new ArrayList<>();
 
 	/**
-	 * Queue Manager
-	 */
-	private final QueueManager queueManager;
-
-	/**
 	 * Constructor
-	 * 
-	 * @param queueManager Queue Manager
 	 */
-	private DownloadQueueManager(QueueManager queueManager) {
-		this.queueManager = queueManager;
+	public DownloadQueueManager() {
 		SettingsManager.instance().addSettingsListener(this);
-	}
-
-	/**
-	 * Returns the singleton
-	 * 
-	 * @return Instance
-	 */
-	public static synchronized DownloadQueueManager instance(QueueManager queueManager) {
-		if (instance == null) {
-			instance = new DownloadQueueManager(queueManager);
-		}
-		return instance;
 	}
 
 	/**
@@ -306,8 +281,6 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 			// Run the mangageDLSlots-Method, which will allow the download
 			manageDLSlots();
 			if (queue.isEmpty()) {
-				// If the queue is now empty, it is a good time to commit the database
-				queueManager.saveDatabase();
 				if (calculateRateTimerTask != null) {
 					calculateRateTimerTask.cancel();
 					calculateRateTimerTask.removeCalculateRateListener(this);
@@ -323,9 +296,9 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 					listener.downloadsComplete(queueSize, this.openDownloadSlots, this.connectionCount);
 					listener.totalDownloadRateCalculated(downloadBitrate);
 				}
-			}
-			if (queueSize <= 0 && queueManager.isDownloadsStopped() == false && SettingsManager.instance().isAutoRetryAfterDownloadsComplete()) {
-				queueManager.startDownload();
+				if (queue.isEmpty()) {
+					listener.queueEmpty();
+				}
 			}
 		}
 	}

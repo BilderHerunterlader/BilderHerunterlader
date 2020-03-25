@@ -337,7 +337,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportHTML(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importHTML();
+				new ImportHTML(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importHTML();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -348,7 +348,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				DownloadAddDialog dlg = new DownloadAddDialog(mainWindow, logManager, queueManager, clipboardObserver);
+				DownloadAddDialog dlg = new DownloadAddDialog(mainWindow, logManager, queueManager, keywordManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -360,7 +360,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ParsePagesDialog dlg = new ParsePagesDialog(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver);
+				ParsePagesDialog dlg = new ParsePagesDialog(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -372,7 +372,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportLinkList(mainWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importLinkList();
+				new ImportLinkList(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLinkList();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -409,10 +409,12 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 
 	@Override
 	public void sessionDownloadedBytesChanged(long count) {
+		// Nothing to do
 	}
 
 	@Override
 	public void sessionDownloadedFilesChanged(int count) {
+		// Nothing to do
 	}
 
 	@Override
@@ -420,5 +422,10 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		if (trayIcon != null) {
 			trayIcon.setToolTip(getSystemTrayToolTipText());
 		}
+	}
+
+	@Override
+	public void queueEmpty() {
+		// Nothing to do
 	}
 }

@@ -1,6 +1,5 @@
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,8 +25,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.keywords.Keyword;
-import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -40,13 +37,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for BabesBoard
  * 
- * @version 2.9
+ * @version 3.0
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.9";
+	public static final String VERSION = "3.0";
 
 	/**
 	 * Name dieser Klasse
@@ -269,34 +266,6 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 			String strRootDir = SettingsManager.instance().getSavePath() + strBabeName + FileUtil.FILE_SEPERATOR;
 
-			Iterator<Keyword> it = KeywordManager.instance().getKeywords().iterator();
-			Keyword foundKeyword = null;
-			while (it.hasNext()) {
-				Keyword kw = it.next();
-				String ks = kw.getKeywords().toUpperCase(); // Bring the keywords to UpperCase
-				if (ks.length() == 0) {
-					continue; // if there are no keywords we can ignore this
-				}
-
-				boolean bExactMatch = false;
-
-				// Check if we have an exact match
-				String ksArr[] = ks.split(";"); // Split the keywordgroups
-				for (int i = 0; i < ksArr.length; i++) {
-					// Check if the searchstring equals the complete keyword
-					if (strBabeName.equalsIgnoreCase(ksArr[i])) {
-						bExactMatch = true;
-						foundKeyword = kw;
-						break;
-					}
-				}
-				if (bExactMatch) {
-					break;
-				}
-			}
-			if (foundKeyword != null) {
-				strRootDir = foundKeyword.getAdderDownloadPath();
-			}
 			String strDirectory = strRootDir + "BabesBoard" + FileUtil.FILE_SEPERATOR + strDate + FileUtil.FILE_SEPERATOR;
 
 			ArrayList<URL> downloadURLs = new ArrayList<>();

@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -54,12 +55,14 @@ public class ImportURL {
 	 * @param mainWindowAccess Main Window Access
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportURL(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+	public ImportURL(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
+			ClipboardObserver clipboardObserver) {
 		this.parentComponent = parentComponent;
-		linkListImporter = new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
-		htmlImporter = new ImportHTML(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+		linkListImporter = new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+		htmlImporter = new ImportHTML(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 	}
 
 	/**

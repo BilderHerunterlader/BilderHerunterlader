@@ -525,6 +525,11 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private final QueueManager queueManager;
 
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -536,10 +541,11 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param urlList URLList
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
-		this(parent, false, urlList, logManager, queueManager, clipboardObserver);
+	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
+		this(parent, false, urlList, logManager, queueManager, keywordManager, clipboardObserver);
 	}
 
 	/**
@@ -550,14 +556,16 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param urlList URLList
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
 		super(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("DownloadSelection"));
 		this.localFiles = localFiles;
 		this.urlList = urlList;
 		this.logManager = logManager;
 		this.queueManager = queueManager;
+		this.keywordManager = keywordManager;
 		this.clipboardObserver = clipboardObserver;
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -1501,6 +1509,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		} else if (e.getSource() == btnNewKeyword) {
 			Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(this, txtTitle.getSelectedText());
 			if (k != null) {
+				keywordManager.addKeyword(k);
 				searchForKeywords();
 			}
 		} else if (e.getSource() == btnAdd) {
@@ -1524,11 +1533,14 @@ public class AdderPanel extends JFrame implements ActionListener {
 				SettingsManager.instance().writeSettings(true);
 			}
 		} else if (e.getSource() == menuItemSelectKeyword) {
-			List<Keyword> vk = KeywordManager.instance().getKeywords();
+			List<Keyword> vk = keywordManager.getKeywords();
 			Collections.sort(vk);
 			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(this, Localization.getString("SelectKeyword"), true, null, vk, false);
 			if (aks.isOkPressed()) {
 				Keyword keyword = aks.getSelectedKeyword();
+				if (aks.isNewKeywordCreated()) {
+					keywordManager.addKeyword(keyword);
+				}
 
 				model.setFireTableCellUpdatedEnabled(false);
 				int selectedRows[] = jtAdder.getSelectedRows();
@@ -1607,7 +1619,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		this.setPGText(Localization.getString("SearchForKeywords"));
 		if (rbTitle.isSelected()) {
 			String strSearch = txtTitle.getText();
-			kst = new KeywordSearchThread(strSearch, this, false, true, localFiles);
+			kst = new KeywordSearchThread(strSearch, this, false, true, localFiles, keywordManager);
 			kst.setKeywordSearchThreadListener(keywordSearchThreadListener);
 			kst.setPriority(Thread.MIN_PRIORITY);
 			kst.start();
@@ -1618,7 +1630,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				int modelIndex = jtAdder.convertRowIndexToModel(i);
 				strSearchA[i] = (String)model.getValueAt(modelIndex, urlColumnModelIndex);
 			}
-			kst = new KeywordSearchThread(strSearchA, this, true, false, localFiles);
+			kst = new KeywordSearchThread(strSearchA, this, true, false, localFiles, keywordManager);
 			kst.setKeywordSearchThreadListener(keywordSearchThreadListener);
 			kst.setPriority(Thread.MIN_PRIORITY);
 			kst.start();

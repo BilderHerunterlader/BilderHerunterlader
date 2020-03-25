@@ -21,6 +21,7 @@ import javax.swing.KeyStroke;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.importexport.ImportURL;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -72,11 +73,12 @@ public class ParsePagesDialog extends JDialog {
 	 * @param mainWindowAccess Main Window Access
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ParsePagesDialog(JFrame owner, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+	public ParsePagesDialog(JFrame owner, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
 		super(owner);
-		this.urlImporter = new ImportURL(owner, mainWindowAccess, logManager, queueManager, clipboardObserver);
+		this.urlImporter = new ImportURL(owner, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);

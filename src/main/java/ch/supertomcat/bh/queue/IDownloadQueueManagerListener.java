@@ -16,6 +16,11 @@ public interface IDownloadQueueManagerListener {
 	public void queueChanged(int queue, int openSlots, int maxSlots);
 
 	/**
+	 * Queue is empty
+	 */
+	public void queueEmpty();
+
+	/**
 	 * Changes of the count of downloaded files since application started
 	 * 
 	 * @param count Count of downloaded files

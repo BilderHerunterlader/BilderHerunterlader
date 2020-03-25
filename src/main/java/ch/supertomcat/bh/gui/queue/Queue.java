@@ -5,10 +5,9 @@ import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
@@ -54,6 +53,7 @@ import ch.supertomcat.bh.importexport.ImportHTML;
 import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.importexport.ImportLocalFiles;
 import ch.supertomcat.bh.importexport.ImportQueue;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
@@ -71,25 +71,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Queue-Panel
  */
-public class Queue extends JPanel implements ActionListener, IDownloadQueueManagerListener, MouseListener, TableColumnModelListener {
-	/**
-	 * UID
-	 */
-	private static final long serialVersionUID = 5907100131845566233L;
+public class Queue extends JPanel {
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * Logger for this class
 	 */
 	private Logger logger = LoggerFactory.getLogger(getClass());
-
-	/**
-	 * Synchronization Object for changes of the table. This object is used instead of
-	 * the Queue (this) itself to prevent deadlocks, when EventQueue.invokeAndWait is used.
-	 * 
-	 * A deadlock happened when SwingUtilities.updateComponentTreeUI was called, while another Thread called picProgressBarUpdated.
-	 * picProgressBarUpdated locked the Queue(this) and SwingUtilities.updateComponentTreeUI did too. This causes the deadlock.
-	 */
-	private Object syncObject = new Object();
 
 	/**
 	 * TabelModel
@@ -265,6 +253,11 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	private final LogManager logManager;
 
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -277,15 +270,17 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 * @param queueManager Queue Manager
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param logManager Log Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public Queue(JFrame parentWindow, MainWindowAccess mainWindowAccess, QueueManager queueManager, DownloadQueueManager downloadQueueManager, LogManager logManager,
+	public Queue(JFrame parentWindow, MainWindowAccess mainWindowAccess, QueueManager queueManager, DownloadQueueManager downloadQueueManager, LogManager logManager, KeywordManager keywordManager,
 			ClipboardObserver clipboardObserver) {
 		this.parentWindow = parentWindow;
 		this.mainWindowAccess = mainWindowAccess;
 		this.queueManager = queueManager;
 		this.downloadQueueManager = downloadQueueManager;
 		this.logManager = logManager;
+		this.keywordManager = keywordManager;
 		this.clipboardObserver = clipboardObserver;
 
 		setLayout(new BorderLayout());
@@ -310,8 +305,47 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		jtQueue.getColumn("URL").setPreferredWidth(urlOrTargetTableHeaderWidth);
 		jtQueue.getColumn("Target").setPreferredWidth(urlOrTargetTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
-		jtQueue.getColumnModel().addColumnModelListener(this);
-		jtQueue.addMouseListener(this);
+		jtQueue.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
+			}
+		});
+		jtQueue.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
+					showTablePopupMenu(e);
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
+					showTablePopupMenu(e);
+				}
+			}
+		});
 		jtQueue.getTableHeader().setReorderingAllowed(false);
 
 		jtQueue.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
@@ -325,10 +359,27 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		btnImportLinks.setMnemonic(KeyEvent.VK_L);
 		btnParseLinks.setMnemonic(KeyEvent.VK_P);
 
-		btnStart.addActionListener(this);
-		btnStop.addActionListener(this);
-		btnImport.addActionListener(this);
-		btnImport.addMouseListener(this);
+		btnStart.addActionListener(e -> actionStart());
+		btnStop.addActionListener(e -> actionStop());
+		btnImport.addActionListener(e -> {
+			SwingUtilities.updateComponentTreeUI(menuImport);
+			menuImport.show(btnImport, menuImport.getX(), menuImport.getY());
+		});
+		btnImport.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mousePressed(MouseEvent e) {
+				if (e.getSource() == btnImport && e.isPopupTrigger()) {
+					menuImport.show(btnImport, e.getX(), e.getY());
+				}
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				if (e.getSource() == btnImport && e.isPopupTrigger()) {
+					menuImport.show(btnImport, e.getX(), e.getY());
+				}
+			}
+		});
 		btnStop.setToolTipText(Localization.getString("StopTooltip"));
 		pnlButtons.add(btnStart);
 		pnlButtons.add(btnStop);
@@ -340,7 +391,65 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		pnlStatus.add(lblRowCount);
 		pnlStatus.add(lblStatus);
 		add(pnlStatus, BorderLayout.NORTH);
-		downloadQueueManager.addDownloadQueueManagerListener(this);
+		downloadQueueManager.addDownloadQueueManagerListener(new IDownloadQueueManagerListener() {
+			@Override
+			public void totalDownloadRateCalculated(double downloadRate) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						updateStatus();
+					}
+				});
+			}
+
+			@Override
+			public void sessionDownloadedFilesChanged(int count) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						updateStatus();
+					}
+				});
+			}
+
+			@Override
+			public void sessionDownloadedBytesChanged(long count) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						updateStatus();
+					}
+				});
+			}
+
+			@Override
+			public void queueChanged(int queue, int openSlots, int maxSlots) {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						long overallDownloadedFiles = SettingsManager.instance().getOverallDownloadedFiles();
+						String overallDownloadedBytes = UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView());
+						int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
+						String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
+						String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getDownloadBitrate());
+						if (downloadRate.isEmpty()) {
+							downloadRate = Localization.getString("NotAvailable");
+						}
+						updateStatus(openSlots, maxSlots, overallDownloadedFiles, overallDownloadedBytes, sessionDownloadedFiles, sessionDownloadedBytes, downloadRate);
+					}
+				});
+			}
+
+			@Override
+			public void downloadsComplete(int queue, int openSlots, int maxSlots) {
+				// Nothing to do
+			}
+
+			@Override
+			public void queueEmpty() {
+				// Nothing to do
+			}
+		});
 
 		popupMenu.add(menuItemChangeTargetByInput);
 		popupMenu.add(menuItemChangeTargetBySelection);
@@ -352,23 +461,23 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		popupMenu.add(menuItemDeactivate);
 		popupMenu.add(menuItemDelete);
 
-		menuItemChangeTargetByInput.addActionListener(this);
-		menuItemChangeTargetBySelection.addActionListener(this);
-		menuItemChangeTargetfilename.addActionListener(this);
-		menuItemCopyURL.addActionListener(this);
-		menuItemOpenURL.addActionListener(this);
-		menuItemOpenThreadURL.addActionListener(this);
-		menuItemActivate.addActionListener(this);
-		menuItemDeactivate.addActionListener(this);
-		menuItemDelete.addActionListener(this);
+		menuItemChangeTargetByInput.addActionListener(e -> actionChangeTargetByInput());
+		menuItemChangeTargetBySelection.addActionListener(e -> actionChangeTargetBySelection());
+		menuItemChangeTargetfilename.addActionListener(e -> actionChangeTargetFilename());
+		menuItemCopyURL.addActionListener(e -> actionCopyURLs());
+		menuItemOpenURL.addActionListener(e -> actionOpenURLs());
+		menuItemOpenThreadURL.addActionListener(e -> actionOpenThreadURLs());
+		menuItemActivate.addActionListener(e -> actionActivate());
+		menuItemDeactivate.addActionListener(e -> actionDeactivate());
+		menuItemDelete.addActionListener(e -> actionDelete());
 
-		itemImportHTML.addActionListener(this);
-		itemImportText.addActionListener(this);
-		btnImportLinks.addActionListener(this);
-		btnParseLinks.addActionListener(this);
-		itemExportQueue.addActionListener(this);
-		itemImportQueue.addActionListener(this);
-		itemSort.addActionListener(this);
+		itemImportHTML.addActionListener(e -> actionImportHTML());
+		itemImportText.addActionListener(e -> actionImportTextfile());
+		btnImportLinks.addActionListener(e -> actionImportLinks());
+		btnParseLinks.addActionListener(e -> actionParseLinks());
+		itemExportQueue.addActionListener(e -> actionExportQueue());
+		itemImportQueue.addActionListener(e -> actionImportQueue());
+		itemSort.addActionListener(e -> actionSort());
 
 		menuImport.add(itemImportHTML);
 		menuImport.add(itemImportText);
@@ -438,7 +547,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionCopyURLs() {
 		StringJoiner content = new StringJoiner("\n");
-		synchronized (syncObject) {
+		synchronized (queueManager.getSyncObject()) {
 			for (int selectedRow : jtQueue.getSelectedRows()) {
 				content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
 			}
@@ -453,7 +562,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionOpenURLs() {
 		final List<String> urls = new ArrayList<>();
-		synchronized (syncObject) {
+		synchronized (queueManager.getSyncObject()) {
 			for (int selectedRow : jtQueue.getSelectedRows()) {
 				urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
 			}
@@ -485,14 +594,12 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	private void actionOpenThreadURLs() {
 		final List<String> urls = new ArrayList<>();
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				for (int selectedRow : jtQueue.getSelectedRows()) {
-					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
-					if (pic != null) {
-						String url = pic.getThreadURL();
-						if (!url.isEmpty()) {
-							urls.add(url);
-						}
+			for (int selectedRow : jtQueue.getSelectedRows()) {
+				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
+				if (pic != null) {
+					String url = pic.getThreadURL();
+					if (!url.isEmpty()) {
+						urls.add(url);
 					}
 				}
 			}
@@ -540,22 +647,20 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 					pg.progressModeChanged(true);
 					pg.progressChanged(Localization.getString("DeleteEntries"));
 					synchronized (queueManager.getSyncObject()) {
-						synchronized (syncObject) {
-							int[] selectedRows = jtQueue.getSelectedRows();
-							int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
+						int[] selectedRows = jtQueue.getSelectedRows();
+						int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
 
-							// Convert first removed row index, before removing any rows
-							int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
+						// Convert first removed row index, before removing any rows
+						int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
 
-							queueManager.removePics(selectedModelRows);
+						queueManager.removePics(selectedModelRows);
 
-							int rowCount = jtQueue.getRowCount();
-							int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
-							if (firstRemovedRowViewIndex < rowCount) {
-								jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
-							} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
-								jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
-							}
+						int rowCount = jtQueue.getRowCount();
+						int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
+						if (firstRemovedRowViewIndex < rowCount) {
+							jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
+						} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
+							jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
 						}
 					}
 					mainWindowAccess.removeProgressObserver(pg);
@@ -581,7 +686,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportHTML(parentWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importHTML();
+				new ImportHTML(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importHTML();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -595,7 +700,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportLinkList(parentWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importLinkList();
+				new ImportLinkList(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLinkList();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -609,7 +714,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				DownloadAddDialog dlg = new DownloadAddDialog(parentWindow, logManager, queueManager, clipboardObserver);
+				DownloadAddDialog dlg = new DownloadAddDialog(parentWindow, logManager, queueManager, keywordManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -624,7 +729,7 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ParsePagesDialog dlg = new ParsePagesDialog(parentWindow, mainWindowAccess, logManager, queueManager, clipboardObserver);
+				ParsePagesDialog dlg = new ParsePagesDialog(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -669,32 +774,30 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionChangeTargetByInput() {
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				int[] s = jtQueue.getSelectedRows();
-				String defaultPath = SettingsManager.instance().getSavePath();
-				if (s.length == 1) {
-					defaultPath = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[0])).getTargetPath();
+			int[] s = jtQueue.getSelectedRows();
+			String defaultPath = SettingsManager.instance().getSavePath();
+			if (s.length == 1) {
+				defaultPath = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[0])).getTargetPath();
+			}
+			String input = PathRenameDialog.showPathRenameDialog(parentWindow, defaultPath);
+			if ((input != null) && (input.length() > 2)) {
+				boolean b1 = input.endsWith("/");
+				boolean b2 = input.endsWith("\\");
+				if ((b1 == false) && (b2 == false)) {
+					input += FileUtil.FILE_SEPERATOR;
 				}
-				String input = PathRenameDialog.showPathRenameDialog(parentWindow, defaultPath);
-				if ((input != null) && (input.length() > 2)) {
-					boolean b1 = input.endsWith("/");
-					boolean b2 = input.endsWith("\\");
-					if ((b1 == false) && (b2 == false)) {
-						input += FileUtil.FILE_SEPERATOR;
-					}
-					for (int i = 0; i < s.length; i++) {
-						String newPath = input;
-						newPath = BHUtil.filterPath(newPath);
-						newPath = FileUtil.reducePathLength(newPath);
+				for (int i = 0; i < s.length; i++) {
+					String newPath = input;
+					newPath = BHUtil.filterPath(newPath);
+					newPath = FileUtil.reducePathLength(newPath);
 
-						Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-						if (pic != null) {
-							pic.setTargetPath(newPath);
-							queueManager.updatePic(pic);
-						}
+					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
+					if (pic != null) {
+						pic.setTargetPath(newPath);
+						queueManager.updatePic(pic);
 					}
-					queueManager.asyncSaveDatabase();
 				}
+				queueManager.asyncSaveDatabase();
 			}
 		}
 	}
@@ -704,21 +807,19 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionChangeTargetBySelection() {
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				File file = FileDialogUtil.showFolderSaveDialog(this, SettingsManager.instance().getSavePath(), null);
-				if (file != null) {
-					String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-					int s[] = jtQueue.getSelectedRows();
-					for (int i = 0; i < s.length; i++) {
-						Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-						if (pic != null) {
-							pic.setTargetPath(folder);
-							queueManager.updatePic(pic);
-						}
+			File file = FileDialogUtil.showFolderSaveDialog(this, SettingsManager.instance().getSavePath(), null);
+			if (file != null) {
+				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
+				int s[] = jtQueue.getSelectedRows();
+				for (int i = 0; i < s.length; i++) {
+					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
+					if (pic != null) {
+						pic.setTargetPath(folder);
+						queueManager.updatePic(pic);
 					}
-					file = null;
-					queueManager.asyncSaveDatabase();
 				}
+				file = null;
+				queueManager.asyncSaveDatabase();
 			}
 		}
 	}
@@ -728,42 +829,40 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionChangeTargetFilename() {
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				String defaultvalue = "";
-				int s[] = jtQueue.getSelectedRows();
-				if (s.length > 0) {
-					defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), 1);
-					defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-					String input[] = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length);
-					if ((input != null)) {
-						int index = Integer.parseInt(input[1]);
-						int step = Integer.parseInt(input[2]);
-						boolean keepOriginal = (input[5].length() > 0);
-						boolean clearFilename = (input[6].length() > 0);
-						for (int i = 0; i < s.length; i++) {
-							int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
-							String out = "";
-							if (clearFilename == false) {
-								String fname = input[0];
-								if (keepOriginal) {
-									fname = (String)model.getValueAt(modelIndex, 1);
-									fname = fname.substring(fname.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-								}
-								fname = input[3] + fname + input[4];
-								out = FileUtil.getNumberedFilename(fname, index);
+			String defaultvalue = "";
+			int s[] = jtQueue.getSelectedRows();
+			if (s.length > 0) {
+				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), 1);
+				defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
+				String input[] = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length);
+				if ((input != null)) {
+					int index = Integer.parseInt(input[1]);
+					int step = Integer.parseInt(input[2]);
+					boolean keepOriginal = (input[5].length() > 0);
+					boolean clearFilename = (input[6].length() > 0);
+					for (int i = 0; i < s.length; i++) {
+						int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
+						String out = "";
+						if (clearFilename == false) {
+							String fname = input[0];
+							if (keepOriginal) {
+								fname = (String)model.getValueAt(modelIndex, 1);
+								fname = fname.substring(fname.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 							}
-
-							Pic pic = queueManager.getPicByIndex(modelIndex);
-							if (pic != null) {
-								pic.setTargetFilename(out);
-								pic.setFixedTargetFilename(true);
-								queueManager.updatePic(pic);
-							}
-
-							index += step;
+							fname = input[3] + fname + input[4];
+							out = FileUtil.getNumberedFilename(fname, index);
 						}
-						queueManager.asyncSaveDatabase();
+
+						Pic pic = queueManager.getPicByIndex(modelIndex);
+						if (pic != null) {
+							pic.setTargetFilename(out);
+							pic.setFixedTargetFilename(true);
+							queueManager.updatePic(pic);
+						}
+
+						index += step;
 					}
+					queueManager.asyncSaveDatabase();
 				}
 			}
 		}
@@ -773,20 +872,17 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 * Sort
 	 */
 	private void actionSort() {
-		synchronized (syncObject) {
-			final File folder = FileDialogUtil.showFolderOpenDialog(parentWindow, SettingsManager.instance().getSavePath(), null);
-			if (folder != null) {
-
-				Thread t = new Thread(new Runnable() {
-					@Override
-					public void run() {
-						File files[] = folder.listFiles();
-						new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, clipboardObserver).importLocalFiles(files);
-					}
-				});
-				t.setPriority(Thread.MIN_PRIORITY);
-				t.start();
-			}
+		final File folder = FileDialogUtil.showFolderOpenDialog(parentWindow, SettingsManager.instance().getSavePath(), null);
+		if (folder != null) {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					File files[] = folder.listFiles();
+					new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLocalFiles(files);
+				}
+			});
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
 		}
 	}
 
@@ -795,14 +891,12 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionActivate() {
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				int s[] = jtQueue.getSelectedRows();
-				for (int i = 0; i < s.length; i++) {
-					queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(false);
-				}
-				model.fireTableDataChanged();
-				queueManager.asyncSaveDatabase();
+			int s[] = jtQueue.getSelectedRows();
+			for (int i = 0; i < s.length; i++) {
+				queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(false);
 			}
+			model.fireTableDataChanged();
+			queueManager.asyncSaveDatabase();
 		}
 	}
 
@@ -811,14 +905,12 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 	 */
 	private void actionDeactivate() {
 		synchronized (queueManager.getSyncObject()) {
-			synchronized (syncObject) {
-				int s[] = jtQueue.getSelectedRows();
-				for (int i = 0; i < s.length; i++) {
-					queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(true);
-				}
-				model.fireTableDataChanged();
-				queueManager.asyncSaveDatabase();
+			int s[] = jtQueue.getSelectedRows();
+			for (int i = 0; i < s.length; i++) {
+				queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(true);
 			}
+			model.fireTableDataChanged();
+			queueManager.asyncSaveDatabase();
 		}
 	}
 
@@ -840,68 +932,6 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		btnParseLinks.setEnabled(true);
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnStart) {
-			actionStart();
-		} else if (e.getSource() == btnStop) {
-			actionStop();
-		} else if (e.getSource() == menuItemCopyURL) {
-			actionCopyURLs();
-		} else if (e.getSource() == menuItemOpenURL) {
-			actionOpenURLs();
-		} else if (e.getSource() == menuItemDelete) {
-			actionDelete();
-		} else if (e.getSource() == itemImportHTML) {
-			actionImportHTML();
-		} else if (e.getSource() == itemImportText) {
-			actionImportTextfile();
-		} else if (e.getSource() == btnImportLinks) {
-			actionImportLinks();
-		} else if (e.getSource() == btnParseLinks) {
-			actionParseLinks();
-		} else if (e.getSource() == itemImportQueue) {
-			actionImportQueue();
-		} else if (e.getSource() == itemExportQueue) {
-			actionExportQueue();
-		} else if (e.getSource() == itemSort) {
-			actionSort();
-		} else if (e.getSource() == menuItemChangeTargetByInput) {
-			actionChangeTargetByInput();
-		} else if (e.getSource() == menuItemChangeTargetBySelection) {
-			actionChangeTargetBySelection();
-		} else if (e.getSource() == menuItemChangeTargetfilename) {
-			actionChangeTargetFilename();
-		} else if (e.getSource() == menuItemOpenThreadURL) {
-			actionOpenThreadURLs();
-		} else if (e.getSource() == menuItemActivate) {
-			actionActivate();
-		} else if (e.getSource() == menuItemDeactivate) {
-			actionDeactivate();
-		} else if (e.getSource() == btnImport) {
-			SwingUtilities.updateComponentTreeUI(menuImport);
-			menuImport.show(btnImport, menuImport.getX(), menuImport.getY());
-		}
-	}
-
-	@Override
-	public void queueChanged(final int queue, final int openSlots, final int maxSlots) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				long overallDownloadedFiles = SettingsManager.instance().getOverallDownloadedFiles();
-				String overallDownloadedBytes = UnitFormatUtil.getSizeString(SettingsManager.instance().getOverallDownloadedBytes(), SettingsManager.instance().getSizeView());
-				int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
-				String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), SettingsManager.instance().getSizeView());
-				String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getDownloadBitrate());
-				if (downloadRate.isEmpty()) {
-					downloadRate = Localization.getString("NotAvailable");
-				}
-				updateStatus(openSlots, maxSlots, overallDownloadedFiles, overallDownloadedBytes, sessionDownloadedFiles, sessionDownloadedBytes, downloadRate);
-			}
-		});
-	}
-
 	private void showTablePopupMenu(MouseEvent e) {
 		boolean bIsDownloading = downloadQueueManager.isDownloading();
 		boolean bTableEnabled = jtQueue.isEnabled();
@@ -914,40 +944,6 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 		menuItemDelete.setEnabled(enableMenuItems);
 		SwingUtilities.updateComponentTreeUI(popupMenu);
 		popupMenu.show(e.getComponent(), e.getX(), e.getY());
-	}
-
-	@Override
-	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if (e.getSource() == btnImport && e.isPopupTrigger()) {
-			menuImport.show(btnImport, e.getX(), e.getY());
-		} else if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
-			showTablePopupMenu(e);
-		}
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		if (e.getSource() == btnImport && e.isPopupTrigger()) {
-			menuImport.show(btnImport, e.getX(), e.getY());
-		} else if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
-			showTablePopupMenu(e);
-		}
 	}
 
 	/**
@@ -993,36 +989,6 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 				+ Localization.getString("DownloadBitrate") + ": " + downloadRate);
 	}
 
-	@Override
-	public void sessionDownloadedBytesChanged(long count) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				updateStatus();
-			}
-		});
-	}
-
-	@Override
-	public void sessionDownloadedFilesChanged(int count) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				updateStatus();
-			}
-		});
-	}
-
-	@Override
-	public void totalDownloadRateCalculated(double downloadRate) {
-		EventQueue.invokeLater(new Runnable() {
-			@Override
-			public void run() {
-				updateStatus();
-			}
-		});
-	}
-
 	/**
 	 * updateColWidthsToSettingsManager
 	 */
@@ -1042,26 +1008,5 @@ public class Queue extends JPanel implements ActionListener, IDownloadQueueManag
 			return;
 		}
 		TableUtil.applyColWidths(jtQueue, SettingsManager.instance().getColWidthsQueue());
-	}
-
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
 	}
 }

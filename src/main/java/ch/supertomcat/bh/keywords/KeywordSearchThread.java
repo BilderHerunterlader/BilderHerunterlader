@@ -83,6 +83,11 @@ public class KeywordSearchThread extends Thread {
 	private boolean displayKeywordsWhenNoMatches = SettingsManager.instance().isDisplayKeywordsWhenNoMatches();
 
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Constructor for a Single Searchstring
 	 * 
 	 * @param strS Searchstring (URL)
@@ -90,9 +95,10 @@ public class KeywordSearchThread extends Thread {
 	 * @param multiResultDisplay True if multiple results should be displayed in one dialog, false if for every result a dialog should be displayed
 	 * @param byTitle Search by title
 	 * @param localFiles Search for files on the harddisk
+	 * @param keywordManager Keyword Manager
 	 */
-	public KeywordSearchThread(String strS, JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles) {
-		this(new String[] { strS }, owner, multiResultDisplay, byTitle, localFiles);
+	public KeywordSearchThread(String strS, JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager) {
+		this(new String[] { strS }, owner, multiResultDisplay, byTitle, localFiles, keywordManager);
 	}
 
 	/**
@@ -103,13 +109,15 @@ public class KeywordSearchThread extends Thread {
 	 * @param multiResultDisplay True if multiple results should be displayed in one dialog, false if for every result a dialog should be displayed
 	 * @param byTitle Search by title
 	 * @param localFiles Search for files on the harddisk
+	 * @param keywordManager Keyword Manager
 	 */
-	public KeywordSearchThread(String strS[], JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles) {
+	public KeywordSearchThread(String strS[], JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager) {
 		this.strS = strS;
 		this.owner = owner;
 		this.multiResultDisplay = multiResultDisplay;
 		this.byTitle = byTitle;
 		this.localFiles = localFiles;
+		this.keywordManager = keywordManager;
 		this.setName("Keyword-Search-Thread-" + this.getId());
 	}
 
@@ -125,13 +133,13 @@ public class KeywordSearchThread extends Thread {
 
 			if (multiResultDisplay) {
 				// if search by URL/Filename
-				keywords = KeywordManager.instance().getKeywords();
+				keywords = keywordManager.getKeywords();
 				this.retval = search(strS);
 			} else {
 				// if search by title
 				for (int i = 0; i < strS.length; i++) {
 					// Get keywords every time from KeywordManager in case a keyword was added
-					keywords = KeywordManager.instance().getKeywords();
+					keywords = keywordManager.getKeywords();
 					this.retval[i] = search(strS[i]);
 				}
 			}
@@ -295,7 +303,10 @@ public class KeywordSearchThread extends Thread {
 				// If the user has selected a Keyword
 				this.chooseDefault = aks.isChooseDefault();
 				chosen = aks.getSelectedKeyword();
-				return aks.getSelectedKeyword();
+				if (aks.isNewKeywordCreated()) {
+					keywordManager.addKeyword(chosen);
+				}
+				return chosen;
 			} else {
 				// If the user canceled the Dialog then return null
 				chosen = null;

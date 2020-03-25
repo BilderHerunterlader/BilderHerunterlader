@@ -35,11 +35,6 @@ public class KeywordManager {
 	public static final int MATCH_ALL = 2;
 
 	/**
-	 * Singleton
-	 */
-	private static KeywordManager instance;
-
-	/**
 	 * Keywords
 	 */
 	private List<Keyword> keywords = new ArrayList<>();
@@ -54,21 +49,9 @@ public class KeywordManager {
 	/**
 	 * Constructor
 	 */
-	private KeywordManager() {
+	public KeywordManager() {
 		List<Keyword> keywordsFromDB = keywordsSQLiteDB.getAllEntries();
 		keywords.addAll(keywordsFromDB);
-	}
-
-	/**
-	 * Returns the instance
-	 * 
-	 * @return Instance
-	 */
-	public static synchronized KeywordManager instance() {
-		if (instance == null) {
-			instance = new KeywordManager();
-		}
-		return instance;
 	}
 
 	/**

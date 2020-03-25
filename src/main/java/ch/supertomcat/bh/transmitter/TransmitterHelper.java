@@ -17,6 +17,7 @@ import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.importexport.ImportURL;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
@@ -52,6 +53,11 @@ public class TransmitterHelper {
 	private final LogManager logManager;
 
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -68,15 +74,18 @@ public class TransmitterHelper {
 	 * @param mainWindowAccess Main Window Access
 	 * @param queueManager Queue Manager
 	 * @param logManager Log Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public TransmitterHelper(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, LogManager logManager, ClipboardObserver clipboardObserver) {
+	public TransmitterHelper(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, LogManager logManager, KeywordManager keywordManager,
+			ClipboardObserver clipboardObserver) {
 		this.parentComponent = parentComponent;
 		this.mainWindowAccess = mainWindowAccess;
 		this.queueManager = queueManager;
 		this.logManager = logManager;
+		this.keywordManager = keywordManager;
 		this.clipboardObserver = clipboardObserver;
-		this.urlImporter = new ImportURL(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+		this.urlImporter = new ImportURL(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 	}
 
 	/**
@@ -235,7 +244,7 @@ public class TransmitterHelper {
 
 			if ((fullList == false) && (file.length() > 0) && (eof)) {
 				// If we recieved only a path to a file, we must read it
-				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver).importLinkList(file, true);
+				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLinkList(file, true);
 				logger.info("Handled Connection successfully");
 			} else if ((fullList == false) && (url.length() > 0) && (eof)) {
 				// If we recieved only a URL which contains all the URLs, we download the URL
@@ -251,7 +260,7 @@ public class TransmitterHelper {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
 				adderpnl.init();
 				logger.info("Handled Connection successfully");
 			}

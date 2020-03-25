@@ -363,6 +363,13 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	}
 
 	/**
+	 * @return True if new keyword was created, false otherwise
+	 */
+	public boolean isNewKeywordCreated() {
+		return newKeyword != null;
+	}
+
+	/**
 	 * @return Selected Keyword or null if none selected
 	 */
 	public Keyword getSelectedKeyword() {

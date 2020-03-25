@@ -5,7 +5,6 @@ import javax.swing.JFrame;
 
 import ch.supertomcat.bh.gui.keywords.KeywordEditDialog;
 import ch.supertomcat.bh.keywords.Keyword;
-import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -85,9 +84,7 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"));
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
-			Keyword keyword = dialog.getKeyword();
-			KeywordManager.instance().addKeyword(keyword);
-			return keyword;
+			return dialog.getKeyword();
 		}
 		return null;
 	}
@@ -103,9 +100,7 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"), keywordTitle);
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
-			Keyword keyword = dialog.getKeyword();
-			KeywordManager.instance().addKeyword(keyword);
-			return keyword;
+			return dialog.getKeyword();
 		}
 		return null;
 	}

@@ -56,6 +56,11 @@ public class QueueManager implements IPicListener {
 	private final QueueTableModel tableModel = new QueueTableModel();
 
 	/**
+	 * Download Queue Manager
+	 */
+	private final DownloadQueueManager downloadQueueManager;
+
+	/**
 	 * Log Manager
 	 */
 	private final LogManager logManager;
@@ -63,9 +68,12 @@ public class QueueManager implements IPicListener {
 	/**
 	 * Constructor
 	 * 
+	 * @param downloadQueueManager Download Queue Manager
 	 * @param logManager Log Manager
+	 * @param settingsManager SettingsManager
 	 */
-	public QueueManager(LogManager logManager) {
+	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager) {
+		this.downloadQueueManager = downloadQueueManager;
 		this.logManager = logManager;
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
@@ -81,6 +89,42 @@ public class QueueManager implements IPicListener {
 				queueSQLiteDB.deleteEntry(pic);
 			}
 		}
+
+		this.downloadQueueManager.addDownloadQueueManagerListener(new IDownloadQueueManagerListener() {
+			@Override
+			public void totalDownloadRateCalculated(double downloadRate) {
+				// Nothing to do
+			}
+
+			@Override
+			public void sessionDownloadedFilesChanged(int count) {
+				// Nothing to do
+			}
+
+			@Override
+			public void sessionDownloadedBytesChanged(long count) {
+				// Nothing to do
+			}
+
+			@Override
+			public void queueEmpty() {
+				// If the queue is now empty, it is a good time to commit the database
+				saveDatabase();
+				if (!isDownloadsStopped() && settingsManager.isAutoRetryAfterDownloadsComplete()) {
+					startDownload();
+				}
+			}
+
+			@Override
+			public void queueChanged(int queue, int openSlots, int maxSlots) {
+				// Nothing to do
+			}
+
+			@Override
+			public void downloadsComplete(int queue, int openSlots, int maxSlots) {
+				// Nothing to do
+			}
+		});
 	}
 
 	/**
@@ -171,8 +215,8 @@ public class QueueManager implements IPicListener {
 			executeInEventQueueThread(r);
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
-			pic.startDownload(DownloadQueueManager.instance(this));
-			DownloadQueueManager.instance(this).manageDLSlots();
+			pic.startDownload(downloadQueueManager);
+			downloadQueueManager.manageDLSlots();
 		}
 	}
 
@@ -204,9 +248,9 @@ public class QueueManager implements IPicListener {
 		}
 		if (SettingsManager.instance().isAutoStartDownloads()) {
 			for (Pic pic : picsAdded) {
-				pic.startDownload(DownloadQueueManager.instance(this));
+				pic.startDownload(downloadQueueManager);
 			}
-			DownloadQueueManager.instance(this).manageDLSlots();
+			downloadQueueManager.manageDLSlots();
 		}
 	}
 
@@ -268,7 +312,7 @@ public class QueueManager implements IPicListener {
 	 * @param indices Indices
 	 */
 	public void removePics(int indices[]) {
-		if (DownloadQueueManager.instance(this).isDownloading()) {
+		if (downloadQueueManager.isDownloading()) {
 			return;
 		}
 
@@ -310,9 +354,9 @@ public class QueueManager implements IPicListener {
 		}
 		// request downloadslots for all pics in queue
 		for (Pic pic : list) {
-			pic.startDownload(DownloadQueueManager.instance(this));
+			pic.startDownload(downloadQueueManager);
 		}
-		DownloadQueueManager.instance(this).manageDLSlots();
+		downloadQueueManager.manageDLSlots();
 	}
 
 	/**
@@ -326,7 +370,7 @@ public class QueueManager implements IPicListener {
 		}
 		// stop all downloads
 		for (Pic pic : list) {
-			pic.stopDownload(DownloadQueueManager.instance(this));
+			pic.stopDownload(downloadQueueManager);
 		}
 	}
 
@@ -442,8 +486,8 @@ public class QueueManager implements IPicListener {
 			}
 			SettingsManager.instance().increaseOverallDownloadedFiles(1);
 			SettingsManager.instance().increaseOverallDownloadedBytes(pic.getSize());
-			DownloadQueueManager.instance(this).increaseSessionDownloadedBytes(pic.getSize());
-			DownloadQueueManager.instance(this).increaseSessionDownloadedFiles();
+			downloadQueueManager.increaseSessionDownloadedBytes(pic.getSize());
+			downloadQueueManager.increaseSessionDownloadedFiles();
 			SettingsManager.instance().writeSettings(true);
 			removePic(pic);
 		}

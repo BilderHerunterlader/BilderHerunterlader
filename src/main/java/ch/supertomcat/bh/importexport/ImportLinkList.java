@@ -12,6 +12,7 @@ import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.importexport.base.AdderImportBase;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
@@ -31,10 +32,12 @@ public class ImportLinkList extends AdderImportBase {
 	 * @param mainWindowAccess Main Window Access
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportLinkList(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
-		super(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	public ImportLinkList(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
+			ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 	}
 
 	/**
@@ -132,7 +135,7 @@ public class ImportLinkList extends AdderImportBase {
 
 			if (urls.size() > 0) {
 				// Open Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
 				adderpnl.init();
 				adderpnl = null;
 			}

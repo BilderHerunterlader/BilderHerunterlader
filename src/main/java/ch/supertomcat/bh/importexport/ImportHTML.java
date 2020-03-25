@@ -27,6 +27,7 @@ import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.hoster.linkextract.ImageExtract;
 import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
 import ch.supertomcat.bh.importexport.base.AdderImportBase;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
@@ -50,10 +51,12 @@ public class ImportHTML extends AdderImportBase {
 	 * @param mainWindowAccess Main Window Access
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportHTML(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
-		super(parentComponent, mainWindowAccess, logManager, queueManager, clipboardObserver);
+	public ImportHTML(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
+			ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
 	}
 
 	/**
@@ -93,7 +96,7 @@ public class ImportHTML extends AdderImportBase {
 				}
 
 				// Open the Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, clipboardObserver);
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, clipboardObserver);
 				adderpnl.init(); // We need to do this!
 				adderpnl = null;
 
@@ -200,7 +203,7 @@ public class ImportHTML extends AdderImportBase {
 			}
 
 			// Open the Dialog
-			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
+			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
 			adderpnl.init(); // We need to do this!
 			adderpnl = null;
 		} catch (MalformedURLException e) {
@@ -227,7 +230,7 @@ public class ImportHTML extends AdderImportBase {
 		}
 
 		// Open the Dialog
-		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, clipboardObserver);
+		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
 		adderpnl = null;
 	}

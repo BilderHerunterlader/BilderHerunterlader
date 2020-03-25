@@ -32,13 +32,20 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  */
 public class ImportKeywords extends ImportExportBase {
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
+	 * @param keywordManager Keyword Manager
 	 */
-	public ImportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess) {
+	public ImportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
 		super(parentComponent, mainWindowAccess);
+		this.keywordManager = keywordManager;
 	}
 
 	/**
@@ -59,7 +66,7 @@ public class ImportKeywords extends ImportExportBase {
 	 * @param file File
 	 */
 	public void importKeywords(String file) {
-		List<Keyword> keyw = KeywordManager.instance().getKeywords();
+		List<Keyword> keyw = keywordManager.getKeywords();
 		List<Keyword> v = new ArrayList<>();
 
 		ProgressObserver pg = new ProgressObserver();
@@ -150,7 +157,7 @@ public class ImportKeywords extends ImportExportBase {
 		if (!v.isEmpty()) {
 			// Add the keywords
 			mainWindowAccess.clearKeywordFilters();
-			KeywordManager.instance().addKeywords(v);
+			keywordManager.addKeywords(v);
 		}
 		JOptionPane.showMessageDialog(parentComponent, v.size() + " " + Localization.getString("KeywordsImported"), Localization.getString("KeywordImport"), JOptionPane.INFORMATION_MESSAGE);
 	}

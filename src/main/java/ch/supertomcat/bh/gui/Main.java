@@ -142,7 +142,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 			ClipboardObserver clipboardObserver) {
 		this.settingsManager = settingsManager;
 		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager);
-		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, clipboardObserver);
+		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, keywordManager, clipboardObserver);
 		this.log = new Log(logManager, downloadQueueManager, this, clipboardObserver);
 		this.directoryLog = new DirectoryLog(logManager);
 		this.keywords = new Keywords(this, this, keywordManager);
@@ -181,7 +181,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 								String referrer = Localization.getString("Unkown");
 								byte[] stringBytes = sbData.toString().getBytes();
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
-								new ImportHTML(Main.this, Main.this, logManager, queueManager, clipboardObserver).importHTML(bais, referrer, title);
+								new ImportHTML(Main.this, Main.this, logManager, queueManager, keywordManager, clipboardObserver).importHTML(bais, referrer, title);
 								br.close();
 								e.dropComplete(true);
 								return;

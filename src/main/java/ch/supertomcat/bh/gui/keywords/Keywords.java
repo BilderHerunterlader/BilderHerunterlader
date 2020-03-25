@@ -624,7 +624,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				@Override
 				public void run() {
 					enableComponents(false);
-					new ImportKeywords(parentWindow, mainWindowAccess).importKeywords();
+					new ImportKeywords(parentWindow, mainWindowAccess, keywordManager).importKeywords();
 					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
 					enableComponents(true);
 				}

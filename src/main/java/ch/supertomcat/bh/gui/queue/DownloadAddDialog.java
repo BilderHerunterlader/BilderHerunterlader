@@ -21,6 +21,7 @@ import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
@@ -79,6 +80,11 @@ public class DownloadAddDialog extends JDialog {
 	private final QueueManager queueManager;
 
 	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -89,12 +95,14 @@ public class DownloadAddDialog extends JDialog {
 	 * @param owner Owner
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
+	 * @param keywordManager Keyword Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public DownloadAddDialog(JFrame owner, LogManager logManager, QueueManager queueManager, ClipboardObserver clipboardObserver) {
+	public DownloadAddDialog(JFrame owner, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
 		super(owner);
 		this.logManager = logManager;
 		this.queueManager = queueManager;
+		this.keywordManager = keywordManager;
 		this.clipboardObserver = clipboardObserver;
 
 		setLayout(new BorderLayout());
@@ -171,7 +179,7 @@ public class DownloadAddDialog extends JDialog {
 					}
 
 					AdderPanel adderpnl = new AdderPanel(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-							+ Localization.getString("Referrer"), urls), logManager, queueManager, clipboardObserver);
+							+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, clipboardObserver);
 					adderpnl.init();
 					adderpnl = null;
 				}
