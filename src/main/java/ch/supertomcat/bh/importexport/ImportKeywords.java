@@ -42,9 +42,10 @@ public class ImportKeywords extends ImportExportBase {
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public ImportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
-		super(parentComponent, mainWindowAccess);
+	public ImportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager, SettingsManager settingsManager) {
+		super(parentComponent, mainWindowAccess, settingsManager);
 		this.keywordManager = keywordManager;
 	}
 
@@ -54,7 +55,7 @@ public class ImportKeywords extends ImportExportBase {
 	public void importKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			importKeywords(file.getAbsolutePath());
 			file = null;
 		}
@@ -130,7 +131,7 @@ public class ImportKeywords extends ImportExportBase {
 
 						String path = line[2];
 						if (line[2].equals("#")) {
-							path = SettingsManager.instance().getSavePath() + title;
+							path = settingsManager.getSavePath() + title;
 						}
 
 						String rpath = line[3];

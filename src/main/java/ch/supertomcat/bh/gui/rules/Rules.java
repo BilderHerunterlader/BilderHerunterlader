@@ -95,7 +95,7 @@ public class Rules extends JPanel {
 	/**
 	 * HostManager
 	 */
-	private HostManager hm = HostManager.instance();
+	private HostManager hostManager;
 
 	/**
 	 * Constructor
@@ -103,8 +103,11 @@ public class Rules extends JPanel {
 	 * @param parentWindow Parent Window
 	 * @param mainWindowAccess Main Window Access
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 */
-	public Rules(JFrame parentWindow, MainWindowAccess mainWindowAccess, DownloadQueueManager downloadQueueManager) {
+	public Rules(JFrame parentWindow, MainWindowAccess mainWindowAccess, DownloadQueueManager downloadQueueManager, SettingsManager settingsManager, HostManager hostManager) {
+		this.hostManager = hostManager;
 		setLayout(new BorderLayout());
 
 		jtRules = new JTable(model);
@@ -141,7 +144,7 @@ public class Rules extends JPanel {
 			}
 		});
 
-		updateColWidthsFromSettingsManager();
+		updateColWidthsFromSettingsManager(settingsManager);
 		jtRules.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 
 			@Override
@@ -158,7 +161,7 @@ public class Rules extends JPanel {
 
 			@Override
 			public void columnMarginChanged(ChangeEvent e) {
-				updateColWidthsToSettingsManager();
+				updateColWidthsToSettingsManager(settingsManager);
 			}
 
 			@Override
@@ -180,11 +183,11 @@ public class Rules extends JPanel {
 					return;
 				}
 				Rule r = new Rule("", "0.1", "", "");
-				RuleMainEditor rme = new RuleMainEditor(parentWindow, r);
+				RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
 				if (rme.getCanceled()) {
 					return;
 				}
-				hm.getHostRules().addRule(r);
+				hostManager.getHostRules().addRule(r);
 				r.writeRule();
 				model.addRow(r);
 				sorter.sort();
@@ -203,7 +206,7 @@ public class Rules extends JPanel {
 						return;
 					}
 					Rule r = (Rule)model.getValueAt(jtRules.convertRowIndexToModel(row), 0);
-					RuleMainEditor rme = new RuleMainEditor(parentWindow, r);
+					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
 					if (rme.getCanceled()) {
 						return;
 					}
@@ -241,7 +244,7 @@ public class Rules extends JPanel {
 						}
 					}
 					model.removeRow(rowModelIndex);
-					hm.getHostRules().removeRule(r);
+					hostManager.getHostRules().removeRule(r);
 				}
 			}
 		});
@@ -253,7 +256,7 @@ public class Rules extends JPanel {
 					mainWindowAccess.addProgressObserver(pg);
 					pg.progressChanged(-1, -1, -1);
 					pg.progressChanged(Localization.getString("SavingRules"));
-					if (hm.getHostRules().saveAllRules()) {
+					if (hostManager.getHostRules().saveAllRules()) {
 						mainWindowAccess.setMessage(Localization.getString("RulesSaved"));
 					} else {
 						mainWindowAccess.setMessage(Localization.getString("RulesSaveFailed"));
@@ -277,7 +280,7 @@ public class Rules extends JPanel {
 	 * Load Rules
 	 */
 	private void loadRules() {
-		List<Rule> rules = HostManager.instance().getHostRules().getRules();
+		List<Rule> rules = hostManager.getHostRules().getRules();
 		for (Rule rule : rules) {
 			model.addRow(rule);
 		}
@@ -286,21 +289,25 @@ public class Rules extends JPanel {
 
 	/**
 	 * updateColWidthsToSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsRules(TableUtil.serializeColWidthSetting(jtRules));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsRules(TableUtil.serializeColWidthSetting(jtRules));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableUtil.applyColWidths(jtRules, SettingsManager.instance().getColWidthsRules());
+	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes()) {
+			TableUtil.applyColWidths(jtRules, settingsManager.getColWidthsRules());
 		}
 	}
 }

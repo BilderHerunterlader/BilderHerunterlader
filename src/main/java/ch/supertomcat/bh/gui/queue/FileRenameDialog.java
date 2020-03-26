@@ -112,27 +112,27 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	/**
 	 * TextField
 	 */
-	private JTextField txtPrefix = new JTextField(SettingsManager.instance().getFilenameChangePrefix(), 20);
+	private final JTextField txtPrefix;
 
 	/**
 	 * TextField
 	 */
-	private JTextField txtAppendix = new JTextField(SettingsManager.instance().getFilenameChangeAppendix(), 20);
+	private final JTextField txtAppendix;
 
 	/**
 	 * CheckBox
 	 */
-	private JCheckBox cbPrefix = new JCheckBox(Localization.getString("AppendPrefix"), SettingsManager.instance().isAppendPrefixFilenameChange());
+	private final JCheckBox cbPrefix;
 
 	/**
 	 * CheckBox
 	 */
-	private JCheckBox cbAppendix = new JCheckBox(Localization.getString("AppendAppendix"), SettingsManager.instance().isAppendAppendixFilenameChange());
+	private final JCheckBox cbAppendix;
 
 	/**
 	 * CheckBox
 	 */
-	private JCheckBox cbOriginalFilenames = new JCheckBox(Localization.getString("KeepOriginalFilenames"), SettingsManager.instance().isFilenameChangeKeepOriginal());
+	private final JCheckBox cbOriginalFilenames;
 
 	/**
 	 * CheckBox
@@ -165,16 +165,29 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	private int files = 0;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
 	 * @param description Description
 	 * @param defaultvalue Default-Value
 	 * @param files Count of files
+	 * @param settingsManager Settings Manager
 	 */
-	public FileRenameDialog(JFrame owner, String description, String defaultvalue, int files) {
+	public FileRenameDialog(JFrame owner, String description, String defaultvalue, int files, SettingsManager settingsManager) {
 		super(owner);
 		this.files = files;
+		this.settingsManager = settingsManager;
+
+		this.txtPrefix = new JTextField(settingsManager.getFilenameChangePrefix(), 20);
+		this.txtAppendix = new JTextField(settingsManager.getFilenameChangeAppendix(), 20);
+		this.cbPrefix = new JCheckBox(Localization.getString("AppendPrefix"), settingsManager.isAppendPrefixFilenameChange());
+		this.cbAppendix = new JCheckBox(Localization.getString("AppendAppendix"), settingsManager.isAppendAppendixFilenameChange());
+		this.cbOriginalFilenames = new JCheckBox(Localization.getString("KeepOriginalFilenames"), settingsManager.isFilenameChangeKeepOriginal());
 
 		setTitle(Localization.getString("FilenameInput"));
 
@@ -240,7 +253,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 
 		txtFilename.addItem("");
 		txtFilename.addItem(defaultvalue);
-		List<String> lstAdd = SettingsManager.instance().getFilenameChangeHistory();
+		List<String> lstAdd = settingsManager.getFilenameChangeHistory();
 		for (int i = lstAdd.size() - 1; i >= 0; i--) {
 			txtFilename.addItem(lstAdd.get(i));
 		}
@@ -393,15 +406,15 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 						txtFilename.addItem(f);
 					}
 					txtFilename.setSelectedItem(f);
-					SettingsManager.instance().addFilenameChangeHistory(f);
+					settingsManager.addFilenameChangeHistory(f);
 				}
 			}
-			SettingsManager.instance().setFilenameChangePrefix(txtPrefix.getText());
-			SettingsManager.instance().setFilenameChangeAppendix(txtAppendix.getText());
-			SettingsManager.instance().setAppendPrefixFilenameChange(cbPrefix.isSelected());
-			SettingsManager.instance().setAppendAppendixFilenameChange(cbAppendix.isSelected());
-			SettingsManager.instance().setFilenameChangeKeepOriginal(cbOriginalFilenames.isSelected());
-			SettingsManager.instance().writeSettings(true);
+			settingsManager.setFilenameChangePrefix(txtPrefix.getText());
+			settingsManager.setFilenameChangeAppendix(txtAppendix.getText());
+			settingsManager.setAppendPrefixFilenameChange(cbPrefix.isSelected());
+			settingsManager.setAppendAppendixFilenameChange(cbAppendix.isSelected());
+			settingsManager.setFilenameChangeKeepOriginal(cbOriginalFilenames.isSelected());
+			settingsManager.writeSettings(true);
 			this.dispose();
 		}
 	}
@@ -493,10 +506,11 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	 * @param description Description
 	 * @param defaultvalue Default-Value
 	 * @param files Count of Files
+	 * @param settingsManager Settings Manager
 	 * @return Value
 	 */
-	public static String[] showFileRenameDialog(JFrame owner, String description, String defaultvalue, int files) {
-		FileRenameDialog frd = new FileRenameDialog(owner, description, defaultvalue, files);
+	public static String[] showFileRenameDialog(JFrame owner, String description, String defaultvalue, int files, SettingsManager settingsManager) {
+		FileRenameDialog frd = new FileRenameDialog(owner, description, defaultvalue, files, settingsManager);
 		if (frd.isCanceled()) {
 			return null;
 		}

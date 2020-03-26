@@ -12,18 +12,17 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.ProxyManager;
 
 /**
  * Host class for ImageVenue
  * 
- * @version 3.9
+ * @version 4.1
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.9";
+	public static final String VERSION = "4.1";
 
 	/**
 	 * Name dieser Klasse
@@ -87,7 +86,7 @@ public class HostImageVenue extends Host implements IHoster {
 	 */
 	private String parseURL(String url) throws HostException {
 		String parsedURL = "";
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			String page = downloadContainerPage(url, url, null, client);
 
 			if (page.contains("This image does not exist on this server")) {

@@ -23,8 +23,8 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -49,9 +49,24 @@ public abstract class Hoster {
 	private static JFrame mainWindow = null;
 
 	/**
-	 * Download Queue Manager
+	 * Restriction Access
 	 */
-	private static DownloadQueueManager downloadQueueManager = null;
+	private static RestrictionAccess restrictionAccess = null;
+
+	/**
+	 * Proxy Manager
+	 */
+	private static ProxyManager proxyManager = null;
+
+	/**
+	 * Settings Manager
+	 */
+	private static SettingsManager settingsManager = null;
+
+	/**
+	 * Cookie Manager
+	 */
+	private static CookieManager cookieManager = null;
 
 	/**
 	 * Returns the developer
@@ -90,12 +105,66 @@ public abstract class Hoster {
 	}
 
 	/**
-	 * Sets the downloadQueueManager
+	 * Sets the restrictionAccess
 	 * 
-	 * @param downloadQueueManager downloadQueueManager
+	 * @param restrictionAccess restrictionAccess
 	 */
-	static void setDownloadQueueManager(DownloadQueueManager downloadQueueManager) {
-		Hoster.downloadQueueManager = downloadQueueManager;
+	static void setRestrictionAccess(RestrictionAccess restrictionAccess) {
+		Hoster.restrictionAccess = restrictionAccess;
+	}
+
+	/**
+	 * Returns the proxyManager
+	 * 
+	 * @return proxyManager
+	 */
+	public ProxyManager getProxyManager() {
+		return proxyManager;
+	}
+
+	/**
+	 * Sets the proxyManager
+	 * 
+	 * @param proxyManager proxyManager
+	 */
+	static void setProxyManager(ProxyManager proxyManager) {
+		Hoster.proxyManager = proxyManager;
+	}
+
+	/**
+	 * Returns the settingsManager
+	 * 
+	 * @return settingsManager
+	 */
+	public SettingsManager getSettingsManager() {
+		return settingsManager;
+	}
+
+	/**
+	 * Sets the settingsManager
+	 * 
+	 * @param settingsManager settingsManager
+	 */
+	static void setSettingsManager(SettingsManager settingsManager) {
+		Hoster.settingsManager = settingsManager;
+	}
+
+	/**
+	 * Returns the cookieManager
+	 * 
+	 * @return cookieManager
+	 */
+	public CookieManager getCookieManager() {
+		return cookieManager;
+	}
+
+	/**
+	 * Sets the cookieManager
+	 * 
+	 * @param cookieManager cookieManager
+	 */
+	static void setCookieManager(CookieManager cookieManager) {
+		Hoster.cookieManager = cookieManager;
 	}
 
 	/**
@@ -127,10 +196,10 @@ public abstract class Hoster {
 	 * @param restriction Restriction
 	 */
 	public void addRestriction(Restriction restriction) {
-		if (downloadQueueManager != null) {
-			downloadQueueManager.addRestriction(restriction);
+		if (restrictionAccess != null) {
+			restrictionAccess.addRestriction(restriction);
 		} else {
-			LoggerFactory.getLogger(getClass()).error("Could not add restriction, because downloadQueueManager is not initialized");
+			LoggerFactory.getLogger(getClass()).error("Could not add restriction, because restrictionAccess is not initialized");
 		}
 	}
 
@@ -140,10 +209,10 @@ public abstract class Hoster {
 	 * @param restriction Restriction
 	 */
 	public void removeRestriction(Restriction restriction) {
-		if (downloadQueueManager != null) {
-			downloadQueueManager.removeRestriction(restriction);
+		if (restrictionAccess != null) {
+			restrictionAccess.removeRestriction(restriction);
 		} else {
-			LoggerFactory.getLogger(getClass()).error("Could not remove restriction, because downloadQueueManager is not initialized");
+			LoggerFactory.getLogger(getClass()).error("Could not remove restriction, because restrictionAccess is not initialized");
 		}
 	}
 
@@ -230,7 +299,7 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options) throws HostException {
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			return downloadContainerPageEx(hosterName, url, referrer, options, client);
 		} catch (Exception e) {
 			throw new HostIOException(hosterName + ": Container-Page: " + e.getMessage(), e);
@@ -253,16 +322,16 @@ public abstract class Hoster {
 		try {
 			String cookies = null;
 			if (options == null || options.isSendCookies()) {
-				cookies = CookieManager.getCookies(url);
+				cookies = cookieManager.getCookies(url);
 			}
 
 			url = HTTPUtil.encodeURL(url);
 			method = new HttpGet(url);
 
-			RequestConfig.Builder requestConfigBuilder = ProxyManager.instance().getDefaultRequestConfigBuilder();
+			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (cookies != null && !cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -324,7 +393,7 @@ public abstract class Hoster {
 	 * @return Filtered Filename
 	 */
 	protected final String filterFilename(String filename) {
-		return FileUtil.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterFilename(filename, settingsManager.getAllowedFilenameChars());
 	}
 
 	/**
@@ -334,7 +403,7 @@ public abstract class Hoster {
 	 * @return Filtered path
 	 */
 	protected final String filterPath(String path) {
-		return FileUtil.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
+		return FileUtil.filterPath(path, settingsManager.getAllowedFilenameChars());
 	}
 
 	/**

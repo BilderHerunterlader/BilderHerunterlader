@@ -35,6 +35,7 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -182,14 +183,22 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 	private Rule rule = null;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
 	 * @param rule Rule
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 */
-	public RuleMainEditor(JFrame owner, Rule rule) {
+	public RuleMainEditor(JFrame owner, Rule rule, SettingsManager settingsManager, HostManager hostManager) {
 		super(owner);
 		this.rule = rule;
+		this.settingsManager = settingsManager;
 		setTitle(Localization.getString("RuleEditor"));
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnTest);
@@ -223,7 +232,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 			chkDeveloper.setEnabled(false);
 		}
 
-		chkDeveloper.setVisible(HostManager.instance().getHostRules().isDeveloperRulesEnabled());
+		chkDeveloper.setVisible(hostManager.getHostRules().isDeveloperRulesEnabled());
 
 		pnlGeneral.setLayout(gbl);
 
@@ -257,12 +266,13 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		gbc = gblt.getGBC(2, i, 2, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, chkResend, pnlGeneral);
 
-		pnlPipes = new RulePipesPanel(this.rule, this);
+		pnlPipes = new RulePipesPanel(this.rule, this, settingsManager);
 
-		pnlPipesFailures = new RulePipesFailuresPanel(this.rule, this);
+		pnlPipesFailures = new RulePipesFailuresPanel(this.rule, this, settingsManager);
 
-		pnlFilename = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME, this.rule, this.rule.getPipelineFilename(), this);
-		pnlFilenameDownloadSelection = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION, this.rule, this.rule.getPipelineFilenameDownloadSelection(), this);
+		pnlFilename = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME, this.rule, this.rule.getPipelineFilename(), this, settingsManager);
+		pnlFilenameDownloadSelection = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION, this.rule, this.rule
+				.getPipelineFilenameDownloadSelection(), this, settingsManager);
 
 		pnlRuleOptions = new RuleOptionsPanel(this.rule);
 		pnlConnections = new RuleConnectionsPanel(this.rule);
@@ -371,7 +381,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 			return false;
 		}
 		String rulename = txtName.getText();
-		rulename = BHUtil.filterFilename(rulename);
+		rulename = BHUtil.filterFilename(rulename, settingsManager);
 		String filename = "Rule" + rulename + ".xml";
 		String file = ApplicationProperties.getProperty("ApplicationPath") + "rules/" + filename;
 		if (chkDeveloper.isSelected()) {

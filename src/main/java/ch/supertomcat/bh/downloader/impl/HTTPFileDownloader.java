@@ -21,6 +21,7 @@ import org.apache.http.util.EntityUtils;
 
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.parser.URLParseObjectFile;
@@ -46,12 +47,28 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 public class HTTPFileDownloader extends FileDownloaderBase {
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 */
-	public HTTPFileDownloader(DownloadQueueManager downloadQueueManager) {
-		super(downloadQueueManager);
+	public HTTPFileDownloader(DownloadQueueManager downloadQueueManager, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
+		super(downloadQueueManager, settingsManager, hostManager);
+		this.proxyManager = proxyManager;
+		this.cookieManager = cookieManager;
 	}
 
 	@Override
@@ -88,7 +105,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			}
 
 			// And replace the %20 in the filename, if there are any
-			String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "));
+			String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "), settingsManager);
 			if (bReduceFilenameLength) {
 				targetFilename = FileUtil.reduceFilenameLength(targetFilename);
 			}
@@ -106,9 +123,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				// if the hostclass gives us a nice filename
 				String currentCorrectedFilename = directLink.getCorrectedFilename();
 				if (currentCorrectedFilename != null && !currentCorrectedFilename.isEmpty() && (!fixedTargetFilename || targetFilename.isEmpty())) {
-					currentTargetFilename = BHUtil.filterFilename(currentCorrectedFilename);
+					currentTargetFilename = BHUtil.filterFilename(currentCorrectedFilename, settingsManager);
 					// And replace the %20 in the filename, if there are any
-					currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "));
+					currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "), settingsManager);
 					if (bReduceFilenameLength) {
 						currentTargetFilename = FileUtil.reduceFilenameLength(currentTargetFilename);
 					}
@@ -145,7 +162,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		String target = pic.getTargetPath() + correctedFilename;
 
 		// Get the cookies for the url
-		String cookies = CookieManager.getCookies(url);
+		String cookies = cookieManager.getCookies(url);
 
 		/*
 		 * Get a HttpClient
@@ -161,7 +178,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		HttpUriRequest method = null;
-		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? ProxyManager.instance().getNonMultithreadedHTTPClient() : ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? proxyManager.getNonMultithreadedHTTPClient() : proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(url);
 
 			// Create a new GetMethod or PostMethod and set timeouts, cookies, user-agent and so on
@@ -170,7 +187,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			} else {
 				method = new HttpGet(encodedURL);
 			}
-			String userAgent = SettingsManager.instance().getUserAgent();
+			String userAgent = settingsManager.getUserAgent();
 			if (result.checkExistInfo("useUserAgent") && result.getInfo("useUserAgent") instanceof String) {
 				userAgent = (String)result.getInfo("useUserAgent");
 			}
@@ -213,9 +230,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					}
 				}
 
-				RegexReplacePipeline regexPipe = SettingsManager.instance().getRegexReplacePipelineFilename();
+				RegexReplacePipeline regexPipe = settingsManager.getRegexReplacePipelineFilename();
 				correctedFilename = regexPipe.getReplacedFilename(correctedFilename);
-				correctedFilename = BHUtil.filterFilename(correctedFilename);
+				correctedFilename = BHUtil.filterFilename(correctedFilename, settingsManager);
 				if (firstURL) {
 					pic.setTargetFilename(correctedFilename);
 				}
@@ -260,7 +277,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				}
 				pic.setSize(size);
 
-				if (size > 0 && size < SettingsManager.instance().getMinFilesize()) {
+				if (size > 0 && size < settingsManager.getMinFilesize()) {
 					/*
 					 * The user can set in an options, which defines a minimum filesize.
 					 * If the file here is to small
@@ -303,7 +320,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					 * And we should make the rate depending on the time, not on the bytes
 					 * read.
 					 */
-					boolean downloadRate = SettingsManager.instance().isDownloadRate();
+					boolean downloadRate = settingsManager.isDownloadRate();
 					// Ok, now start downloading
 					while ((n = in.read(buf)) > 0) {
 						/*
@@ -370,7 +387,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				if (!pic.isStop()) {
 					// If the user doesn't stopped the download
 
-					boolean downloadFailed = ((size > 0) && (iBW != size)) || (iBW < SettingsManager.instance().getMinFilesize());
+					boolean downloadFailed = ((size > 0) && (iBW != size)) || (iBW < settingsManager.getMinFilesize());
 					if (downloadFailed) {
 						if ((size > 0) && (iBW != size)) {
 							/*
@@ -381,7 +398,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 							 */
 							failDownload(pic, result, false, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
 							logger.error("Download failed (Too many or to less bytes were downloaded): '" + pic.getContainerURL() + "'");
-						} else if (iBW < SettingsManager.instance().getMinFilesize()) {
+						} else if (iBW < settingsManager.getMinFilesize()) {
 							/*
 							 * The user can set in an options, which defines a minimum filesize.
 							 * If the file here is to small
@@ -405,7 +422,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						 * The user can set subdirs for specific filesize-ranges
 						 * So maybe we have to move the file
 						 */
-						if (SettingsManager.instance().isSubdirsEnabled()) {
+						if (settingsManager.isSubdirsEnabled()) {
 							boolean isImage = false;
 							int imageWidth = 0;
 							int imageHeight = 0;
@@ -429,11 +446,11 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 								// Nothing to do
 							}
 
-							List<Subdir> v = SettingsManager.instance().getSubdirs();
+							List<Subdir> v = settingsManager.getSubdirs();
 							for (int i = 0; i < v.size(); i++) {
 								Subdir sdir = v.get(i);
 
-								if (sdir.isInRange(size, imageWidth, imageHeight, isImage)) {
+								if (sdir.isInRange(size, imageWidth, imageHeight, isImage, settingsManager)) {
 									// If the filesize is in the size-range of this subdir, then we move to file
 									try {
 										moveFileToSubdir(correctedFilename, pic.getTargetPath(), sdir.getSubdirName());
@@ -499,7 +516,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * are not too long.
 		 */
 		String targetPath = pic.getTargetPath();
-		targetPath = BHUtil.filterPath(targetPath);
+		targetPath = BHUtil.filterPath(targetPath, settingsManager);
 		targetPath = FileUtil.pathRTrim(targetPath);
 
 		boolean bReducePathLength = true;

@@ -24,10 +24,13 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.settings.Settings;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
@@ -112,9 +115,14 @@ public class MainMenuBar {
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManger Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
+	 * @param guiEvent GUI Event
 	 */
 	public MainMenuBar(JFrame parentWindow, MainWindowAccess mainWindowAccess, LogManager logManager, DownloadQueueManager downloadQueueManager, QueueManager queueManager,
-			KeywordManager keywordManager) {
+			KeywordManager keywordManager, ProxyManager proxyManger, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager, GuiEvent guiEvent) {
 		menuFile.add(itemExit);
 
 		menuSettings.add(itemSettings);
@@ -130,15 +138,15 @@ public class MainMenuBar {
 		itemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.SHIFT_MASK));
 		itemTutorial.setAccelerator(KeyStroke.getKeyStroke("F1"));
 
-		itemExit.addActionListener(e -> GuiEvent.instance().exitApp(false));
+		itemExit.addActionListener(e -> guiEvent.exitApp(false));
 
-		itemSettings.addActionListener(e -> new Settings(parentWindow, mainWindowAccess));
+		itemSettings.addActionListener(e -> new Settings(parentWindow, mainWindowAccess, proxyManger, settingsManager, cookieManager, hostManager));
 
 		itemUpdate.addActionListener(e -> {
 			if (downloadQueueManager.isDownloading()) {
 				JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 			} else {
-				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), parentWindow, queueManager, keywordManager);
+				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource(proxyManger), guiEvent), parentWindow, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
 				update.setVisible(true);
 				update.toFront();
 			}
@@ -163,7 +171,7 @@ public class MainMenuBar {
 				logger.error("Could not open URL, because Desktop is not supported: {}", url);
 			}
 		});
-		itemAbout.addActionListener(e -> new About(parentWindow));
+		itemAbout.addActionListener(e -> new About(parentWindow, settingsManager));
 
 		String logFiles[] = logManager.getAvailableLogFileNames();
 		for (int i = 0; i < logFiles.length; i++) {
@@ -172,8 +180,8 @@ public class MainMenuBar {
 		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFiles);
 		cmbLogFile.setSelectedIndex(currentLogFileIndex);
 		cmbLogFile.addActionListener(e -> {
-			SettingsManager.instance().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
-			SettingsManager.instance().writeSettings(true);
+			settingsManager.setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
+			settingsManager.writeSettings(true);
 		});
 		cmbLogFile.setMaximumSize(new Dimension(133, 20));
 		cmbLogFile.setFocusable(false);

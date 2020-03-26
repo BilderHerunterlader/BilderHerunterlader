@@ -32,7 +32,6 @@ import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -40,13 +39,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 3.0
+ * @version 3.1
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.0";
+	public static final String VERSION = "3.1";
 
 	/**
 	 * Name dieser Klasse
@@ -168,7 +167,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 
 		title = filterPath(title);
 
-		String dlDir = SettingsManager.instance().getSavePath();
+		String dlDir = getSettingsManager().getSavePath();
 		if (dlDir.length() > 0 && dlDir.endsWith("/") == false && dlDir.endsWith("\\") == false) {
 			dlDir += FileUtil.FILE_SEPERATOR;
 		}
@@ -218,7 +217,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 					recursive = cbRecursive.isSelected();
 					setBooleanOptionValue(NAME + ".recursive", recursive);
 					deactivateOption.saveOption();
-					SettingsManager.instance().writeSettings(true);
+					getSettingsManager().writeSettings(true);
 					dialog.dispose();
 				} else if (e.getSource() == btnCancel) {
 					dialog.dispose();
@@ -235,12 +234,12 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 	}
 
 	private boolean getBooleanOptionValue(String name) throws Exception {
-		return SettingsManager.instance().getBooleanValue(name);
+		return getSettingsManager().getBooleanValue(name);
 	}
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			SettingsManager.instance().setOptionValue(option, value);
+			getSettingsManager().setOptionValue(option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
@@ -337,7 +336,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		};
 
 		List<URL> downloadedCategoryLinks = new ArrayList<>();
-		List<URL> links = LinkExtract.getLinks(url.getURL(), "", filter);
+		List<URL> links = LinkExtract.getLinks(url.getURL(), "", filter, getProxyManager(), getSettingsManager(), getCookieManager());
 		for (int i = 0; i < links.size(); i++) {
 			Matcher matcherCat = patternCategory.matcher(links.get(i).getURL());
 			if (matcherCat.matches()) {
@@ -345,7 +344,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 					downloadedCategoryLinks.add(links.get(i));
 				} else if (downloadedCategoryLinks.contains(links.get(i)) == false) {
 					progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + i + "/" + links.size() + ")");
-					List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter);
+					List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter, getProxyManager(), getSettingsManager(), getCookieManager());
 					for (int x = 0; x < foundLinks.size(); x++) {
 						if (links.contains(foundLinks.get(x)) == false) {
 							links.add(foundLinks.get(x));

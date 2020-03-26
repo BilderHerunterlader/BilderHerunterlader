@@ -40,9 +40,10 @@ public class ImportQueue extends ImportExportBase {
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
 	 * @param queueManager Queue Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager) {
-		super(parentComponent, mainWindowAccess);
+	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, SettingsManager settingsManager) {
+		super(parentComponent, mainWindowAccess, settingsManager);
 		this.queueManager = queueManager;
 	}
 
@@ -58,7 +59,7 @@ public class ImportQueue extends ImportExportBase {
 
 		File file = getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
 			read(file);
 			file = null;

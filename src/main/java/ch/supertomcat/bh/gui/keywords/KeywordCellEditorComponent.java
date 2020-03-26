@@ -32,10 +32,18 @@ public class KeywordCellEditorComponent extends JPanel {
 	private JButton btnPath = new JButton("...");
 
 	/**
-	 * Constructor
+	 * Settings Manager
 	 */
-	public KeywordCellEditorComponent() {
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 */
+	public KeywordCellEditorComponent(SettingsManager settingsManager) {
 		super(new BorderLayout(5, 5));
+		this.settingsManager = settingsManager;
 		add(txtPath, BorderLayout.CENTER);
 		add(btnPath, BorderLayout.EAST);
 
@@ -47,7 +55,7 @@ public class KeywordCellEditorComponent extends JPanel {
 				String dir = txtPath.getText();
 				File fDir = new File(dir);
 				if (!(fDir.exists() && fDir.isDirectory())) {
-					dir = SettingsManager.instance().getSavePath();
+					dir = settingsManager.getSavePath();
 				}
 				File file = FileDialogUtil.showFolderOpenDialog(KeywordCellEditorComponent.this, dir, null);
 				if (file != null) {
@@ -85,7 +93,7 @@ public class KeywordCellEditorComponent extends JPanel {
 	 */
 	public String getPath() {
 		String newPath = txtPath.getText();
-		newPath = BHUtil.filterPath(newPath);
+		newPath = BHUtil.filterPath(newPath, settingsManager);
 		newPath = FileUtil.reducePathLength(newPath);
 		return newPath;
 	}

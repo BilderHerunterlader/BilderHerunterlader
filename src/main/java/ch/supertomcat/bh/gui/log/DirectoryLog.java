@@ -111,7 +111,7 @@ public class DirectoryLog extends JPanel {
 	/**
 	 * txtFilter
 	 */
-	private JTextField txtDirCount = new JTextField(String.valueOf(SettingsManager.instance().getDirectoryLogDirCount()), 5);
+	private JTextField txtDirCount;
 
 	/**
 	 * txtFilter
@@ -121,7 +121,7 @@ public class DirectoryLog extends JPanel {
 	/**
 	 * chkFilterOnlyExistingDirs
 	 */
-	private JCheckBox chkFilterOnlyExistingDirs = new JCheckBox(Localization.getString("OnlyExistingDirectories"), SettingsManager.instance().isDirectoryLogOnlyExisting());
+	private JCheckBox chkFilterOnlyExistingDirs;
 
 	/**
 	 * btnFilter
@@ -151,12 +151,19 @@ public class DirectoryLog extends JPanel {
 	private final LogManager logManager;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param logManager Log Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public DirectoryLog(LogManager logManager) {
+	public DirectoryLog(LogManager logManager, SettingsManager settingsManager) {
 		this.logManager = logManager;
+		this.settingsManager = settingsManager;
 		TableUtil.internationalizeColumns(jtLog);
 		setLayout(new BorderLayout());
 		jtLog.getColumn("DateTime").setMinWidth(100);
@@ -170,6 +177,9 @@ public class DirectoryLog extends JPanel {
 
 		popupMenu.add(menuItemOpenDirectory);
 		menuItemOpenDirectory.addActionListener(e -> actionOpenDirectories());
+
+		this.txtDirCount = new JTextField(String.valueOf(settingsManager.getDirectoryLogDirCount()), 5);
+		this.chkFilterOnlyExistingDirs = new JCheckBox(Localization.getString("OnlyExistingDirectories"), settingsManager.isDirectoryLogOnlyExisting());
 
 		TitledBorder brdFilter = BorderFactory.createTitledBorder(Localization.getString("Filter"));
 		pnlFilter.setBorder(brdFilter);
@@ -259,15 +269,15 @@ public class DirectoryLog extends JPanel {
 		}
 		initialized = true;
 
-		boolean filterEnabled = SettingsManager.instance().isDirectoryLogFilterEnabled();
+		boolean filterEnabled = settingsManager.isDirectoryLogFilterEnabled();
 		btnFilter.setSelected(filterEnabled);
 		pnlFilter.setVisible(filterEnabled);
 		btnFilter.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				pnlFilter.setVisible(btnFilter.isSelected());
-				SettingsManager.instance().setDirectoryLogFilterEnabled(btnFilter.isSelected());
-				SettingsManager.instance().writeSettings(true);
+				settingsManager.setDirectoryLogFilterEnabled(btnFilter.isSelected());
+				settingsManager.writeSettings(true);
 			}
 		});
 
@@ -301,12 +311,12 @@ public class DirectoryLog extends JPanel {
 	private void reloadLogs() {
 		try {
 			int dirCount = Integer.parseInt(txtDirCount.getText());
-			SettingsManager.instance().setDirectoryLogDirCount(dirCount);
+			settingsManager.setDirectoryLogDirCount(dirCount);
 		} catch (NumberFormatException nfe) {
-			txtDirCount.setText(String.valueOf(SettingsManager.instance().getDirectoryLogDirCount()));
+			txtDirCount.setText(String.valueOf(settingsManager.getDirectoryLogDirCount()));
 		}
-		SettingsManager.instance().setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
+		settingsManager.writeSettings(true);
 		readLogs();
 	}
 
@@ -343,7 +353,7 @@ public class DirectoryLog extends JPanel {
 				List<DirectoryLogObject> dirs = logManager.readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
 				if (dirs != null) {
 
-					int maxDirs = SettingsManager.instance().getDirectoryLogDirCount();
+					int maxDirs = settingsManager.getDirectoryLogDirCount();
 
 					int maxSize = dirs.size() < maxDirs ? dirs.size() : maxDirs;
 

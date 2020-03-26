@@ -27,9 +27,6 @@ import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -37,13 +34,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for BabesBoard
  * 
- * @version 3.0
+ * @version 3.1
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.0";
+	public static final String VERSION = "3.1";
 
 	/**
 	 * Name dieser Klasse
@@ -208,14 +205,14 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	}
 
 	private ArrayList<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, AtomicInteger iwMax, boolean firstLoad) throws HostException {
-		String cookies = CookieManager.getCookies(url);
+		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
-		HttpClientBuilder clientBuilder = ProxyManager.instance().getHTTPClientBuilder();
+		HttpClientBuilder clientBuilder = getProxyManager().getHTTPClientBuilder();
 		clientBuilder.disableRedirectHandling();
 		HttpPost method = null;
 		try (CloseableHttpClient client = clientBuilder.build()) {
 			method = new HttpPost(encodedURL);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -264,7 +261,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 			String strDate = regexDate.doPageSourcecodeReplace(pageCode, 0, url, null);
 
-			String strRootDir = SettingsManager.instance().getSavePath() + strBabeName + FileUtil.FILE_SEPERATOR;
+			String strRootDir = getSettingsManager().getSavePath() + strBabeName + FileUtil.FILE_SEPERATOR;
 
 			String strDirectory = strRootDir + "BabesBoard" + FileUtil.FILE_SEPERATOR + strDate + FileUtil.FILE_SEPERATOR;
 

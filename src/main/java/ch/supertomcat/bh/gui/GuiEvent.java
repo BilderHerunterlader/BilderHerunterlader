@@ -13,11 +13,6 @@ import ch.supertomcat.bh.gui.update.UpdateListener;
  */
 public class GuiEvent {
 	/**
-	 * Singleton
-	 */
-	private static GuiEvent instance = null;
-
-	/**
 	 * Listeners
 	 */
 	private List<IGuiEventListener> listeners = new CopyOnWriteArrayList<>();
@@ -30,19 +25,7 @@ public class GuiEvent {
 	/**
 	 * Constructor
 	 */
-	private GuiEvent() {
-	}
-
-	/**
-	 * Returns the instance
-	 * 
-	 * @return Instance
-	 */
-	public static synchronized GuiEvent instance() {
-		if (instance == null) {
-			instance = new GuiEvent();
-		}
-		return instance;
+	public GuiEvent() {
 	}
 
 	/**

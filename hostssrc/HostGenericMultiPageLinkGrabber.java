@@ -37,9 +37,6 @@ import ch.supertomcat.bh.hoster.IHosterURLAdder;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
@@ -51,13 +48,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 2.9
+ * @version 3.1
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "2.9";
+	public static final String VERSION = "3.1";
 
 	/**
 	 * Name dieser Klasse
@@ -108,10 +105,10 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		patternPhpBBThread = Pattern.compile("^((https?://([^/]{1,}/){1,}|)viewtopic\\.php\\?t=([0-9]+).*?)(&start=([0-9]+))");
 
 		try {
-			maxPages = SettingsManager.instance().getIntValue(NAME + ".maxPages");
+			maxPages = getSettingsManager().getIntValue(NAME + ".maxPages");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".maxPages", maxPages);
+				getSettingsManager().setOptionValue(NAME + ".maxPages", maxPages);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -163,13 +160,13 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		List<URL> multiPageURLs = new ArrayList<>();
 
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			String encodedURL = HTTPUtil.encodeURL(url);
 			method = new HttpGet(encodedURL);
 
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
-			String cookies = CookieManager.getCookies(url);
+			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
+			String cookies = getCookieManager().getCookies(url);
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -349,14 +346,14 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 					bVBulletin = cbVBulletin.isSelected();
 					bPhpBB = cbPhpBB.isSelected();
 					try {
-						SettingsManager.instance().setOptionValue(NAME + ".maxPages", maxPages);
+						getSettingsManager().setOptionValue(NAME + ".maxPages", maxPages);
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(), e1);
 					}
 					setBooleanOptionValue(NAME + ".vBulletin", bVBulletin);
 					setBooleanOptionValue(NAME + ".phpBB", bPhpBB);
 					deactivateOption.saveOption();
-					SettingsManager.instance().writeSettings(true);
+					getSettingsManager().writeSettings(true);
 					dialog.dispose();
 				} else if (e.getSource() == btnCancel) {
 					dialog.dispose();
@@ -375,7 +372,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	private void updateBooleanOptionValue(String option, boolean defaultvalue) {
 		boolean bVal = false;
 		try {
-			bVal = SettingsManager.instance().getBooleanValue(option);
+			bVal = getSettingsManager().getBooleanValue(option);
 			if (option.equals(NAME + ".vBulletin")) {
 				bVBulletin = bVal;
 			} else if (option.equals(NAME + ".phpBB")) {
@@ -390,7 +387,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			SettingsManager.instance().setOptionValue(option, value);
+			getSettingsManager().setOptionValue(option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

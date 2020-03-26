@@ -43,6 +43,7 @@ import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordMatch;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchType;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchTypeComparator;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
@@ -142,8 +143,9 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	 * @param matches Matches
 	 * @param additionalKeywords Additional Keywords, which can be displayed
 	 * @param byFilename Search by filename (True if old style search for filenames is used, open this dialog for every file)
+	 * @param settingsManager Settings Manager
 	 */
-	public AdderKeywordSelectorTitle(JFrame owner, String title, boolean modal, List<KeywordMatch> matches, List<Keyword> additionalKeywords, boolean byFilename) {
+	public AdderKeywordSelectorTitle(JFrame owner, String title, boolean modal, List<KeywordMatch> matches, List<Keyword> additionalKeywords, boolean byFilename, SettingsManager settingsManager) {
 		super(owner, title, modal);
 		this.setModalityType(Dialog.ModalityType.DOCUMENT_MODAL);
 
@@ -288,7 +290,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		btnNew.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(AdderKeywordSelectorTitle.this);
+				Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(AdderKeywordSelectorTitle.this, settingsManager);
 				if (k != null) {
 					newKeyword = k;
 					okPressed = true;

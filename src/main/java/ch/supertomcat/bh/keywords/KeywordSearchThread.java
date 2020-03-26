@@ -80,12 +80,17 @@ public class KeywordSearchThread extends Thread {
 	/**
 	 * Display dialog to select keyword, when no matches where found
 	 */
-	private boolean displayKeywordsWhenNoMatches = SettingsManager.instance().isDisplayKeywordsWhenNoMatches();
+	private final boolean displayKeywordsWhenNoMatches;
 
 	/**
 	 * Keyword Manager
 	 */
 	private final KeywordManager keywordManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
 
 	/**
 	 * Constructor for a Single Searchstring
@@ -96,9 +101,10 @@ public class KeywordSearchThread extends Thread {
 	 * @param byTitle Search by title
 	 * @param localFiles Search for files on the harddisk
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public KeywordSearchThread(String strS, JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager) {
-		this(new String[] { strS }, owner, multiResultDisplay, byTitle, localFiles, keywordManager);
+	public KeywordSearchThread(String strS, JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager, SettingsManager settingsManager) {
+		this(new String[] { strS }, owner, multiResultDisplay, byTitle, localFiles, keywordManager, settingsManager);
 	}
 
 	/**
@@ -110,14 +116,17 @@ public class KeywordSearchThread extends Thread {
 	 * @param byTitle Search by title
 	 * @param localFiles Search for files on the harddisk
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public KeywordSearchThread(String strS[], JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager) {
+	public KeywordSearchThread(String strS[], JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager, SettingsManager settingsManager) {
 		this.strS = strS;
 		this.owner = owner;
 		this.multiResultDisplay = multiResultDisplay;
 		this.byTitle = byTitle;
 		this.localFiles = localFiles;
 		this.keywordManager = keywordManager;
+		this.settingsManager = settingsManager;
+		this.displayKeywordsWhenNoMatches = this.settingsManager.isDisplayKeywordsWhenNoMatches();
 		this.setName("Keyword-Search-Thread-" + this.getId());
 	}
 
@@ -173,7 +182,7 @@ public class KeywordSearchThread extends Thread {
 		progressBarChanged(0, keywords.size() - 1, 0); // configure progressbar
 		List<KeywordMatch> foundKeywords = new ArrayList<>();
 
-		int keywordMatchMode = SettingsManager.instance().getKeywordMatchMode();
+		int keywordMatchMode = settingsManager.getKeywordMatchMode();
 		// Check if we have to match only exact
 		boolean exactOnly = keywordMatchMode == KeywordManager.MATCH_ONLY_EXACT;
 		// Check if we have to do a strict search
@@ -298,7 +307,7 @@ public class KeywordSearchThread extends Thread {
 			/*
 			 * We ask the user, which Keyword he will use
 			 */
-			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(owner, Localization.getString("KeywordSelection"), true, foundKeywords, keywords, !byTitle);
+			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(owner, Localization.getString("KeywordSelection"), true, foundKeywords, keywords, !byTitle, settingsManager);
 			if (aks.isOkPressed()) {
 				// If the user has selected a Keyword
 				this.chooseDefault = aks.isChooseDefault();
@@ -415,7 +424,7 @@ public class KeywordSearchThread extends Thread {
 		 * but i don't know if i can really do that, because this would again need memory, but
 		 * there is no more free ;-)
 		 */
-		AdderKeywordSelectorFilename dlg = new AdderKeywordSelectorFilename(owner, Localization.getString("KeywordSelection"), true, resultFoundKeywords, localFiles);
+		AdderKeywordSelectorFilename dlg = new AdderKeywordSelectorFilename(owner, Localization.getString("KeywordSelection"), true, resultFoundKeywords, localFiles, settingsManager);
 		return dlg.getChosenKeywords();
 	}
 

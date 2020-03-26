@@ -1,8 +1,6 @@
 package ch.supertomcat.bh.gui.rules;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,21 +21,20 @@ import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * 
  *
  */
-public class RulePipesPanel extends JPanel implements ActionListener, ListSelectionListener {
+public class RulePipesPanel extends JPanel {
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = 1391103999859263322L;
 
 	private Rule rule = null;
-
-	private JDialog owner = null;
 
 	/**
 	 * Model for List
@@ -104,11 +101,10 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 	 * 
 	 * @param rule Rule
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 */
-	public RulePipesPanel(Rule rule, JDialog owner) {
-		super();
+	public RulePipesPanel(Rule rule, JDialog owner, SettingsManager settingsManager) {
 		this.rule = rule;
-		this.owner = owner;
 
 		originalPipelines = this.rule.getPipelines();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
@@ -117,7 +113,7 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 				pnlPipelines.add(pnlPipe);
 				modelPipelines.addElement("Javascript Pipeline");
 			} else {
-				RulePipelinePanel pnlPipe = new RulePipelinePanel(originalPipelines.get(iPipe).getMode(), this.rule, originalPipelines.get(iPipe), owner);
+				RulePipelinePanel pnlPipe = new RulePipelinePanel(originalPipelines.get(iPipe).getMode(), this.rule, originalPipelines.get(iPipe), owner, settingsManager);
 				pnlPipelines.add(pnlPipe);
 				modelPipelines.addElement("Regex Pipeline");
 			}
@@ -142,40 +138,28 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 		pnlPipe.add(pnlPipelineButtons, BorderLayout.EAST);
 		add(pnlPipe, BorderLayout.WEST);
 
-		lstPipelines.addListSelectionListener(this);
-		btnPipelineRegexNew.addActionListener(this);
-		btnPipelineJavascriptNew.addActionListener(this);
-		btnPipelineUp.addActionListener(this);
-		btnPipelineDown.addActionListener(this);
-		btnPipelineDelete.addActionListener(this);
-
-		if (pnlPipelines.size() > 0) {
-			lstPipelines.setSelectedIndex(0);
-		}
-
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		if (e.getSource() == lstPipelines) {
-			if (pnlPipelines.size() > 0) {
-				int selectedIndex = lstPipelines.getSelectedIndex();
-				if (selectedIndex > -1) {
-					if (pnlCurrentDisplayedPipeline != null) {
-						remove(pnlCurrentDisplayedPipeline);
-					}
-					IRulePipelineURLPanel currentPanel = pnlPipelines.get(selectedIndex);
-					if (currentPanel instanceof RulePipelinePanel) {
-						add((RulePipelinePanel)pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
-						pnlCurrentDisplayedPipeline = (RulePipelinePanel)pnlPipelines.get(selectedIndex);
-					} else if (currentPanel instanceof RulePipelineJavascriptPanel) {
-						add((RulePipelineJavascriptPanel)pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
-						pnlCurrentDisplayedPipeline = (RulePipelineJavascriptPanel)pnlPipelines.get(selectedIndex);
+		lstPipelines.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (pnlPipelines.size() > 0) {
+					int selectedIndex = lstPipelines.getSelectedIndex();
+					if (selectedIndex > -1) {
+						if (pnlCurrentDisplayedPipeline != null) {
+							remove(pnlCurrentDisplayedPipeline);
+						}
+						IRulePipelineURLPanel currentPanel = pnlPipelines.get(selectedIndex);
+						if (currentPanel instanceof RulePipelinePanel) {
+							add((RulePipelinePanel)pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
+							pnlCurrentDisplayedPipeline = (RulePipelinePanel)pnlPipelines.get(selectedIndex);
+						} else if (currentPanel instanceof RulePipelineJavascriptPanel) {
+							add((RulePipelineJavascriptPanel)pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
+							pnlCurrentDisplayedPipeline = (RulePipelineJavascriptPanel)pnlPipelines.get(selectedIndex);
+						}
+					} else {
+						if (pnlCurrentDisplayedPipeline != null) {
+							remove(pnlCurrentDisplayedPipeline);
+						}
+						pnlCurrentDisplayedPipeline = null;
 					}
 				} else {
 					if (pnlCurrentDisplayedPipeline != null) {
@@ -183,37 +167,39 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 					}
 					pnlCurrentDisplayedPipeline = null;
 				}
-			} else {
-				if (pnlCurrentDisplayedPipeline != null) {
-					remove(pnlCurrentDisplayedPipeline);
-				}
-				pnlCurrentDisplayedPipeline = null;
+				revalidate();
+				repaint();
 			}
-			revalidate();
-			repaint();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnPipelineRegexNew) {
+		});
+		btnPipelineRegexNew.addActionListener(e -> {
 			RulePipeline pipe = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
-			RulePipelinePanel pnlPipe = new RulePipelinePanel(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL, this.rule, pipe, owner);
-			pnlPipelines.add(pnlPipe);
+			RulePipelinePanel pnlPipeRegex = new RulePipelinePanel(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL, this.rule, pipe, owner, settingsManager);
+			pnlPipelines.add(pnlPipeRegex);
 			modelPipelines.addElement("Regex Pipeline");
 			pipelines.add(pipe);
-		} else if (e.getSource() == btnPipelineJavascriptNew) {
+		});
+		btnPipelineJavascriptNew.addActionListener(e -> {
 			RulePipeline pipe = new RulePipelineURLJavascript(RuleMode.RULE_MODE_JAVASCRIPT);
-			RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, pipe, owner);
-			pnlPipelines.add(pnlPipe);
+			RulePipelineJavascriptPanel pnlPipeJavascript = new RulePipelineJavascriptPanel(this.rule, pipe, owner);
+			pnlPipelines.add(pnlPipeJavascript);
 			modelPipelines.addElement("Javascript Pipeline");
 			pipelines.add(pipe);
-		} else if (e.getSource() == btnPipelineDelete) {
+		});
+		btnPipelineUp.addActionListener(e -> {
+			int selectedIndex = lstPipelines.getSelectedIndex();
+			if (selectedIndex > 0) {
+				swapPipelines(selectedIndex, selectedIndex - 1);
+				lstPipelines.setSelectedIndex(selectedIndex - 1);
+			}
+		});
+		btnPipelineDown.addActionListener(e -> {
+			int selectedIndex = lstPipelines.getSelectedIndex();
+			if (selectedIndex > -1 && selectedIndex < modelPipelines.getSize() - 1) {
+				swapPipelines(selectedIndex, selectedIndex + 1);
+				lstPipelines.setSelectedIndex(selectedIndex + 1);
+			}
+		});
+		btnPipelineDelete.addActionListener(e -> {
 			int selectedIndex = lstPipelines.getSelectedIndex();
 			if (selectedIndex > -1) {
 				pipelines.remove(selectedIndex);
@@ -227,19 +213,12 @@ public class RulePipesPanel extends JPanel implements ActionListener, ListSelect
 					}
 				}
 			}
-		} else if (e.getSource() == btnPipelineUp) {
-			int selectedIndex = lstPipelines.getSelectedIndex();
-			if (selectedIndex > 0) {
-				swapPipelines(selectedIndex, selectedIndex - 1);
-				lstPipelines.setSelectedIndex(selectedIndex - 1);
-			}
-		} else if (e.getSource() == btnPipelineDown) {
-			int selectedIndex = lstPipelines.getSelectedIndex();
-			if (selectedIndex > -1 && selectedIndex < modelPipelines.getSize() - 1) {
-				swapPipelines(selectedIndex, selectedIndex + 1);
-				lstPipelines.setSelectedIndex(selectedIndex + 1);
-			}
+		});
+
+		if (pnlPipelines.size() > 0) {
+			lstPipelines.setSelectedIndex(0);
 		}
+
 	}
 
 	private void swapPipelines(int index1, int index2) {

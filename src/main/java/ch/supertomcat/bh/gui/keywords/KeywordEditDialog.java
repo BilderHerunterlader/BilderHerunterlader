@@ -91,12 +91,12 @@ public class KeywordEditDialog extends JDialog {
 	/**
 	 * TextField
 	 */
-	protected KeywordCellEditorComponent txtPath = new KeywordCellEditorComponent();
+	protected final KeywordCellEditorComponent txtPath;
 
 	/**
 	 * TextField
 	 */
-	protected KeywordCellEditorComponent txtRPath = new KeywordCellEditorComponent();
+	protected final KeywordCellEditorComponent txtRPath;
 
 	/**
 	 * Checkbox
@@ -113,9 +113,10 @@ public class KeywordEditDialog extends JDialog {
 	 * 
 	 * @param owner Owner-Dialog
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 */
-	public KeywordEditDialog(Window owner, String title) {
-		this(owner, title, "", "", SettingsManager.instance().getSavePath(), true, "");
+	public KeywordEditDialog(Window owner, String title, SettingsManager settingsManager) {
+		this(owner, title, settingsManager, "", "", settingsManager.getSavePath(), true, "");
 	}
 
 	/**
@@ -123,27 +124,20 @@ public class KeywordEditDialog extends JDialog {
 	 * 
 	 * @param owner Owner-Dialog
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 * @param keywordTitle Keyword title
 	 * @param keywords keywords
 	 * @param downloadPath absolute Path
 	 * @param relativePath use relative Path
 	 * @param relativeDownloadPath relative Path
 	 */
-	public KeywordEditDialog(Window owner, String title, String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath) {
+	public KeywordEditDialog(Window owner, String title, SettingsManager settingsManager, String keywordTitle, String keywords, String downloadPath, boolean relativePath,
+			String relativeDownloadPath) {
 		super(owner, title);
-		init(keywordTitle, keywords, downloadPath, relativePath, relativeDownloadPath);
-	}
 
-	/**
-	 * Initialize GUI-Components
-	 * 
-	 * @param keywordTitle Keyword title
-	 * @param keywords keywords
-	 * @param downloadPath absolute Path
-	 * @param relativePath use relative Path
-	 * @param relativeDownloadPath relative Path
-	 */
-	private void init(String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath) {
+		this.txtPath = new KeywordCellEditorComponent(settingsManager);
+		this.txtRPath = new KeywordCellEditorComponent(settingsManager);
+
 		txtPath.setRelative(false);
 		txtRPath.setRelative(true);
 
@@ -288,10 +282,12 @@ public class KeywordEditDialog extends JDialog {
 	 * @param downloadPath absolute Path
 	 * @param relativePath use relative Path
 	 * @param relativeDownloadPath relative Path
+	 * @param settingsManager Settings Manager
 	 * @return KeywordEditDialog or null if cancelled
 	 */
-	public static KeywordEditDialog openKeywordEditDialog(JDialog owner, String title, String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath) {
-		KeywordEditDialog dialog = new KeywordEditDialog(owner, title, keywordTitle, keywords, downloadPath, relativePath, relativeDownloadPath);
+	public static KeywordEditDialog openKeywordEditDialog(JDialog owner, String title, String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath,
+			SettingsManager settingsManager) {
+		KeywordEditDialog dialog = new KeywordEditDialog(owner, title, settingsManager, keywordTitle, keywords, downloadPath, relativePath, relativeDownloadPath);
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
 			return dialog;
@@ -309,10 +305,12 @@ public class KeywordEditDialog extends JDialog {
 	 * @param downloadPath absolute Path
 	 * @param relativePath use relative Path
 	 * @param relativeDownloadPath relative Path
+	 * @param settingsManager Settings Manager
 	 * @return KeywordEditDialog or null if cancelled
 	 */
-	public static KeywordEditDialog openKeywordEditDialog(JFrame owner, String title, String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath) {
-		KeywordEditDialog dialog = new KeywordEditDialog(owner, title, keywordTitle, keywords, downloadPath, relativePath, relativeDownloadPath);
+	public static KeywordEditDialog openKeywordEditDialog(JFrame owner, String title, String keywordTitle, String keywords, String downloadPath, boolean relativePath, String relativeDownloadPath,
+			SettingsManager settingsManager) {
+		KeywordEditDialog dialog = new KeywordEditDialog(owner, title, settingsManager, keywordTitle, keywords, downloadPath, relativePath, relativeDownloadPath);
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
 			return dialog;

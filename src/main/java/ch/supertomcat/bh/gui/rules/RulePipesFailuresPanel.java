@@ -1,8 +1,6 @@
 package ch.supertomcat.bh.gui.rules;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,21 +20,20 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineFailures;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * 
  *
  */
-public class RulePipesFailuresPanel extends JPanel implements ActionListener, ListSelectionListener {
+public class RulePipesFailuresPanel extends JPanel {
 	/**
 	 * serialVersionUID
 	 */
 	private static final long serialVersionUID = 1391103999859263322L;
 
 	private Rule rule = null;
-
-	private JDialog owner = null;
 
 	/**
 	 * Model for List
@@ -98,15 +95,14 @@ public class RulePipesFailuresPanel extends JPanel implements ActionListener, Li
 	 * 
 	 * @param rule Rule
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 */
-	public RulePipesFailuresPanel(Rule rule, JDialog owner) {
-		super();
+	public RulePipesFailuresPanel(Rule rule, JDialog owner, SettingsManager settingsManager) {
 		this.rule = rule;
-		this.owner = owner;
 
 		originalPipelines = this.rule.getPipelinesFailures();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
-			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, originalPipelines.get(iPipe), owner);
+			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, originalPipelines.get(iPipe), owner, settingsManager);
 			pnlPipelines.add(pnlPipe);
 			modelPipelines.addElement("Pipeline");
 			pipelines.add(originalPipelines.get(iPipe));
@@ -128,64 +124,55 @@ public class RulePipesFailuresPanel extends JPanel implements ActionListener, Li
 		pnlPipe.add(pnlPipelineButtons, BorderLayout.EAST);
 		add(pnlPipe, BorderLayout.WEST);
 
-		lstPipelines.addListSelectionListener(this);
-		btnPipelineNew.addActionListener(this);
-		btnPipelineUp.addActionListener(this);
-		btnPipelineDown.addActionListener(this);
-		btnPipelineDelete.addActionListener(this);
-
-		if (pnlPipelines.size() > 0) {
-			lstPipelines.setSelectedIndex(0);
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.ListSelectionListener#valueChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void valueChanged(ListSelectionEvent e) {
-		if (e.getSource() == lstPipelines) {
-			if (pnlPipelines.size() > 0) {
-				int selectedIndex = lstPipelines.getSelectedIndex();
-				if (selectedIndex > -1) {
-					if (pnlCurrentDisplayedPipeline != null) {
-						remove(pnlCurrentDisplayedPipeline);
+		lstPipelines.addListSelectionListener(new ListSelectionListener() {
+			@Override
+			public void valueChanged(ListSelectionEvent e) {
+				if (pnlPipelines.size() > 0) {
+					int selectedIndex = lstPipelines.getSelectedIndex();
+					if (selectedIndex > -1) {
+						if (pnlCurrentDisplayedPipeline != null) {
+							remove(pnlCurrentDisplayedPipeline);
+						}
+						add(pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
+						pnlCurrentDisplayedPipeline = pnlPipelines.get(selectedIndex);
+					} else {
+						if (pnlCurrentDisplayedPipeline != null) {
+							remove(pnlCurrentDisplayedPipeline);
+						}
+						pnlCurrentDisplayedPipeline = null;
 					}
-					add(pnlPipelines.get(selectedIndex), BorderLayout.CENTER);
-					pnlCurrentDisplayedPipeline = pnlPipelines.get(selectedIndex);
 				} else {
 					if (pnlCurrentDisplayedPipeline != null) {
 						remove(pnlCurrentDisplayedPipeline);
 					}
 					pnlCurrentDisplayedPipeline = null;
 				}
-			} else {
-				if (pnlCurrentDisplayedPipeline != null) {
-					remove(pnlCurrentDisplayedPipeline);
-				}
-				pnlCurrentDisplayedPipeline = null;
+				revalidate();
+				repaint();
 			}
-			revalidate();
-			repaint();
-		}
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnPipelineNew) {
+		});
+		btnPipelineNew.addActionListener(e -> {
 			RulePipeline pipe = new RulePipelineFailures(RuleMode.RULE_MODE_FAILURES);
-			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, pipe, owner);
-			pnlPipelines.add(pnlPipe);
+			RulePipelineFailuresPanel pnlPipeFailures = new RulePipelineFailuresPanel(this.rule, pipe, owner, settingsManager);
+			pnlPipelines.add(pnlPipeFailures);
 			modelPipelines.addElement("Pipeline");
 			pipelines.add(pipe);
-		} else if (e.getSource() == btnPipelineDelete) {
+		});
+		btnPipelineUp.addActionListener(e -> {
+			int selectedIndex = lstPipelines.getSelectedIndex();
+			if (selectedIndex > 0) {
+				swapPipelines(selectedIndex, selectedIndex - 1);
+				lstPipelines.setSelectedIndex(selectedIndex - 1);
+			}
+		});
+		btnPipelineDown.addActionListener(e -> {
+			int selectedIndex = lstPipelines.getSelectedIndex();
+			if (selectedIndex > -1 && selectedIndex < modelPipelines.getSize() - 1) {
+				swapPipelines(selectedIndex, selectedIndex + 1);
+				lstPipelines.setSelectedIndex(selectedIndex + 1);
+			}
+		});
+		btnPipelineDelete.addActionListener(e -> {
 			int selectedIndex = lstPipelines.getSelectedIndex();
 			if (selectedIndex > -1) {
 				pipelines.remove(selectedIndex);
@@ -199,18 +186,10 @@ public class RulePipesFailuresPanel extends JPanel implements ActionListener, Li
 					}
 				}
 			}
-		} else if (e.getSource() == btnPipelineUp) {
-			int selectedIndex = lstPipelines.getSelectedIndex();
-			if (selectedIndex > 0) {
-				swapPipelines(selectedIndex, selectedIndex - 1);
-				lstPipelines.setSelectedIndex(selectedIndex - 1);
-			}
-		} else if (e.getSource() == btnPipelineDown) {
-			int selectedIndex = lstPipelines.getSelectedIndex();
-			if (selectedIndex > -1 && selectedIndex < modelPipelines.getSize() - 1) {
-				swapPipelines(selectedIndex, selectedIndex + 1);
-				lstPipelines.setSelectedIndex(selectedIndex + 1);
-			}
+		});
+
+		if (pnlPipelines.size() > 0) {
+			lstPipelines.setSelectedIndex(0);
 		}
 	}
 

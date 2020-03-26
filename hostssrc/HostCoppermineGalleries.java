@@ -37,9 +37,6 @@ import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.linkextract.ExtractTools;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -48,13 +45,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.2
+ * @version 4.3
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.2";
+	public static final String VERSION = "4.3";
 
 	/**
 	 * Name dieser Klasse
@@ -152,13 +149,13 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	 */
 	private List<URL> getDirectLinkedArchives(String url) {
 		List<URL> urls = new ArrayList<>();
-		String cookies = CookieManager.getCookies(url);
+		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -232,13 +229,13 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	 */
 	private List<URL> getLinks(String url) throws HostException {
 		List<URL> urls = new ArrayList<>();
-		String cookies = CookieManager.getCookies(url);
+		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -333,7 +330,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				rootFolder = filterFilename(rootFolder);
 			} catch (MalformedURLException mue) {
 			}
-			String targetPath = SettingsManager.instance().getSavePath() + rootFolder + FileUtil.FILE_SEPERATOR + sb.toString();
+			String targetPath = getSettingsManager().getSavePath() + rootFolder + FileUtil.FILE_SEPERATOR + sb.toString();
 
 			/*
 			 * Get the links
@@ -434,7 +431,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 					metaAlbumsEnabled = cbMetaAlbumsEnabled.isSelected();
 					setBooleanOptionValue(NAME + ".metaAlbumsEnabled", metaAlbumsEnabled);
 					deactivateOption.saveOption();
-					SettingsManager.instance().writeSettings(true);
+					getSettingsManager().writeSettings(true);
 					dialog.dispose();
 				} else if (e.getSource() == btnCancel) {
 					dialog.dispose();
@@ -453,7 +450,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	private void updateBooleanOptionValue(String option, boolean defaultvalue) {
 		boolean bVal = false;
 		try {
-			bVal = SettingsManager.instance().getBooleanValue(option);
+			bVal = getSettingsManager().getBooleanValue(option);
 			if (option.equals(NAME + ".recursive")) {
 				recursive = bVal;
 			} else if (option.equals(NAME + ".deactivated")) {
@@ -468,7 +465,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			SettingsManager.instance().setOptionValue(option, value);
+			getSettingsManager().setOptionValue(option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

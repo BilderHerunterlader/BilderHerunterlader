@@ -5,6 +5,7 @@ import javax.swing.JFrame;
 
 import ch.supertomcat.bh.gui.keywords.KeywordEditDialog;
 import ch.supertomcat.bh.keywords.Keyword;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -18,9 +19,10 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * 
 	 * @param owner Owner-Dialog
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 */
-	public AdderKeywordAddDialog(JDialog owner, String title) {
-		this(owner, title, "");
+	public AdderKeywordAddDialog(JDialog owner, String title, SettingsManager settingsManager) {
+		this(owner, title, settingsManager, "");
 	}
 
 	/**
@@ -28,9 +30,10 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * 
 	 * @param owner Owner-Frame
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 */
-	public AdderKeywordAddDialog(JFrame owner, String title) {
-		this(owner, title, "");
+	public AdderKeywordAddDialog(JFrame owner, String title, SettingsManager settingsManager) {
+		this(owner, title, settingsManager, "");
 	}
 
 	/**
@@ -38,10 +41,11 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * 
 	 * @param owner Owner-Dialog
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 * @param keywordTitle Predefined keyword title
 	 */
-	public AdderKeywordAddDialog(JDialog owner, String title, String keywordTitle) {
-		super(owner, title);
+	public AdderKeywordAddDialog(JDialog owner, String title, SettingsManager settingsManager, String keywordTitle) {
+		super(owner, title, settingsManager);
 		init(keywordTitle);
 	}
 
@@ -50,10 +54,11 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * 
 	 * @param owner Owner-Frame
 	 * @param title Title
+	 * @param settingsManager Settings Manager
 	 * @param keywordTitle Predefined keyword title
 	 */
-	public AdderKeywordAddDialog(JFrame owner, String title, String keywordTitle) {
-		super(owner, title);
+	public AdderKeywordAddDialog(JFrame owner, String title, SettingsManager settingsManager, String keywordTitle) {
+		super(owner, title, settingsManager);
 		init(keywordTitle);
 	}
 
@@ -78,10 +83,11 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * Open the Dialog
 	 * 
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 * @return Keyword
 	 */
-	public static Keyword openAddKeywordDialog(JDialog owner) {
-		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"));
+	public static Keyword openAddKeywordDialog(JDialog owner, SettingsManager settingsManager) {
+		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"), settingsManager);
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
 			return dialog.getKeyword();
@@ -93,11 +99,12 @@ public class AdderKeywordAddDialog extends KeywordEditDialog {
 	 * Open the Dialog
 	 * 
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 * @param keywordTitle Keyword-Title
 	 * @return Keyword
 	 */
-	public static Keyword openAddKeywordDialog(JFrame owner, String keywordTitle) {
-		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"), keywordTitle);
+	public static Keyword openAddKeywordDialog(JFrame owner, SettingsManager settingsManager, String keywordTitle) {
+		AdderKeywordAddDialog dialog = new AdderKeywordAddDialog(owner, Localization.getString("Add"), settingsManager, keywordTitle);
 		dialog.setVisible(true);
 		if (dialog.isOkPressed()) {
 			return dialog.getKeyword();

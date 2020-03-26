@@ -8,6 +8,8 @@ import ch.supertomcat.supertomcatutils.settings.SettingsListener;
 public interface BHSettingsListener extends SettingsListener {
 	/**
 	 * Look and Feel changed
+	 * 
+	 * @param lookAndFeel Look And Feel
 	 */
-	public void lookAndFeelChanged();
+	public void lookAndFeelChanged(int lookAndFeel);
 }

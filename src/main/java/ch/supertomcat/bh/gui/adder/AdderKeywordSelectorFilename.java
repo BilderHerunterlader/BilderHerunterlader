@@ -92,6 +92,11 @@ public class AdderKeywordSelectorFilename extends JDialog {
 	private boolean localFiles = false;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
@@ -99,10 +104,12 @@ public class AdderKeywordSelectorFilename extends JDialog {
 	 * @param modal Modal
 	 * @param matchesByURL Keyword Matches
 	 * @param localFiles Local files
+	 * @param settingsManager Settings Manager
 	 */
-	public AdderKeywordSelectorFilename(JFrame owner, String title, boolean modal, List<KeywordFilenameMatches> matchesByURL, boolean localFiles) {
+	public AdderKeywordSelectorFilename(JFrame owner, String title, boolean modal, List<KeywordFilenameMatches> matchesByURL, boolean localFiles, SettingsManager settingsManager) {
 		super(owner, title, modal);
 		this.localFiles = localFiles;
+		this.settingsManager = settingsManager;
 
 		setLayout(new BorderLayout());
 
@@ -178,7 +185,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 		}
 
 		if (localFiles) {
-			chkDeleteNoKeyword.setSelected(SettingsManager.instance().isDeleteNoKeyword());
+			chkDeleteNoKeyword.setSelected(settingsManager.isDeleteNoKeyword());
 			chkDeleteNoKeyword.setVisible(true);
 		} else {
 			chkDeleteNoKeyword.setVisible(false);
@@ -189,8 +196,8 @@ public class AdderKeywordSelectorFilename extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				cancelled = false;
 				if (localFiles) {
-					SettingsManager.instance().setDeleteNoKeyword(chkDeleteNoKeyword.isSelected());
-					SettingsManager.instance().writeSettings(true);
+					settingsManager.setDeleteNoKeyword(chkDeleteNoKeyword.isSelected());
+					settingsManager.writeSettings(true);
 				}
 				dispose();
 			}
@@ -306,15 +313,15 @@ public class AdderKeywordSelectorFilename extends JDialog {
 	}
 
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			SettingsManager.instance().setColWidthsAdderKeywordSelectorFilename(TableUtil.serializeColWidthSetting(table));
-			SettingsManager.instance().writeSettings(true);
+		if (settingsManager.isSaveTableColumnSizes()) {
+			settingsManager.setColWidthsAdderKeywordSelectorFilename(TableUtil.serializeColWidthSetting(table));
+			settingsManager.writeSettings(true);
 		}
 	}
 
 	private boolean updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsAdderKeywordSelectorFilename());
+		if (settingsManager.isSaveTableColumnSizes()) {
+			TableUtil.applyColWidths(table, settingsManager.getColWidthsAdderKeywordSelectorFilename());
 			return true;
 		}
 		return false;

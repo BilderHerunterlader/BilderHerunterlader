@@ -19,9 +19,6 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -30,13 +27,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 /**
  * Host-Klasse fuer beliebige Dateien und speziell fuer Bilder die nicht auf einem Image-Hoster gehostet sind.
  * 
- * @version 3.7
+ * @version 3.8
  */
 public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.7";
+	public static final String VERSION = "3.8";
 
 	/**
 	 * Name dieser Klasse
@@ -242,12 +239,12 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 * @throws HostException
 	 */
 	private String requestContentType(String url) throws HostException {
-		String cookies = CookieManager.getCookies(url);
+		String cookies = getCookieManager().getCookies(url);
 		url = HTTPUtil.encodeURL(url);
 		HttpHead method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			method = new HttpHead(url);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (!cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -330,16 +327,16 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
-			SettingsManager.instance().writeSettings(true);
+			getSettingsManager().writeSettings(true);
 		}
 	}
 
 	private boolean getBooleanOptionValue(String name) throws Exception {
-		return SettingsManager.instance().getBooleanValue(name);
+		return getSettingsManager().getBooleanValue(name);
 	}
 
 	private void setBooleanOptionValue(String name, boolean value) throws Exception {
-		SettingsManager.instance().setOptionValue(name, value);
+		getSettingsManager().setOptionValue(name, value);
 	}
 
 	@Override

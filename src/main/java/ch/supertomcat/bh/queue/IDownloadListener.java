@@ -1,5 +1,10 @@
 package ch.supertomcat.bh.queue;
 
+import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
+
 /**
  * Interface of QueueData for downloads, so they will
  * know, when they are allowed to start the download, after
@@ -15,10 +20,14 @@ public interface IDownloadListener {
 	 * and would not increase the slots used.
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 * 
 	 * @return True/False
 	 */
-	public boolean downloadAllowed(DownloadQueueManager downloadQueueManager);
+	public boolean downloadAllowed(DownloadQueueManager downloadQueueManager, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager);
 
 	/**
 	 * Returns the Container-URL of a listener

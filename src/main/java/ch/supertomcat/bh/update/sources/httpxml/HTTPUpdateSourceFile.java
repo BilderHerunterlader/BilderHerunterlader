@@ -34,16 +34,23 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 	private final String targetFilename;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param sourceURL Source URL
 	 * @param targetFilename Target Filename
 	 * @param delete True if is delete update, false otherwise
+	 * @param proxyManager Proxy Manager
 	 */
-	public HTTPUpdateSourceFile(String sourceURL, String targetFilename, boolean delete) {
+	public HTTPUpdateSourceFile(String sourceURL, String targetFilename, boolean delete, ProxyManager proxyManager) {
 		super(delete);
 		this.sourceURL = sourceURL;
 		this.targetFilename = targetFilename;
+		this.proxyManager = proxyManager;
 	}
 
 	@Override
@@ -66,7 +73,7 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 
 		String encodedURL = HTTPUtil.encodeURL(sourceURL);
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			method = new HttpGet(encodedURL);
 			File tempTargetFile = new File(target);
 

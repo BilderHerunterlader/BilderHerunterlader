@@ -155,9 +155,10 @@ public class Log extends JPanel implements ILogManagerListener {
 	 * @param logManager Log Manager
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param mainWindowAccess Main Window Access
+	 * @param settingsManager Settings Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public Log(LogManager logManager, DownloadQueueManager downloadQueueManager, MainWindowAccess mainWindowAccess, ClipboardObserver clipboardObserver) {
+	public Log(LogManager logManager, DownloadQueueManager downloadQueueManager, MainWindowAccess mainWindowAccess, SettingsManager settingsManager, ClipboardObserver clipboardObserver) {
 		this.logManager = logManager;
 		this.mainWindowAccess = mainWindowAccess;
 		this.clipboardObserver = clipboardObserver;
@@ -171,7 +172,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		jtLog.getColumn("DateTime").setMaxWidth(150);
 		jtLog.getColumn("Size").setMinWidth(100);
 		jtLog.getColumn("Size").setMaxWidth(150);
-		updateColWidthsFromSettingsManager();
+		updateColWidthsFromSettingsManager(settingsManager);
 		jtLog.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
@@ -187,7 +188,7 @@ public class Log extends JPanel implements ILogManagerListener {
 
 			@Override
 			public void columnMarginChanged(ChangeEvent e) {
-				updateColWidthsToSettingsManager();
+				updateColWidthsToSettingsManager(settingsManager);
 			}
 
 			@Override
@@ -376,23 +377,27 @@ public class Log extends JPanel implements ILogManagerListener {
 
 	/**
 	 * updateColWidthsToSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsLog(TableUtil.serializeColWidthSetting(jtLog));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsLog(TableUtil.serializeColWidthSetting(jtLog));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(jtLog, SettingsManager.instance().getColWidthsLog());
+		TableUtil.applyColWidths(jtLog, settingsManager.getColWidthsLog());
 	}
 
 	@Override

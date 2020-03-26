@@ -120,12 +120,13 @@ public class Keyword implements Comparable<Keyword> {
 	 * Returns the target path
 	 * This method checks the flag an then returns the absolute or relative path
 	 * 
+	 * @param settingsManager Settings Manager
 	 * @return Target path
 	 */
-	public String getAdderDownloadPath() {
+	public String getAdderDownloadPath(SettingsManager settingsManager) {
 		String retval = "";
 		if (relativePath) {
-			retval = SettingsManager.instance().getSavePath() + relativeDownloadPath;
+			retval = settingsManager.getSavePath() + relativeDownloadPath;
 			if ((retval.endsWith("/") == false) && (retval.endsWith("\\") == false)) {
 				retval += FileUtil.FILE_SEPERATOR;
 			}

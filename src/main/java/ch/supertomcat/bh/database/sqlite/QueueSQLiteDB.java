@@ -39,9 +39,10 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	 * Constructor
 	 * 
 	 * @param databaseFile Path to the database File
+	 * @param backupDatabaseOnStart True if database should be backed up on start, false otherwise
 	 */
-	public QueueSQLiteDB(String databaseFile) {
-		super(databaseFile, "bh_downloadqueue");
+	public QueueSQLiteDB(String databaseFile, boolean backupDatabaseOnStart) {
+		super(databaseFile, "bh_downloadqueue", backupDatabaseOnStart);
 
 		selectAllEntriesSQL = "SELECT * FROM " + tableName;
 

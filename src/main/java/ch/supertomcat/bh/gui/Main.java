@@ -37,12 +37,15 @@ import ch.supertomcat.bh.gui.log.DirectoryLog;
 import ch.supertomcat.bh.gui.log.Log;
 import ch.supertomcat.bh.gui.queue.Queue;
 import ch.supertomcat.bh.gui.rules.Rules;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportHTML;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.keywords.KeywordManagerListener;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -126,7 +129,12 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	/**
 	 * Settings Manager
 	 */
-	private SettingsManager settingsManager;
+	private final SettingsManager settingsManager;
+
+	/**
+	 * GUI Event
+	 */
+	private final GuiEvent guiEvent;
 
 	/**
 	 * Constructor
@@ -136,18 +144,23 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	 * @param queueManager Queue Manager
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManger Proxy Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
+	 * @param guiEvent GUI Event
 	 */
-	public Main(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
-			ClipboardObserver clipboardObserver) {
+	public Main(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager, ProxyManager proxyManger,
+			CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
 		this.settingsManager = settingsManager;
-		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager);
-		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, keywordManager, clipboardObserver);
-		this.log = new Log(logManager, downloadQueueManager, this, clipboardObserver);
-		this.directoryLog = new DirectoryLog(logManager);
-		this.keywords = new Keywords(this, this, keywordManager);
-		this.hosts = new HosterPanel(downloadQueueManager);
-		this.rules = new Rules(this, this, downloadQueueManager);
+		this.guiEvent = guiEvent;
+		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, guiEvent);
+		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, clipboardObserver);
+		this.log = new Log(logManager, downloadQueueManager, this, settingsManager, clipboardObserver);
+		this.directoryLog = new DirectoryLog(logManager, settingsManager);
+		this.keywords = new Keywords(this, this, keywordManager, settingsManager);
+		this.hosts = new HosterPanel(hostManager, downloadQueueManager, settingsManager);
+		this.rules = new Rules(this, this, downloadQueueManager, settingsManager, hostManager);
 		setIconImage(Icons.getBHImage("BH.png"));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 
@@ -181,7 +194,8 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 								String referrer = Localization.getString("Unkown");
 								byte[] stringBytes = sbData.toString().getBytes();
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
-								new ImportHTML(Main.this, Main.this, logManager, queueManager, keywordManager, clipboardObserver).importHTML(bais, referrer, title);
+								new ImportHTML(Main.this, Main.this, logManager, queueManager, keywordManager, proxyManger, settingsManager, hostManager, cookieManager, clipboardObserver)
+										.importHTML(bais, referrer, title);
 								br.close();
 								e.dropComplete(true);
 								return;
@@ -277,7 +291,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 				return;
 			}
 			// If no systemtray exit application
-			GuiEvent.instance().exitApp(false);
+			guiEvent.exitApp(false);
 		} else {
 			setVisible(false);
 		}

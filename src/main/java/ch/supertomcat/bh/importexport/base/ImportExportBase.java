@@ -33,14 +33,21 @@ public abstract class ImportExportBase {
 	protected final MainWindowAccess mainWindowAccess;
 
 	/**
+	 * Settings Manager
+	 */
+	protected final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
+	 * @param settingsManager Settings Manager
 	 */
-	public ImportExportBase(Component parentComponent, MainWindowAccess mainWindowAccess) {
+	public ImportExportBase(Component parentComponent, MainWindowAccess mainWindowAccess, SettingsManager settingsManager) {
 		this.parentComponent = parentComponent;
 		this.mainWindowAccess = mainWindowAccess;
+		this.settingsManager = settingsManager;
 	}
 
 	/**
@@ -63,9 +70,9 @@ public abstract class ImportExportBase {
 			}
 		};
 		if (save) {
-			return FileDialogUtil.showFileSaveDialog(parentComponent, SettingsManager.instance().getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileSaveDialog(parentComponent, settingsManager.getLastUsedImportDialogPath(), filter);
 		} else {
-			return FileDialogUtil.showFileOpenDialog(parentComponent, SettingsManager.instance().getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileOpenDialog(parentComponent, settingsManager.getLastUsedImportDialogPath(), filter);
 		}
 	}
 

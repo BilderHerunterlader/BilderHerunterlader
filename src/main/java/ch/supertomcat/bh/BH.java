@@ -38,8 +38,11 @@ import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.DownloadQueueManagerRestrictions;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.bh.transmitter.TransmitterHTTP;
@@ -127,7 +130,8 @@ public abstract class BH {
 	 * Constructor
 	 */
 	public BH() {
-		GuiEvent.instance().addListener(new IGuiEventListener() {
+		GuiEvent guiEvent = new GuiEvent();
+		guiEvent.addListener(new IGuiEventListener() {
 			@Override
 			public void exitApp(boolean restart) {
 				if (!started) {
@@ -147,7 +151,7 @@ public abstract class BH {
 				}
 			}
 		});
-		GuiEvent.instance().addUpdateListener(new UpdateListener() {
+		guiEvent.addUpdateListener(new UpdateListener() {
 			@Override
 			public void updateWindowOpened() {
 				if (transmitterSocket != null) {
@@ -170,7 +174,7 @@ public abstract class BH {
 		});
 
 		// Read the settings from settings file
-		settingsManager = SettingsManager.instance();
+		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
 		settingsManager.readSettings();
 		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
@@ -215,14 +219,18 @@ public abstract class BH {
 		Localization.init("ch.supertomcat.bh.BH", language, country);
 
 		// Initalized too fast as it would be worth to execute parallel
-		LogManager logManager = new LogManager();
-		downloadQueueManager = new DownloadQueueManager();
+		ProxyManager proxyManager = new ProxyManager(settingsManager);
+		CookieManager cookieManager = new CookieManager(settingsManager);
+		LogManager logManager = new LogManager(settingsManager);
+		DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
+		hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
+		downloadQueueManager = new DownloadQueueManager(restrictions, proxyManager, settingsManager, cookieManager, hostManager);
 
 		int threadCount = settingsManager.getThreadCount();
 		if (threadCount < 1) {
 			threadCount = 1;
-		} else if (threadCount > 3) {
-			threadCount = 3;
+		} else if (threadCount > 2) {
+			threadCount = 2;
 		}
 
 		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
@@ -237,13 +245,7 @@ public abstract class BH {
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				hostManager = new HostManager(main, downloadQueueManager);
-			}
-		}));
-		tasks.add(Executors.callable(new Runnable() {
-			@Override
-			public void run() {
-				keywordManager = new KeywordManager();
+				keywordManager = new KeywordManager(settingsManager);
 			}
 		}));
 
@@ -256,7 +258,7 @@ public abstract class BH {
 		executor.shutdown();
 
 		ClipboardObserver clipboardObserver = new ClipboardObserver(settingsManager);
-		main = new Main(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, clipboardObserver);
+		main = new Main(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, proxyManager, cookieManager, hostManager, clipboardObserver, guiEvent);
 		if (SystemTrayTool.isTraySupported()) {
 			/*
 			 * We can only use the SystemTray on Java 1.6 or above and the user wants this
@@ -265,7 +267,7 @@ public abstract class BH {
 			 */
 
 			// Init SystemTray
-			stt = new SystemTrayTool(main, main, queueManager, downloadQueueManager, keywordManager, logManager, clipboardObserver);
+			stt = new SystemTrayTool(main, main, queueManager, downloadQueueManager, keywordManager, logManager, proxyManager, settingsManager, cookieManager, hostManager, clipboardObserver, guiEvent);
 			stt.init();
 			/*
 			 * If SystemTray is used, we show the window but hide it just again.
@@ -292,7 +294,7 @@ public abstract class BH {
 			/**
 			 * URL Importer
 			 */
-			private ImportURL urlImporter = new ImportURL(main, main, logManager, queueManager, keywordManager, clipboardObserver);
+			private ImportURL urlImporter = new ImportURL(main, main, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
 
 			@Override
 			public void linksDetected(List<String> links) {
@@ -321,7 +323,7 @@ public abstract class BH {
 		/*
 		 * Start the TransmitterSocket
 		 */
-		TransmitterHelper transmitterHelper = new TransmitterHelper(main, main, queueManager, logManager, keywordManager, clipboardObserver);
+		TransmitterHelper transmitterHelper = new TransmitterHelper(main, main, queueManager, logManager, keywordManager, proxyManager, settingsManager, cookieManager, hostManager, clipboardObserver);
 		transmitterSocket = new TransmitterSocket(transmitterHelper);
 		Thread tThread = new Thread(transmitterSocket, "TransmitterSocket-Thread");
 		tThread.start();
@@ -340,15 +342,15 @@ public abstract class BH {
 			}
 
 			@Override
-			public void lookAndFeelChanged() {
+			public void lookAndFeelChanged(int lookAndFeel) {
 				// Nothing to do
 			}
 		});
 
 		if (settingsManager.isUpdates()) {
 			// If the user wants, we check if updates are available
-			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource());
-			update = new UpdateWindow(updateManager, main, queueManager, keywordManager);
+			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent);
+			update = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
 			if (update.checkForUpdates()) {
 				// If Updates are available, show the Update-Window
 				EventQueue.invokeLater(() -> {
@@ -440,7 +442,7 @@ public abstract class BH {
 	}
 
 	private synchronized void initializeTransmitterHTTP(TransmitterHelper transmitterHelper) {
-		int port = SettingsManager.instance().getWebExtensionPort();
+		int port = settingsManager.getWebExtensionPort();
 		if (transmitterHTTP != null) {
 			if (transmitterHTTP.getListeningPort() == port && transmitterHTTP.isAlive()) {
 				/*

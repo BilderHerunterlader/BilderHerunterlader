@@ -31,7 +31,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 /**
  * Rule-Pipeline-Panel
  */
-public class RegexReplacePanel extends JPanel implements ActionListener, TableColumnModelListener {
+public class RegexReplacePanel extends JPanel implements ActionListener {
 	/**
 	 * UID
 	 */
@@ -91,8 +91,9 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 	 * Constructor
 	 * 
 	 * @param pipe Pipeline
+	 * @param settingsManager Settings Manager
 	 */
-	public RegexReplacePanel(RegexReplacePipeline pipe) {
+	public RegexReplacePanel(RegexReplacePipeline pipe, SettingsManager settingsManager) {
 		super();
 		this.pipe = pipe;
 		setLayout(new BorderLayout());
@@ -103,8 +104,29 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
-		updateColWidthsFromSettingsManager();
-		table.getColumnModel().addColumnModelListener(this);
+		updateColWidthsFromSettingsManager(settingsManager);
+		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager(settingsManager);
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+			}
+		});
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 
@@ -195,43 +217,26 @@ public class RegexReplacePanel extends JPanel implements ActionListener, TableCo
 
 	/**
 	 * updateColWidthsToSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
-	}
-
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
+		TableUtil.applyColWidths(table, settingsManager.getColWidthsRulesEditor());
 	}
 }

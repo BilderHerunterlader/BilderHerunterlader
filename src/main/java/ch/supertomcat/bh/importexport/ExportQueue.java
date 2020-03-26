@@ -36,9 +36,10 @@ public class ExportQueue extends ImportExportBase {
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
 	 * @param queueManager Queue Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public ExportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager) {
-		super(parentComponent, mainWindowAccess);
+	public ExportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, SettingsManager settingsManager) {
+		super(parentComponent, mainWindowAccess, settingsManager);
 		this.queueManager = queueManager;
 	}
 
@@ -48,7 +49,7 @@ public class ExportQueue extends ImportExportBase {
 	public void exportQueue() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", true);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportQueue(file.getAbsolutePath());
 			file = null;

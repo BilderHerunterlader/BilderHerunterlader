@@ -40,7 +40,7 @@ import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowR
 /**
  * Rule-Pipeline-Panel
  */
-public class RulePipelineFilenamePanel extends JPanel implements ActionListener, ItemListener, TableColumnModelListener {
+public class RulePipelineFilenamePanel extends JPanel implements ActionListener, ItemListener {
 	/**
 	 * UID
 	 */
@@ -153,8 +153,9 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 	 * @param rule Rule
 	 * @param pipe Pipeline
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 */
-	public RulePipelineFilenamePanel(RuleMode mode, Rule rule, RulePipeline pipe, JDialog owner) {
+	public RulePipelineFilenamePanel(RuleMode mode, Rule rule, RulePipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super();
 		this.owner = owner;
 		this.rule = rule;
@@ -168,8 +169,29 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
-		updateColWidthsFromSettingsManager();
-		table.getColumnModel().addColumnModelListener(this);
+		updateColWidthsFromSettingsManager(settingsManager);
+		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager(settingsManager);
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+			}
+
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+			}
+		});
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
@@ -332,69 +354,27 @@ public class RulePipelineFilenamePanel extends JPanel implements ActionListener,
 
 	/**
 	 * updateColWidthsToSettingsManager
+	 * 
+	 * @param settingsManager SettingsManager
 	 */
-	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
+	 * 
+	 * @param settingsManager SettingsManager
 	 */
-	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsRulesEditor());
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
+		TableUtil.applyColWidths(table, settingsManager.getColWidthsRulesEditor());
 	}
 
 	/**

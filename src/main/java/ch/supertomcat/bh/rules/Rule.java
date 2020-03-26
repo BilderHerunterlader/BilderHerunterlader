@@ -30,7 +30,6 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.Restriction;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -181,7 +180,7 @@ public class Rule extends Hoster {
 	public Rule(String file, boolean developer) throws PatternSyntaxException {
 		this.strFile = file;
 		setDeveloper(developer);
-		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile));
+		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
 		boolean b = readRule();
 		this.urlPattern = Pattern.compile(this.pattern);
 		if (!b) {
@@ -207,7 +206,7 @@ public class Rule extends Hoster {
 		pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
 		pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
 		this.strFile = file;
-		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile));
+		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
 	}
 
 	/**
@@ -1140,7 +1139,7 @@ public class Rule extends Hoster {
 	public void setEnabled(boolean enabled) {
 		deactivateOption.setDeactivated(!enabled);
 		deactivateOption.saveOption();
-		SettingsManager.instance().writeSettings(true);
+		getSettingsManager().writeSettings(true);
 	}
 
 	@Override

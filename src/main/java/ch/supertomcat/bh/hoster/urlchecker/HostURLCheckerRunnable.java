@@ -49,16 +49,18 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 	/**
 	 * HostManager
 	 */
-	private HostManager hm = HostManager.instance();
+	private final HostManager hostManager;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param urlList URLList
+	 * @param hostManager Host Manager
 	 */
-	public HostURLCheckerRunnable(URLList urlList) {
+	public HostURLCheckerRunnable(URLList urlList, HostManager hostManager) {
 		this.stop = false;
 		this.urlList = urlList;
+		this.hostManager = hostManager;
 		progress.addProgressListener(this);
 	}
 
@@ -102,12 +104,12 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 
 			URL urlObject = urls.get(i);
 			// Redirect the url if needed
-			urlObject.checkURLForRedirect();
+			urlObject.checkURLForRedirect(hostManager);
 
 			List<URL> additionalURLs = null;
 			// Check if there is a hostclass available which accepts the url
 			AtomicBoolean bOK = new AtomicBoolean(false);
-			additionalURLs = hm.checkURL(urlObject, bOK, progress);
+			additionalURLs = hostManager.checkURL(urlObject, bOK, progress);
 			if (bOK.get()) {
 				v.add(urlObject);
 			}

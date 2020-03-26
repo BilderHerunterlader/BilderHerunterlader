@@ -23,7 +23,9 @@ import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.urlchecker.RemoveDuplicatesRunnable;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.queue.RestrictionAccess;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
@@ -58,7 +60,7 @@ public class HostManager {
 	/**
 	 * HostRules
 	 */
-	private HostRules hostRules = new HostRules();
+	private HostRules hostRules;
 
 	/**
 	 * HostSortImages
@@ -71,14 +73,28 @@ public class HostManager {
 	private final Object syncObject = new Object();
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param mainWindow MainWindow
-	 * @param downloadQueueManager Download Queue Manager
+	 * @param restrictionAccess Restriction Access
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
 	 */
-	public HostManager(JFrame mainWindow, DownloadQueueManager downloadQueueManager) {
+	public HostManager(JFrame mainWindow, RestrictionAccess restrictionAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager) {
+		this.settingsManager = settingsManager;
 		Hoster.setMainWindow(mainWindow);
-		Hoster.setDownloadQueueManager(downloadQueueManager);
+		Hoster.setRestrictionAccess(restrictionAccess);
+		Hoster.setProxyManager(proxyManager);
+		Hoster.setSettingsManager(settingsManager);
+		Hoster.setCookieManager(cookieManager);
+
+		this.hostRules = new HostRules(this);
 
 		// Load the hostclasses
 		List<Host> loadedHosts = HostClassesLoader.loadHostClasses();
@@ -99,25 +115,12 @@ public class HostManager {
 	}
 
 	/**
-	 * TODO Remove singleton
-	 * Returns the singleton
-	 * 
-	 * @return Singleton
-	 */
-	public static synchronized HostManager instance() {
-		if (instance == null) {
-			throw new IllegalStateException("HostManager not yet instanced");
-		}
-		return instance;
-	}
-
-	/**
 	 * Create a sorted hostclass-array
 	 */
 	public void reInitHosterList() {
 		synchronized (syncObject) {
 			Collections.sort(hosts, new Comparator<Host>() {
-				private boolean bRulesBeforeClasses = SettingsManager.instance().isRulesBeforeClasses();
+				private boolean bRulesBeforeClasses = settingsManager.isRulesBeforeClasses();
 
 				@Override
 				public int compare(Host o1, Host o2) {
@@ -347,12 +350,13 @@ public class HostManager {
 	/**
 	 * @param urls URLs
 	 * @param progress Progress
+	 * @param settingsManager Settings Manager
 	 */
-	public static void removeDuplicates(List<URL> urls, ProgressObserver progress) {
+	public static void removeDuplicates(List<URL> urls, ProgressObserver progress, SettingsManager settingsManager) {
 		List<URL> originalUrls = new ArrayList<>(urls);
 		urls.clear();
 
-		int threadCount = SettingsManager.instance().getThreadCount();
+		int threadCount = settingsManager.getThreadCount();
 
 		if (threadCount < 1) {
 			threadCount = 1;

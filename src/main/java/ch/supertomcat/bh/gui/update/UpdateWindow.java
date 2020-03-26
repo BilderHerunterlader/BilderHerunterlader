@@ -196,17 +196,39 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private final KeywordManager keywordManager;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
+	 * GUI Event
+	 */
+	private final GuiEvent guiEvent;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param updateManager UpdateManager
 	 * @param owner Owner
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
+	 * @param guiEvent GUI Event
 	 */
-	public UpdateWindow(UpdateManager updateManager, Window owner, QueueManager queueManager, KeywordManager keywordManager) {
+	public UpdateWindow(UpdateManager updateManager, Window owner, QueueManager queueManager, KeywordManager keywordManager, SettingsManager settingsManager, HostManager hostManager,
+			GuiEvent guiEvent) {
 		this.updateManager = updateManager;
 		this.queueManager = queueManager;
 		this.keywordManager = keywordManager;
+		this.settingsManager = settingsManager;
+		this.hostManager = hostManager;
+		this.guiEvent = guiEvent;
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		setIconImage(Icons.getBHImage("BH.png"));
 		addWindowListener(this);
@@ -359,7 +381,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 				return false;
 			}
 
-			String v = HostManager.instance().getHostVersion(update.getName());
+			String v = hostManager.getHostVersion(update.getName());
 			if (!v.equals("")) {
 				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
 					model.addRow(update);
@@ -398,7 +420,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 				return false;
 			}
 
-			String v = HostManager.instance().getRedirectManager().getRedirectVersion(update.getName());
+			String v = hostManager.getRedirectManager().getRedirectVersion(update.getName());
 			if (!v.equals("")) {
 				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
 					model.addRow(update);
@@ -419,11 +441,11 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		}
 
 		// Rules
-		int sizer = HostManager.instance().getHostRules().getRules().size();
+		int sizer = hostManager.getHostRules().getRules().size();
 
 		// We create first an array with name and version of all rules
 		String ruleVersions[][] = new String[sizer][2];
-		Iterator<Rule> it = HostManager.instance().getHostRules().getRules().iterator();
+		Iterator<Rule> it = hostManager.getHostRules().getRules().iterator();
 		int ir = 0;
 		Rule r;
 		while (it.hasNext()) {
@@ -533,7 +555,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			t.start();
 		} else if (e.getSource() == btnWebsite) {
 			String url;
-			if (SettingsManager.instance().getLanguage().equals("de_DE")) {
+			if (settingsManager.getLanguage().equals("de_DE")) {
 				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=de";
 			} else {
 				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=en";
@@ -549,7 +571,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			}
 		} else if (e.getSource() == btnChanges) {
 			String message = changelogDE;
-			if (SettingsManager.instance().getLanguage() == "EN") {
+			if (settingsManager.getLanguage() == "EN") {
 				message = changelogEN;
 			}
 			message = message.replaceAll("\\\\n", "\n");
@@ -562,21 +584,21 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsUpdate(TableUtil.serializeColWidthSetting(table));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsUpdate(TableUtil.serializeColWidthSetting(table));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(table, SettingsManager.instance().getColWidthsUpdate());
+		TableUtil.applyColWidths(table, settingsManager.getColWidthsUpdate());
 	}
 
 	/*
@@ -641,7 +663,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 */
 	@Override
 	public void windowClosed(WindowEvent e) {
-		GuiEvent.instance().updateWindowClosed(updateRunned, updateSuccessfull);
+		guiEvent.updateWindowClosed(updateRunned, updateSuccessfull);
 	}
 
 	/*
@@ -687,7 +709,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 */
 	@Override
 	public void windowOpened(WindowEvent e) {
-		GuiEvent.instance().updateWindowOpened();
+		guiEvent.updateWindowOpened();
 	}
 
 	/*

@@ -21,11 +21,14 @@ import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
@@ -85,6 +88,21 @@ public class DownloadAddDialog extends JDialog {
 	private final KeywordManager keywordManager;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -96,13 +114,20 @@ public class DownloadAddDialog extends JDialog {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public DownloadAddDialog(JFrame owner, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
+	public DownloadAddDialog(JFrame owner, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager, SettingsManager settingsManager,
+			HostManager hostManager, ClipboardObserver clipboardObserver) {
 		super(owner);
 		this.logManager = logManager;
 		this.queueManager = queueManager;
 		this.keywordManager = keywordManager;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.hostManager = hostManager;
 		this.clipboardObserver = clipboardObserver;
 
 		setLayout(new BorderLayout());
@@ -179,7 +204,7 @@ public class DownloadAddDialog extends JDialog {
 					}
 
 					AdderPanel adderpnl = new AdderPanel(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-							+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, clipboardObserver);
+							+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 					adderpnl.init();
 					adderpnl = null;
 				}

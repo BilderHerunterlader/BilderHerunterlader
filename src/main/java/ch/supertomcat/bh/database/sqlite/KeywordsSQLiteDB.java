@@ -38,9 +38,10 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	 * Constructor
 	 * 
 	 * @param databaseFile Path to the database File
+	 * @param backupDatabaseOnStart True if database should be backed up on start, false otherwise
 	 */
-	public KeywordsSQLiteDB(String databaseFile) {
-		super(databaseFile, "bh_keywords");
+	public KeywordsSQLiteDB(String databaseFile, boolean backupDatabaseOnStart) {
+		super(databaseFile, "bh_keywords", backupDatabaseOnStart);
 
 		selectAllEntriesSQL = "SELECT * FROM " + tableName;
 

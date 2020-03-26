@@ -16,6 +16,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
@@ -49,6 +50,21 @@ public class ImportURL {
 	private final Component parentComponent;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
@@ -56,13 +72,20 @@ public class ImportURL {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
+	 * @param cookieManager Cookie Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportURL(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
-			ClipboardObserver clipboardObserver) {
+	public ImportURL(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, HostManager hostManager, CookieManager cookieManager, ClipboardObserver clipboardObserver) {
 		this.parentComponent = parentComponent;
-		linkListImporter = new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
-		htmlImporter = new ImportHTML(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.cookieManager = cookieManager;
+		linkListImporter = new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+		htmlImporter = new ImportHTML(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
 	}
 
 	/**
@@ -73,7 +96,7 @@ public class ImportURL {
 	 * @param embeddedImages Embedded Images
 	 */
 	public void importURL(String url, String referrer, boolean embeddedImages) {
-		String cookies = CookieManager.getCookies(url);
+		String cookies = cookieManager.getCookies(url);
 		url = HTTPUtil.encodeURL(url);
 
 		/*
@@ -87,10 +110,10 @@ public class ImportURL {
 		 * So, maybe there is a bug in Jakarta-HttpClient...
 		 */
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getNonMultithreadedHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
 			method = new HttpGet(url);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}

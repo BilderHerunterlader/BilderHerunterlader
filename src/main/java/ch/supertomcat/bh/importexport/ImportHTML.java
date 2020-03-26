@@ -24,6 +24,7 @@ import org.w3c.tidy.Tidy;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.linkextract.ImageExtract;
 import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
 import ch.supertomcat.bh.importexport.base.AdderImportBase;
@@ -45,6 +46,11 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  */
 public class ImportHTML extends AdderImportBase {
 	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
@@ -52,11 +58,16 @@ public class ImportHTML extends AdderImportBase {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
+	 * @param cookieManager Cookie Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportHTML(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
-			ClipboardObserver clipboardObserver) {
-		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+	public ImportHTML(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, HostManager hostManager, CookieManager cookieManager, ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+		this.cookieManager = cookieManager;
 	}
 
 	/**
@@ -69,7 +80,7 @@ public class ImportHTML extends AdderImportBase {
 			mainWindowAccess.addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("ImportingHTMLFile") + "...");
-			SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 
 			try (FileInputStream in = new FileInputStream(file)) {
 				// Parse the inputstream by tidy
@@ -96,7 +107,7 @@ public class ImportHTML extends AdderImportBase {
 				}
 
 				// Open the Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, clipboardObserver);
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init(); // We need to do this!
 				adderpnl = null;
 
@@ -122,7 +133,7 @@ public class ImportHTML extends AdderImportBase {
 	 * @param embeddedImages Embedded Images
 	 */
 	public void importHTML(String url, String referrer, boolean embeddedImages) {
-		String cookies = CookieManager.getCookies(url);
+		String cookies = cookieManager.getCookies(url);
 		url = HTTPUtil.encodeURL(url);
 
 		/*
@@ -136,10 +147,10 @@ public class ImportHTML extends AdderImportBase {
 		 * So, maybe there is a bug in Jakarta-HttpClient...
 		 */
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getNonMultithreadedHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
 			method = new HttpGet(url);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (!cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -203,7 +214,7 @@ public class ImportHTML extends AdderImportBase {
 			}
 
 			// Open the Dialog
-			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
+			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 			adderpnl.init(); // We need to do this!
 			adderpnl = null;
 		} catch (MalformedURLException e) {
@@ -230,7 +241,7 @@ public class ImportHTML extends AdderImportBase {
 		}
 
 		// Open the Dialog
-		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
+		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
 		adderpnl = null;
 	}

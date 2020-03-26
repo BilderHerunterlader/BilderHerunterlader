@@ -59,10 +59,18 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	private boolean developerRulesEnabled = false;
 
 	/**
-	 * Constructor
+	 * Host Manager
 	 */
-	public HostRules() {
+	private final HostManager hostManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param hostManager Host Manager
+	 */
+	public HostRules(HostManager hostManager) {
 		super(NAME, VERSION, false);
+		this.hostManager = hostManager;
 		domains = new ArrayList<>();
 		domains.add("NODOMAINS");
 
@@ -196,7 +204,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 				upo.setCorrectedFilename(result[1]);
 				if (rule.isResend()) {
 					upo.setContainerURL(result[0]);
-					HostManager.instance().parseURL(upo);
+					hostManager.parseURL(upo);
 				}
 				return;
 			}

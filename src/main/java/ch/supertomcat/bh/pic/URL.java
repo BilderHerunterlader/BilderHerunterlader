@@ -81,7 +81,42 @@ public class URL {
 		this.thumb = thumb;
 		this.filenameCorrected = Localization.getString("Unkown");
 		this.httpsURL = this.url.startsWith(HTTPS_PROTOCOL);
-		host = HostManager.instance().getHosterForURL(this.url);
+	}
+
+	/**
+	 * Finds the hoster for this URL
+	 * 
+	 * @param hostManager HostManager
+	 */
+	public void findHostForURL(HostManager hostManager) {
+		host = hostManager.getHosterForURL(this.url);
+	}
+
+	/**
+	 * Checks the url for redirect
+	 * 
+	 * @param hostManager HostManager
+	 */
+	public void checkURLForRedirect(HostManager hostManager) {
+		if (urlAlreadyCheckedForRedirect) {
+			return;
+		}
+
+		// To prevent endless loops we limit the redirects
+		int maxRedirects = 50;
+		int i = 0;
+		String redirectedURL = this.url;
+		while (i < maxRedirects) {
+			redirectedURL = hostManager.getRedirectManager().checkURLForRedirect(this);
+			if (this.url.equals(redirectedURL)) {
+				break;
+			}
+			this.url = redirectedURL;
+			i++;
+		}
+		host = hostManager.getHosterForURL(this.url);
+
+		urlAlreadyCheckedForRedirect = true;
 	}
 
 	/**
@@ -128,31 +163,6 @@ public class URL {
 	public void setThumb(String thumb) {
 		thumb = HTTPUtil.trimURL(thumb);
 		this.thumb = thumb;
-	}
-
-	/**
-	 * Checks the url for redirect
-	 */
-	public void checkURLForRedirect() {
-		if (urlAlreadyCheckedForRedirect) {
-			return;
-		}
-
-		// To prevent endless loops we limit the redirects
-		int maxRedirects = 50;
-		int i = 0;
-		String redirectedURL = this.url;
-		while (i < maxRedirects) {
-			redirectedURL = HostManager.instance().getRedirectManager().checkURLForRedirect(this);
-			if (this.url.equals(redirectedURL)) {
-				break;
-			}
-			this.url = redirectedURL;
-			i++;
-		}
-		host = HostManager.instance().getHosterForURL(this.url);
-
-		urlAlreadyCheckedForRedirect = true;
 	}
 
 	/**

@@ -3,9 +3,6 @@ package ch.supertomcat.bh.gui.queue;
 import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * TableModel for Queue
@@ -37,16 +34,8 @@ public class QueueTableModel extends DefaultTableModel {
 		Object data[] = new Object[4];
 		data[0] = pic.getContainerURL();
 		data[1] = pic.getTarget();
-
-		long size = pic.getSize();
-		if (size <= 0) {
-			data[2] = Localization.getString("Unkown");
-		} else {
-			data[2] = UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView());
-		}
-
+		data[2] = pic.getSize();
 		data[3] = pic;
-
 		this.addRow(data);
 	}
 

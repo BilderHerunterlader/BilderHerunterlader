@@ -7,6 +7,7 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
@@ -14,6 +15,20 @@ import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowR
  */
 public class QueueColorRowRenderer extends DefaultStringColorRowRenderer implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Settings Manager
+	 */
+	protected final SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 */
+	public QueueColorRowRenderer(SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
+	}
 
 	@Override
 	public void prepareForegroundColor(Component comp, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

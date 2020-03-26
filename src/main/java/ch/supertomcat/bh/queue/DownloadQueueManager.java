@@ -7,7 +7,10 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
@@ -42,17 +45,17 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	/**
 	 * Maximum connection count
 	 */
-	private int connectionCount = SettingsManager.instance().getConnections();
+	private int connectionCount;
 
 	/**
 	 * Maximum connection count per host
 	 */
-	private int connectionCountPerHost = SettingsManager.instance().getConnectionsPerHost();
+	private int connectionCountPerHost;
 
 	/**
 	 * Free download slots
 	 */
-	private int openDownloadSlots = connectionCount;
+	private int openDownloadSlots;
 
 	/**
 	 * Downloaded files since application started
@@ -67,9 +70,9 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private double downloadBitrate = -1;
 
 	/**
-	 * Array containing the restrictions
+	 * Restrictions
 	 */
-	private List<Restriction> restrictions = new ArrayList<>();
+	private final DownloadQueueManagerRestrictions restrictions;
 
 	/**
 	 * Hashtable containing the counters
@@ -82,10 +85,44 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private List<IDownloadListener> queue = new ArrayList<>();
 
 	/**
-	 * Constructor
+	 * Proxy Manager
 	 */
-	public DownloadQueueManager() {
-		SettingsManager.instance().addSettingsListener(this);
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param restrictions Restrictions
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
+	 */
+	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
+		this.restrictions = restrictions;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.settingsManager.addSettingsListener(this);
+		this.cookieManager = cookieManager;
+		this.hostManager = hostManager;
+		this.connectionCount = settingsManager.getConnections();
+		this.connectionCountPerHost = settingsManager.getConnectionsPerHost();
+		this.openDownloadSlots = connectionCount;
 	}
 
 	/**
@@ -180,7 +217,7 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 					countForDomain = cfd;
 				}
 
-				Restriction re = getRestrictionForDomain(domain);
+				Restriction re = restrictions.getRestrictionForDomain(domain);
 
 				if (re != null) {
 					if (re.getMaxSimultaneousDownloads() > 0) {
@@ -216,7 +253,7 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 				}
 
 				// Allow the download and check if the listener really started the download
-				boolean b = download.downloadAllowed(this);
+				boolean b = download.downloadAllowed(this, proxyManager, settingsManager, cookieManager, hostManager);
 				if (b == true) {
 					calculateRateListeners.add(download);
 					// Only if the listener has started the download, we decrease open download slots
@@ -361,11 +398,11 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 		 */
 		if (!isDownloading()) {
 			// If no downloads are running we change only the openDownloadSlots
-			this.connectionCount = SettingsManager.instance().getConnections();
+			this.connectionCount = settingsManager.getConnections();
 			setOpenDownloadSlots(this.connectionCount);
 		} else {
 			// If downloads are running
-			int cc = SettingsManager.instance().getConnections();
+			int cc = settingsManager.getConnections();
 			// Calculate the difference between the new max connection value and the old
 			int diff = cc - this.connectionCount;
 			if (diff != 0) {
@@ -380,11 +417,11 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 			// Set the max value
 			this.connectionCount = cc;
 		}
-		this.connectionCountPerHost = SettingsManager.instance().getConnectionsPerHost();
+		this.connectionCountPerHost = settingsManager.getConnectionsPerHost();
 	}
 
 	@Override
-	public void lookAndFeelChanged() {
+	public void lookAndFeelChanged(int lookAndFeel) {
 		// Nothing to do
 	}
 
@@ -434,34 +471,6 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	}
 
 	/**
-	 * Adds a restriction
-	 * If there is already a restriction for a domain the restriction
-	 * is not added. But the value of maximum simultanious downloads from
-	 * the restriction to add is taken and set to the existing restriction.
-	 * So this method can be used to update a restriction
-	 * 
-	 * @param restriction Restriction
-	 */
-	public synchronized void addRestriction(Restriction restriction) {
-		for (int i = 0; i < restrictions.size(); i++) {
-			if (restrictions.get(i).equals(restriction)) {
-				restrictions.get(i).setMaxSimultaneousDownloads(restriction.getMaxSimultaneousDownloads());
-				return;
-			}
-		}
-		restrictions.add(restriction);
-	}
-
-	/**
-	 * Removes a restriction
-	 * 
-	 * @param restriction Restriction
-	 */
-	public synchronized void removeRestriction(Restriction restriction) {
-		restrictions.remove(restriction);
-	}
-
-	/**
 	 * Returns the domain from a URL
 	 * If the domain could not retrieved, an empty
 	 * String is returned.
@@ -491,25 +500,6 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 			return domain;
 		}
 		return domain.substring(lastBeforeLastPoint + 1);
-	}
-
-	/**
-	 * Returns the restriction for a domain
-	 * If there is no restriction for a domain null is returned
-	 * 
-	 * @param domain Domain
-	 * @return Restriction
-	 */
-	private Restriction getRestrictionForDomain(String domain) {
-		if (domain.isEmpty()) {
-			return null;
-		}
-		for (Restriction restriction : restrictions) {
-			if (restriction.isDomainRestricted(domain)) {
-				return restriction;
-			}
-		}
-		return null;
 	}
 
 	/**

@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -22,6 +23,9 @@ import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Helper class for Transmitter
@@ -58,6 +62,21 @@ public class TransmitterHelper {
 	private final KeywordManager keywordManager;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -75,17 +94,24 @@ public class TransmitterHelper {
 	 * @param queueManager Queue Manager
 	 * @param logManager Log Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public TransmitterHelper(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, LogManager logManager, KeywordManager keywordManager,
-			ClipboardObserver clipboardObserver) {
+	public TransmitterHelper(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, LogManager logManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver) {
 		this.parentComponent = parentComponent;
 		this.mainWindowAccess = mainWindowAccess;
 		this.queueManager = queueManager;
 		this.logManager = logManager;
 		this.keywordManager = keywordManager;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.hostManager = hostManager;
 		this.clipboardObserver = clipboardObserver;
-		this.urlImporter = new ImportURL(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+		this.urlImporter = new ImportURL(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
 	}
 
 	/**
@@ -244,7 +270,8 @@ public class TransmitterHelper {
 
 			if ((fullList == false) && (file.length() > 0) && (eof)) {
 				// If we recieved only a path to a file, we must read it
-				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLinkList(file, true);
+				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
+						.importLinkList(file, true);
 				logger.info("Handled Connection successfully");
 			} else if ((fullList == false) && (url.length() > 0) && (eof)) {
 				// If we recieved only a URL which contains all the URLs, we download the URL
@@ -260,7 +287,7 @@ public class TransmitterHelper {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, clipboardObserver);
+				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init();
 				logger.info("Handled Connection successfully");
 			}

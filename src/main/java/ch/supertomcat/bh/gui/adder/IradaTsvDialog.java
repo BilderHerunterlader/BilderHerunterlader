@@ -129,12 +129,26 @@ public class IradaTsvDialog extends JDialog {
 	private boolean okPressed = false;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public IradaTsvDialog(Window owner) {
+	public IradaTsvDialog(Window owner, ProxyManager proxyManager, SettingsManager settingsManager) {
 		super(owner);
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
 
 		JPanel pnlRB = new JPanel();
 		pnlRB.add(rbFile);
@@ -162,9 +176,9 @@ public class IradaTsvDialog extends JDialog {
 		btnFile.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				File file = FileDialogUtil.showFileOpenDialog(owner, SettingsManager.instance().getLastUsedImportDialogPath(), new TsvFileFilter());
+				File file = FileDialogUtil.showFileOpenDialog(owner, settingsManager.getLastUsedImportDialogPath(), new TsvFileFilter());
 				if (file != null) {
-					SettingsManager.instance().setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+					settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 					txtFile.setText(file.getAbsolutePath());
 				}
 			}
@@ -280,10 +294,10 @@ public class IradaTsvDialog extends JDialog {
 
 	private boolean loadTsvURL() {
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(txtURL.getText());
 			method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", settingsManager.getUserAgent());
 
 			try (CloseableHttpResponse response = client.execute(method)) {
 				int statusCode = response.getStatusLine().getStatusCode();

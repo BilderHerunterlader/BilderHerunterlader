@@ -32,12 +32,19 @@ public class UpdateManager {
 	private UpdateSource updateSource = null;
 
 	/**
+	 * GUI Event
+	 */
+	private final GuiEvent guiEvent;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param updateSource UpdateSource
+	 * @param guiEvent GUI Event
 	 */
-	public UpdateManager(UpdateSource updateSource) {
+	public UpdateManager(UpdateSource updateSource, GuiEvent guiEvent) {
 		this.updateSource = updateSource;
+		this.guiEvent = guiEvent;
 	}
 
 	/**
@@ -226,9 +233,9 @@ public class UpdateManager {
 		}
 
 		if (deleteUpdatesAvailable) {
-			GuiEvent.instance().exitAppForce(Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart"), Localization.getString("Update"), owner, false);
+			guiEvent.exitAppForce(Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart"), Localization.getString("Update"), owner, false);
 		} else {
-			GuiEvent.instance().exitAppForce(Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), owner, true);
+			guiEvent.exitAppForce(Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), owner, true);
 		}
 	}
 

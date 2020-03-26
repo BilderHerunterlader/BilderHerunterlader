@@ -102,11 +102,18 @@ public class About extends JDialog implements ActionListener, WindowListener {
 	private JPanel pnlButtons = new JPanel();
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
+	 * @param settingsManager Settings Manager
 	 */
-	public About(Window owner) {
+	public About(Window owner, SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
 		setTitle(Localization.getString("About"));
 		setIconImage(Icons.getBHImage("BH.png"));
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -261,7 +268,7 @@ public class About extends JDialog implements ActionListener, WindowListener {
 		long total = Runtime.getRuntime().totalMemory();
 		long used = total - free;
 
-		int mode = SettingsManager.instance().getSizeView();
+		int mode = settingsManager.getSizeView();
 
 		lblMaxTotalMemory.setText(Localization.getString("MaximumAvailableMemory") + ": " + UnitFormatUtil.getSizeString(max, mode));
 

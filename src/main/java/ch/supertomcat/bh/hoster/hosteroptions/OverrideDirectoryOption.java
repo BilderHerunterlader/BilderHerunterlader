@@ -18,42 +18,50 @@ public class OverrideDirectoryOption {
 
 	private boolean pathOverride = false;
 
-	private String pathOverrideVal = SettingsManager.instance().getSavePath();
+	private String pathOverrideVal;
 
 	private boolean pathOverrideSubdirsAllowed = true;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param optionPrefix Prefix
+	 * @param settingsManager Settings Manager
 	 */
-	public OverrideDirectoryOption(String optionPrefix) {
+	public OverrideDirectoryOption(String optionPrefix, SettingsManager settingsManager) {
 		optionPrefix = optionPrefix.replaceAll("[.]+$", "");
 		this.optionPrefix = optionPrefix;
+		this.settingsManager = settingsManager;
+		this.pathOverrideVal = settingsManager.getSavePath();
 
 		try {
-			pathOverride = SettingsManager.instance().getBooleanValue(optionPrefix + ".pathOverride");
+			pathOverride = settingsManager.getBooleanValue(optionPrefix + ".pathOverride");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverride", false);
+				settingsManager.setOptionValue(optionPrefix + ".pathOverride", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 		try {
-			pathOverrideSubdirsAllowed = SettingsManager.instance().getBooleanValue(optionPrefix + ".pathOverrideSubdirsAllowed");
+			pathOverrideSubdirsAllowed = settingsManager.getBooleanValue(optionPrefix + ".pathOverrideSubdirsAllowed");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", true);
+				settingsManager.setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 		try {
-			pathOverrideVal = SettingsManager.instance().getStringValue(optionPrefix + ".pathOverrideVal");
+			pathOverrideVal = settingsManager.getStringValue(optionPrefix + ".pathOverrideVal");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverrideVal", pathOverrideVal);
+				settingsManager.setOptionValue(optionPrefix + ".pathOverrideVal", pathOverrideVal);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -128,17 +136,17 @@ public class OverrideDirectoryOption {
 	 */
 	public void saveOptions() {
 		try {
-			SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverride", this.pathOverride);
+			settingsManager.setOptionValue(optionPrefix + ".pathOverride", this.pathOverride);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
 		try {
-			SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", this.pathOverrideSubdirsAllowed);
+			settingsManager.setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", this.pathOverrideSubdirsAllowed);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
 		try {
-			SettingsManager.instance().setOptionValue(optionPrefix + ".pathOverrideVal", this.pathOverrideVal);
+			settingsManager.setOptionValue(optionPrefix + ".pathOverrideVal", this.pathOverrideVal);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

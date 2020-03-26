@@ -59,7 +59,7 @@ public class LogManager implements BHSettingsListener {
 	/**
 	 * Path to Text-Log-File
 	 */
-	private String logFile = ApplicationProperties.getProperty("DownloadLogPath") + SettingsManager.instance().getCurrentDownloadLogFile();
+	private String logFile;
 
 	/**
 	 * Path to Text-Blacklist-File
@@ -67,9 +67,19 @@ public class LogManager implements BHSettingsListener {
 	private String blacklistFile = ApplicationProperties.getProperty("DownloadLogPath") + "BH-Blacklist.txt";
 
 	/**
-	 * Constructor
+	 * Settings Manager
 	 */
-	public LogManager() {
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 */
+	public LogManager(SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
+		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
+
 		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
 		if (folder.exists() == false) {
 			folder.mkdirs();
@@ -91,7 +101,7 @@ public class LogManager implements BHSettingsListener {
 			}
 		}
 
-		SettingsManager.instance().addSettingsListener(this);
+		settingsManager.addSettingsListener(this);
 	}
 
 	/**
@@ -146,7 +156,7 @@ public class LogManager implements BHSettingsListener {
 	public int getCurrentLogFileIndexForArray(String[] logFiles) {
 		if (logFiles != null) {
 			for (int i = 0; i < logFiles.length; i++) {
-				if (logFiles[i].equals(SettingsManager.instance().getCurrentDownloadLogFile())) {
+				if (logFiles[i].equals(settingsManager.getCurrentDownloadLogFile())) {
 					return i;
 				}
 			}
@@ -252,7 +262,7 @@ public class LogManager implements BHSettingsListener {
 			 * have enough to do.
 			 */
 
-			int threadCount = SettingsManager.instance().getThreadCount();
+			int threadCount = settingsManager.getThreadCount();
 
 			if (threadCount < 1) {
 				threadCount = 1;
@@ -406,7 +416,7 @@ public class LogManager implements BHSettingsListener {
 							String strFilesize;
 							if (arr.length >= 4) {
 								long filesize = Long.parseLong(arr[3]);
-								strFilesize = UnitFormatUtil.getSizeString(filesize, SettingsManager.instance().getSizeView());
+								strFilesize = UnitFormatUtil.getSizeString(filesize, settingsManager.getSizeView());
 							} else {
 								strFilesize = Localization.getString("Unkown");
 							}
@@ -584,7 +594,7 @@ public class LogManager implements BHSettingsListener {
 
 	@Override
 	public void settingsChanged() {
-		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + SettingsManager.instance().getCurrentDownloadLogFile();
+		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
 		if (logFile.equals(currentLogFile) == false) {
 			logFile = currentLogFile;
 			for (ILogManagerListener listener : listeners) {
@@ -594,7 +604,7 @@ public class LogManager implements BHSettingsListener {
 	}
 
 	@Override
-	public void lookAndFeelChanged() {
+	public void lookAndFeelChanged(int lookAndFeel) {
 		// Nothing to do
 	}
 }

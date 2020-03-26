@@ -13,7 +13,12 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -42,7 +47,21 @@ class RulesTest {
 
 	@BeforeEach
 	public void beforeTest() {
-		hostManager = HostManager.instance();
+		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
+		ProxyManager proxyManager = new ProxyManager(settingsManager);
+		CookieManager cookieManager = new CookieManager(settingsManager);
+		hostManager = new HostManager(null, new RestrictionAccess() {
+
+			@Override
+			public void removeRestriction(Restriction restriction) {
+				// Nothing to do
+			}
+
+			@Override
+			public void addRestriction(Restriction restriction) {
+				// Nothing to do
+			}
+		}, proxyManager, settingsManager, cookieManager);
 	}
 
 	@Test

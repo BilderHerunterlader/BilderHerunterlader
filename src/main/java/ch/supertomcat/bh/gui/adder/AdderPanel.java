@@ -98,6 +98,7 @@ import ch.supertomcat.bh.preview.DownloadPreviewRunnable;
 import ch.supertomcat.bh.preview.PreviewCache;
 import ch.supertomcat.bh.preview.PreviewCache.PreviewCacheListener;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -278,7 +279,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	/**
 	 * Checkbox
 	 */
-	private JCheckBox cbTargetDirAuto = new JCheckBox(Localization.getString("AutomaticRecognition"), SettingsManager.instance().isAutoTargetdir());
+	private JCheckBox cbTargetDirAuto;
 
 	/**
 	 * Buttongroup
@@ -530,6 +531,21 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private final KeywordManager keywordManager;
 
 	/**
+	 * Proxy Manager
+	 */
+	private final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -542,10 +558,14 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
-		this(parent, false, urlList, logManager, queueManager, keywordManager, clipboardObserver);
+	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager, SettingsManager settingsManager,
+			HostManager hostManager, ClipboardObserver clipboardObserver) {
+		this(parent, false, urlList, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 	}
 
 	/**
@@ -557,15 +577,22 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
+	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, HostManager hostManager, ClipboardObserver clipboardObserver) {
 		super(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("DownloadSelection"));
 		this.localFiles = localFiles;
 		this.urlList = urlList;
 		this.logManager = logManager;
 		this.queueManager = queueManager;
 		this.keywordManager = keywordManager;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.hostManager = hostManager;
 		this.clipboardObserver = clipboardObserver;
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -581,7 +608,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		previewCache.addListener(previewCacheListener);
 
-		int configuredPreviewHeight = SettingsManager.instance().getPreviewSize();
+		int configuredPreviewHeight = settingsManager.getPreviewSize();
 		previewHeight = Integer.max(MINIMUM_PREVIEW_HEIGHT, configuredPreviewHeight);
 		imgDummy = ImageUtil.generatePreviewImage(Icons.getBHImage("Dummy.png", 16), -1, previewHeight);
 		iconDummy = new ImageIcon(imgDummy);
@@ -716,8 +743,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			}
 		});
 		txtTargetDir.setEditable(false);
-		txtTargetDir.addItem(SettingsManager.instance().getSavePath());
-		for (String strAdd : SettingsManager.instance().getTargetDirChangeHistory()) {
+		txtTargetDir.addItem(settingsManager.getSavePath());
+		for (String strAdd : settingsManager.getTargetDirChangeHistory()) {
 			txtTargetDir.addItem(strAdd);
 		}
 		txtTargetDir.setSelectedIndex(0);
@@ -728,14 +755,15 @@ public class AdderPanel extends JFrame implements ActionListener {
 		menuTarget.add(itemTargetBySelection);
 		menuTarget.add(itemTargetByInput);
 
-		if (SettingsManager.instance().isDownloadPreviews()) {
+		if (settingsManager.isDownloadPreviews()) {
 			pnlDisplayOptions.add(btnShowPreviews);
 		}
 
-		boolean autoTargetDirByTitle = SettingsManager.instance().getAutoTargetDirMode() == SettingsManager.BY_TITLE;
+		boolean autoTargetDirByTitle = settingsManager.getAutoTargetDirMode() == SettingsManager.BY_TITLE;
 		rbTitle.setSelected(autoTargetDirByTitle);
 		rbFilename.setSelected(!autoTargetDirByTitle);
 
+		cbTargetDirAuto = new JCheckBox(Localization.getString("AutomaticRecognition"), settingsManager.isAutoTargetdir());
 		boolean autoTargetDirEnabled = cbTargetDirAuto.isSelected();
 		rbTitle.setEnabled(autoTargetDirEnabled);
 		rbFilename.setEnabled(autoTargetDirEnabled);
@@ -750,8 +778,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				boolean b = cbTargetDirAuto.isSelected();
-				SettingsManager.instance().setAutoTargetdir(b);
-				SettingsManager.instance().writeSettings(true);
+				settingsManager.setAutoTargetdir(b);
+				settingsManager.writeSettings(true);
 				lblTargetDirAuto.setEnabled(b);
 				rbTitle.setEnabled(b);
 				rbFilename.setEnabled(b);
@@ -769,8 +797,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (rbTitle.isSelected()) {
-					SettingsManager.instance().setAutoTargetDirMode(SettingsManager.BY_TITLE);
-					SettingsManager.instance().writeSettings(true);
+					settingsManager.setAutoTargetDirMode(SettingsManager.BY_TITLE);
+					settingsManager.writeSettings(true);
 				}
 			}
 		});
@@ -778,8 +806,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				if (rbFilename.isSelected()) {
-					SettingsManager.instance().setAutoTargetDirMode(SettingsManager.BY_FILENAME);
-					SettingsManager.instance().writeSettings(true);
+					settingsManager.setAutoTargetDirMode(SettingsManager.BY_FILENAME);
+					settingsManager.writeSettings(true);
 				}
 			}
 		});
@@ -790,7 +818,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		pnlTargetDirAuto.add(rbFilename);
 		pnlTargetDirAuto.add(btnSearchAgain);
 		pnlTargetDirAuto.add(btnNewKeyword);
-		if (SettingsManager.instance().isDownloadPreviews()) {
+		if (settingsManager.isDownloadPreviews()) {
 			btnShowPreviews.addActionListener(this);
 		}
 		btnSearchAgain.addActionListener(this);
@@ -811,7 +839,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		pnlSelect.add(Box.createRigidArea(new Dimension(5, 0)));
 		pnlSelect.add(btnSelectOther);
 
-		for (String strAdd : SettingsManager.instance().getAdderAdd()) {
+		for (String strAdd : settingsManager.getAdderAdd()) {
 			cbAdd.addItem(strAdd);
 		}
 		cbAdd.setEditable(true);
@@ -928,7 +956,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		im.put(windowOkStroke, windowOkKey);
 		am.put(windowOkKey, windowOkAction);
 
-		SettingsManager sm = SettingsManager.instance();
+		SettingsManager sm = settingsManager;
 		if (sm.isSaveDownloadSelectionWindowSizePosition()) {
 			this.setSize(sm.getDownloadSelectionWindowWidth(), sm.getDownloadSelectionWindowHeight());
 			this.setLocation(sm.getDownloadSelectionWindowXPos(), sm.getDownloadSelectionWindowYPos());
@@ -945,7 +973,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 			@Override
 			public void componentResized(ComponentEvent e) {
-				SettingsManager sm = SettingsManager.instance();
+				SettingsManager sm = settingsManager;
 				sm.setDownloadSelectionWindowWidth(getWidth());
 				sm.setDownloadSelectionWindowHeight(getHeight());
 				sm.writeSettings(true);
@@ -954,7 +982,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 			@Override
 			public void componentMoved(ComponentEvent e) {
-				SettingsManager sm = SettingsManager.instance();
+				SettingsManager sm = settingsManager;
 				sm.setDownloadSelectionWindowXPos(getX());
 				sm.setDownloadSelectionWindowYPos(getY());
 				sm.writeSettings(true);
@@ -975,20 +1003,33 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 */
 	public void init() {
 		String title = urlList.getTitle();
-		RegexReplacePipeline regexPipe = SettingsManager.instance().getRegexReplacePipelinePageTitle();
+		RegexReplacePipeline regexPipe = settingsManager.getRegexReplacePipelinePageTitle();
 		txtTitle.setText(regexPipe.getReplacedPageTitle(title));
 
 		txtReferrer.setText(urlList.getReferrer());
 
-		setComponentsEnabled(false, false);
 		ProgressObserver progress = new ProgressObserver();
 		progress.addProgressListener(new AdderProgressListener());
-		HostManager.removeDuplicates(urlList.getUrls(), progress);
+
+		setComponentsEnabled(false, false);
+		progress.progressChanged(true);
+		progress.progressChanged(0, urlList.getUrls().size(), 0);
+		progress.progressChanged(Localization.getString("CheckingLinks") + "...");
+		int urlCount = 0;
+		for (URL url : urlList.getUrls()) {
+			url.findHostForURL(hostManager);
+			urlCount++;
+			progress.progressChanged(urlCount);
+		}
+		progress.progressChanged(false);
+
+		setComponentsEnabled(false, false);
+		HostManager.removeDuplicates(urlList.getUrls(), progress, settingsManager);
 
 		this.setPGText(Localization.getString("CheckingLinks") + "...");
 		this.setPGEnabled(true);
 		setComponentsEnabled(false, true);
-		huc = new HostURLCheckerRunnable(urlList);
+		huc = new HostURLCheckerRunnable(urlList, hostManager);
 		huc.addHMListener(hostURLCheckerListener);
 		huc.checkURLs();
 	}
@@ -1053,7 +1094,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		alreadyDownloadedLinksCount = 0;
 
-		if (SettingsManager.instance().isDownloadPreviews()) {
+		if (settingsManager.isDownloadPreviews()) {
 			previewRunnable = new DownloadPreviewRunnable(previewCache, previewHeight, clearedUpURLs);
 			Thread previewThread = new Thread(previewRunnable);
 			previewThread.setName("Preview-Download-Wait" + previewThread.getId());
@@ -1064,7 +1105,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			Object[] data = new Object[15];
 			data[0] = Boolean.valueOf(!url.isAlreadyDownloaded());
 			data[1] = url.getURL();
-			String filename = BHUtil.filterFilename(url.getFilenameCorrected());
+			String filename = BHUtil.filterFilename(url.getFilenameCorrected(), settingsManager);
 			filename = filename.replaceAll("%20", " ");
 			data[2] = filename;
 			if (url.getTargetPath() != null && !url.getTargetPath().isEmpty()) {
@@ -1458,14 +1499,14 @@ public class AdderPanel extends JFrame implements ActionListener {
 				if (folderIndex < 0) {
 					txtTargetDir.addItem(folder);
 					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
-					SettingsManager.instance().addTargetDirChangeHistory(folder);
-					SettingsManager.instance().writeSettings(true);
+					settingsManager.addTargetDirChangeHistory(folder);
+					settingsManager.writeSettings(true);
 				} else {
 					txtTargetDir.setSelectedIndex(folderIndex);
 				}
-				if (SettingsManager.instance().isSaveLastPath()) {
-					SettingsManager.instance().setSavePath(folder);
-					SettingsManager.instance().writeSettings(true);
+				if (settingsManager.isSaveLastPath()) {
+					settingsManager.setSavePath(folder);
+					settingsManager.writeSettings(true);
 				}
 				file = null;
 			}
@@ -1475,20 +1516,20 @@ public class AdderPanel extends JFrame implements ActionListener {
 				if (!input.endsWith("/") && !input.endsWith("\\")) {
 					input += FileUtil.FILE_SEPERATOR;
 				}
-				input = BHUtil.filterPath(input);
+				input = BHUtil.filterPath(input, settingsManager);
 				input = FileUtil.reducePathLength(input);
 				int folderIndex = getIndexForFolder(input);
 				if (folderIndex < 0) {
 					txtTargetDir.addItem(input);
 					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
-					SettingsManager.instance().addTargetDirChangeHistory(input);
-					SettingsManager.instance().writeSettings(true);
+					settingsManager.addTargetDirChangeHistory(input);
+					settingsManager.writeSettings(true);
 				} else {
 					txtTargetDir.setSelectedIndex(folderIndex);
 				}
-				if (SettingsManager.instance().isSaveLastPath()) {
-					SettingsManager.instance().setSavePath(input);
-					SettingsManager.instance().writeSettings(true);
+				if (settingsManager.isSaveLastPath()) {
+					settingsManager.setSavePath(input);
+					settingsManager.writeSettings(true);
 				}
 			}
 		} else if (e.getSource() == btnAddTitle) {
@@ -1507,7 +1548,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				searchForKeywords();
 			}
 		} else if (e.getSource() == btnNewKeyword) {
-			Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(this, txtTitle.getSelectedText());
+			Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(this, settingsManager, txtTitle.getSelectedText());
 			if (k != null) {
 				keywordManager.addKeyword(k);
 				searchForKeywords();
@@ -1529,13 +1570,13 @@ public class AdderPanel extends JFrame implements ActionListener {
 			}
 			if (!available) {
 				cbAdd.insertItemAt(strAdd, 0);
-				SettingsManager.instance().addAdderAdd(strAdd);
-				SettingsManager.instance().writeSettings(true);
+				settingsManager.addAdderAdd(strAdd);
+				settingsManager.writeSettings(true);
 			}
 		} else if (e.getSource() == menuItemSelectKeyword) {
 			List<Keyword> vk = keywordManager.getKeywords();
 			Collections.sort(vk);
-			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(this, Localization.getString("SelectKeyword"), true, null, vk, false);
+			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(this, Localization.getString("SelectKeyword"), true, null, vk, false, settingsManager);
 			if (aks.isOkPressed()) {
 				Keyword keyword = aks.getSelectedKeyword();
 				if (aks.isNewKeywordCreated()) {
@@ -1619,7 +1660,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		this.setPGText(Localization.getString("SearchForKeywords"));
 		if (rbTitle.isSelected()) {
 			String strSearch = txtTitle.getText();
-			kst = new KeywordSearchThread(strSearch, this, false, true, localFiles, keywordManager);
+			kst = new KeywordSearchThread(strSearch, this, false, true, localFiles, keywordManager, settingsManager);
 			kst.setKeywordSearchThreadListener(keywordSearchThreadListener);
 			kst.setPriority(Thread.MIN_PRIORITY);
 			kst.start();
@@ -1630,7 +1671,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				int modelIndex = jtAdder.convertRowIndexToModel(i);
 				strSearchA[i] = (String)model.getValueAt(modelIndex, urlColumnModelIndex);
 			}
-			kst = new KeywordSearchThread(strSearchA, this, true, false, localFiles, keywordManager);
+			kst = new KeywordSearchThread(strSearchA, this, true, false, localFiles, keywordManager, settingsManager);
 			kst.setKeywordSearchThreadListener(keywordSearchThreadListener);
 			kst.setPriority(Thread.MIN_PRIORITY);
 			kst.start();
@@ -1649,8 +1690,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 				if (keyword != null) {
 					model.setValueAt(keyword, modelIndex, keywordColumnModelIndex);
 				} else {
-					boolean deselectNoKeyword = SettingsManager.instance().isDeselectNoKeyword();
-					boolean deleteNoKeyword = SettingsManager.instance().isDeleteNoKeyword() && localFiles;
+					boolean deselectNoKeyword = settingsManager.isDeselectNoKeyword();
+					boolean deleteNoKeyword = settingsManager.isDeleteNoKeyword() && localFiles;
 					if (deselectNoKeyword && (deleteNoKeyword == false)) {
 						model.setValueAt(false, modelIndex, selectionColumnModelIndex);
 					}
@@ -1764,8 +1805,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			}
 		}
 
-		if (SettingsManager.instance().isAlwaysAddTitle()) {
-			String title = BHUtil.filterFilename(txtTitle.getText());
+		if (settingsManager.isAlwaysAddTitle()) {
+			String title = BHUtil.filterFilename(txtTitle.getText(), settingsManager);
 			if (!title.isEmpty()) {
 				sbNewPath.append(title);
 				sbNewPath.append(FileUtil.FILE_SEPERATOR);
@@ -1773,7 +1814,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		}
 
 		String newPath = sbNewPath.toString();
-		newPath = BHUtil.filterPath(newPath);
+		newPath = BHUtil.filterPath(newPath, settingsManager);
 		newPath = FileUtil.reducePathLength(newPath);
 
 		int pathColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
@@ -1786,8 +1827,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			int rowModelIndex = jtAdder.convertRowIndexToModel(i);
 			String oldPath = (String)model.getValueAt(rowModelIndex, pathColumnModelIndex);
-			String newPath = oldPath + BHUtil.filterFilename(value) + FileUtil.FILE_SEPERATOR;
-			newPath = BHUtil.filterPath(newPath);
+			String newPath = oldPath + BHUtil.filterFilename(value, settingsManager) + FileUtil.FILE_SEPERATOR;
+			newPath = BHUtil.filterPath(newPath, settingsManager);
 			newPath = FileUtil.reducePathLength(newPath);
 			model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
 		}
@@ -1796,7 +1837,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	}
 
 	private void importIrada() {
-		IradaTsvDialog itd = new IradaTsvDialog(this);
+		IradaTsvDialog itd = new IradaTsvDialog(this, proxyManager, settingsManager);
 		List<Tsv> result = itd.getResult();
 		if (itd.isOkPressed() && result != null) {
 			int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
@@ -1898,7 +1939,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		if (selectedRows.length > 0) {
 			String defaultvalue = (String)model.getValueAt(jtAdder.convertRowIndexToModel(selectedRows[0]), filenameColumnModelIndex);
 			defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-			String[] input = FileRenameDialog.showFileRenameDialog(this, "", defaultvalue, selectedRows.length);
+			String[] input = FileRenameDialog.showFileRenameDialog(this, "", defaultvalue, selectedRows.length, settingsManager);
 			if (input != null) {
 				int index = Integer.parseInt(input[1]);
 				int step = Integer.parseInt(input[2]);
@@ -1955,7 +1996,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
-				String newPath = BHUtil.filterPath(input);
+				String newPath = BHUtil.filterPath(input, settingsManager);
 				newPath = FileUtil.reducePathLength(newPath);
 				model.setValueAt(newPath, modelIndex, folderColumnModelIndex);
 				model.setValueAt(false, modelIndex, folderOverrideColumnModelIndex);
@@ -2074,21 +2115,21 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(jtAdder, SettingsManager.instance().getColWidthsAdder());
+		TableUtil.applyColWidths(jtAdder, settingsManager.getColWidthsAdder());
 	}
 
 	/**
@@ -2116,7 +2157,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			setComponentsEnabled(false, false);
 			ProgressObserver progress = new ProgressObserver();
 			progress.addProgressListener(new AdderProgressListener());
-			HostManager.removeDuplicates(urls, progress);
+			HostManager.removeDuplicates(urls, progress, settingsManager);
 
 			// Add links to table
 			setData(urls);

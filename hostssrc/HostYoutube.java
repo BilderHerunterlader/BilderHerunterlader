@@ -55,7 +55,6 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.Restriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
@@ -66,13 +65,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Youtube
  * 
- * @version 8.0
+ * @version 8.2
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "8.0";
+	public static final String VERSION = "8.2";
 
 	/**
 	 * Name dieser Klasse
@@ -140,7 +139,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 	private boolean filenameIncludeVideoID = false;
 
-	private OverrideDirectoryOption overrideDirectoryOption = new OverrideDirectoryOption(NAME);
+	private OverrideDirectoryOption overrideDirectoryOption;
 
 	/**
 	 * Beschraenkung
@@ -152,6 +151,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	 */
 	public HostYoutube() {
 		super(NAME, VERSION);
+		this.overrideDirectoryOption = new OverrideDirectoryOption(NAME, getSettingsManager());
 		/**
 		 * Name, Container Format, Video Format, Aspect Ratio, Max Video Resolution,
 		 * Audio Format, Audio Channels, Sampling Rate (kHz), File-Extension, QUALITY_...
@@ -243,120 +243,120 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 		int iMaxConnections = 0;
 		try {
-			iMaxConnections = SettingsManager.instance().getIntValue(NAME + ".maxSimultaneousDownloads");
+			iMaxConnections = getSettingsManager().getIntValue(NAME + ".maxSimultaneousDownloads");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".maxSimultaneousDownloads", 1);
+				getSettingsManager().setOptionValue(NAME + ".maxSimultaneousDownloads", 1);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			download4KHD = SettingsManager.instance().getBooleanValue(NAME + ".download4KHD");
+			download4KHD = getSettingsManager().getBooleanValue(NAME + ".download4KHD");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".download4KHD", download4KHD);
+				getSettingsManager().setOptionValue(NAME + ".download4KHD", download4KHD);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadFullHD = SettingsManager.instance().getBooleanValue(NAME + ".downloadFullHD");
+			downloadFullHD = getSettingsManager().getBooleanValue(NAME + ".downloadFullHD");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
+				getSettingsManager().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadHD = SettingsManager.instance().getBooleanValue(NAME + ".downloadHD");
+			downloadHD = getSettingsManager().getBooleanValue(NAME + ".downloadHD");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadHD", downloadHD);
+				getSettingsManager().setOptionValue(NAME + ".downloadHD", downloadHD);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadHigh = SettingsManager.instance().getBooleanValue(NAME + ".downloadHigh");
+			downloadHigh = getSettingsManager().getBooleanValue(NAME + ".downloadHigh");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadHigh", downloadHigh);
+				getSettingsManager().setOptionValue(NAME + ".downloadHigh", downloadHigh);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadMedium = SettingsManager.instance().getBooleanValue(NAME + ".downloadMedium");
+			downloadMedium = getSettingsManager().getBooleanValue(NAME + ".downloadMedium");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadMedium", downloadMedium);
+				getSettingsManager().setOptionValue(NAME + ".downloadMedium", downloadMedium);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadMobile = SettingsManager.instance().getBooleanValue(NAME + ".downloadMobile");
+			downloadMobile = getSettingsManager().getBooleanValue(NAME + ".downloadMobile");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadMobile", downloadMobile);
+				getSettingsManager().setOptionValue(NAME + ".downloadMobile", downloadMobile);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			downloadDASH = SettingsManager.instance().getBooleanValue(NAME + ".downloadDASH");
+			downloadDASH = getSettingsManager().getBooleanValue(NAME + ".downloadDASH");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".downloadDASH", downloadDASH);
+				getSettingsManager().setOptionValue(NAME + ".downloadDASH", downloadDASH);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			preferWEBM = SettingsManager.instance().getBooleanValue(NAME + ".preferWEBM");
+			preferWEBM = getSettingsManager().getBooleanValue(NAME + ".preferWEBM");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".preferWEBM", preferWEBM);
+				getSettingsManager().setOptionValue(NAME + ".preferWEBM", preferWEBM);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			prefer3D = SettingsManager.instance().getBooleanValue(NAME + ".prefer3D");
+			prefer3D = getSettingsManager().getBooleanValue(NAME + ".prefer3D");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".prefer3D", prefer3D);
+				getSettingsManager().setOptionValue(NAME + ".prefer3D", prefer3D);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			preferDASH = SettingsManager.instance().getBooleanValue(NAME + ".preferDASH");
+			preferDASH = getSettingsManager().getBooleanValue(NAME + ".preferDASH");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".preferDASH", preferDASH);
+				getSettingsManager().setOptionValue(NAME + ".preferDASH", preferDASH);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			filenameIncludeVideoID = SettingsManager.instance().getBooleanValue(NAME + ".filenameIncludeVideoID");
+			filenameIncludeVideoID = getSettingsManager().getBooleanValue(NAME + ".filenameIncludeVideoID");
 		} catch (Exception e) {
 			try {
-				SettingsManager.instance().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
+				getSettingsManager().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -810,20 +810,20 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 		dialog.setLayout(new BorderLayout());
 		dialog.add(pnlButtons, BorderLayout.SOUTH);
 		try {
-			txtMaxConnections.setText(Integer.toString(SettingsManager.instance().getIntValue(NAME + ".maxSimultaneousDownloads")));
-			cbFilenameIncludeVideoID.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".filenameIncludeVideoID"));
+			txtMaxConnections.setText(Integer.toString(getSettingsManager().getIntValue(NAME + ".maxSimultaneousDownloads")));
+			cbFilenameIncludeVideoID.setSelected(getSettingsManager().getBooleanValue(NAME + ".filenameIncludeVideoID"));
 			cbPathOverride.setSelected(overrideDirectoryOption.isPathOverride());
 			cbPathOverrideSubdirs.setSelected(overrideDirectoryOption.isPathOverrideSubdirsAllowed());
-			cbDownload4KHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".download4KHD"));
-			cbDownloadFullHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadFullHD"));
-			cbDownloadHD.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadHD"));
-			cbDownloadHigh.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadHigh"));
-			cbDownloadMedium.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMedium"));
-			cbDownloadMobile.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadMobile"));
-			cbPreferWEBM.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".preferWEBM"));
-			cbPrefer3D.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".prefer3D"));
-			cbDownloadDASH.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".downloadDASH"));
-			cbPreferDASH.setSelected(SettingsManager.instance().getBooleanValue(NAME + ".preferDASH"));
+			cbDownload4KHD.setSelected(getSettingsManager().getBooleanValue(NAME + ".download4KHD"));
+			cbDownloadFullHD.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadFullHD"));
+			cbDownloadHD.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadHD"));
+			cbDownloadHigh.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadHigh"));
+			cbDownloadMedium.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadMedium"));
+			cbDownloadMobile.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadMobile"));
+			cbPreferWEBM.setSelected(getSettingsManager().getBooleanValue(NAME + ".preferWEBM"));
+			cbPrefer3D.setSelected(getSettingsManager().getBooleanValue(NAME + ".prefer3D"));
+			cbDownloadDASH.setSelected(getSettingsManager().getBooleanValue(NAME + ".downloadDASH"));
+			cbPreferDASH.setSelected(getSettingsManager().getBooleanValue(NAME + ".preferDASH"));
 			txtPathOverride.setText(overrideDirectoryOption.getPathOverrideVal());
 		} catch (Exception ex) {
 			logger.error(ex.getMessage(), ex);
@@ -855,21 +855,21 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 						return;
 					}
 					try {
-						SettingsManager.instance().setOptionValue(NAME + ".maxSimultaneousDownloads", iVal);
-						SettingsManager.instance().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
-						SettingsManager.instance().setOptionValue(NAME + ".download4KHD", download4KHD);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadHD", downloadHD);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadHigh", downloadHigh);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadMedium", downloadMedium);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadMobile", downloadMobile);
-						SettingsManager.instance().setOptionValue(NAME + ".preferWEBM", preferWEBM);
-						SettingsManager.instance().setOptionValue(NAME + ".prefer3D", prefer3D);
-						SettingsManager.instance().setOptionValue(NAME + ".downloadDASH", downloadDASH);
-						SettingsManager.instance().setOptionValue(NAME + ".preferDASH", preferDASH);
+						getSettingsManager().setOptionValue(NAME + ".maxSimultaneousDownloads", iVal);
+						getSettingsManager().setOptionValue(NAME + ".filenameIncludeVideoID", filenameIncludeVideoID);
+						getSettingsManager().setOptionValue(NAME + ".download4KHD", download4KHD);
+						getSettingsManager().setOptionValue(NAME + ".downloadFullHD", downloadFullHD);
+						getSettingsManager().setOptionValue(NAME + ".downloadHD", downloadHD);
+						getSettingsManager().setOptionValue(NAME + ".downloadHigh", downloadHigh);
+						getSettingsManager().setOptionValue(NAME + ".downloadMedium", downloadMedium);
+						getSettingsManager().setOptionValue(NAME + ".downloadMobile", downloadMobile);
+						getSettingsManager().setOptionValue(NAME + ".preferWEBM", preferWEBM);
+						getSettingsManager().setOptionValue(NAME + ".prefer3D", prefer3D);
+						getSettingsManager().setOptionValue(NAME + ".downloadDASH", downloadDASH);
+						getSettingsManager().setOptionValue(NAME + ".preferDASH", preferDASH);
 						overrideDirectoryOption.saveOptions();
 						deactivateOption.saveOption();
-						SettingsManager.instance().writeSettings(true);
+						getSettingsManager().writeSettings(true);
 					} catch (Exception ex) {
 						logger.error(ex.getMessage(), ex);
 					}
@@ -1008,7 +1008,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 					if (downloadedLinks.contains(links.get(i)) == false) {
 						progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
 
-						List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter);
+						List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter, getProxyManager(), getSettingsManager(), getCookieManager());
 						for (int x = 0; x < foundLinks.size(); x++) {
 							if (links.contains(foundLinks.get(x)) == false) {
 								links.add(foundLinks.get(x));

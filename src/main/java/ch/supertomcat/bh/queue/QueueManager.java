@@ -16,8 +16,6 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
-import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
  * Class which holds the Keywords
@@ -48,7 +46,7 @@ public class QueueManager implements IPicListener {
 	 */
 	private int deletedObjects = 0;
 
-	private QueueSQLiteDB queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite");
+	private final QueueSQLiteDB queueSQLiteDB;
 
 	/**
 	 * TabelModel
@@ -66,6 +64,11 @@ public class QueueManager implements IPicListener {
 	private final LogManager logManager;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
@@ -75,6 +78,8 @@ public class QueueManager implements IPicListener {
 	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager) {
 		this.downloadQueueManager = downloadQueueManager;
 		this.logManager = logManager;
+		this.settingsManager = settingsManager;
+		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.isBackupDbOnStart());
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
 			if (pic.getStatus() != PicState.COMPLETE) {
@@ -214,7 +219,7 @@ public class QueueManager implements IPicListener {
 			};
 			executeInEventQueueThread(r);
 		}
-		if (SettingsManager.instance().isAutoStartDownloads()) {
+		if (settingsManager.isAutoStartDownloads()) {
 			pic.startDownload(downloadQueueManager);
 			downloadQueueManager.manageDLSlots();
 		}
@@ -246,7 +251,7 @@ public class QueueManager implements IPicListener {
 			};
 			executeInEventQueueThread(r);
 		}
-		if (SettingsManager.instance().isAutoStartDownloads()) {
+		if (settingsManager.isAutoStartDownloads()) {
 			for (Pic pic : picsAdded) {
 				pic.startDownload(downloadQueueManager);
 			}
@@ -419,12 +424,7 @@ public class QueueManager implements IPicListener {
 				public void run() {
 					if ((index > -1) && (tableModel.getRowCount() > index)) {
 						// Change Cell
-						long size = pic.getSize();
-						if (size < 1) {
-							tableModel.setValueAt(Localization.getString("Unkown"), index, 2);
-						} else {
-							tableModel.setValueAt(UnitFormatUtil.getSizeString(size, SettingsManager.instance().getSizeView()), index, 2);
-						}
+						tableModel.setValueAt(pic.getSize(), index, 2);
 						tableModel.fireTableCellUpdated(index, 2);
 					}
 				}
@@ -481,14 +481,14 @@ public class QueueManager implements IPicListener {
 			updatePic(pic);
 		}
 		if (pic.getStatus() == PicState.COMPLETE) {
-			if (SettingsManager.instance().isSaveLogs()) {
+			if (settingsManager.isSaveLogs()) {
 				logManager.addPicToLog(pic);
 			}
-			SettingsManager.instance().increaseOverallDownloadedFiles(1);
-			SettingsManager.instance().increaseOverallDownloadedBytes(pic.getSize());
+			settingsManager.increaseOverallDownloadedFiles(1);
+			settingsManager.increaseOverallDownloadedBytes(pic.getSize());
 			downloadQueueManager.increaseSessionDownloadedBytes(pic.getSize());
 			downloadQueueManager.increaseSessionDownloadedFiles();
-			SettingsManager.instance().writeSettings(true);
+			settingsManager.writeSettings(true);
 			removePic(pic);
 		}
 	}

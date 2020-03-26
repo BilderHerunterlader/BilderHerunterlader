@@ -124,22 +124,26 @@ public final class LinkExtract {
 	 * @param url URL
 	 * @param referrer Referrer
 	 * @param filter Filter
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
 	 * @return Array with links
 	 * @throws HostException
 	 */
-	public static List<URL> getLinks(String url, String referrer, ILinkExtractFilter filter) throws HostException {
+	public static List<URL> getLinks(String url, String referrer, ILinkExtractFilter filter, ProxyManager proxyManager, SettingsManager settingsManager,
+			CookieManager cookieManager) throws HostException {
 		List<URL> extractedURLs = new ArrayList<>();
 
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
-			String cookies = CookieManager.getCookies(url);
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
+			String cookies = cookieManager.getCookies(url);
 			url = HTTPUtil.encodeURL(url);
 			method = new HttpGet(url);
 			// Verbindung oeffnen
-			RequestConfig.Builder requestConfigBuilder = ProxyManager.instance().getDefaultRequestConfigBuilder();
+			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
-			method.setHeader("User-Agent", SettingsManager.instance().getUserAgent());
+			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -178,10 +182,14 @@ public final class LinkExtract {
 	 * @param referrer Referrer
 	 * @param extractConfig ExtractConfig
 	 * @param progress Progress
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
 	 * @return URLs
 	 * @throws Exception
 	 */
-	public static List<URL> getLinksRecursive(URL url, String referrer, ExtractConfig extractConfig, ProgressObserver progress) throws Exception {
+	public static List<URL> getLinksRecursive(URL url, String referrer, ExtractConfig extractConfig, ProgressObserver progress, ProxyManager proxyManager, SettingsManager settingsManager,
+			CookieManager cookieManager) throws Exception {
 		List<URL> links = new ArrayList<>();
 
 		List<ExtractConfigWhitelist> whitelists = extractConfig.getWhitelists();
@@ -199,7 +207,7 @@ public final class LinkExtract {
 				if (downloadedLinks.contains(links.get(i)) == false) {
 					progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
 
-					List<URL> foundLinks = getLinks(links.get(i).getURL(), referrer, filter);
+					List<URL> foundLinks = getLinks(links.get(i).getURL(), referrer, filter, proxyManager, settingsManager, cookieManager);
 					for (int x = 0; x < foundLinks.size(); x++) {
 						if (links.contains(foundLinks.get(x)) == false) {
 							links.add(foundLinks.get(x));

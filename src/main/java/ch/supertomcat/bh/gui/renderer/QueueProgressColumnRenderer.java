@@ -50,17 +50,12 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 	private JProgressBar progressBar = new JProgressBar();
 
 	/**
-	 * Settings Manager
-	 */
-	private final SettingsManager settingsManager;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param settingsManager Settings Manager
 	 */
 	public QueueProgressColumnRenderer(SettingsManager settingsManager) {
-		this.settingsManager = settingsManager;
+		super(settingsManager);
 		progressBar.setMinimum(0);
 		progressBar.setMaximum(100);
 		progressBar.setValue(0);
@@ -107,14 +102,14 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 					if (progressView == SettingsManager.PROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
 						progressString = String.format(PROGRESS_PERCENT_STRING_FORMAT, urlIndexString, progress.getPercent(), rateString);
 					} else if (progressView == SettingsManager.PROGRESSBAR_SIZE || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
-						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, SettingsManager.instance().getSizeView());
+						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
 						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
 					} else {
-						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, SettingsManager.instance().getSizeView());
+						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
 						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
 					}
 				} else {
-					String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, SettingsManager.instance().getSizeView());
+					String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
 					progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
 				}
 

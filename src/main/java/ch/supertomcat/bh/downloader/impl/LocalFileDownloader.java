@@ -4,9 +4,11 @@ import java.io.File;
 
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
@@ -18,9 +20,11 @@ public class LocalFileDownloader extends FileDownloaderBase {
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 */
-	public LocalFileDownloader(DownloadQueueManager downloadQueueManager) {
-		super(downloadQueueManager);
+	public LocalFileDownloader(DownloadQueueManager downloadQueueManager, SettingsManager settingsManager, HostManager hostManager) {
+		super(downloadQueueManager, settingsManager, hostManager);
 	}
 
 	@Override

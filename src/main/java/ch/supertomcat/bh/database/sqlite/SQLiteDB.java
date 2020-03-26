@@ -13,7 +13,6 @@ import javax.swing.JOptionPane;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -45,15 +44,16 @@ public abstract class SQLiteDB<T> {
 	 * 
 	 * @param databaseFile Path to the database File
 	 * @param tableName Table Name
+	 * @param backupDatabaseOnStart True if database should be backed up on start, false otherwise
 	 */
-	public SQLiteDB(String databaseFile, String tableName) {
+	public SQLiteDB(String databaseFile, String tableName, boolean backupDatabaseOnStart) {
 		this.databaseFile = databaseFile;
 		this.tableName = tableName;
 
 		createFolderIfNotExist();
 
 		// Check if we have to backup the database
-		if (SettingsManager.instance().isBackupDbOnStart()) {
+		if (backupDatabaseOnStart) {
 			backupDatabase();
 		}
 

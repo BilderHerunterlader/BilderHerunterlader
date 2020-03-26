@@ -41,6 +41,11 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	private final Component parentComponent;
 
 	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Download Queue Manager
 	 */
 	private final DownloadQueueManager downloadQueueManager;
@@ -49,17 +54,18 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
+	 * @param hostManager Host Manager
 	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public HosterTableModel(Component parentComponent, DownloadQueueManager downloadQueueManager) {
+	public HosterTableModel(Component parentComponent, HostManager hostManager, DownloadQueueManager downloadQueueManager) {
 		this.parentComponent = parentComponent;
+		this.hostManager = hostManager;
 		this.downloadQueueManager = downloadQueueManager;
 		this.addColumn("Hoster");
 		this.addColumn("Version");
 		this.addColumn("Type");
 		this.addColumn("Settings");
 		this.addColumn("Enabled");
-		SettingsManager.instance().addSettingsListener(this);
 	}
 
 	@Override
@@ -141,7 +147,7 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	 * @param redirect Redirect
 	 */
 	public void addRow(final IRedirect redirect) {
-		if (redirect == HostManager.instance().getHostRules()) {
+		if (redirect == hostManager.getHostRules()) {
 			/*
 			 * Prevent double insertion of HostRules, because it is a Host, but also a IRedirect
 			 */
@@ -170,11 +176,16 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 
 	@Override
 	public void settingsChanged() {
+		// Nothing to do
+	}
+
+	@Override
+	public void lookAndFeelChanged(int lookAndFeel) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				Iterator<JPanel> it = panels.iterator();
-				String strLAF = SettingsManager.LAF_CLASSPATHES[SettingsManager.instance().getLookAndFeel()];
+				String strLAF = SettingsManager.LAF_CLASSPATHES[lookAndFeel];
 				if (strLAF.length() > 0) {
 					while (it.hasNext()) {
 						JPanel currentPanel = it.next();
@@ -185,10 +196,5 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 				}
 			}
 		});
-	}
-
-	@Override
-	public void lookAndFeelChanged() {
-		// Nothing to do
 	}
 }

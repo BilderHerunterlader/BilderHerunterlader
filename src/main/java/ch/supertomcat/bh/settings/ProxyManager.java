@@ -34,11 +34,6 @@ public class ProxyManager {
 	public static final int HTTP_PROXY = 1;
 
 	/**
-	 * Singleton
-	 */
-	private static ProxyManager instance = null;
-
-	/**
 	 * Mode
 	 */
 	private int mode = ProxyManager.DIRECT_CONNECTION;
@@ -74,9 +69,17 @@ public class ProxyManager {
 	private final PoolingHttpClientConnectionManager conManager;
 
 	/**
-	 * Constructor
+	 * Settings Manager
 	 */
-	private ProxyManager() {
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager SettingsManager
+	 */
+	public ProxyManager(SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
 		// Get the configuration
 		readFromSettings();
 
@@ -90,27 +93,15 @@ public class ProxyManager {
 	}
 
 	/**
-	 * Returns the Singleton
-	 * 
-	 * @return Singleton
-	 */
-	public static synchronized ProxyManager instance() {
-		if (instance == null) {
-			instance = new ProxyManager();
-		}
-		return instance;
-	}
-
-	/**
 	 * Returns a preconfigured RequestConfig Builder
 	 * 
 	 * @return RequestConfig.Builder
 	 */
 	public RequestConfig.Builder getDefaultRequestConfigBuilder() {
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-		requestConfigBuilder.setSocketTimeout(SettingsManager.instance().getTimeout());
-		requestConfigBuilder.setConnectionRequestTimeout(SettingsManager.instance().getTimeout());
-		requestConfigBuilder.setConnectTimeout(SettingsManager.instance().getTimeout());
+		requestConfigBuilder.setSocketTimeout(settingsManager.getTimeout());
+		requestConfigBuilder.setConnectionRequestTimeout(settingsManager.getTimeout());
+		requestConfigBuilder.setConnectTimeout(settingsManager.getTimeout());
 		requestConfigBuilder.setCookieSpec(CookieSpecs.STANDARD);
 		return requestConfigBuilder;
 	}
@@ -186,25 +177,25 @@ public class ProxyManager {
 	 * Save the settings
 	 */
 	public void writeToSettings() {
-		SettingsManager.instance().setProxymode(mode);
-		SettingsManager.instance().setProxyname(proxyname);
-		SettingsManager.instance().setProxyport(proxyport);
-		SettingsManager.instance().setProxyuser(proxyuser);
-		SettingsManager.instance().setProxypassword(proxypassword);
-		SettingsManager.instance().setProxyauth(auth);
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setProxymode(mode);
+		settingsManager.setProxyname(proxyname);
+		settingsManager.setProxyport(proxyport);
+		settingsManager.setProxyuser(proxyuser);
+		settingsManager.setProxypassword(proxypassword);
+		settingsManager.setProxyauth(auth);
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * Read the settings
 	 */
 	public void readFromSettings() {
-		mode = SettingsManager.instance().getProxymode();
-		proxyname = SettingsManager.instance().getProxyname();
-		proxyport = SettingsManager.instance().getProxyport();
-		proxyuser = SettingsManager.instance().getProxyuser();
-		proxypassword = SettingsManager.instance().getProxypassword();
-		auth = SettingsManager.instance().isProxyauth();
+		mode = settingsManager.getProxymode();
+		proxyname = settingsManager.getProxyname();
+		proxyport = settingsManager.getProxyport();
+		proxyuser = settingsManager.getProxyuser();
+		proxypassword = settingsManager.getProxypassword();
+		auth = settingsManager.isProxyauth();
 	}
 
 	/**

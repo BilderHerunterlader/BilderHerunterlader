@@ -165,7 +165,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * TextField
 	 */
-	private JTextField txtStdSavePath = new JTextField(SettingsManager.instance().getSavePath());
+	private final JTextField txtStdSavePath;
 
 	/**
 	 * Button
@@ -795,12 +795,12 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * CheckBox
 	 */
-	private RegexReplacePanel pnlRegexReplacePageTitle = new RegexReplacePanel(SettingsManager.instance().getRegexReplacePipelinePageTitle());
+	private final RegexReplacePanel pnlRegexReplacePageTitle;
 
 	/**
 	 * CheckBox
 	 */
-	private RegexReplacePanel pnlRegexReplaceFilename = new RegexReplacePanel(SettingsManager.instance().getRegexReplacePipelineFilename());
+	private final RegexReplacePanel pnlRegexReplaceFilename;
 
 	/**
 	 * Label
@@ -903,14 +903,24 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
-	 * Settingsmanager
+	 * Proxy Manager
 	 */
-	private SettingsManager sm = SettingsManager.instance();
+	private final ProxyManager proxyManager;
 
 	/**
-	 * ProxyManager
+	 * Settings Manager
 	 */
-	private ProxyManager pm = ProxyManager.instance();
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
 
 	/**
 	 * Main Window Access
@@ -927,15 +937,28 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * 
 	 * @param owner Owner
 	 * @param mainWindowAccess Main Window Access
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 */
-	public Settings(Window owner, MainWindowAccess mainWindowAccess) {
+	public Settings(Window owner, MainWindowAccess mainWindowAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
 		this.owner = owner;
 		this.mainWindowAccess = mainWindowAccess;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.cookieManager = cookieManager;
+		this.hostManager = hostManager;
 		setTitle(Localization.getString("Settings"));
 		setModal(true);
 		setIconImage(Icons.getBHImage("BH.png"));
 		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		setLayout(gbl);
+
+		this.txtStdSavePath = new JTextField(settingsManager.getSavePath());
+		this.pnlRegexReplacePageTitle = new RegexReplacePanel(settingsManager.getRegexReplacePipelinePageTitle(), settingsManager);
+		this.pnlRegexReplaceFilename = new RegexReplacePanel(settingsManager.getRegexReplacePipelineFilename(), settingsManager);
+
 		pnlPaths.setLayout(gblPaths);
 		pnlConnection.setLayout(gblConnection);
 		pnlGUI.setLayout(gblGUI);
@@ -1483,7 +1506,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 
 		addWindowListener(this);
 
-		SettingsManager.instance().addSettingsListener(this);
+		settingsManager.addSettingsListener(this);
 
 		pack();
 		setLocationRelativeTo(owner);
@@ -1495,56 +1518,56 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * Initialize
 	 */
 	private void init() {
-		txtStdSavePath.setText(sm.getSavePath());
-		txtConnectionCount.setText(String.valueOf(sm.getConnections()));
-		txtConnectionCountPerHost.setText(String.valueOf(sm.getConnectionsPerHost()));
-		txtThreadCount.setText(String.valueOf(sm.getThreadCount()));
-		txtMaxFailedCount.setText(String.valueOf(sm.getMaxFailedCount()));
-		txtMinFilesize.setText(String.valueOf(sm.getMinFilesize()));
-		txtTimeout.setText(String.valueOf(sm.getTimeout()));
-		txtDefragMinFilesize.setText(String.valueOf(sm.getDefragMinFilesize()));
-		txtUserAgent.setText(sm.getUserAgent());
-		chkUpdates.setSelected(sm.isUpdates());
-		chkSaveLogs.setSelected(sm.isSaveLogs());
-		chkAutoStartDownloads.setSelected(sm.isAutoStartDownloads());
-		chkAutoRetryAfterDownloadsComplete.setSelected(sm.isAutoRetryAfterDownloadsComplete());
-		chkCheckClipboard.setSelected(sm.isCheckClipboard());
-		txtWebExtensionPort.setText(String.valueOf(sm.getWebExtensionPort()));
-		chkDefragDB.setSelected(sm.isDefragDBOnStart());
-		chkBackupDB.setSelected(sm.isBackupDbOnStart());
-		chkSubdirsEnabled.setSelected(sm.isSubdirsEnabled());
-		chkDownloadRate.setSelected(sm.isDownloadRate());
-		chkDownloadsCompleteNotification.setSelected(sm.isDownloadsCompleteNotification());
-		chkDownloadPreviews.setSelected(sm.isDownloadPreviews());
-		txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
-		sldConnectionCount.setValue(sm.getConnections());
-		sldConnectionCountPerHost.setValue(sm.getConnectionsPerHost());
-		sldThreadCount.setValue(sm.getThreadCount());
+		txtStdSavePath.setText(settingsManager.getSavePath());
+		txtConnectionCount.setText(String.valueOf(settingsManager.getConnections()));
+		txtConnectionCountPerHost.setText(String.valueOf(settingsManager.getConnectionsPerHost()));
+		txtThreadCount.setText(String.valueOf(settingsManager.getThreadCount()));
+		txtMaxFailedCount.setText(String.valueOf(settingsManager.getMaxFailedCount()));
+		txtMinFilesize.setText(String.valueOf(settingsManager.getMinFilesize()));
+		txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
+		txtDefragMinFilesize.setText(String.valueOf(settingsManager.getDefragMinFilesize()));
+		txtUserAgent.setText(settingsManager.getUserAgent());
+		chkUpdates.setSelected(settingsManager.isUpdates());
+		chkSaveLogs.setSelected(settingsManager.isSaveLogs());
+		chkAutoStartDownloads.setSelected(settingsManager.isAutoStartDownloads());
+		chkAutoRetryAfterDownloadsComplete.setSelected(settingsManager.isAutoRetryAfterDownloadsComplete());
+		chkCheckClipboard.setSelected(settingsManager.isCheckClipboard());
+		txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
+		chkDefragDB.setSelected(settingsManager.isDefragDBOnStart());
+		chkBackupDB.setSelected(settingsManager.isBackupDbOnStart());
+		chkSubdirsEnabled.setSelected(settingsManager.isSubdirsEnabled());
+		chkDownloadRate.setSelected(settingsManager.isDownloadRate());
+		chkDownloadsCompleteNotification.setSelected(settingsManager.isDownloadsCompleteNotification());
+		chkDownloadPreviews.setSelected(settingsManager.isDownloadPreviews());
+		txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
+		sldConnectionCount.setValue(settingsManager.getConnections());
+		sldConnectionCountPerHost.setValue(settingsManager.getConnectionsPerHost());
+		sldThreadCount.setValue(settingsManager.getThreadCount());
 
-		String lang = sm.getLanguage();
+		String lang = settingsManager.getLanguage();
 		if (lang.equals("de_DE")) {
 			cmbLanguage.setSelectedIndex(0);
 		} else {
 			cmbLanguage.setSelectedIndex(1);
 		}
-		cmbSizeView.setSelectedIndex(sm.getSizeView());
+		cmbSizeView.setSelectedIndex(settingsManager.getSizeView());
 
-		cmbProgressView.setSelectedIndex(sm.getProgessView());
+		cmbProgressView.setSelectedIndex(settingsManager.getProgessView());
 
-		cmbKeywordMatchMode.setSelectedIndex(sm.getKeywordMatchMode());
+		cmbKeywordMatchMode.setSelectedIndex(settingsManager.getKeywordMatchMode());
 
-		cmbLAF.setSelectedIndex(sm.getLookAndFeel());
+		cmbLAF.setSelectedIndex(settingsManager.getLookAndFeel());
 
-		cmbCookies.setSelectedIndex(sm.getCookiesFromBrowser());
+		cmbCookies.setSelectedIndex(settingsManager.getCookiesFromBrowser());
 
-		cmbSortDownloadsOnStart.setSelectedIndex(sm.getSortDownloadsOnStart());
+		cmbSortDownloadsOnStart.setSelectedIndex(settingsManager.getSortDownloadsOnStart());
 
-		cmbSubdirsResolutionMode.setSelectedIndex(sm.getSubdirsResolutionMode());
+		cmbSubdirsResolutionMode.setSelectedIndex(settingsManager.getSubdirsResolutionMode());
 
-		boolean bOpera = (sm.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA);
-		boolean bOperaNew = (sm.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA_NEW);
-		boolean bFirefox = (sm.getCookiesFromBrowser() == BrowserCookies.BROWSER_FIREFOX);
-		boolean bPaleMoon = (sm.getCookiesFromBrowser() == BrowserCookies.BROWSER_PALE_MOON);
+		boolean bOpera = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA);
+		boolean bOperaNew = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA_NEW);
+		boolean bFirefox = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_FIREFOX);
+		boolean bPaleMoon = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_PALE_MOON);
 		lblCookiesOpera.setVisible(bOpera);
 		cbCookiesOperaFixed.setVisible(bOpera);
 		txtCookiesOpera.setVisible(bOpera);
@@ -1570,19 +1593,19 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		btnCookiesFirefox.setEnabled(cbCookiesFirefoxFixed.isSelected());
 		btnCookiesPaleMoon.setEnabled(cbCookiesPaleMoonFixed.isSelected());
 
-		cbCookiesOperaFixed.setSelected(sm.isCookieFileOperaFixed());
-		cbCookiesOperaNewFixed.setSelected(sm.isCookieFileOperaNewFixed());
-		cbCookiesFirefoxFixed.setSelected(sm.isCookieFileFirefoxFixed());
-		cbCookiesPaleMoonFixed.setSelected(sm.isCookieFilePaleMoonFixed());
+		cbCookiesOperaFixed.setSelected(settingsManager.isCookieFileOperaFixed());
+		cbCookiesOperaNewFixed.setSelected(settingsManager.isCookieFileOperaNewFixed());
+		cbCookiesFirefoxFixed.setSelected(settingsManager.isCookieFileFirefoxFixed());
+		cbCookiesPaleMoonFixed.setSelected(settingsManager.isCookieFilePaleMoonFixed());
 
-		txtCookiesOpera.setText(CookieManager.getCookieFileForOpera(false));
-		txtCookiesOperaNew.setText(CookieManager.getCookieFileForOperaNew());
-		txtCookiesFirefox.setText(CookieManager.getCookieFileForFirefox());
-		txtCookiesPaleMoon.setText(CookieManager.getCookieFileForPaleMoon());
+		txtCookiesOpera.setText(cookieManager.getCookieFileForOpera(false));
+		txtCookiesOperaNew.setText(cookieManager.getCookieFileForOperaNew());
+		txtCookiesFirefox.setText(cookieManager.getCookieFileForFirefox());
+		txtCookiesPaleMoon.setText(cookieManager.getCookieFileForPaleMoon());
 
-		cmbAllowedFilenameChars.setSelectedIndex(sm.getAllowedFilenameChars());
+		cmbAllowedFilenameChars.setSelectedIndex(settingsManager.getAllowedFilenameChars());
 
-		String debugLevel = sm.getDebugLevel();
+		String debugLevel = settingsManager.getDebugLevel();
 		for (int i = 0; i < cmbDebugLevel.getItemCount(); i++) {
 			if (cmbDebugLevel.getItemAt(i).equals(debugLevel)) {
 				cmbDebugLevel.setSelectedIndex(i);
@@ -1590,37 +1613,37 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			}
 		}
 
-		chkWindowSizePos.setSelected(sm.isSaveWindowSizePosition());
+		chkWindowSizePos.setSelected(settingsManager.isSaveWindowSizePosition());
 
-		chkDownloadSelectionWindowSizePos.setSelected(sm.isSaveDownloadSelectionWindowSizePosition());
+		chkDownloadSelectionWindowSizePos.setSelected(settingsManager.isSaveDownloadSelectionWindowSizePosition());
 
-		chkSaveTableColumnSizes.setSelected(sm.isSaveTableColumnSizes());
+		chkSaveTableColumnSizes.setSelected(settingsManager.isSaveTableColumnSizes());
 
-		chkSaveTableSortOrders.setSelected(sm.isSaveTableSortOrders());
+		chkSaveTableSortOrders.setSelected(settingsManager.isSaveTableSortOrders());
 
-		chkRememberLastUsedPath.setSelected(sm.isSaveLastPath());
+		chkRememberLastUsedPath.setSelected(settingsManager.isSaveLastPath());
 
-		chkAlwaysAddTitle.setSelected(sm.isAlwaysAddTitle());
+		chkAlwaysAddTitle.setSelected(settingsManager.isAlwaysAddTitle());
 
-		chkDeselectNoKeyword.setSelected(sm.isDeselectNoKeyword());
+		chkDeselectNoKeyword.setSelected(settingsManager.isDeselectNoKeyword());
 
-		chkDisplayKeywordsWhenNoMatches.setSelected(sm.isDisplayKeywordsWhenNoMatches());
+		chkDisplayKeywordsWhenNoMatches.setSelected(settingsManager.isDisplayKeywordsWhenNoMatches());
 
-		chkRulesBefore.setSelected(sm.isRulesBeforeClasses());
+		chkRulesBefore.setSelected(settingsManager.isRulesBeforeClasses());
 
-		pm.readFromSettings();
-		txtProxyName.setText(pm.getProxyname());
-		txtProxyPort.setText(String.valueOf(pm.getProxyport()));
-		txtProxyUser.setText(pm.getProxyuser());
-		txtProxyPassword.setText(pm.getProxypassword());
+		proxyManager.readFromSettings();
+		txtProxyName.setText(proxyManager.getProxyname());
+		txtProxyPort.setText(String.valueOf(proxyManager.getProxyport()));
+		txtProxyUser.setText(proxyManager.getProxyuser());
+		txtProxyPassword.setText(proxyManager.getProxypassword());
 
-		int mode = pm.getMode();
+		int mode = proxyManager.getMode();
 		if (mode == ProxyManager.DIRECT_CONNECTION) {
 			rbNoProxy.setSelected(true);
 		} else if (mode == ProxyManager.HTTP_PROXY) {
 			rbHTTP.setSelected(true);
 		}
-		boolean b = pm.isAuth();
+		boolean b = proxyManager.isAuth();
 		if (b && (mode > 0)) {
 			cbAuth.setSelected(true);
 		}
@@ -1637,7 +1660,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		txtProxyPassword.setEnabled(cbAuth.isSelected());
 
 		subdirModel.removeAllRows();
-		List<Subdir> v = sm.getSubdirs();
+		List<Subdir> v = settingsManager.getSubdirs();
 		for (int s = 0; s < v.size(); s++) {
 			subdirModel.addRow(v.get(s));
 		}
@@ -1648,18 +1671,18 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		if (e.getSource() == btnSave) {
 			applySettings();
 			mainWindowAccess.setMessage(Localization.getString("SavingSettings"));
-			boolean b = sm.writeSettings(true);
+			boolean b = settingsManager.writeSettings(true);
 			if (b) {
 				mainWindowAccess.setMessage(Localization.getString("SettingsSaved"));
 			} else {
 				mainWindowAccess.setMessage(Localization.getString("SettingsSaveFailed"));
 			}
-			SettingsManager.instance().removeSettingsListener(this);
+			settingsManager.removeSettingsListener(this);
 			this.dispose();
 		} else if (e.getSource() == btnReset) {
 			init();
 		} else if (e.getSource() == btnCancel) {
-			SettingsManager.instance().removeSettingsListener(this);
+			settingsManager.removeSettingsListener(this);
 			this.dispose();
 		} else if (e.getSource() == btnStdSavePath) {
 			File file = FileDialogUtil.showFolderSaveDialog(this, txtStdSavePath.getText(), null);
@@ -1796,101 +1819,101 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * Apply Settings
 	 */
 	private void applySettings() {
-		SettingsManager.instance().removeSettingsListener(this);
+		settingsManager.removeSettingsListener(this);
 		mainWindowAccess.setMessage(Localization.getString("ApplyingSettings"));
-		sm.setConnections(sldConnectionCount.getValue());
-		sm.setConnectionsPerHost(sldConnectionCountPerHost.getValue());
-		sm.setThreadCount(sldThreadCount.getValue());
-		sm.setMaxFailedCount(Integer.parseInt(txtMaxFailedCount.getText()));
+		settingsManager.setConnections(sldConnectionCount.getValue());
+		settingsManager.setConnectionsPerHost(sldConnectionCountPerHost.getValue());
+		settingsManager.setThreadCount(sldThreadCount.getValue());
+		settingsManager.setMaxFailedCount(Integer.parseInt(txtMaxFailedCount.getText()));
 		try {
-			sm.setMinFilesize(Integer.parseInt(txtMinFilesize.getText()));
+			settingsManager.setMinFilesize(Integer.parseInt(txtMinFilesize.getText()));
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
-			txtMinFilesize.setText(String.valueOf(sm.getMinFilesize()));
+			txtMinFilesize.setText(String.valueOf(settingsManager.getMinFilesize()));
 		}
 		try {
-			sm.setDefragMinFilesize(Integer.parseInt(txtDefragMinFilesize.getText()));
+			settingsManager.setDefragMinFilesize(Integer.parseInt(txtDefragMinFilesize.getText()));
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
-			txtDefragMinFilesize.setText(String.valueOf(sm.getDefragMinFilesize()));
+			txtDefragMinFilesize.setText(String.valueOf(settingsManager.getDefragMinFilesize()));
 		}
 		try {
 			int val = Integer.parseInt(txtTimeout.getText());
 			if (val <= 1000) {
-				txtTimeout.setText(String.valueOf(sm.getTimeout()));
+				txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
 			} else {
-				sm.setTimeout(val);
+				settingsManager.setTimeout(val);
 			}
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
-			txtTimeout.setText(String.valueOf(sm.getTimeout()));
+			txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
 		}
-		sm.setSavePath(txtStdSavePath.getText());
-		sm.setUserAgent(txtUserAgent.getText());
-		sm.setUpdates(chkUpdates.isSelected());
-		sm.setSaveLogs(chkSaveLogs.isSelected());
-		sm.setAutoStartDownloads(chkAutoStartDownloads.isSelected());
-		sm.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
-		sm.setCheckClipboard(chkCheckClipboard.isSelected());
+		settingsManager.setSavePath(txtStdSavePath.getText());
+		settingsManager.setUserAgent(txtUserAgent.getText());
+		settingsManager.setUpdates(chkUpdates.isSelected());
+		settingsManager.setSaveLogs(chkSaveLogs.isSelected());
+		settingsManager.setAutoStartDownloads(chkAutoStartDownloads.isSelected());
+		settingsManager.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
+		settingsManager.setCheckClipboard(chkCheckClipboard.isSelected());
 		try {
 			int val = Integer.parseInt(txtWebExtensionPort.getText());
 			if (val < 0 || val > 65535) {
-				txtWebExtensionPort.setText(String.valueOf(sm.getWebExtensionPort()));
+				txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
 			} else {
-				sm.setWebExtensionPort(val);
+				settingsManager.setWebExtensionPort(val);
 			}
 		} catch (NumberFormatException nfe) {
 			logger.error("WebExtensionPort is not an integer: {}", txtWebExtensionPort.getText(), nfe);
-			txtWebExtensionPort.setText(String.valueOf(sm.getWebExtensionPort()));
+			txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
 		}
-		sm.setDownloadRate(chkDownloadRate.isSelected());
+		settingsManager.setDownloadRate(chkDownloadRate.isSelected());
 		if (cmbLanguage.getSelectedIndex() == 0) {
-			sm.setLanguage("de_DE");
+			settingsManager.setLanguage("de_DE");
 		} else {
-			sm.setLanguage("en_EN");
+			settingsManager.setLanguage("en_EN");
 		}
-		sm.setSizeView(cmbSizeView.getSelectedIndex());
-		sm.setProgessView(cmbProgressView.getSelectedIndex());
-		sm.setKeywordMatchMode(cmbKeywordMatchMode.getSelectedIndex());
-		int previousLookAndFeel = sm.getLookAndFeel();
-		sm.setLookAndFeel(cmbLAF.getSelectedIndex());
-		sm.setCookiesFromBrowser(cmbCookies.getSelectedIndex());
-		sm.setCookieFileOperaFixed(cbCookiesOperaFixed.isSelected());
-		sm.setCookieFileOpera(txtCookiesOpera.getText());
-		sm.setCookieFileOperaNewFixed(cbCookiesOperaNewFixed.isSelected());
-		sm.setCookieFileOperaNew(txtCookiesOperaNew.getText());
-		sm.setCookieFileFirefoxFixed(cbCookiesFirefoxFixed.isSelected());
-		sm.setCookieFileFirefox(txtCookiesFirefox.getText());
-		sm.setCookieFilePaleMoonFixed(cbCookiesPaleMoonFixed.isSelected());
-		sm.setCookieFilePaleMoon(txtCookiesPaleMoon.getText());
-		sm.setAllowedFilenameChars(cmbAllowedFilenameChars.getSelectedIndex());
-		sm.setDebugLevel((String)cmbDebugLevel.getSelectedItem());
-		sm.setSaveWindowSizePosition(chkWindowSizePos.isSelected());
-		sm.setSaveDownloadSelectionWindowSizePosition(chkDownloadSelectionWindowSizePos.isSelected());
-		sm.setSaveTableColumnSizes(chkSaveTableColumnSizes.isSelected());
-		sm.setSaveTableSortOrders(chkSaveTableSortOrders.isSelected());
-		sm.setSaveLastPath(chkRememberLastUsedPath.isSelected());
-		sm.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
-		sm.setDeselectNoKeyword(chkDeselectNoKeyword.isSelected());
-		sm.setDisplayKeywordsWhenNoMatches(chkDisplayKeywordsWhenNoMatches.isSelected());
-		sm.setDefragDBOnStart(chkDefragDB.isSelected());
-		sm.setBackupDbOnStart(chkBackupDB.isSelected());
-		sm.setSubdirsEnabled(chkSubdirsEnabled.isSelected());
-		sm.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
-		sm.setDownloadPreviews(chkDownloadPreviews.isSelected());
+		settingsManager.setSizeView(cmbSizeView.getSelectedIndex());
+		settingsManager.setProgessView(cmbProgressView.getSelectedIndex());
+		settingsManager.setKeywordMatchMode(cmbKeywordMatchMode.getSelectedIndex());
+		int previousLookAndFeel = settingsManager.getLookAndFeel();
+		settingsManager.setLookAndFeel(cmbLAF.getSelectedIndex());
+		settingsManager.setCookiesFromBrowser(cmbCookies.getSelectedIndex());
+		settingsManager.setCookieFileOperaFixed(cbCookiesOperaFixed.isSelected());
+		settingsManager.setCookieFileOpera(txtCookiesOpera.getText());
+		settingsManager.setCookieFileOperaNewFixed(cbCookiesOperaNewFixed.isSelected());
+		settingsManager.setCookieFileOperaNew(txtCookiesOperaNew.getText());
+		settingsManager.setCookieFileFirefoxFixed(cbCookiesFirefoxFixed.isSelected());
+		settingsManager.setCookieFileFirefox(txtCookiesFirefox.getText());
+		settingsManager.setCookieFilePaleMoonFixed(cbCookiesPaleMoonFixed.isSelected());
+		settingsManager.setCookieFilePaleMoon(txtCookiesPaleMoon.getText());
+		settingsManager.setAllowedFilenameChars(cmbAllowedFilenameChars.getSelectedIndex());
+		settingsManager.setDebugLevel((String)cmbDebugLevel.getSelectedItem());
+		settingsManager.setSaveWindowSizePosition(chkWindowSizePos.isSelected());
+		settingsManager.setSaveDownloadSelectionWindowSizePosition(chkDownloadSelectionWindowSizePos.isSelected());
+		settingsManager.setSaveTableColumnSizes(chkSaveTableColumnSizes.isSelected());
+		settingsManager.setSaveTableSortOrders(chkSaveTableSortOrders.isSelected());
+		settingsManager.setSaveLastPath(chkRememberLastUsedPath.isSelected());
+		settingsManager.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
+		settingsManager.setDeselectNoKeyword(chkDeselectNoKeyword.isSelected());
+		settingsManager.setDisplayKeywordsWhenNoMatches(chkDisplayKeywordsWhenNoMatches.isSelected());
+		settingsManager.setDefragDBOnStart(chkDefragDB.isSelected());
+		settingsManager.setBackupDbOnStart(chkBackupDB.isSelected());
+		settingsManager.setSubdirsEnabled(chkSubdirsEnabled.isSelected());
+		settingsManager.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
+		settingsManager.setDownloadPreviews(chkDownloadPreviews.isSelected());
 		try {
 			int val = Integer.parseInt(txtPreviewSize.getText());
 			if (val < 100 || val > 1000) {
-				txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
+				txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
 			} else {
-				sm.setPreviewSize(val);
+				settingsManager.setPreviewSize(val);
 			}
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
-			txtPreviewSize.setText(String.valueOf(sm.getPreviewSize()));
+			txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
 		}
-		sm.setSortDownloadsOnStart(cmbSortDownloadsOnStart.getSelectedIndex());
-		sm.setSubdirsResolutionMode(cmbSubdirsResolutionMode.getSelectedIndex());
+		settingsManager.setSortDownloadsOnStart(cmbSortDownloadsOnStart.getSelectedIndex());
+		settingsManager.setSubdirsResolutionMode(cmbSubdirsResolutionMode.getSelectedIndex());
 
 		List<Subdir> v = new ArrayList<>();
 		for (int i = 0; i < jtSubdirs.getRowCount(); i++) {
@@ -1918,26 +1941,26 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 
 			v.add(new Subdir(name, min, max, resMinW, resMinH, resMaxW, resMaxH));
 		}
-		sm.addSubdirs(v, true);
+		settingsManager.addSubdirs(v, true);
 
-		sm.setRulesBeforeClasses(chkRulesBefore.isSelected());
-		HostManager.instance().reInitHosterList();
+		settingsManager.setRulesBeforeClasses(chkRulesBefore.isSelected());
+		hostManager.reInitHosterList();
 
-		pm.setAuth(cbAuth.isSelected());
+		proxyManager.setAuth(cbAuth.isSelected());
 		if (rbNoProxy.isSelected()) {
-			pm.setMode(ProxyManager.DIRECT_CONNECTION);
+			proxyManager.setMode(ProxyManager.DIRECT_CONNECTION);
 		} else if (rbHTTP.isSelected()) {
-			pm.setMode(ProxyManager.HTTP_PROXY);
+			proxyManager.setMode(ProxyManager.HTTP_PROXY);
 		}
-		pm.setProxyname(txtProxyName.getText());
+		proxyManager.setProxyname(txtProxyName.getText());
 		try {
-			pm.setProxyport(Integer.parseInt(txtProxyPort.getText()));
+			proxyManager.setProxyport(Integer.parseInt(txtProxyPort.getText()));
 		} catch (NumberFormatException nfe) {
-			txtProxyPort.setText(String.valueOf(pm.getProxyport()));
+			txtProxyPort.setText(String.valueOf(proxyManager.getProxyport()));
 		}
-		pm.setProxyuser(txtProxyUser.getText());
-		pm.setProxypassword(String.valueOf(txtProxyPassword.getPassword()));
-		ProxyManager.instance().writeToSettings();
+		proxyManager.setProxyuser(txtProxyUser.getText());
+		proxyManager.setProxypassword(String.valueOf(txtProxyPassword.getPassword()));
+		proxyManager.writeToSettings();
 		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
 		if (cmbLAF.getSelectedIndex() != previousLookAndFeel) {
 			String strLAF = SettingsManager.LAF_CLASSPATHES[cmbLAF.getSelectedIndex()];
@@ -1956,7 +1979,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 				}
 			}
 		}
-		SettingsManager.instance().addSettingsListener(this);
+		settingsManager.addSettingsListener(this);
 	}
 
 	@Override
@@ -2002,7 +2025,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	}
 
 	@Override
-	public void lookAndFeelChanged() {
+	public void lookAndFeelChanged(int lookAndFeel) {
 		// Nothing to do
 	}
 
@@ -2084,21 +2107,21 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsSubdirs(TableUtil.serializeColWidthSetting(jtSubdirs));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsSubdirs(TableUtil.serializeColWidthSetting(jtSubdirs));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(jtSubdirs, SettingsManager.instance().getColWidthsSubdirs());
+		TableUtil.applyColWidths(jtSubdirs, settingsManager.getColWidthsSubdirs());
 	}
 
 	@Override
@@ -2128,7 +2151,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 
 	@Override
 	public void windowClosing(WindowEvent e) {
-		SettingsManager.instance().removeSettingsListener(this);
+		settingsManager.removeSettingsListener(this);
 		this.dispose();
 	}
 

@@ -6,6 +6,8 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 
+import ch.supertomcat.bh.settings.SettingsManager;
+
 /**
  * Editor for Keywords
  */
@@ -18,7 +20,16 @@ public class KeywordCellEditor extends AbstractCellEditor implements TableCellEd
 	/**
 	 * Editor-Component
 	 */
-	private KeywordCellEditorComponent kcec = new KeywordCellEditorComponent();
+	private final KeywordCellEditorComponent kcec;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 */
+	public KeywordCellEditor(SettingsManager settingsManager) {
+		this.kcec = new KeywordCellEditorComponent(settingsManager);
+	}
 
 	@Override
 	public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {

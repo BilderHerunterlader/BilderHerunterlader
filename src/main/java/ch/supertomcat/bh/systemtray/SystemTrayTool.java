@@ -26,6 +26,7 @@ import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.queue.DownloadAddDialog;
 import ch.supertomcat.bh.gui.queue.ParsePagesDialog;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportHTML;
 import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -34,6 +35,8 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
@@ -155,9 +158,34 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	private final LogManager logManager;
 
 	/**
+	 * Proxy Manager
+	 */
+	protected final ProxyManager proxyManager;
+
+	/**
+	 * Settings Manager
+	 */
+	protected final SettingsManager settingsManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
+
+	/**
+	 * GUI Event
+	 */
+	private final GuiEvent guiEvent;
 
 	/**
 	 * Constructor
@@ -168,17 +196,28 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param keywordManager Keyword Manager
 	 * @param logManager Log Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param cookieManager Cookie Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
+	 * @param guiEvent GUI Event
 	 */
 	public SystemTrayTool(JFrame mainWindow, MainWindowAccess mainWindowAccess, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
-			LogManager logManager, ClipboardObserver clipboardObserver) {
+			LogManager logManager, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver,
+			GuiEvent guiEvent) {
 		this.mainWindow = mainWindow;
 		this.mainWindowAccess = mainWindowAccess;
 		this.queueManager = queueManager;
 		this.downloadQueueManager = downloadQueueManager;
 		this.keywordManager = keywordManager;
 		this.logManager = logManager;
+		this.proxyManager = proxyManager;
+		this.settingsManager = settingsManager;
+		this.cookieManager = cookieManager;
+		this.hostManager = hostManager;
 		this.clipboardObserver = clipboardObserver;
+		this.guiEvent = guiEvent;
 	}
 
 	/**
@@ -208,7 +247,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 			popup.add(itemUpdate);
 			popup.add(itemExit);
 
-			itemClipboard.setState(SettingsManager.instance().isCheckClipboard());
+			itemClipboard.setState(settingsManager.isCheckClipboard());
 
 			// Create the TrayIcon
 			trayIcon = new TrayIcon(image, getClipboardStateText() + Localization.getString("SystemTrayTool_Sleeping"), popup);
@@ -248,7 +287,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 							mainWindow.setVisible(true);
 							mainWindow.toFront();
 						} else {
-							GuiEvent.instance().hideWindow();
+							guiEvent.hideWindow();
 						}
 					}
 				}
@@ -257,7 +296,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 			try {
 				tray.add(trayIcon);
 				downloadQueueManager.addDownloadQueueManagerListener(this);
-				SettingsManager.instance().addSettingsListener(this);
+				settingsManager.addSettingsListener(this);
 			} catch (AWTException e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -279,7 +318,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	 */
 	private String getClipboardStateText() {
 		String retval = Localization.getString("ClipboardObserve") + " ";
-		if (SettingsManager.instance().isCheckClipboard()) {
+		if (settingsManager.isCheckClipboard()) {
 			retval += Localization.getString("On");
 		} else {
 			retval += Localization.getString("Off");
@@ -316,28 +355,28 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	}
 
 	private void actionClipboard() {
-		SettingsManager.instance().setCheckClipboard(itemClipboard.getState());
+		settingsManager.setCheckClipboard(itemClipboard.getState());
 	}
 
 	private void actionUpdate() {
 		if (downloadQueueManager.isDownloading()) {
 			JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 		} else {
-			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource()), mainWindow, queueManager, keywordManager);
+			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent), mainWindow, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
 			update.setVisible(true);
 			update.toFront();
 		}
 	}
 
 	private void actionExit() {
-		GuiEvent.instance().exitApp(false);
+		guiEvent.exitApp(false);
 	}
 
 	private void actionImportHTML() {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportHTML(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importHTML();
+				new ImportHTML(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver).importHTML();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -348,7 +387,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				DownloadAddDialog dlg = new DownloadAddDialog(mainWindow, logManager, queueManager, keywordManager, clipboardObserver);
+				DownloadAddDialog dlg = new DownloadAddDialog(mainWindow, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -360,7 +399,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				ParsePagesDialog dlg = new ParsePagesDialog(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+				ParsePagesDialog dlg = new ParsePagesDialog(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
 				dlg.setVisible(true);
 			}
 		});
@@ -372,7 +411,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportLinkList(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver).importLinkList();
+				new ImportLinkList(mainWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver).importLinkList();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -388,7 +427,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 
 	@Override
 	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
-		if (SettingsManager.instance().isDownloadsCompleteNotification()) {
+		if (settingsManager.isDownloadsCompleteNotification()) {
 			String text = queueManager.getQueueSize() + " " + Localization.getString("DownloadsLeftInQueue");
 			trayIcon.displayMessage(Localization.getString("DownloadsComplete"), text, TrayIcon.MessageType.INFO);
 		}
@@ -399,11 +438,11 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		if (trayIcon != null) {
 			trayIcon.setToolTip(getSystemTrayToolTipText());
 		}
-		itemClipboard.setState(SettingsManager.instance().isCheckClipboard());
+		itemClipboard.setState(settingsManager.isCheckClipboard());
 	}
 
 	@Override
-	public void lookAndFeelChanged() {
+	public void lookAndFeelChanged(int lookAndFeel) {
 		// Nothing to do
 	}
 

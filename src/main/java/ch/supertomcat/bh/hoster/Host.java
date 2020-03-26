@@ -6,7 +6,6 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
-import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Class which all hostclasses have to extend
@@ -48,7 +47,7 @@ public abstract class Host extends Hoster implements IHoster {
 		this.name = name;
 		this.version = version;
 		if (canBeDisabled) {
-			deactivateOption = new DeactivateOption(name);
+			deactivateOption = new DeactivateOption(name, getSettingsManager());
 		} else {
 			deactivateOption = null;
 		}
@@ -78,7 +77,7 @@ public abstract class Host extends Hoster implements IHoster {
 		if (deactivateOption != null) {
 			deactivateOption.setDeactivated(!enabled);
 			deactivateOption.saveOption();
-			SettingsManager.instance().writeSettings(true);
+			getSettingsManager().writeSettings(true);
 		}
 	}
 

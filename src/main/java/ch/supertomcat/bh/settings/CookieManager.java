@@ -19,42 +19,56 @@ import ch.supertomcat.supertomcatutils.http.cookies.palemoon.PaleMoonCookies;
  */
 public class CookieManager {
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
+	 */
+	public CookieManager(SettingsManager settingsManager) {
+		this.settingsManager = settingsManager;
+	}
+
+	/**
 	 * Returns the Cookies for a domain
 	 * 
 	 * @param url URL
 	 * @return Cookies
 	 */
-	public static String getCookies(String url) {
+	public String getCookies(String url) {
 		Map<String, String> cookieStrategyOptions = new HashMap<>();
 
-		int browser = SettingsManager.instance().getCookiesFromBrowser();
+		int browser = settingsManager.getCookiesFromBrowser();
 		switch (browser) {
 			case BrowserCookies.BROWSER_NO_COOKIES:
 				break;
 			case BrowserCookies.BROWSER_IE:
 				break;
 			case BrowserCookies.BROWSER_FIREFOX:
-				if (SettingsManager.instance().isCookieFileFirefoxFixed()) {
-					String cookieFile = SettingsManager.instance().getCookieFileFirefox();
+				if (settingsManager.isCookieFileFirefoxFixed()) {
+					String cookieFile = settingsManager.getCookieFileFirefox();
 					cookieStrategyOptions.put(FirefoxCookieStrategy.COOKIE_FILE_FF_KEY, cookieFile);
 					cookieStrategyOptions.put(FirefoxCookieStrategy.COOKIE_FILE_FF_V3_KEY, cookieFile);
 				}
 				break;
 			case BrowserCookies.BROWSER_OPERA:
-				if (SettingsManager.instance().isCookieFileOperaFixed()) {
-					String cookieFile = SettingsManager.instance().getCookieFileOpera();
+				if (settingsManager.isCookieFileOperaFixed()) {
+					String cookieFile = settingsManager.getCookieFileOpera();
 					cookieStrategyOptions.put(OperaCookieStrategy.COOKIE_FILE_OPERA_KEY, cookieFile);
 				}
 				break;
 			case BrowserCookies.BROWSER_PALE_MOON:
-				if (SettingsManager.instance().isCookieFilePaleMoonFixed()) {
-					String cookieFile = SettingsManager.instance().getCookieFilePaleMoon();
+				if (settingsManager.isCookieFilePaleMoonFixed()) {
+					String cookieFile = settingsManager.getCookieFilePaleMoon();
 					cookieStrategyOptions.put(PaleMoonCookieStrategy.COOKIE_FILE_PALE_MOON_KEY, cookieFile);
 				}
 				break;
 			case BrowserCookies.BROWSER_OPERA_NEW:
-				if (SettingsManager.instance().isCookieFileOperaNewFixed()) {
-					String cookieFile = SettingsManager.instance().getCookieFileOperaNew();
+				if (settingsManager.isCookieFileOperaNewFixed()) {
+					String cookieFile = settingsManager.getCookieFileOperaNew();
 					cookieStrategyOptions.put(OperaNewCookieStrategy.COOKIE_FILE_OPERA_NEW_KEY, cookieFile);
 				}
 				break;
@@ -70,9 +84,9 @@ public class CookieManager {
 	 * 
 	 * @return Cookie-File-Path
 	 */
-	public static String getCookieFileForFirefox() {
-		if (SettingsManager.instance().isCookieFileFirefoxFixed()) {
-			return SettingsManager.instance().getCookieFileFirefox();
+	public String getCookieFileForFirefox() {
+		if (settingsManager.isCookieFileFirefoxFixed()) {
+			return settingsManager.getCookieFileFirefox();
 		}
 
 		return FirefoxCookies.getPathForFirefox() + "cookies.txt";
@@ -83,9 +97,9 @@ public class CookieManager {
 	 * 
 	 * @return Cookie-File-Path
 	 */
-	public static String getCookieFileForFirefox3() {
-		if (SettingsManager.instance().isCookieFileFirefoxFixed()) {
-			return SettingsManager.instance().getCookieFileFirefox();
+	public String getCookieFileForFirefox3() {
+		if (settingsManager.isCookieFileFirefoxFixed()) {
+			return settingsManager.getCookieFileFirefox();
 		}
 
 		return FirefoxCookies.getPathForFirefox() + "cookies.sqlite";
@@ -96,9 +110,9 @@ public class CookieManager {
 	 * 
 	 * @return Cookie-File-Path
 	 */
-	public static String getCookieFileForPaleMoon() {
-		if (SettingsManager.instance().isCookieFilePaleMoonFixed()) {
-			return SettingsManager.instance().getCookieFilePaleMoon();
+	public String getCookieFileForPaleMoon() {
+		if (settingsManager.isCookieFilePaleMoonFixed()) {
+			return settingsManager.getCookieFilePaleMoon();
 		}
 
 		return PaleMoonCookies.getPathForPaleMoon() + "cookies.sqlite";
@@ -110,9 +124,9 @@ public class CookieManager {
 	 * @param checkExist Check Existance
 	 * @return Cookie Pfad
 	 */
-	public static String getCookieFileForOpera(boolean checkExist) {
-		if (SettingsManager.instance().isCookieFileOperaFixed()) {
-			return SettingsManager.instance().getCookieFileOpera();
+	public String getCookieFileForOpera(boolean checkExist) {
+		if (settingsManager.isCookieFileOperaFixed()) {
+			return settingsManager.getCookieFileOpera();
 		}
 
 		return OperaCookies.getCookieFileForOpera(checkExist);
@@ -123,9 +137,9 @@ public class CookieManager {
 	 * 
 	 * @return Cookie Pfad
 	 */
-	public static String getCookieFileForOperaNew() {
-		if (SettingsManager.instance().isCookieFileOperaNewFixed()) {
-			return SettingsManager.instance().getCookieFileOperaNew();
+	public String getCookieFileForOperaNew() {
+		if (settingsManager.isCookieFileOperaNewFixed()) {
+			return settingsManager.getCookieFileOperaNew();
 		}
 
 		return OperaNewCookies.getCookieFileForOpera();

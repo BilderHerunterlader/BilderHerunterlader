@@ -201,11 +201,6 @@ public class SettingsManager {
 	private static final String RESTRICTED_START_WITH_PATHS[] = { "Directories.Subdir", "GUI.regexReplacePageTitle", "Downloads.regexReplaceFilename", "GUI.FilenameChangeHistory", "GUI.targetDirChangeHistory", "GUI.adderAdd", "Hosts.deactivatedHosts" };
 
 	/**
-	 * Singleton
-	 */
-	private static SettingsManager instance;
-
-	/**
 	 * Listener
 	 */
 	private List<BHSettingsListener> listeners = new CopyOnWriteArrayList<>();
@@ -761,7 +756,7 @@ public class SettingsManager {
 	 * @param strSettingsFolder Settings Folder
 	 * @param strSettingsFilename Settings Filename
 	 */
-	private SettingsManager(String strSettingsFolder, final String strSettingsFilename) {
+	public SettingsManager(String strSettingsFolder, final String strSettingsFilename) {
 		// If path for downloads are overridden by directories.properties file, then we need to set the path here
 		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
 		if (portableDownloadPath != null) {
@@ -821,18 +816,6 @@ public class SettingsManager {
 				}
 			}
 		}
-	}
-
-	/**
-	 * Returns the Singleton
-	 * 
-	 * @return Singleton
-	 */
-	public synchronized static SettingsManager instance() {
-		if (instance == null) {
-			instance = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
-		}
-		return instance;
 	}
 
 	/**
@@ -2539,6 +2522,9 @@ public class SettingsManager {
 	public void setLookAndFeel(int lookAndFeel) {
 		if (checkIntValue(0, 9, lookAndFeel)) {
 			this.lookAndFeel = lookAndFeel;
+			for (BHSettingsListener listener : listeners) {
+				listener.lookAndFeelChanged(lookAndFeel);
+			}
 		}
 	}
 

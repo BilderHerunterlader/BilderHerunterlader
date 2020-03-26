@@ -11,13 +11,20 @@ public class DeactivateOption {
 	private boolean deactivated;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param optionPrefix Prefix
+	 * @param settingsManager Settings Manager
 	 */
-	public DeactivateOption(String optionPrefix) {
+	public DeactivateOption(String optionPrefix, SettingsManager settingsManager) {
 		this.optionPrefix = optionPrefix;
-		deactivated = SettingsManager.instance().isHostDeactivated(optionPrefix);
+		this.settingsManager = settingsManager;
+		deactivated = settingsManager.isHostDeactivated(optionPrefix);
 	}
 
 	/**
@@ -52,6 +59,6 @@ public class DeactivateOption {
 	 * Note: It only saves the option in SettingsManager, but it does not write the settings to the settings-file
 	 */
 	public void saveOption() {
-		SettingsManager.instance().setHostDeactivated(optionPrefix, deactivated);
+		settingsManager.setHostDeactivated(optionPrefix, deactivated);
 	}
 }

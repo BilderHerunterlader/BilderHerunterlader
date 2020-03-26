@@ -13,8 +13,11 @@ import ch.supertomcat.bh.downloader.FileDownloader;
 import ch.supertomcat.bh.downloader.impl.HTTPFileDownloader;
 import ch.supertomcat.bh.downloader.impl.LocalFileDownloader;
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -301,7 +304,7 @@ public class Pic implements IDownloadListener {
 	}
 
 	@Override
-	public boolean downloadAllowed(DownloadQueueManager downloadQueueManager) {
+	public boolean downloadAllowed(DownloadQueueManager downloadQueueManager, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
 		/*
 		 * When the startDownload-Method is called, the download requests the
 		 * Queue for a download-slot. The Queue fires this method, as soon as there is
@@ -369,9 +372,9 @@ public class Pic implements IDownloadListener {
 					FileDownloader downloader;
 					String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
 					if (HTTPUtil.isURL(encodedContainerURL)) {
-						downloader = new HTTPFileDownloader(downloadQueueManager);
+						downloader = new HTTPFileDownloader(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
 					} else {
-						downloader = new LocalFileDownloader(downloadQueueManager);
+						downloader = new LocalFileDownloader(downloadQueueManager, settingsManager, hostManager);
 					}
 					try {
 						downloader.downloadFile(Pic.this);
@@ -392,12 +395,14 @@ public class Pic implements IDownloadListener {
 	/**
 	 * Checks if the download failed to often (defined by the user over the options)
 	 * If so the download will be deactivated
+	 * 
+	 * @param maxFailedCount Max Failed Count
 	 */
-	private void checkDeactivate() {
-		if (SettingsManager.instance().getMaxFailedCount() <= 0) {
+	private void checkDeactivate(int maxFailedCount) {
+		if (maxFailedCount <= 0) {
 			return;
 		}
-		if (this.failedCount >= SettingsManager.instance().getMaxFailedCount()) {
+		if (this.failedCount >= maxFailedCount) {
 			setDeactivated(true);
 		}
 	}
@@ -672,18 +677,22 @@ public class Pic implements IDownloadListener {
 
 	/**
 	 * Increases the failedCount and deactivates the Pic if necessary
+	 * 
+	 * @param maxFailedCount Max Failed Count
 	 */
-	public void increaseFailedCount() {
+	public void increaseFailedCount(int maxFailedCount) {
 		failedCount++;
-		checkDeactivate(); // check if the download has to be deactivated
+		checkDeactivate(maxFailedCount); // check if the download has to be deactivated
 	}
 
 	/**
 	 * Sets the failedCount to maximum failed count and deactivates the Pic if necessary
+	 * 
+	 * @param maxFailedCount Max Failed Count
 	 */
-	public void setToMaxFailedCount() {
-		failedCount = SettingsManager.instance().getMaxFailedCount();
-		checkDeactivate(); // check if the download has to be deactivated
+	public void setToMaxFailedCount(int maxFailedCount) {
+		failedCount = maxFailedCount;
+		checkDeactivate(maxFailedCount); // check if the download has to be deactivated
 	}
 
 	/**

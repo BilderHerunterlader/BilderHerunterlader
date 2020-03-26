@@ -43,20 +43,22 @@ public class BHUtil {
 	 * This method filters not allowed chars in filenames
 	 * 
 	 * @param filename Filename
+	 * @param settingsManager Settings Manager
 	 * @return Filtered Filename
 	 */
-	public static String filterFilename(String filename) {
-		return FileUtil.filterFilename(filename, SettingsManager.instance().getAllowedFilenameChars());
+	public static String filterFilename(String filename, SettingsManager settingsManager) {
+		return FileUtil.filterFilename(filename, settingsManager.getAllowedFilenameChars());
 	}
 
 	/**
 	 * This method filters not allowed chars in paths (including filename if available)
 	 * 
 	 * @param path Path
+	 * @param settingsManager Settings Manager
 	 * @return Filtered path
 	 */
-	public static String filterPath(String path) {
-		return FileUtil.filterPath(path, SettingsManager.instance().getAllowedFilenameChars());
+	public static String filterPath(String path, SettingsManager settingsManager) {
+		return FileUtil.filterPath(path, settingsManager.getAllowedFilenameChars());
 	}
 
 	/**

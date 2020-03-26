@@ -57,12 +57,21 @@ public class HosterPanel extends JPanel {
 	private HosterOptionsColumnRenderer ocr = new HosterOptionsColumnRenderer();
 
 	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Constructor
 	 * 
+	 * @param hostManager Host Manager
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public HosterPanel(DownloadQueueManager downloadQueueManager) {
-		model = new HosterTableModel(this, downloadQueueManager);
+	public HosterPanel(HostManager hostManager, DownloadQueueManager downloadQueueManager, SettingsManager settingsManager) {
+		this.hostManager = hostManager;
+		model = new HosterTableModel(this, hostManager, downloadQueueManager);
+		settingsManager.addSettingsListener(model);
 		jtHoster = new JTable(model);
 
 		TableUtil.internationalizeColumns(jtHoster);
@@ -92,7 +101,7 @@ public class HosterPanel extends JPanel {
 		jtHoster.setDefaultRenderer(Boolean.class, new DefaultBooleanColorRowRenderer());
 		jtHoster.getColumn("Settings").setCellRenderer(ocr);
 		jtHoster.getColumn("Settings").setCellEditor(new OptionsCellEditor(model));
-		updateColWidthsFromSettingsManager();
+		updateColWidthsFromSettingsManager(settingsManager);
 		jtHoster.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
@@ -108,7 +117,7 @@ public class HosterPanel extends JPanel {
 
 			@Override
 			public void columnMarginChanged(ChangeEvent e) {
-				updateColWidthsToSettingsManager();
+				updateColWidthsToSettingsManager(settingsManager);
 			}
 
 			@Override
@@ -132,33 +141,37 @@ public class HosterPanel extends JPanel {
 	 * Load hosters
 	 */
 	private void loadHoster() {
-		for (IRedirect redirect : HostManager.instance().getRedirectManager().getRedirects()) {
+		for (IRedirect redirect : hostManager.getRedirectManager().getRedirects()) {
 			model.addRow(redirect);
 		}
 
-		for (Host host : HostManager.instance().getHosters()) {
+		for (Host host : hostManager.getHosters()) {
 			model.addRow(host);
 		}
 	}
 
 	/**
 	 * updateColWidthsToSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		SettingsManager.instance().setColWidthsHosts(TableUtil.serializeColWidthSetting(jtHoster));
-		SettingsManager.instance().writeSettings(true);
+		settingsManager.setColWidthsHosts(TableUtil.serializeColWidthSetting(jtHoster));
+		settingsManager.writeSettings(true);
 	}
 
 	/**
 	 * updateColWidthsFromSettingsManager
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes() == false) {
+	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
-		TableUtil.applyColWidths(jtHoster, SettingsManager.instance().getColWidthsHosts());
+		TableUtil.applyColWidths(jtHoster, settingsManager.getColWidthsHosts());
 	}
 }

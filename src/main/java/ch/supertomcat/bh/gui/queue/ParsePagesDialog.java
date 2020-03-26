@@ -20,10 +20,14 @@ import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 
@@ -74,11 +78,16 @@ public class ParsePagesDialog extends JDialog {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
+	 * @param cookieManager Cookie Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ParsePagesDialog(JFrame owner, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ClipboardObserver clipboardObserver) {
+	public ParsePagesDialog(JFrame owner, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, HostManager hostManager, CookieManager cookieManager, ClipboardObserver clipboardObserver) {
 		super(owner);
-		this.urlImporter = new ImportURL(owner, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+		this.urlImporter = new ImportURL(owner, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
 
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);

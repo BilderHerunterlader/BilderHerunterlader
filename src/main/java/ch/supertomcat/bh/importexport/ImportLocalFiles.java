@@ -7,12 +7,15 @@ import java.util.ArrayList;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.base.AdderImportBase;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.queue.QueueManager;
+import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -27,11 +30,14 @@ public class ImportLocalFiles extends AdderImportBase {
 	 * @param logManager Log Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
+	 * @param proxyManager Proxy Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public ImportLocalFiles(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager,
-			ClipboardObserver clipboardObserver) {
-		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, clipboardObserver);
+	public ImportLocalFiles(Component parentComponent, MainWindowAccess mainWindowAccess, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+			SettingsManager settingsManager, HostManager hostManager, ClipboardObserver clipboardObserver) {
+		super(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 	}
 
 	/**
@@ -59,7 +65,7 @@ public class ImportLocalFiles extends AdderImportBase {
 		if (urls.size() > 0) {
 			// Open Download-Selection-Dialog
 			AdderPanel adderpnl = new AdderPanel(parentComponent, true, new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-					+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, clipboardObserver);
+					+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 			adderpnl.init();
 			adderpnl = null;
 		}

@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.database.sqlite.KeywordsSQLiteDB;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
@@ -44,12 +45,15 @@ public class KeywordManager {
 	 */
 	private List<KeywordManagerListener> listeners = new CopyOnWriteArrayList<>();
 
-	private KeywordsSQLiteDB keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite");
+	private final KeywordsSQLiteDB keywordsSQLiteDB;
 
 	/**
 	 * Constructor
+	 * 
+	 * @param settingsManager Settings Manager
 	 */
-	public KeywordManager() {
+	public KeywordManager(SettingsManager settingsManager) {
+		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.isBackupDbOnStart());
 		List<Keyword> keywordsFromDB = keywordsSQLiteDB.getAllEntries();
 		keywords.addAll(keywordsFromDB);
 	}

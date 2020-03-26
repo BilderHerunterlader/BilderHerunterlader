@@ -245,16 +245,23 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	private final KeywordManager keywordManager;
 
 	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentWindow Parent Window
 	 * @param mainWindowAccess Main Window Access
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public Keywords(JFrame parentWindow, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
+	public Keywords(JFrame parentWindow, MainWindowAccess mainWindowAccess, KeywordManager keywordManager, SettingsManager settingsManager) {
 		this.parentWindow = parentWindow;
 		this.mainWindowAccess = mainWindowAccess;
 		this.keywordManager = keywordManager;
+		this.settingsManager = settingsManager;
 		TableUtil.internationalizeColumns(jtKeywords);
 
 		jtKeywords.setRowSorter(sorter);
@@ -347,15 +354,15 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		pnlP.add(pnlInfo, BorderLayout.NORTH);
 		pnlP.add(pnlFilter, BorderLayout.CENTER);
 		add(pnlP, BorderLayout.NORTH);
-		boolean filterEnabled = SettingsManager.instance().isKeywordFilterEnabled();
+		boolean filterEnabled = settingsManager.isKeywordFilterEnabled();
 		btnFilter.setSelected(filterEnabled);
 		pnlFilter.setVisible(filterEnabled);
 		btnFilter.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				pnlFilter.setVisible(btnFilter.isSelected());
-				SettingsManager.instance().setKeywordFilterEnabled(btnFilter.isSelected());
-				SettingsManager.instance().writeSettings(true);
+				settingsManager.setKeywordFilterEnabled(btnFilter.isSelected());
+				settingsManager.writeSettings(true);
 			}
 		});
 
@@ -561,7 +568,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			return;
 		}
 		if (e.getSource() == btnNew) {
-			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Add"), "", "", SettingsManager.instance().getSavePath(), true, "");
+			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Add"), "", "", settingsManager.getSavePath(), true, "", settingsManager);
 			if (dialog != null) {
 				keywordManager.addKeyword(dialog.getKeyword());
 			}
@@ -609,8 +616,8 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			int row = jtKeywords.getSelectedRow();
 			row = jtKeywords.convertRowIndexToModel(row);
 			Keyword k = keywordManager.getKeywordByIndex(row);
-			KeywordEditDialog dialog = KeywordEditDialog
-					.openKeywordEditDialog(parentWindow, Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k.getRelativeDownloadPath());
+			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k
+					.getRelativeDownloadPath(), settingsManager);
 			if (dialog != null) {
 				k.setTitle(dialog.getKeywordTitle());
 				k.setKeywords(dialog.getKeywords());
@@ -624,7 +631,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				@Override
 				public void run() {
 					enableComponents(false);
-					new ImportKeywords(parentWindow, mainWindowAccess, keywordManager).importKeywords();
+					new ImportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).importKeywords();
 					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
 					enableComponents(true);
 				}
@@ -636,7 +643,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				@Override
 				public void run() {
 					enableComponents(false);
-					new ExportKeywords(parentWindow, mainWindowAccess, keywordManager).exportKeywords();
+					new ExportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).exportKeywords();
 					enableComponents(true);
 				}
 			});
@@ -655,7 +662,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			enableComponents(false);
 			int s[] = jtKeywords.getSelectedRows();
 			String val = "";
-			String path = SettingsManager.instance().getSavePath();
+			String path = settingsManager.getSavePath();
 			for (int i = 0; i < s.length; i++) {
 				val = path + (String)jtKeywords.getValueAt(s[i], 0);
 				jtKeywords.setValueAt(val, s[i], 2);
@@ -676,7 +683,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			String val = "";
 			for (int i = 0; i < s.length; i++) {
 				val = (String)jtKeywords.getValueAt(s[i], 2);
-				String dlFolder = SettingsManager.instance().getSavePath();
+				String dlFolder = settingsManager.getSavePath();
 				int pos = val.indexOf(dlFolder);
 				if (pos == 0) {
 					val = val.substring(dlFolder.length());
@@ -739,9 +746,9 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 * updateTableSortOrdersToSettingsManager
 	 */
 	private void updateTableSortOrdersToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableSortOrders()) {
-			SettingsManager.instance().setTableSortOrdersKeywords(TableUtil.serializeTableSortOrderSetting(jtKeywords));
-			SettingsManager.instance().writeSettings(true);
+		if (settingsManager.isSaveTableSortOrders()) {
+			settingsManager.setTableSortOrdersKeywords(TableUtil.serializeTableSortOrderSetting(jtKeywords));
+			settingsManager.writeSettings(true);
 		}
 	}
 
@@ -749,8 +756,8 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 * updateTableSortOrdersFromSettingsManager
 	 */
 	private void updateTableSortOrdersFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableSortOrders()) {
-			TableUtil.applyTableSortOrder(jtKeywords, SettingsManager.instance().getTableSortOrdersKeywords());
+		if (settingsManager.isSaveTableSortOrders()) {
+			TableUtil.applyTableSortOrder(jtKeywords, settingsManager.getTableSortOrdersKeywords());
 		}
 	}
 
@@ -758,9 +765,9 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			SettingsManager.instance().setColWidthsKeywords(TableUtil.serializeColWidthSetting(jtKeywords));
-			SettingsManager.instance().writeSettings(true);
+		if (settingsManager.isSaveTableColumnSizes()) {
+			settingsManager.setColWidthsKeywords(TableUtil.serializeColWidthSetting(jtKeywords));
+			settingsManager.writeSettings(true);
 		}
 	}
 
@@ -768,8 +775,8 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (SettingsManager.instance().isSaveTableColumnSizes()) {
-			TableUtil.applyColWidths(jtKeywords, SettingsManager.instance().getColWidthsKeywords());
+		if (settingsManager.isSaveTableColumnSizes()) {
+			TableUtil.applyColWidths(jtKeywords, settingsManager.getColWidthsKeywords());
 		}
 	}
 }

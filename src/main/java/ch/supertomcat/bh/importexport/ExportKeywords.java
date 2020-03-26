@@ -37,9 +37,10 @@ public class ExportKeywords extends ImportExportBase {
 	 * @param parentComponent Parent Component
 	 * @param mainWindowAccess Main Window Access
 	 * @param keywordManager Keyword Manager
+	 * @param settingsManager Settings Manager
 	 */
-	public ExportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager) {
-		super(parentComponent, mainWindowAccess);
+	public ExportKeywords(Component parentComponent, MainWindowAccess mainWindowAccess, KeywordManager keywordManager, SettingsManager settingsManager) {
+		super(parentComponent, mainWindowAccess, settingsManager);
 		this.keywordManager = keywordManager;
 	}
 
@@ -49,7 +50,7 @@ public class ExportKeywords extends ImportExportBase {
 	public void exportKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
 		if (file != null) {
-			SettingsManager.instance().setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportKeywords(file.getAbsolutePath());
 			file = null;

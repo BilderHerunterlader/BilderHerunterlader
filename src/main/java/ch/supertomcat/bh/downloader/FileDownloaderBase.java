@@ -27,6 +27,7 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -64,12 +65,26 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	protected final DownloadQueueManager downloadQueueManager;
 
 	/**
+	 * Settings Manager
+	 */
+	protected final SettingsManager settingsManager;
+
+	/**
+	 * Host Manager
+	 */
+	protected final HostManager hostManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
+	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 */
-	public FileDownloaderBase(DownloadQueueManager downloadQueueManager) {
+	public FileDownloaderBase(DownloadQueueManager downloadQueueManager, SettingsManager settingsManager, HostManager hostManager) {
 		this.downloadQueueManager = downloadQueueManager;
+		this.settingsManager = settingsManager;
+		this.hostManager = hostManager;
 	}
 
 	/**
@@ -162,9 +177,9 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 */
 	protected void failDownload(Pic pic, URLParseObject upo, boolean disableDownload, String errorMessage, Throwable e) {
 		if (disableDownload) {
-			pic.setToMaxFailedCount();
+			pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
 		} else {
-			pic.increaseFailedCount();
+			pic.increaseFailedCount(settingsManager.getMaxFailedCount());
 		}
 		if (errorMessage != null) {
 			changeStatusAndReturnSlot(pic, PicState.FAILED, 0, errorMessage);
@@ -187,7 +202,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param e Exception
 	 */
 	protected void failDownloadTemporaryOffline(Pic pic, HostFileTemporaryOfflineException e) {
-		pic.setToMaxFailedCount();
+		pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
 		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_TEMPORARY_OFFLINE, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());
@@ -201,7 +216,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param e Exception
 	 */
 	protected void failDownloadFileNotExist(Pic pic, HostFileNotExistException e) {
-		pic.setToMaxFailedCount();
+		pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
 		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_NOT_EXIST, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());
@@ -242,7 +257,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		// Now we try to get the direct link
 		try {
 			// Now let the HostManager parse it
-			result = HostManager.instance().parseURL(upo);
+			result = hostManager.parseURL(upo);
 			if (result == null) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
 			}
@@ -260,13 +275,13 @@ public abstract class FileDownloaderBase implements FileDownloader {
 
 			// if the hostclass gives us a nice filename
 			if (correctedFilename != null && !correctedFilename.isEmpty() && (!pic.isFixedTargetFilename() || pic.getTargetFilename().isEmpty())) {
-				pic.setTargetFilename(BHUtil.filterFilename(correctedFilename));
+				pic.setTargetFilename(BHUtil.filterFilename(correctedFilename, settingsManager));
 			}
 
 			// If no specific filename was set, then get it from URL
 			if (pic.getTargetFilename().isEmpty() || pic.getTargetFilename().equals(Localization.getString("Unkown"))) {
 				String filenameFromURL = getFilenameFromURL(url);
-				pic.setTargetFilename(BHUtil.filterFilename(filenameFromURL));
+				pic.setTargetFilename(BHUtil.filterFilename(filenameFromURL, settingsManager));
 			}
 
 			prepareTargetDirectory(pic, result);
@@ -368,7 +383,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 				return null;
 			}
 
-			return BHUtil.filterFilename(cdResult);
+			return BHUtil.filterFilename(cdResult, settingsManager);
 		}
 		return null;
 	}

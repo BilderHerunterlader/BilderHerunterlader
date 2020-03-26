@@ -27,6 +27,20 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  */
 public class HTTPXMLUpdateSource implements UpdateSource {
 	/**
+	 * Proxy Manager
+	 */
+	protected final ProxyManager proxyManager;
+
+	/**
+	 * Constructor
+	 * 
+	 * @param proxyManager Proxy Manager
+	 */
+	public HTTPXMLUpdateSource(ProxyManager proxyManager) {
+		this.proxyManager = proxyManager;
+	}
+
+	/**
 	 * Downloads and parses Update-xml-File
 	 * 
 	 * @param url URL
@@ -41,7 +55,7 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 
 		url = HTTPUtil.encodeURL(url);
 		HttpGet method = null;
-		try (CloseableHttpClient client = ProxyManager.instance().getHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			method = new HttpGet(url);
 			Document doc;
 			try (CloseableHttpResponse response = client.execute(method)) {
@@ -146,7 +160,7 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 	 * @param updateType Update-Type
 	 * @return UpdateObject or null if not all required information is present
 	 */
-	private static UpdateObject getUpdateObject(Element elHost, UpdateObject.UpdateType updateType) {
+	private UpdateObject getUpdateObject(Element elHost, UpdateObject.UpdateType updateType) {
 		UpdateObject updateObject = null;
 
 		// Read out name
@@ -185,7 +199,7 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 		if (targetFilename == null) {
 			return null;
 		}
-		sources.add(new HTTPUpdateSourceFile(source, targetFilename, (delete != null) ? true : false));
+		sources.add(new HTTPUpdateSourceFile(source, targetFilename, delete != null, proxyManager));
 
 		/*
 		 * In the new version of the update-xml-file host-plugins and redirect-plugins
@@ -205,7 +219,7 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 						return null;
 					}
 					String deleteAdditional = el.getAttributeValue("delete");
-					sources.add(new HTTPUpdateSourceFile(src, tgtFilename, (deleteAdditional != null) ? true : false));
+					sources.add(new HTTPUpdateSourceFile(src, tgtFilename, deleteAdditional != null, proxyManager));
 				}
 			}
 		}
