@@ -130,7 +130,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		}
 		pic.getProgress().setBytesDownloaded(progressBarValue);
 		pic.progressUpdated();
-		downloadQueueManager.removeDLSlotListener(pic);
+		downloadQueueManager.removeDLSlotListener(pic.getDownloadListener());
 	}
 
 	/**

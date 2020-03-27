@@ -9,10 +9,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.database.sqlite.QueueSQLiteDB;
+import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.gui.queue.QueueTableModel;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.pic.PicDownloadListener;
+import ch.supertomcat.bh.pic.PicProgress;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -69,16 +72,23 @@ public class QueueManager implements IPicListener {
 	private final SettingsManager settingsManager;
 
 	/**
+	 * File Downloader Factory
+	 */
+	private final FileDownloaderFactory fileDownloaderFactory;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param logManager Log Manager
 	 * @param settingsManager SettingsManager
+	 * @param fileDownloaderFactory File Downloader Factory
 	 */
-	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager) {
+	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager, FileDownloaderFactory fileDownloaderFactory) {
 		this.downloadQueueManager = downloadQueueManager;
 		this.logManager = logManager;
 		this.settingsManager = settingsManager;
+		this.fileDownloaderFactory = fileDownloaderFactory;
 		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.isBackupDbOnStart());
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
@@ -220,7 +230,7 @@ public class QueueManager implements IPicListener {
 			executeInEventQueueThread(r);
 		}
 		if (settingsManager.isAutoStartDownloads()) {
-			pic.startDownload(downloadQueueManager);
+			startDownload(pic);
 			downloadQueueManager.manageDLSlots();
 		}
 	}
@@ -253,7 +263,7 @@ public class QueueManager implements IPicListener {
 		}
 		if (settingsManager.isAutoStartDownloads()) {
 			for (Pic pic : picsAdded) {
-				pic.startDownload(downloadQueueManager);
+				startDownload(pic);
 			}
 			downloadQueueManager.manageDLSlots();
 		}
@@ -359,9 +369,43 @@ public class QueueManager implements IPicListener {
 		}
 		// request downloadslots for all pics in queue
 		for (Pic pic : list) {
-			pic.startDownload(downloadQueueManager);
+			startDownload(pic);
 		}
 		downloadQueueManager.manageDLSlots();
+	}
+
+	/**
+	 * Start download
+	 * 
+	 * @param pic pic
+	 */
+	public void startDownload(Pic pic) {
+		synchronized (pic) {
+			// If the download is deactivated, then we don't start the download
+			if (pic.isDeactivated()) {
+				return;
+			}
+
+			IDownloadListener downloadListener = pic.getDownloadListener();
+			if (downloadListener != null) {
+				// If there is not already a request for a download-slot and the status is sleeping or failed
+				boolean downloadSlotRequested = downloadQueueManager.isDLSlotListenerRegistered(downloadListener);
+				if (downloadSlotRequested) {
+					return;
+				}
+			}
+
+			PicState status = pic.getStatus();
+			if (status == PicState.SLEEPING || status == PicState.FAILED || status == PicState.FAILED_FILE_NOT_EXIST || status == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
+				pic.setStop(false);
+				pic.setStopOncePressed(false);
+				pic.setStatus(PicState.WAITING);
+				// Request a download slot
+				PicDownloadListener newDownloadListener = new PicDownloadListener(pic, fileDownloaderFactory, downloadQueueManager);
+				pic.setDownloadListener(newDownloadListener);
+				downloadQueueManager.addDLSlotListener(newDownloadListener);
+			}
+		}
 	}
 
 	/**
@@ -375,7 +419,47 @@ public class QueueManager implements IPicListener {
 		}
 		// stop all downloads
 		for (Pic pic : list) {
-			pic.stopDownload(downloadQueueManager);
+			stopDownload(pic);
+		}
+	}
+
+	/**
+	 * Stop download
+	 * 
+	 * This does not immediately stop the download, it only changes
+	 * the stop-flag to true and the download method will stop if this
+	 * flag is true.
+	 * When the download is waiting for the parsed URL, this could take some time...
+	 * 
+	 * @param pic Pic
+	 */
+	private void stopDownload(Pic pic) {
+		synchronized (pic) {
+			if (pic.isStopOncePressed()) {
+				pic.setStop(true);
+			}
+			PicState status = pic.getStatus();
+			if (status == PicState.WAITING) {
+				pic.setStop(true);
+				pic.setStatus(PicState.SLEEPING);
+
+				PicProgress progress = pic.getProgress();
+				progress.setBytesTotal(pic.getSize());
+				progress.setBytesDownloaded(0);
+				pic.progressUpdated();
+
+				/*
+				 * Free the download-slot
+				 * Maybe i should do this not at this point, because the user could
+				 * start the download again, before it has really stopped
+				 */
+				downloadQueueManager.removeDLSlotListenerStopping(pic.getDownloadListener());
+			} else if (status == PicState.DOWNLOADING) {
+				if (pic.isStop()) {
+					pic.setStatus(PicState.ABORTING);
+				}
+			}
+			pic.setStopOncePressed(true);
 		}
 	}
 

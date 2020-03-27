@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
+import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
 import ch.supertomcat.bh.gui.Icons;
@@ -222,9 +223,6 @@ public abstract class BH {
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);
 		LogManager logManager = new LogManager(settingsManager);
-		DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
-		hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
-		downloadQueueManager = new DownloadQueueManager(restrictions, proxyManager, settingsManager, cookieManager, hostManager);
 
 		int threadCount = settingsManager.getThreadCount();
 		if (threadCount < 1) {
@@ -239,7 +237,11 @@ public abstract class BH {
 		tasks.add(Executors.callable(new Runnable() {
 			@Override
 			public void run() {
-				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager);
+				DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
+				hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
+				downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager);
+				FileDownloaderFactory fileDownloaderFactory = new FileDownloaderFactory(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
+				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, fileDownloaderFactory);
 			}
 		}));
 		tasks.add(Executors.callable(new Runnable() {

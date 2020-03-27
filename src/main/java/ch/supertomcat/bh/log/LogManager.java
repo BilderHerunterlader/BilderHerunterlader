@@ -84,22 +84,6 @@ public class LogManager implements BHSettingsListener {
 		if (folder.exists() == false) {
 			folder.mkdirs();
 		}
-		File fileLog = new File(logFile);
-		if (fileLog.exists() == false) {
-			try {
-				fileLog.createNewFile();
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
-		File fileBlacklist = new File(blacklistFile);
-		if (fileBlacklist.exists() == false) {
-			try {
-				fileBlacklist.createNewFile();
-			} catch (IOException e) {
-				logger.error(e.getMessage(), e);
-			}
-		}
 
 		settingsManager.addSettingsListener(this);
 	}
@@ -505,6 +489,9 @@ public class LogManager implements BHSettingsListener {
 		List<DirectoryLogObject> dirs = new ArrayList<>();
 
 		File f = new File(logFile);
+		if (!f.exists()) {
+			return dirs;
+		}
 		long size = f.length();
 		progress.progressChanged(0, 100, 0);
 		progress.progressChanged(true);

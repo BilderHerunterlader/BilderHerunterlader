@@ -140,7 +140,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			}
 		} finally {
 			// Give the slot back to the Queue
-			downloadQueueManager.removeDLSlotListener(pic); // important!
+			downloadQueueManager.removeDLSlotListener(pic.getDownloadListener()); // important!
 		}
 	}
 

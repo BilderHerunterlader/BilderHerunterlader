@@ -7,10 +7,7 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
@@ -85,41 +82,20 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private List<IDownloadListener> queue = new ArrayList<>();
 
 	/**
-	 * Proxy Manager
-	 */
-	private final ProxyManager proxyManager;
-
-	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
 
 	/**
-	 * Cookie Manager
-	 */
-	private final CookieManager cookieManager;
-
-	/**
-	 * Host Manager
-	 */
-	private final HostManager hostManager;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param restrictions Restrictions
-	 * @param proxyManager Proxy Manager
 	 * @param settingsManager Settings Manager
-	 * @param cookieManager Cookie Manager
-	 * @param hostManager Host Manager
 	 */
-	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
+	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, SettingsManager settingsManager) {
 		this.restrictions = restrictions;
-		this.proxyManager = proxyManager;
 		this.settingsManager = settingsManager;
 		this.settingsManager.addSettingsListener(this);
-		this.cookieManager = cookieManager;
-		this.hostManager = hostManager;
 		this.connectionCount = settingsManager.getConnections();
 		this.connectionCountPerHost = settingsManager.getConnectionsPerHost();
 		this.openDownloadSlots = connectionCount;
@@ -253,7 +229,7 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 				}
 
 				// Allow the download and check if the listener really started the download
-				boolean b = download.downloadAllowed(this, proxyManager, settingsManager, cookieManager, hostManager);
+				boolean b = download.downloadAllowed();
 				if (b == true) {
 					calculateRateListeners.add(download);
 					// Only if the listener has started the download, we decrease open download slots
