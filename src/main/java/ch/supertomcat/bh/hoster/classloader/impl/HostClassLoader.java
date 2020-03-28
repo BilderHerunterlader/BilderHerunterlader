@@ -15,7 +15,7 @@ import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
  */
 public class HostClassLoader extends HostClassLoaderBase<Host> {
 	private final FileFilter filter = new FileFilter() {
-		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+[$][0-9]+\\.class$");
+		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+?[$].+?\\.class$");
 
 		@Override
 		public boolean accept(File pathname) {
