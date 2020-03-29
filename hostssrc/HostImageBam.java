@@ -12,7 +12,7 @@ import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
@@ -77,7 +77,7 @@ public class HostImageBam extends Host implements IHoster {
 		regexFilename.setSearch(".+?filename=(.+)");
 		regexFilename.setReplace("$1");
 
-		addRestriction(new Restriction("imagebam.com", 6));
+		addRestriction(new DownloadRestriction("imagebam.com", 6));
 	}
 
 	@Override

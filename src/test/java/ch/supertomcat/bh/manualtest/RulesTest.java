@@ -13,7 +13,7 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -53,12 +53,12 @@ class RulesTest {
 		hostManager = new HostManager(null, new RestrictionAccess() {
 
 			@Override
-			public void removeRestriction(Restriction restriction) {
+			public void removeRestriction(DownloadRestriction restriction) {
 				// Nothing to do
 			}
 
 			@Override
-			public void addRestriction(Restriction restriction) {
+			public void addRestriction(DownloadRestriction restriction) {
 				// Nothing to do
 			}
 		}, proxyManager, settingsManager, cookieManager);

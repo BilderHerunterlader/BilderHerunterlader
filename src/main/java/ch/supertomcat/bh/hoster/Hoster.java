@@ -23,7 +23,7 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
-import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
@@ -195,7 +195,7 @@ public abstract class Hoster {
 	 * 
 	 * @param restriction Restriction
 	 */
-	public void addRestriction(Restriction restriction) {
+	public void addRestriction(DownloadRestriction restriction) {
 		if (restrictionAccess != null) {
 			restrictionAccess.addRestriction(restriction);
 		} else {
@@ -208,7 +208,7 @@ public abstract class Hoster {
 	 * 
 	 * @param restriction Restriction
 	 */
-	public void removeRestriction(Restriction restriction) {
+	public void removeRestriction(DownloadRestriction restriction) {
 		if (restrictionAccess != null) {
 			restrictionAccess.removeRestriction(restriction);
 		} else {

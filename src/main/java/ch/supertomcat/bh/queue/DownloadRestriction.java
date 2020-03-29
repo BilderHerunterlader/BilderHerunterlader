@@ -3,6 +3,8 @@ package ch.supertomcat.bh.queue;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.supertomcat.supertomcatutils.queue.RestrictionBase;
+
 /**
  * This class is to set a limit of simultanious downloads for a
  * domain.
@@ -26,7 +28,7 @@ import java.util.List;
  * 
  * @see ch.supertomcat.bh.queue.DownloadQueueManager
  */
-public class Restriction implements Comparable<Restriction> {
+public class DownloadRestriction extends RestrictionBase implements Comparable<DownloadRestriction> {
 	/**
 	 * Domain
 	 */
@@ -38,26 +40,19 @@ public class Restriction implements Comparable<Restriction> {
 	private final List<String> domains = new ArrayList<>();
 
 	/**
-	 * Maximum of simultanious downloads for this domain
-	 */
-	private int maxSimultaneousDownloads = 1;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param domain Domain
 	 * @param maxSimultaneousDownloads Maximum
 	 */
-	public Restriction(String domain, int maxSimultaneousDownloads) {
+	public DownloadRestriction(String domain, int maxSimultaneousDownloads) {
+		super(domain, maxSimultaneousDownloads);
 		if (domain == null || domain.isEmpty()) {
 			throw new IllegalArgumentException("domain is null or empty: " + domain);
 		}
 
 		this.domain = domain;
 		this.domains.add(domain);
-		if (maxSimultaneousDownloads >= 1) {
-			this.maxSimultaneousDownloads = maxSimultaneousDownloads;
-		}
 	}
 
 	/**
@@ -66,10 +61,8 @@ public class Restriction implements Comparable<Restriction> {
 	 * @param domains Domains
 	 * @param maxSimultaneousDownloads Maximum
 	 */
-	public Restriction(List<String> domains, int maxSimultaneousDownloads) {
-		if (domains == null || domains.isEmpty()) {
-			throw new IllegalArgumentException("domains is null or empty: " + domains);
-		}
+	public DownloadRestriction(List<String> domains, int maxSimultaneousDownloads) {
+		super(domains.get(0), maxSimultaneousDownloads);
 
 		this.domain = domains.get(0);
 		for (String currentDomain : domains) {
@@ -77,9 +70,6 @@ public class Restriction implements Comparable<Restriction> {
 				throw new IllegalArgumentException("currentDomain is null or empty: " + currentDomain);
 			}
 			this.domains.add(currentDomain);
-		}
-		if (maxSimultaneousDownloads >= 1) {
-			this.maxSimultaneousDownloads = maxSimultaneousDownloads;
 		}
 	}
 
@@ -107,7 +97,7 @@ public class Restriction implements Comparable<Restriction> {
 	 * @return Maximum
 	 */
 	public int getMaxSimultaneousDownloads() {
-		return maxSimultaneousDownloads;
+		return getMaxConnectionCount();
 	}
 
 	/**
@@ -117,7 +107,7 @@ public class Restriction implements Comparable<Restriction> {
 	 */
 	public void setMaxSimultaneousDownloads(int maxSimultaneousDownloads) {
 		if (maxSimultaneousDownloads >= 1) {
-			this.maxSimultaneousDownloads = maxSimultaneousDownloads;
+			setMaxConnectionCount(maxSimultaneousDownloads);
 		}
 	}
 
@@ -150,7 +140,7 @@ public class Restriction implements Comparable<Restriction> {
 		if (getClass() != obj.getClass()) {
 			return false;
 		}
-		Restriction other = (Restriction)obj;
+		DownloadRestriction other = (DownloadRestriction)obj;
 		if (domain == null) {
 			if (other.domain != null) {
 				return false;
@@ -162,7 +152,7 @@ public class Restriction implements Comparable<Restriction> {
 	}
 
 	@Override
-	public int compareTo(Restriction o) {
+	public int compareTo(DownloadRestriction o) {
 		return domain.compareTo(o.getDomain());
 	}
 }

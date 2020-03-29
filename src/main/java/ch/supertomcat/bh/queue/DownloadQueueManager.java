@@ -16,7 +16,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * So this class allows a Pic to download or let them wait
  * until a slot is free.
  * 
- * @see ch.supertomcat.bh.queue.Restriction
+ * @see ch.supertomcat.bh.queue.DownloadRestriction
  */
 public class DownloadQueueManager implements BHSettingsListener, ICalculateRateTimer {
 	/**
@@ -193,7 +193,7 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 					countForDomain = cfd;
 				}
 
-				Restriction re = restrictions.getRestrictionForDomain(domain);
+				DownloadRestriction re = restrictions.getRestrictionForDomain(domain);
 
 				if (re != null) {
 					if (re.getMaxSimultaneousDownloads() > 0) {

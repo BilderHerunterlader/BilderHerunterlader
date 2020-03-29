@@ -13,12 +13,12 @@ public interface RestrictionAccess {
 	 * 
 	 * @param restriction Restriction
 	 */
-	public void addRestriction(Restriction restriction);
+	public void addRestriction(DownloadRestriction restriction);
 
 	/**
 	 * Removes a restriction
 	 * 
 	 * @param restriction Restriction
 	 */
-	public void removeRestriction(Restriction restriction);
+	public void removeRestriction(DownloadRestriction restriction);
 }

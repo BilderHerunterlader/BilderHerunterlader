@@ -29,7 +29,7 @@ import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -156,7 +156,7 @@ public class Rule extends Hoster {
 	/**
 	 * restriction
 	 */
-	private Restriction restriction = null;
+	private DownloadRestriction restriction = null;
 
 	private DeactivateOption deactivateOption = null;
 
@@ -547,7 +547,7 @@ public class Rule extends Hoster {
 			removeRestriction(restriction);
 		}
 		if (maxConnections > 0 && maxConnectionDomains.size() > 0) {
-			restriction = new Restriction(maxConnectionDomains, maxConnections);
+			restriction = new DownloadRestriction(maxConnectionDomains, maxConnections);
 			addRestriction(restriction);
 		} else {
 			restriction = null;

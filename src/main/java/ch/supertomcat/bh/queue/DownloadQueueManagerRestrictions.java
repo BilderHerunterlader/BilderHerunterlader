@@ -10,7 +10,7 @@ public class DownloadQueueManagerRestrictions implements RestrictionAccess {
 	/**
 	 * Array containing the restrictions
 	 */
-	private final List<Restriction> restrictions = new ArrayList<>();
+	private final List<DownloadRestriction> restrictions = new ArrayList<>();
 
 	/**
 	 * Constructor
@@ -23,7 +23,7 @@ public class DownloadQueueManagerRestrictions implements RestrictionAccess {
 	 * 
 	 * @return restrictions
 	 */
-	public List<Restriction> getRestrictions() {
+	public List<DownloadRestriction> getRestrictions() {
 		return restrictions;
 	}
 
@@ -34,11 +34,11 @@ public class DownloadQueueManagerRestrictions implements RestrictionAccess {
 	 * @param domain Domain
 	 * @return Restriction
 	 */
-	public Restriction getRestrictionForDomain(String domain) {
+	public DownloadRestriction getRestrictionForDomain(String domain) {
 		if (domain.isEmpty()) {
 			return null;
 		}
-		for (Restriction restriction : restrictions) {
+		for (DownloadRestriction restriction : restrictions) {
 			if (restriction.isDomainRestricted(domain)) {
 				return restriction;
 			}
@@ -47,7 +47,7 @@ public class DownloadQueueManagerRestrictions implements RestrictionAccess {
 	}
 
 	@Override
-	public synchronized void addRestriction(Restriction restriction) {
+	public synchronized void addRestriction(DownloadRestriction restriction) {
 		for (int i = 0; i < restrictions.size(); i++) {
 			if (restrictions.get(i).equals(restriction)) {
 				restrictions.get(i).setMaxSimultaneousDownloads(restriction.getMaxSimultaneousDownloads());
@@ -58,7 +58,7 @@ public class DownloadQueueManagerRestrictions implements RestrictionAccess {
 	}
 
 	@Override
-	public synchronized void removeRestriction(Restriction restriction) {
+	public synchronized void removeRestriction(DownloadRestriction restriction) {
 		restrictions.remove(restriction);
 	}
 }

@@ -53,7 +53,7 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.parser.URLParseObjectFile;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.queue.Restriction;
+import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
@@ -144,7 +144,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	/**
 	 * Beschraenkung
 	 */
-	private Restriction restriction = null;
+	private DownloadRestriction restriction = null;
 
 	/**
 	 * Konstruktor
@@ -362,7 +362,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			}
 		}
 
-		restriction = new Restriction("youtube.com", iMaxConnections);
+		restriction = new DownloadRestriction("youtube.com", iMaxConnections);
 		addRestriction(restriction);
 	}
 
