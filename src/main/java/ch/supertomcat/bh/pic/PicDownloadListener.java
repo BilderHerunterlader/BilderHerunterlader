@@ -47,6 +47,15 @@ public class PicDownloadListener implements IDownloadListener {
 		this.downloadQueueManager = downloadQueueManager;
 	}
 
+	/**
+	 * Returns the pic
+	 * 
+	 * @return pic
+	 */
+	public Pic getPic() {
+		return pic;
+	}
+
 	@Override
 	public boolean downloadAllowed() {
 		/*
