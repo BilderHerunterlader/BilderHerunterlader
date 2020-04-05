@@ -330,12 +330,12 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	private String getSystemTrayToolTipText() {
 		DownloadQueueManager queue = downloadQueueManager;
 		if (queue.isDownloading()) {
-			String downloadRate = UnitFormatUtil.getBitrateString(queue.getDownloadBitrate());
+			String downloadRate = UnitFormatUtil.getBitrateString(queue.getTotalDownloadBitrate());
 			if (downloadRate.length() == 0) {
 				downloadRate = Localization.getString("NotAvailable");
 			}
-			return getClipboardStateText() + Localization.getString("Queue") + ": " + queue.getQueueSize() + " | " + Localization.getString("FreeSlots") + ": " + queue.getOpenDownloadSlots() + "/"
-					+ queue.getConnectionCount() + " | " + Localization.getString("DownloadBitrate") + ": " + downloadRate;
+			return getClipboardStateText() + Localization.getString("Queue") + ": " + queue.getQueueSize() + " | " + Localization.getString("FreeSlots") + ": " + queue.getOpenSlots() + "/"
+					+ queue.getMaxConnectionCount() + " | " + Localization.getString("DownloadBitrate") + ": " + downloadRate;
 		} else {
 			return getClipboardStateText() + Localization.getString("SystemTrayTool_Sleeping");
 		}

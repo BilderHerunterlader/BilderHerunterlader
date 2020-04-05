@@ -38,6 +38,9 @@ import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
+import ch.supertomcat.bh.pic.PicDownloadListener;
+import ch.supertomcat.bh.pic.PicDownloadResult;
+import ch.supertomcat.bh.pic.PicQueueTask;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.DownloadQueueManagerRestrictions;
 import ch.supertomcat.bh.queue.QueueManager;
@@ -55,6 +58,8 @@ import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.queue.QueueTask;
+import ch.supertomcat.supertomcatutils.queue.QueueTaskFactory;
 import fi.iki.elonen.NanoHTTPD;
 
 /**
@@ -239,7 +244,13 @@ public abstract class BH {
 			public void run() {
 				DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
 				hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
-				downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager);
+				QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<PicDownloadListener, PicDownloadResult>() {
+					@Override
+					public QueueTask<PicDownloadListener, PicDownloadResult> createTaskCallable(PicDownloadListener task) {
+						return new PicQueueTask(task);
+					}
+				};
+				downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager, queueTaskFactory);
 				FileDownloaderFactory fileDownloaderFactory = new FileDownloaderFactory(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
 				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, fileDownloaderFactory);
 			}

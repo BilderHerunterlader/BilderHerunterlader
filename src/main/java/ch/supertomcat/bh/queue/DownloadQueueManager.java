@@ -1,14 +1,20 @@
 package ch.supertomcat.bh.queue;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutionException;
 
+import ch.supertomcat.bh.pic.PicDownloadListener;
+import ch.supertomcat.bh.pic.PicDownloadResult;
+import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.queue.QueueManagerBase;
+import ch.supertomcat.supertomcatutils.queue.QueueTask;
+import ch.supertomcat.supertomcatutils.queue.QueueTaskFactory;
+import ch.supertomcat.supertomcatutils.queue.Restriction;
 
 /**
  * This class manages the download-slots.
@@ -18,53 +24,11 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * 
  * @see ch.supertomcat.bh.queue.DownloadRestriction
  */
-public class DownloadQueueManager implements BHSettingsListener, ICalculateRateTimer {
+public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, PicDownloadResult> {
 	/**
 	 * Listener
 	 */
 	private List<IDownloadQueueManagerListener> listeners = new CopyOnWriteArrayList<>();
-
-	/**
-	 * timer
-	 */
-	private Timer timer = new Timer("Download-Rate-Timer");
-
-	/**
-	 * calculateRateListeners
-	 */
-	private List<IDownloadListener> calculateRateListeners = new CopyOnWriteArrayList<>();
-
-	/**
-	 * calculateRateTimerTask
-	 */
-	private CalculateRateTimerTask calculateRateTimerTask = null;
-
-	/**
-	 * Maximum connection count
-	 */
-	private int connectionCount;
-
-	/**
-	 * Maximum connection count per host
-	 */
-	private int connectionCountPerHost;
-
-	/**
-	 * Free download slots
-	 */
-	private int openDownloadSlots;
-
-	/**
-	 * Downloaded files since application started
-	 */
-	private int sessionDownloadedFiles = 0;
-
-	/**
-	 * Downloaded bytes since application started
-	 */
-	private long sessionDownloadedBytes = 0;
-
-	private double downloadBitrate = -1;
 
 	/**
 	 * Restrictions
@@ -72,378 +36,107 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	private final DownloadQueueManagerRestrictions restrictions;
 
 	/**
-	 * Hashtable containing the counters
-	 */
-	private Map<String, Integer> counters = new HashMap<>();
-
-	/**
-	 * Array containing listeners which requested a download slot
-	 */
-	private List<IDownloadListener> queue = new ArrayList<>();
-
-	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
+
+	/**
+	 * Total Download Bitrate
+	 */
+	private double totalDownloadBitrate = -1;
+
+	/**
+	 * Download Rate Timer
+	 */
+	private Timer timer = new Timer("Download-Rate-Timer");
+
+	/**
+	 * Calculate Rate Listeners
+	 */
+	private List<IDownloadListener> calculateRateListeners = new CopyOnWriteArrayList<>();
+
+	/**
+	 * Calculate Rate Timer Task
+	 */
+	private CalculateRateTimerTask calculateRateTimerTask = null;
+
+	/**
+	 * Calculate Rate Timer Listener
+	 */
+	private final ICalculateRateTimer calculateRateTimerListener = new ICalculateRateTimer() {
+		@Override
+		public void totalDownloadRateCalculated(double downloadRate) {
+			totalDownloadBitrate = downloadRate;
+			for (IDownloadQueueManagerListener listener : listeners) {
+				listener.totalDownloadRateCalculated(downloadRate);
+			}
+		}
+	};
 
 	/**
 	 * Constructor
 	 * 
 	 * @param restrictions Restrictions
 	 * @param settingsManager Settings Manager
+	 * @param queueTaskFactory Queue Task Factory
 	 */
-	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, SettingsManager settingsManager) {
+	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, SettingsManager settingsManager, QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory) {
+		super(queueTaskFactory, settingsManager.getConnections(), settingsManager.getConnectionsPerHost());
 		this.restrictions = restrictions;
 		this.settingsManager = settingsManager;
-		this.settingsManager.addSettingsListener(this);
-		this.connectionCount = settingsManager.getConnections();
-		this.connectionCountPerHost = settingsManager.getConnectionsPerHost();
-		this.openDownloadSlots = connectionCount;
-	}
-
-	/**
-	 * Returns the maximum connection count
-	 * 
-	 * @return Maximmum connection count
-	 */
-	public int getConnectionCount() {
-		return connectionCount;
-	}
-
-	/**
-	 * Returns the open download slots
-	 * 
-	 * @return Open download slots
-	 */
-	public int getOpenDownloadSlots() {
-		return openDownloadSlots;
-	}
-
-	/**
-	 * Returns the count of listeners which requested a download slot
-	 * 
-	 * @return Queue size
-	 */
-	public int getQueueSize() {
-		return queue.size();
-	}
-
-	/**
-	 * Adds a listener
-	 * 
-	 * @param l Listener
-	 */
-	public void addDownloadQueueManagerListener(IDownloadQueueManagerListener l) {
-		if (!listeners.contains(l)) {
-			listeners.add(l);
-		}
-	}
-
-	/**
-	 * Removes a listener
-	 * 
-	 * @param l Listener
-	 */
-	public void removeDownloadQueueManagerListener(IDownloadQueueManagerListener l) {
-		listeners.remove(l);
-	}
-
-	/**
-	 * This method allows a Pic to start the download
-	 * It checks the restrictions an counters and all needed
-	 * things.
-	 * This method is fired always when a download slot was
-	 * give back to the queue and when a download slot is requested
-	 * and the queue was empty before.
-	 */
-	public synchronized void manageDLSlots() {
-		// If there are no open download slots we can just return
-		if (openDownloadSlots <= 0) {
-			return;
-		}
-		/*
-		 * If the queue is empty, its a good point to check
-		 * if the open download slots are set correct ;-)
-		 */
-		if (queue.isEmpty()) {
-			if (openDownloadSlots != connectionCount) {
-				openDownloadSlots = connectionCount;
-			}
-		} else {
-			if (calculateRateTimerTask == null) {
-				timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(this, calculateRateListeners), 1000, 1000);
-				calculateRateTimerTask.addCalculateRateListener(this);
-			}
-		}
-
-		for (IDownloadListener download : queue) {
-			if (openDownloadSlots <= 0) {
-				// If there are now no open download slots we can just return
-				return;
-			} else {
-				// We say here the download should be allowed
-				boolean bAllowed = true;
-
-				// Now we check if there are a counter and a restriction for the domain
-				String domain = getDomainFromURL(download.getContainerURL());
-
-				int countForDomain = 0;
-				Integer cfd = counters.get(domain);
-				if (cfd != null) {
-					countForDomain = cfd;
-				}
-
-				DownloadRestriction re = restrictions.getRestrictionForDomain(domain);
-
-				if (re != null) {
-					if (re.getMaxSimultaneousDownloads() > 0) {
-						/*
-						 * If there is a restriction and a counter and the max
-						 * simultanious downloads are higher than 0, we check if
-						 * the download can be allowed
-						 */
-
-						int currentCount = getCurrentCount(re.getDomains());
-
-						if (currentCount >= re.getMaxSimultaneousDownloads()) {
-							/*
-							 * If there are already too many running downloads for
-							 * this domain, we don't allow the download
-							 */
-							bAllowed = false;
-						}
-					}
-				} else {
-					/*
-					 * If no restriction is set for the domain, then the default
-					 * max connections per host settings is the restriction
-					 */
-					if (connectionCountPerHost > 0 && countForDomain >= connectionCountPerHost) {
-						bAllowed = false;
-					}
-				}
-
-				// If the download is not allowed, we continue
-				if (bAllowed == false) {
-					continue;
-				}
-
-				// Allow the download and check if the listener really started the download
-				boolean b = download.downloadAllowed();
-				if (b == true) {
-					calculateRateListeners.add(download);
-					// Only if the listener has started the download, we decrease open download slots
-					setOpenDownloadSlots(openDownloadSlots - 1);
-					// And increase the counter
-					counters.put(domain, countForDomain + 1);
-				}
-			}
-		}
-	}
-
-	/**
-	 * Requests a download slot
-	 * 
-	 * @param l Listener
-	 */
-	public synchronized void addDLSlotListener(IDownloadListener l) {
-		if (!queue.contains(l)) {
-			// Add the listener to the queue
-			queue.add(l);
-		}
-	}
-
-	/**
-	 * Gives the download-slot back to the queue
-	 * This method must be used if the Pic has not the status
-	 * Pic.WAITING.
-	 * This method fires queueChanged on all listeners
-	 * 
-	 * @param l Listener
-	 */
-	public synchronized void removeDLSlotListener(IDownloadListener l) {
-		if (queue.contains(l)) {
-			queue.remove(l);
-			calculateRateListeners.remove(l);
-
-			String domain = getDomainFromURL(l.getContainerURL());
-
-			Integer cfd = counters.get(domain);
-			if (cfd != null) {
-				int countForDomain = cfd;
-				if (countForDomain > 0) {
-					// Decrease the queue counter for this domain
-					counters.put(domain, countForDomain - 1);
-				}
+		this.settingsManager.addSettingsListener(new BHSettingsListener() {
+			@Override
+			public void settingsChanged() {
+				setMaxConnectionCount(settingsManager.getConnections());
+				setMaxConnectionCountPerHost(settingsManager.getConnectionsPerHost());
 			}
 
-			if (openDownloadSlots < connectionCount) {
-				/*
-				 * We do this only if the open download slots are lower than max connections
-				 * Example:
-				 * If we would do this always:
-				 * openDownloadSlots: 6
-				 * connectionCount: 6
-				 * So, we would increase openDownloadSlot.
-				 * But there can't be more open download slots as max connections
-				 */
-
-				// Increase the open download slots
-				setOpenDownloadSlots(openDownloadSlots + 1);
+			@Override
+			public void lookAndFeelChanged(int lookAndFeel) {
+				// Nothing to do
 			}
-			// Run the mangageDLSlots-Method, which will allow the download
-			manageDLSlots();
-			if (queue.isEmpty()) {
-				if (calculateRateTimerTask != null) {
-					calculateRateTimerTask.cancel();
-					calculateRateTimerTask.removeCalculateRateListener(this);
-				}
-				calculateRateTimerTask = null;
-				timer.purge();
-				downloadBitrate = -1;
-			}
-			int queueSize = this.queue.size();
-			for (IDownloadQueueManagerListener listener : listeners) {
-				listener.queueChanged(queueSize, this.openDownloadSlots, this.connectionCount);
-				if (queueSize == 0) {
-					listener.downloadsComplete(queueSize, this.openDownloadSlots, this.connectionCount);
-					listener.totalDownloadRateCalculated(downloadBitrate);
-				}
-				if (queue.isEmpty()) {
-					listener.queueEmpty();
-				}
-			}
-		}
-	}
+		});
 
-	/**
-	 * Gives the download-slot back to the queue
-	 * This method is only for a Pic with the status of Pic.WAITING.
-	 * Because there is no download slot for a waiting pic, so the things done
-	 * in removeDLSlotListener-Method are not needed in this case.
-	 * 
-	 * @param l Listener
-	 */
-	public synchronized void removeDLSlotListenerStopping(IDownloadListener l) {
-		queue.remove(l);
-	}
-
-	/**
-	 * Returns if the listener is already registered
-	 * 
-	 * @param l Listener
-	 * @return True if the listener is already registered
-	 */
-	public synchronized boolean isDLSlotListenerRegistered(IDownloadListener l) {
-		if (queue.contains(l)) {
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Sets the open download slots
-	 * This method fires queueChanged on all listeners
-	 * 
-	 * @param count Anzahl Freie Slots
-	 */
-	private synchronized void setOpenDownloadSlots(int count) {
-		this.openDownloadSlots = count;
-		for (IDownloadQueueManagerListener listener : listeners) {
-			listener.queueChanged(this.queue.size(), this.openDownloadSlots, this.connectionCount);
-		}
-	}
-
-	/**
-	 * Returns if downloads are running or not
-	 * 
-	 * @return True if downloads are running
-	 */
-	public boolean isDownloading() {
-		if (this.openDownloadSlots < this.connectionCount) {
-			return true;
-		}
-		return false;
+		init();
 	}
 
 	@Override
-	public synchronized void settingsChanged() {
-		/*
-		 * If the settings were changed, we need to look if we
-		 * must change the openDownloadSlot.
-		 */
-		if (!isDownloading()) {
-			// If no downloads are running we change only the openDownloadSlots
-			this.connectionCount = settingsManager.getConnections();
-			setOpenDownloadSlots(this.connectionCount);
-		} else {
-			// If downloads are running
-			int cc = settingsManager.getConnections();
-			// Calculate the difference between the new max connection value and the old
-			int diff = cc - this.connectionCount;
-			if (diff != 0) {
-				/*
-				 * If the value has changed set openDownloadSlots
-				 * Note: Because diff could be a negative value, we
-				 * can just always use the + operator.
-				 * Example: + -1 is the same as -1
-				 */
-				setOpenDownloadSlots(this.openDownloadSlots + diff);
-			}
-			// Set the max value
-			this.connectionCount = cc;
+	public synchronized void increaseSessionFiles() {
+		super.increaseSessionFiles();
+		for (IDownloadQueueManagerListener listener : listeners) {
+			listener.sessionDownloadedFilesChanged(sessionFiles);
 		}
-		this.connectionCountPerHost = settingsManager.getConnectionsPerHost();
 	}
 
 	@Override
-	public void lookAndFeelChanged(int lookAndFeel) {
-		// Nothing to do
-	}
-
-	/**
-	 * Returns the downloaded files since application started
-	 * 
-	 * @return Downloaded files
-	 */
-	public int getSessionDownloadedFiles() {
-		return sessionDownloadedFiles;
-	}
-
-	/**
-	 * Returns the downloaded bytes since application started
-	 * 
-	 * @return Downloaded bytes
-	 */
-	public long getSessionDownloadedBytes() {
-		return sessionDownloadedBytes;
-	}
-
-	/**
-	 * Increases the downloaded files since application started by 1
-	 * This method will fire the sessionDownloadedFilesChanged-Method
-	 * on all listeners.
-	 */
-	public synchronized void increaseSessionDownloadedFiles() {
-		this.sessionDownloadedFiles++;
+	public synchronized void increaseSessionBytes(long bytes) {
+		super.increaseSessionBytes(bytes);
 		for (IDownloadQueueManagerListener listener : listeners) {
-			listener.sessionDownloadedFilesChanged(this.sessionDownloadedFiles);
+			listener.sessionDownloadedBytesChanged(sessionBytes);
 		}
 	}
 
-	/**
-	 * Increases the downloaded bytes since application started by downloadedBytes
-	 * So QueueData will take the actual value and add downloadedBytes.
-	 * This method will fire the sessionDownloadedBytesChanged-Method
-	 * on all listeners.
-	 * 
-	 * @param downloadedBytes Downloaded bytes
-	 */
-	public synchronized void increaseSessionDownloadedBytes(long downloadedBytes) {
-		this.sessionDownloadedBytes += downloadedBytes;
+	@Override
+	protected void updateOpenSlots() {
+		super.updateOpenSlots();
 		for (IDownloadQueueManagerListener listener : listeners) {
-			listener.sessionDownloadedBytesChanged(this.sessionDownloadedBytes);
+			listener.queueChanged(queue.size(), openSlots, maxConnectionCount);
 		}
+	}
+
+	@Override
+	protected Restriction getRestrictionForTask(PicDownloadListener task) {
+		String domain = getDomainFromURL(task.getContainerURL());
+
+		DownloadRestriction restriction = restrictions.getRestrictionForDomain(domain);
+		if (restriction != null) {
+			return restriction;
+		}
+
+		/*
+		 * If no restriction found, then just return a restriction, which does not restrict
+		 */
+		return new DownloadRestriction(domain, 0);
 	}
 
 	/**
@@ -478,22 +171,46 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 		return domain.substring(lastBeforeLastPoint + 1);
 	}
 
-	/**
-	 * Returns current Queue Count for given domains
-	 * This method should only be called from synchronized methods!!
-	 * 
-	 * @param domains Domains
-	 * @return Current Queue Count for given domains
-	 */
-	private int getCurrentCount(List<String> domains) {
-		int count = 0;
-		for (String domain : domains) {
-			Integer cfd = counters.get(domain);
-			if (cfd != null) {
-				count += cfd;
-			}
+	@Override
+	protected int compareTasks(PicDownloadListener t1, PicDownloadListener t2) {
+		int comparison = super.compareTasks(t1, t2);
+		if (comparison == 0) {
+			return Long.compare(t1.getPic().getDateTimeSimple(), t2.getPic().getDateTimeSimple());
 		}
-		return count;
+		return comparison;
+	}
+
+	@Override
+	protected void addTaskToExecutingTasks(QueueTask<PicDownloadListener, PicDownloadResult> task) {
+		if (calculateRateTimerTask == null) {
+			timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(syncObject, calculateRateListeners), 1000, 1000);
+			calculateRateTimerTask.addCalculateRateListener(calculateRateTimerListener);
+		}
+		calculateRateListeners.add(task.getTask());
+		super.addTaskToExecutingTasks(task);
+	}
+
+	@Override
+	protected void removedTaskFromQueue(PicDownloadListener task, boolean executeFailure) {
+		// Nothing to do
+	}
+
+	@Override
+	protected void completedTaskCallable(QueueTask<PicDownloadListener, PicDownloadResult> task) {
+		calculateRateListeners.remove(task.getTask());
+		try {
+			// Call get to be able to catch Exception
+			task.getFuture().get();
+		} catch (ExecutionException e) {
+			logger.error("Download failed", e);
+			task.getTask().getPic().setStatus(PicState.FAILED);
+		} catch (CancellationException e) {
+			logger.info("Download cancelled");
+			task.getTask().getPic().setStatus(PicState.SLEEPING);
+		} catch (InterruptedException e) {
+			logger.error("Interrupt while waiting for result, this should not happen!", e);
+			task.getTask().getPic().setStatus(PicState.FAILED);
+		}
 	}
 
 	/**
@@ -501,15 +218,75 @@ public class DownloadQueueManager implements BHSettingsListener, ICalculateRateT
 	 * 
 	 * @return downloadBitrate
 	 */
-	public double getDownloadBitrate() {
-		return downloadBitrate;
+	public double getTotalDownloadBitrate() {
+		return totalDownloadBitrate;
 	}
 
-	@Override
-	public void totalDownloadRateCalculated(double downloadRate) {
-		this.downloadBitrate = downloadRate;
-		for (IDownloadQueueManagerListener listener : listeners) {
-			listener.totalDownloadRateCalculated(downloadRate);
+	/**
+	 * Returns if downloads are running or not
+	 * 
+	 * @return True if downloads are running
+	 */
+	public boolean isDownloading() {
+		return isExecutingTasks();
+	}
+
+	/**
+	 * Returns the downloaded files since application started
+	 * 
+	 * @return Downloaded files
+	 */
+	public int getSessionDownloadedFiles() {
+		return getSessionFiles();
+	}
+
+	/**
+	 * Returns the downloaded bytes since application started
+	 * 
+	 * @return Downloaded bytes
+	 */
+	public long getSessionDownloadedBytes() {
+		return getSessionBytes();
+	}
+
+	/**
+	 * Increases the downloaded files since application started by 1
+	 * This method will fire the sessionDownloadedFilesChanged-Method
+	 * on all listeners.
+	 */
+	public synchronized void increaseSessionDownloadedFiles() {
+		increaseSessionFiles();
+	}
+
+	/**
+	 * Increases the downloaded bytes since application started by downloadedBytes
+	 * So QueueData will take the actual value and add downloadedBytes.
+	 * This method will fire the sessionDownloadedBytesChanged-Method
+	 * on all listeners.
+	 * 
+	 * @param downloadedBytes Downloaded bytes
+	 */
+	public synchronized void increaseSessionDownloadedBytes(long downloadedBytes) {
+		increaseSessionBytes(downloadedBytes);
+	}
+
+	/**
+	 * Adds a listener
+	 * 
+	 * @param l Listener
+	 */
+	public void addDownloadQueueManagerListener(IDownloadQueueManagerListener l) {
+		if (!listeners.contains(l)) {
+			listeners.add(l);
 		}
+	}
+
+	/**
+	 * Removes a listener
+	 * 
+	 * @param l Listener
+	 */
+	public void removeDownloadQueueManagerListener(IDownloadQueueManagerListener l) {
+		listeners.remove(l);
 	}
 }

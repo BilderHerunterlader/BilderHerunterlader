@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.downloader.FileDownloader;
 import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
@@ -30,21 +29,14 @@ public class PicDownloadListener implements IDownloadListener {
 	private final FileDownloaderFactory fileDownloaderFactory;
 
 	/**
-	 * Download Queue Manager
-	 */
-	private final DownloadQueueManager downloadQueueManager;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param pic Pic
 	 * @param fileDownloaderFactory File Downloader Factory
-	 * @param downloadQueueManager Download Queue Manager
 	 */
-	public PicDownloadListener(Pic pic, FileDownloaderFactory fileDownloaderFactory, DownloadQueueManager downloadQueueManager) {
+	public PicDownloadListener(Pic pic, FileDownloaderFactory fileDownloaderFactory) {
 		this.pic = pic;
 		this.fileDownloaderFactory = fileDownloaderFactory;
-		this.downloadQueueManager = downloadQueueManager;
 	}
 
 	/**
@@ -75,7 +67,7 @@ public class PicDownloadListener implements IDownloadListener {
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					download();
+					executeDownload();
 				}
 			});
 			t.setName("Download-Thread-" + t.getId());
@@ -89,8 +81,33 @@ public class PicDownloadListener implements IDownloadListener {
 
 	/**
 	 * Download
+	 * 
+	 * @return True if download was started, false otherwise
 	 */
-	private void download() {
+	public boolean download() {
+		/*
+		 * When the startDownload-Method is called, the download requests the
+		 * Queue for a download-slot. The Queue fires this method, as soon as there is
+		 * free download-slot.
+		 * This method returns true if the download is really started.
+		 * If the status is something else than Pic.WAITING here, then
+		 * we don't start the download! So we return false!
+		 */
+		PicState status = pic.getStatus();
+		if (status == PicState.WAITING) {
+			// Set the status to DOWNLOADING
+			pic.setStatus(PicState.DOWNLOADING);
+
+			executeDownload();
+			return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Download
+	 */
+	private void executeDownload() {
 		/*
 		 * So, first some information what happens in this method.
 		 * 
@@ -130,8 +147,6 @@ public class PicDownloadListener implements IDownloadListener {
 			progress.setBytesTotal(pic.getSize());
 			progress.setBytesDownloaded(0);
 			pic.progressUpdated();
-
-			downloadQueueManager.removeDLSlotListener(this);
 			return;
 		}
 
@@ -140,10 +155,6 @@ public class PicDownloadListener implements IDownloadListener {
 
 		FileDownloader downloader;
 		String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
-		/*
-		 * TODO Create a Factory class to create downloaders, which has all the required managers as members. Then there is no need anymore to pass all the
-		 * managers as parameter to this method.
-		 */
 		if (HTTPUtil.isURL(encodedContainerURL)) {
 			downloader = fileDownloaderFactory.createHTTPFileDownloader();
 		} else {

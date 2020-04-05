@@ -308,7 +308,7 @@ public class Queue extends JPanel {
 		model.addTableModelListener(new TableModelListener() {
 			@Override
 			public void tableChanged(TableModelEvent e) {
-				if (e.getType() == TableModelEvent.INSERT || e.getType() == TableModelEvent.DELETE) {
+				if (e.getColumn() == TableModelEvent.ALL_COLUMNS) {
 					updateRowCountLabel();
 				}
 			}
@@ -454,7 +454,7 @@ public class Queue extends JPanel {
 						String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getOverallDownloadedBytes(), settingsManager.getSizeView());
 						int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
 						String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), settingsManager.getSizeView());
-						String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getDownloadBitrate());
+						String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getTotalDownloadBitrate());
 						if (downloadRate.isEmpty()) {
 							downloadRate = Localization.getString("NotAvailable");
 						}
@@ -983,13 +983,13 @@ public class Queue extends JPanel {
 	 * Updates the status-display
 	 */
 	private void updateStatus() {
-		int openDownloadSlots = downloadQueueManager.getOpenDownloadSlots();
-		int connectionCount = downloadQueueManager.getConnectionCount();
+		int openDownloadSlots = downloadQueueManager.getOpenSlots();
+		int connectionCount = downloadQueueManager.getMaxConnectionCount();
 		long overallDownloadedFiles = settingsManager.getOverallDownloadedFiles();
 		String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getOverallDownloadedBytes(), settingsManager.getSizeView());
 		int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
 		String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), settingsManager.getSizeView());
-		String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getDownloadBitrate());
+		String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getTotalDownloadBitrate());
 		if (downloadRate.isEmpty()) {
 			downloadRate = Localization.getString("NotAvailable");
 		}

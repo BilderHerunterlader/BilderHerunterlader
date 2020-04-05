@@ -231,7 +231,6 @@ public class QueueManager implements IPicListener {
 		}
 		if (settingsManager.isAutoStartDownloads()) {
 			startDownload(pic);
-			downloadQueueManager.manageDLSlots();
 		}
 	}
 
@@ -262,10 +261,7 @@ public class QueueManager implements IPicListener {
 			executeInEventQueueThread(r);
 		}
 		if (settingsManager.isAutoStartDownloads()) {
-			for (Pic pic : picsAdded) {
-				startDownload(pic);
-			}
-			downloadQueueManager.manageDLSlots();
+			startDownload(picsAdded);
 		}
 	}
 
@@ -367,32 +363,20 @@ public class QueueManager implements IPicListener {
 		synchronized (syncObject) {
 			list = new ArrayList<>(pics);
 		}
-		// request downloadslots for all pics in queue
-		for (Pic pic : list) {
-			startDownload(pic);
-		}
-		downloadQueueManager.manageDLSlots();
+		startDownload(list);
 	}
 
 	/**
-	 * Start download
+	 * Prepare Download
 	 * 
-	 * @param pic pic
+	 * @param pic Pic
+	 * @return PicDownloadListener or null if download should not be started (because Pic is deactivated for example)
 	 */
-	public void startDownload(Pic pic) {
+	private PicDownloadListener prepareDownload(Pic pic) {
 		synchronized (pic) {
 			// If the download is deactivated, then we don't start the download
 			if (pic.isDeactivated()) {
-				return;
-			}
-
-			IDownloadListener downloadListener = pic.getDownloadListener();
-			if (downloadListener != null) {
-				// If there is not already a request for a download-slot and the status is sleeping or failed
-				boolean downloadSlotRequested = downloadQueueManager.isDLSlotListenerRegistered(downloadListener);
-				if (downloadSlotRequested) {
-					return;
-				}
+				return null;
 			}
 
 			PicState status = pic.getStatus();
@@ -400,11 +384,42 @@ public class QueueManager implements IPicListener {
 				pic.setStop(false);
 				pic.setStopOncePressed(false);
 				pic.setStatus(PicState.WAITING);
-				// Request a download slot
-				PicDownloadListener newDownloadListener = new PicDownloadListener(pic, fileDownloaderFactory, downloadQueueManager);
+
+				PicDownloadListener newDownloadListener = new PicDownloadListener(pic, fileDownloaderFactory);
 				pic.setDownloadListener(newDownloadListener);
-				downloadQueueManager.addDLSlotListener(newDownloadListener);
+				return newDownloadListener;
 			}
+			return null;
+		}
+	}
+
+	/**
+	 * Start download
+	 * 
+	 * @param pics Pics
+	 */
+	private void startDownload(List<Pic> pics) {
+		// request downloadslots for all pics in queue
+		List<PicDownloadListener> picsToDownload = new ArrayList<>();
+		for (Pic pic : pics) {
+			PicDownloadListener picDownloadListener = prepareDownload(pic);
+			if (picDownloadListener != null) {
+				picsToDownload.add(picDownloadListener);
+			}
+		}
+		// Request a download slot
+		downloadQueueManager.addTasksToQueue(picsToDownload);
+	}
+
+	/**
+	 * Start download
+	 * 
+	 * @param pic pic
+	 */
+	private void startDownload(Pic pic) {
+		PicDownloadListener picDownloadListener = prepareDownload(pic);
+		if (picDownloadListener != null) {
+			downloadQueueManager.addTaskToQueue(picDownloadListener);
 		}
 	}
 
@@ -417,6 +432,9 @@ public class QueueManager implements IPicListener {
 		synchronized (syncObject) {
 			list = new ArrayList<>(pics);
 		}
+
+		downloadQueueManager.cancelTasks(false);
+
 		// stop all downloads
 		for (Pic pic : list) {
 			stopDownload(pic);
@@ -447,13 +465,6 @@ public class QueueManager implements IPicListener {
 				progress.setBytesTotal(pic.getSize());
 				progress.setBytesDownloaded(0);
 				pic.progressUpdated();
-
-				/*
-				 * Free the download-slot
-				 * Maybe i should do this not at this point, because the user could
-				 * start the download again, before it has really stopped
-				 */
-				downloadQueueManager.removeDLSlotListenerStopping(pic.getDownloadListener());
 			} else if (status == PicState.DOWNLOADING) {
 				if (pic.isStop()) {
 					pic.setStatus(PicState.ABORTING);
