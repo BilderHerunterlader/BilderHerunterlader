@@ -25,7 +25,6 @@ module ch.supertomcat.bh {
 	requires rhino;
 	requires slf4j.api;
 	requires supertomcatutils;
-	requires swingx.all;
 	requires juniversalchardet;
 	requires syntaxpane;
 }
