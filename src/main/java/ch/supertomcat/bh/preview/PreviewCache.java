@@ -4,6 +4,7 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -26,9 +27,25 @@ public class PreviewCache {
 	private PreviewDiskCache diskCache = new PreviewDiskCache();
 
 	/**
+	 * Image Format
+	 */
+	private final String imageFormat;
+
+	/**
 	 * Constructor
 	 */
 	public PreviewCache() {
+		// Find a format, which can be read and written, because not all JVMs have codecs for all formats
+		List<String> readerFormats = Arrays.asList(ImageIO.getReaderFormatNames());
+		List<String> writerFormats = Arrays.asList(ImageIO.getWriterFormatNames());
+
+		if (readerFormats.contains("jpg") && writerFormats.contains("jpg")) {
+			imageFormat = "jpg";
+		} else if (readerFormats.contains("png") && writerFormats.contains("png")) {
+			imageFormat = "png";
+		} else {
+			imageFormat = null;
+		}
 	}
 
 	/**
@@ -36,15 +53,18 @@ public class PreviewCache {
 	 * @param preview Preview
 	 */
 	public void addPreview(String url, BufferedImage preview) {
-		ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(preview, "jpg", baos);
-			baos.flush();
+		if (imageFormat == null) {
+			return;
+		}
+		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+			if (!ImageIO.write(preview, imageFormat, baos)) {
+				logger.error("Could not store preview: ImageIO.write returned false");
+				return;
+			}
 			byte[] data = baos.toByteArray();
-			baos.close();
 			diskCache.addPreview(url, data);
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+			logger.error("Could not store preview", e);
 		}
 	}
 
