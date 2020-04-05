@@ -57,6 +57,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JProgressBar;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.JViewport;
@@ -69,7 +70,6 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.jdesktop.swingx.JXTable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -109,6 +109,8 @@ import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumHiderSizeBasedImpl;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumnHider;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultNumberColorRowRenderer;
 import ch.supertomcat.supertomcatutils.image.ImageUtil;
@@ -314,7 +316,12 @@ public class AdderPanel extends JFrame implements ActionListener {
 	/**
 	 * Table
 	 */
-	private JXTable jtAdder = new JXTable(model);
+	private JTable jtAdder = new JTable(model);
+
+	/**
+	 * Table Column Hider
+	 */
+	private TableColumnHider tableColumnHider = new TableColumHiderSizeBasedImpl(jtAdder);
 
 	/**
 	 * Scrollpane
@@ -627,25 +634,25 @@ public class AdderPanel extends JFrame implements ActionListener {
 		jtAdder.getColumn("Blacklist").setPreferredWidth(blacklistTableHeaderWidth);
 		jtAdder.getColumn("Blacklist").setResizable(false);
 
-		jtAdder.getColumnExt("Preview").setMaxWidth(previewHeight);
-		jtAdder.getColumnExt("Preview").setPreferredWidth(previewHeight);
-		jtAdder.getColumnExt("Preview").setResizable(false);
+		jtAdder.getColumn("Preview").setMaxWidth(previewHeight);
+		jtAdder.getColumn("Preview").setPreferredWidth(previewHeight);
+		jtAdder.getColumn("Preview").setResizable(false);
 
 		updateColWidthsFromSettingsManager();
 		jtAdder.getColumnModel().addColumnModelListener(new AdderColumnListener());
 
-		jtAdder.getColumnExt("Thumb").setVisible(false);
-		jtAdder.getColumnExt("FilenameOverride").setVisible(false);
-		jtAdder.getColumnExt("TargetFolderOverride").setVisible(false);
-		jtAdder.getColumnExt("TargetFolderOverrideValue").setVisible(false);
+		tableColumnHider.hideColumn("Thumb");
+		tableColumnHider.hideColumn("FilenameOverride");
+		tableColumnHider.hideColumn("TargetFolderOverride");
+		tableColumnHider.hideColumn("TargetFolderOverrideValue");
 		if (localFiles == false) {
-			jtAdder.getColumnExt("DeleteFile").setVisible(false);
+			tableColumnHider.hideColumn("DeleteFile");
 		}
-		jtAdder.getColumnExt("LastModified").setVisible(false);
-		jtAdder.getColumnExt("Host").setVisible(false);
-		jtAdder.getColumnExt("Preview").setVisible(false);
-		jtAdder.getColumnExt("Keyword").setVisible(false);
-		jtAdder.getColumnExt("AlreadyDownloaded").setVisible(false);
+		tableColumnHider.hideColumn("LastModified");
+		tableColumnHider.hideColumn("Host");
+		tableColumnHider.hideColumn("Preview");
+		tableColumnHider.hideColumn("Keyword");
+		tableColumnHider.hideColumn("AlreadyDownloaded");
 
 		jtAdder.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 
@@ -653,10 +660,10 @@ public class AdderPanel extends JFrame implements ActionListener {
 		DefaultBooleanColorRowRenderer dbcrr = new DefaultBooleanColorRowRenderer();
 		jtAdder.getColumn("Selection").setCellRenderer(dbcrr);
 		jtAdder.getColumn("Blacklist").setCellRenderer(dbcrr);
-		jtAdder.getColumnExt("FilenameOverride").setCellRenderer(dbcrr);
-		jtAdder.getColumnExt("TargetFolderOverride").setCellRenderer(dbcrr);
-		jtAdder.getColumnExt("DeleteFile").setCellRenderer(dbcrr);
-		jtAdder.getColumnExt("LastModified").setCellRenderer(new DefaultNumberColorRowRenderer());
+		jtAdder.getColumn("FilenameOverride").setCellRenderer(dbcrr);
+		jtAdder.getColumn("TargetFolderOverride").setCellRenderer(dbcrr);
+		jtAdder.getColumn("DeleteFile").setCellRenderer(dbcrr);
+		jtAdder.getColumn("LastModified").setCellRenderer(new DefaultNumberColorRowRenderer());
 
 		jtAdder.getTableHeader().setReorderingAllowed(false);
 
@@ -1204,12 +1211,12 @@ public class AdderPanel extends JFrame implements ActionListener {
 				int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
 				int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
 				int filenameColumnModelIndex = jtAdder.getColumn("Filename").getModelIndex();
-				int filenameOverrideColumnModelIndex = jtAdder.getColumnExt("FilenameOverride").getModelIndex();
+				int filenameOverrideColumnModelIndex = jtAdder.getColumn("FilenameOverride").getModelIndex();
 				int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
-				int thumbnailColumnModelIndex = jtAdder.getColumnExt("Thumb").getModelIndex();
-				int deleteColumnModelIndex = jtAdder.getColumnExt("DeleteFile").getModelIndex();
-				int lastModifiedColumnModelIndex = jtAdder.getColumnExt("LastModified").getModelIndex();
-				int blacklistColumnModelIndex = jtAdder.getColumnExt("Blacklist").getModelIndex();
+				int thumbnailColumnModelIndex = jtAdder.getColumn("Thumb").getModelIndex();
+				int deleteColumnModelIndex = jtAdder.getColumn("DeleteFile").getModelIndex();
+				int lastModifiedColumnModelIndex = jtAdder.getColumn("LastModified").getModelIndex();
+				int blacklistColumnModelIndex = jtAdder.getColumn("Blacklist").getModelIndex();
 
 				for (int i = 0; i < rowCount; i++) {
 					int rowModelIndex = jtAdder.convertRowIndexToModel(i);
@@ -1585,7 +1592,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 				model.setFireTableCellUpdatedEnabled(false);
 				int selectedRows[] = jtAdder.getSelectedRows();
-				int keywordColumnModelIndex = jtAdder.getColumnExt("Keyword").getModelIndex();
+				int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 				for (int x = 0; x < selectedRows.length; x++) {
 					model.setValueAt(keyword, jtAdder.convertRowIndexToModel(selectedRows[x]), keywordColumnModelIndex);
 					updatePathColumn(selectedRows[x]);
@@ -1615,19 +1622,19 @@ public class AdderPanel extends JFrame implements ActionListener {
 		} else if (e.getSource() == menuItemOpenURL) {
 			actionOpenURLs();
 		} else if (e.getSource() == menuItemTableHeaderThumb) {
-			jtAdder.getColumnExt("Thumb").setVisible(menuItemTableHeaderThumb.isSelected());
+			tableColumnHider.setVisible("Thumb", menuItemTableHeaderThumb.isSelected());
 		} else if (e.getSource() == menuItemTableHeaderFilenameOverride) {
-			jtAdder.getColumnExt("FilenameOverride").setVisible(menuItemTableHeaderFilenameOverride.isSelected());
+			tableColumnHider.setVisible("FilenameOverride", menuItemTableHeaderFilenameOverride.isSelected());
 		} else if (e.getSource() == menuItemTableHeaderLastModified) {
-			jtAdder.getColumnExt("LastModified").setVisible(menuItemTableHeaderLastModified.isSelected());
+			tableColumnHider.setVisible("LastModified", menuItemTableHeaderLastModified.isSelected());
 		} else if (e.getSource() == menuItemTableHeaderHost) {
-			jtAdder.getColumnExt("Host").setVisible(menuItemTableHeaderHost.isSelected());
+			tableColumnHider.setVisible("Host", menuItemTableHeaderHost.isSelected());
 		} else if (e.getSource() == menuItemTableHeaderTargetFolderOverride) {
-			jtAdder.getColumnExt("TargetFolderOverride").setVisible(menuItemTableHeaderTargetFolderOverride.isSelected());
+			tableColumnHider.setVisible("TargetFolderOverride", menuItemTableHeaderTargetFolderOverride.isSelected());
 		} else if (e.getSource() == menuItemTableHeaderTargetFolderOverrideValue) {
-			jtAdder.getColumnExt("TargetFolderOverrideValue").setVisible(menuItemTableHeaderTargetFolderOverrideValue.isSelected());
+			tableColumnHider.setVisible("TargetFolderOverrideValue", menuItemTableHeaderTargetFolderOverrideValue.isSelected());
 		} else if (e.getSource() == btnShowPreviews) {
-			jtAdder.getColumnExt("Preview").setVisible(btnShowPreviews.isSelected());
+			tableColumnHider.setVisible("Preview", btnShowPreviews.isSelected());
 			int newRowHeight = btnShowPreviews.isSelected() ? previewHeight : defaultRowHeight;
 			// If Default row height is bigger, then use the default. This prevents the rows from getting too small on large displays.
 			jtAdder.setRowHeight(Integer.max(newRowHeight, defaultRowHeight));
@@ -1680,7 +1687,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 	private void keywordSearchDone(final Keyword[] retval) {
 		// Update keyword and selected column
-		int keywordColumnModelIndex = jtAdder.getColumnExt("Keyword").getModelIndex();
+		int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 		int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
 		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
@@ -1726,7 +1733,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	}
 
 	private void clearAllKeywords() {
-		int keywordColumnModelIndex = jtAdder.getColumnExt("Keyword").getModelIndex();
+		int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			model.setValueAt(null, i, keywordColumnModelIndex);
@@ -1748,7 +1755,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private void updatePathColumn(int rowIndex) {
 		int rowModelIndex = jtAdder.convertRowIndexToModel(rowIndex);
 
-		int hosterColumnModelIndex = jtAdder.getColumnExt("Host").getModelIndex();
+		int hosterColumnModelIndex = jtAdder.getColumn("Host").getModelIndex();
 
 		boolean bPathOverride = false;
 		String pathOverrideVal = "";
@@ -1763,8 +1770,8 @@ public class AdderPanel extends JFrame implements ActionListener {
 			pathOverrideVal = option.getPathOverrideVal();
 		}
 
-		int folderOverrideColumnModelIndex = jtAdder.getColumnExt("TargetFolderOverride").getModelIndex();
-		int folderOverrideValueColumnModelIndex = jtAdder.getColumnExt("TargetFolderOverrideValue").getModelIndex();
+		int folderOverrideColumnModelIndex = jtAdder.getColumn("TargetFolderOverride").getModelIndex();
+		int folderOverrideValueColumnModelIndex = jtAdder.getColumn("TargetFolderOverrideValue").getModelIndex();
 		boolean folderOverride = (Boolean)model.getValueAt(rowModelIndex, folderOverrideColumnModelIndex);
 		String folderOverrideValue = null;
 		if (folderOverride) {
@@ -1775,7 +1782,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		String actualBasePath = folderOverride ? folderOverrideValue : defaultPath;
 
-		Keyword keyword = (Keyword)model.getValueAt(rowModelIndex, jtAdder.getColumnExt("Keyword").getModelIndex());
+		Keyword keyword = (Keyword)model.getValueAt(rowModelIndex, jtAdder.getColumn("Keyword").getModelIndex());
 		boolean keywordFound = keyword != null;
 
 		StringBuilder sbNewPath = new StringBuilder();
@@ -1842,9 +1849,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 		if (itd.isOkPressed() && result != null) {
 			int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
 			int filenameColumnModelIndex = jtAdder.getColumn("Filename").getModelIndex();
-			int filenameOverrideColumnModelIndex = jtAdder.getColumnExt("FilenameOverride").getModelIndex();
+			int filenameOverrideColumnModelIndex = jtAdder.getColumn("FilenameOverride").getModelIndex();
 			int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
-			int lastModifiedColumnModelIndex = jtAdder.getColumnExt("LastModified").getModelIndex();
+			int lastModifiedColumnModelIndex = jtAdder.getColumn("LastModified").getModelIndex();
 
 			model.setFireTableCellUpdatedEnabled(false);
 			for (Tsv tsv : result) {
@@ -1933,7 +1940,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 */
 	private synchronized void actionChangeTargetFilename() {
 		int filenameColumnModelIndex = jtAdder.getColumn("Filename").getModelIndex();
-		int filenameOverrideColumnModelIndex = jtAdder.getColumnExt("FilenameOverride").getModelIndex();
+		int filenameOverrideColumnModelIndex = jtAdder.getColumn("FilenameOverride").getModelIndex();
 
 		int selectedRows[] = jtAdder.getSelectedRows();
 		if (selectedRows.length > 0) {
@@ -1981,7 +1988,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 */
 	private synchronized void actionChangeTargetByInput() {
 		int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
-		int folderOverrideColumnModelIndex = jtAdder.getColumnExt("TargetFolderOverride").getModelIndex();
+		int folderOverrideColumnModelIndex = jtAdder.getColumn("TargetFolderOverride").getModelIndex();
 		int selectedRows[] = jtAdder.getSelectedRows();
 
 		String defaultPath = (String)txtTargetDir.getSelectedItem();

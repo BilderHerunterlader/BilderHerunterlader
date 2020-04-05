@@ -23,6 +23,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.RowFilter;
@@ -39,9 +40,7 @@ import javax.swing.event.RowSorterEvent;
 import javax.swing.event.RowSorterListener;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
-
-import org.jdesktop.swingx.JXTable;
-import org.jdesktop.swingx.sort.TableSortController;
+import javax.swing.table.TableRowSorter;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
@@ -72,12 +71,15 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	 */
 	private KeywordsTableModel model = new KeywordsTableModel();
 
-	private TableSortController<KeywordsTableModel> sorter = new TableSortController<>(model);
+	/**
+	 * Table Row Sorter
+	 */
+	private TableRowSorter<KeywordsTableModel> sorter = new TableRowSorter<>(model);
 
 	/**
 	 * Table
 	 */
-	private JXTable jtKeywords = new JXTable(model);
+	private JTable jtKeywords = new JTable(model);
 
 	/**
 	 * Label
@@ -294,7 +296,6 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		jtKeywords.setRowHeight(TableUtil.calculateRowHeight(jtKeywords, true, true));
 		jtKeywords.getTableHeader().setReorderingAllowed(false);
 		jtKeywords.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
-		jtKeywords.setVisibleRowCount(10);
 
 		patterns[0] = txtTitle.getText();
 		patterns[1] = txtKeywords.getText();

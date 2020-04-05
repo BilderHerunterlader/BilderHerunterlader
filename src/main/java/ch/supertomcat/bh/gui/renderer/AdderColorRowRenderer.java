@@ -9,8 +9,6 @@ import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
-import org.jdesktop.swingx.JXTable;
-
 /**
  * AdderColorRowRenderer
  */
@@ -33,27 +31,24 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		TableModel model = table.getModel();
 		Color fc;
-		if (!isSelected && table instanceof JXTable) {
-			JXTable jtAdder = (JXTable)table;
+		if (isSelected) {
+			fc = table.getSelectionForeground();
+		} else {
+			fc = table.getForeground();
+
 			int modelRowIndex = table.convertRowIndexToModel(row);
 
-			if ((Boolean)model.getValueAt(modelRowIndex, jtAdder.getColumnExt("AlreadyDownloaded").getModelIndex())) {
+			if ((Boolean)model.getValueAt(modelRowIndex, table.getColumn("AlreadyDownloaded").getModelIndex())) {
 				fc = alreadyDownloadedColor;
 			} else {
 				fc = notAlreadyDownloadedColor;
 			}
 
 			if (table.convertColumnIndexToModel(column) == 3) {
-				boolean keywordFound = model.getValueAt(modelRowIndex, jtAdder.getColumnExt("Keyword").getModelIndex()) != null;
+				boolean keywordFound = model.getValueAt(modelRowIndex, table.getColumn("Keyword").getModelIndex()) != null;
 				if (keywordFound) {
 					fc = keywordFoundColor;
 				}
-			}
-		} else {
-			if (isSelected) {
-				fc = table.getSelectionForeground();
-			} else {
-				fc = table.getForeground();
 			}
 		}
 		setForeground(fc);
@@ -99,8 +94,6 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 		} else {
 			if ((row % 2) != 0) {
 				c = Color.decode("#F0F8FF");
-			} else if (table instanceof JXTable) {
-				c = Color.WHITE;
 			} else {
 				c = table.getBackground();
 			}
