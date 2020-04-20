@@ -1,4 +1,3 @@
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -11,6 +10,8 @@ import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
+import ch.supertomcat.bh.rules.RuleMode;
+import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
 
 /**
@@ -39,7 +40,19 @@ public class HostImageVenue extends Host implements IHoster {
 	 */
 	private Pattern urlPattern;
 
+	/**
+	 * Alternative Pattern
+	 */
+	private Pattern urlAlternativePattern;
+
 	private RuleRegExp regexImage = new RuleRegExp();
+
+	RulePipelineURLRegex pipeAlternativeImage = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	private RuleRegExp regexAlternativeImage1;
+	private RuleRegExp regexAlternativeImage2;
+
+	RulePipelineURLRegex pipeAlternativeFilename = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	private RuleRegExp regexAlternativeFilename;
 
 	private RuleRegExp regexContinue = new RuleRegExp();
 
@@ -52,13 +65,22 @@ public class HostImageVenue extends Host implements IHoster {
 		regexImage.setSearch("(?m)(?s)<img.+?id=[\"']thepic[\\\"'].+?(src|SRC)=[\\\"'](.+?)[\\\"']");
 		regexImage.setReplace("$2");
 
+		urlAlternativePattern = Pattern.compile("^https?://imagevenue\\.com/ME[0-9A-Z]+$");
+		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?\\?full=1\"", "");
+		regexAlternativeImage2 = new RuleRegExp("<img src=\"(.+?)\"", "$1");
+		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
+		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
+
+		regexAlternativeFilename = new RuleRegExp("<img src=\".+?\" alt=\"(.+?)\"", "$1");
+		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
+		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
+
 		regexContinue.setSearch("Continue to your image");
 	}
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		Matcher urlMatcher = urlPattern.matcher(url);
-		if (urlMatcher.matches()) {
+		if (urlPattern.matcher(url).matches() || urlAlternativePattern.matcher(url).matches()) {
 			return true;
 		}
 		return false;
@@ -80,12 +102,12 @@ public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * URL parsen
 	 * 
-	 * @param url Container-URL
-	 * @return URL
+	 * @param upo URL Parse Object
+	 * @param alternative True if alternative, false otherwise
 	 * @throws HostException
 	 */
-	private String parseURL(String url) throws HostException {
-		String parsedURL = "";
+	private void parseURL(URLParseObject upo, boolean alternative) throws HostException {
+		String url = upo.getContainerURL();
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			String page = downloadContainerPage(url, url, null, client);
 
@@ -96,13 +118,30 @@ public class HostImageVenue extends Host implements IHoster {
 			if (regexContinue.doPageSourcecodeSearch(page, 0) >= 0) {
 				page = downloadContainerPage(url, url, null, client);
 			}
-			parsedURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
+
+			if (alternative) {
+				String parsedURL = pipeAlternativeImage.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
+				if (!parsedURL.isEmpty()) {
+					upo.setDirectLink(parsedURL);
+					String filename = pipeAlternativeFilename.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
+					if (!filename.isEmpty()) {
+						upo.setCorrectedFilename(filename);
+					}
+				}
+			} else {
+				String parsedURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
+				if (!parsedURL.isEmpty()) {
+					String sf = getFirstPartURL(upo.getContainerURL());
+					String result = sf + parsedURL;
+					upo.setDirectLink(result);
+					upo.setCorrectedFilename(correctFilename(result));
+				}
+			}
 		} catch (HostFileNotExistException e) {
 			throw new HostFileNotExistException(NAME + ": Container-Page: " + e.getMessage());
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
 		}
-		return parsedURL;
 	}
 
 	/**
@@ -138,33 +177,36 @@ public class HostImageVenue extends Host implements IHoster {
 
 	@Override
 	public String getFilenameFromURL(String url) {
-		if (!isFromThisHoster(url)) {
+		if (urlPattern.matcher(url).matches()) {
+			String search = "image=";
+			int start = url.lastIndexOf(search);
+			if (start > -1) {
+				start += search.length();
+				String retval = url.substring(start);
+				String cf = correctFilename("/" + retval);
+				if (cf.length() > 0) {
+					retval = cf;
+				}
+				return retval;
+			}
+			return "";
+		} else if (urlAlternativePattern.matcher(url).matches()) {
+			int start = url.lastIndexOf('/');
+			if (start > -1) {
+				return url.substring(start + 1);
+			}
+			return "";
+		} else {
 			return "";
 		}
-		String retval = "";
-		String search = "image=";
-		int start = url.lastIndexOf(search);
-		if (start > -1) {
-			start += search.length();
-			retval = url.substring(start);
-			String cf = correctFilename("/" + retval);
-			if (cf.length() > 0) {
-				retval = cf;
-			}
-		}
-		return retval;
 	}
 
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
-		if (isFromThisHoster(upo.getContainerURL())) {
-			String s = parseURL(upo.getContainerURL());
-			if (!s.isEmpty()) {
-				String sf = getFirstPartURL(upo.getContainerURL());
-				String result = sf + s;
-				upo.setDirectLink(result);
-				upo.setCorrectedFilename(correctFilename(result));
-			}
+		if (urlPattern.matcher(upo.getContainerURL()).matches()) {
+			parseURL(upo, false);
+		} else if (urlAlternativePattern.matcher(upo.getContainerURL()).matches()) {
+			parseURL(upo, true);
 		}
 	}
 }
