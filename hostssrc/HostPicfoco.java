@@ -13,13 +13,13 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 /**
  * Host class for Picfoco
  * 
- * @version 1.2
+ * @version 1.3
  */
 public class HostPicfoco extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.2";
+	public static final String VERSION = "1.3";
 
 	/**
 	 * Name dieser Klasse
