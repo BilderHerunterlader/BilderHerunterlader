@@ -171,7 +171,7 @@ public class MainMenuBar {
 				logger.error("Could not open URL, because Desktop is not supported: {}", url);
 			}
 		});
-		itemAbout.addActionListener(e -> new About(parentWindow, settingsManager));
+		itemAbout.addActionListener(e -> new BHAboutDialog(parentWindow, settingsManager));
 
 		String logFiles[] = logManager.getAvailableLogFileNames();
 		for (int i = 0; i < logFiles.length; i++) {
