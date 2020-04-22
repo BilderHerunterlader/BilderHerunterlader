@@ -374,8 +374,8 @@ public abstract class BH {
 				// If not, dispose it
 				EventQueue.invokeLater(() -> {
 					update.dispose();
+					update = null;
 				});
-				update = null;
 			}
 		}
 	}
@@ -429,6 +429,10 @@ public abstract class BH {
 			transmitterHTTP.setAcceptConnections(false);
 			transmitterHTTP.stop();
 			transmitterHTTP = null;
+		}
+
+		if (downloadQueueManager != null) {
+			downloadQueueManager.stop();
 		}
 
 		if (update != null) {
