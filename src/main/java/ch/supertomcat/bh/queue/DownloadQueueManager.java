@@ -119,8 +119,54 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	@Override
 	protected void updateOpenSlots() {
 		super.updateOpenSlots();
+
+		int localQueueSize;
+		int localOpenSlots;
+		int localMaxConnectionCount;
+		synchronized (syncObject) {
+			localQueueSize = queue.size();
+			localOpenSlots = openSlots;
+			localMaxConnectionCount = maxConnectionCount;
+		}
 		for (IDownloadQueueManagerListener listener : listeners) {
-			listener.queueChanged(queue.size(), openSlots, maxConnectionCount);
+			listener.queueChanged(localQueueSize, localOpenSlots, localMaxConnectionCount);
+		}
+
+		/*
+		 * Call different listener methods after each other to prevent inconsitant behavour, when the implementation interacts with the download queue manager.
+		 */
+		boolean localQueueEmpty;
+		synchronized (syncObject) {
+			localQueueEmpty = queue.isEmpty() && executingTasks.isEmpty();
+		}
+
+		if (localQueueEmpty) {
+			logger.info("Queue is empty before queueEmpty Listener: {}", localQueueEmpty);
+			for (IDownloadQueueManagerListener listener : listeners) {
+				listener.queueEmpty();
+			}
+		}
+
+		boolean logEmpty = localQueueEmpty;
+
+		/*
+		 * Call different listener methods after each other to prevent inconsitant behavour, when the implementation interacts with the download queue manager.
+		 * For example if auto retry is enabled, then the queueEmpty call before started failed downloads again by now. Therefore downloads might not be
+		 * complete yet.
+		 */
+		synchronized (syncObject) {
+			localQueueEmpty = queue.isEmpty() && executingTasks.isEmpty();
+			localQueueSize = queue.size();
+			localOpenSlots = openSlots;
+			localMaxConnectionCount = maxConnectionCount;
+		}
+		if (logEmpty) {
+			logger.info("Queue is empty after queueEmpty Listener: {}", localQueueEmpty);
+		}
+		if (localQueueEmpty) {
+			for (IDownloadQueueManagerListener listener : listeners) {
+				listener.downloadsComplete(localQueueSize, localOpenSlots, localMaxConnectionCount);
+			}
 		}
 	}
 
