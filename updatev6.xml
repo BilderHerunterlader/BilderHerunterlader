@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <updates>
-	<setuprelease version="4.12.1">
+	<setuprelease version="4.12.2">
 		<description>
-			<mainDE>- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</mainDE>
-			<mainEN>- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</mainEN>
+			<mainDE>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainDE>
+			<mainEN>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.12.1" src="https://www.dropbox.com/s/bb7myy6dox5s7az/BH-4.12.1.zip?dl=1" filename="BH-4.12.1.zip" name="BilderHerunterlader" />
+	<main version="4.12.2" src="https://www.dropbox.com/s/gjn605y67a2bwcx/BH-4.12.2.zip?dl=1" filename="BH-4.12.2.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</mainDE>
-		<mainEN>- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</mainEN>
+		<mainDE>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainDE>
+		<mainEN>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainEN>
 	</description>
 	<redirects>
 	</redirects>
@@ -144,6 +144,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.12.2" lng="de">- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</changes>
+		<changes version="4.12.2" lng="en">- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</changes>
 		<changes version="4.12.1" lng="de">- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</changes>
 		<changes version="4.12.1" lng="en">- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</changes>
 		<changes version="4.12.0" lng="de">- Use JProgressBar in renderer, instead of placing progress bars into table data\n- Bug Fixed: Restart was not working on Linux\n- Removed all singletons\n- QueueManager now manages the QueueTableModel, instead of Queue, to reduce locking overhead\n- Separated status label in Queue into two labels, so that row count can be updated separately\n- Replaced old implementation for managing download queue by new implementation, which uses QueueManagerBase\n- Moved code away from Pic class, which should not have been there\n- Fixed regex for nested class exclusion when loading Host Classes\n- Updated dependencies\n- Removed swingx dependency. Implemented new class for hiding columns. Hiding columns was to only reason for swingx, so now it is not needed anymore\n- Bug Fixed: Image previews were not working on OpenJDK</changes>
