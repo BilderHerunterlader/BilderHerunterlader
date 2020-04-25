@@ -17,13 +17,13 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.1
+ * @version 4.2
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.1";
+	public static final String VERSION = "4.2";
 
 	/**
 	 * Name dieser Klasse
@@ -65,7 +65,7 @@ public class HostImageVenue extends Host implements IHoster {
 		regexImage.setSearch("(?m)(?s)<img.+?id=[\"']thepic[\\\"'].+?(src|SRC)=[\\\"'](.+?)[\\\"']");
 		regexImage.setReplace("$2");
 
-		urlAlternativePattern = Pattern.compile("^https?://imagevenue\\.com/ME[0-9A-Z]+$");
+		urlAlternativePattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/ME[0-9A-Z]+$");
 		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?\\?full=1\"", "");
 		regexAlternativeImage2 = new RuleRegExp("<img src=\"(.+?)\"", "$1");
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
