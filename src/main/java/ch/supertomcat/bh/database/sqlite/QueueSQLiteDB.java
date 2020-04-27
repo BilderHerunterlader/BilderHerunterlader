@@ -203,37 +203,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 		try (Connection con = getDatabaseConnection()) {
 			con.setAutoCommit(true);
 			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				statement.setString(1, entry.getContainerURL());
-				statement.setString(2, entry.getThreadURL());
-				statement.setString(3, entry.getThumb());
-				statement.setString(4, entry.getDownloadURL());
-				statement.setString(5, entry.getTargetPath());
-				statement.setString(6, entry.getTargetFilename());
-				statement.setBoolean(7, entry.isFixedTargetFilename());
-				statement.setLong(8, entry.getLastModified());
-				statement.setBoolean(9, entry.isFixedLastModified());
-				statement.setLong(10, entry.getSize());
-				statement.setInt(11, entry.getStatus().getValue());
-				statement.setString(12, entry.getErrMsg());
-				statement.setBoolean(13, entry.isDeactivated());
-				statement.setBoolean(14, entry.isRenameWithContentDisposition());
-				statement.setLong(15, entry.getDateTimeSimple());
-
-				int rowsAffected = statement.executeUpdate();
-				if (rowsAffected <= 0) {
-					logger.error("Could not insert Pic into database '{}'. No rows affected: {}", tableName, entry.getContainerURL());
-				} else {
-					// Set ID on entry
-					try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
-						if (generatedKeys.next()) {
-							int id = generatedKeys.getInt(1);
-							entry.setId(id);
-							logger.debug("Set ID for inserted Pic: ID={}, ContainerURL={}", id, entry.getContainerURL());
-						} else {
-							logger.error("Could not get generated ID of Pic from database '{}': {}", tableName, entry.getContainerURL());
-						}
-					}
-				}
+				insertEntry(entry, statement);
 			}
 			return true;
 		} catch (SQLException | ClassNotFoundException e) {
@@ -242,75 +212,148 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 		}
 	}
 
+	/**
+	 * Insert Entry
+	 * 
+	 * @param entry Entry
+	 * @param statement Prepared Statement
+	 * @throws SQLException
+	 */
+	private synchronized void insertEntry(Pic entry, PreparedStatement statement) throws SQLException {
+		statement.setString(1, entry.getContainerURL());
+		statement.setString(2, entry.getThreadURL());
+		statement.setString(3, entry.getThumb());
+		statement.setString(4, entry.getDownloadURL());
+		statement.setString(5, entry.getTargetPath());
+		statement.setString(6, entry.getTargetFilename());
+		statement.setBoolean(7, entry.isFixedTargetFilename());
+		statement.setLong(8, entry.getLastModified());
+		statement.setBoolean(9, entry.isFixedLastModified());
+		statement.setLong(10, entry.getSize());
+		statement.setInt(11, entry.getStatus().getValue());
+		statement.setString(12, entry.getErrMsg());
+		statement.setBoolean(13, entry.isDeactivated());
+		statement.setBoolean(14, entry.isRenameWithContentDisposition());
+		statement.setLong(15, entry.getDateTimeSimple());
+
+		int rowsAffected = statement.executeUpdate();
+		if (rowsAffected <= 0) {
+			logger.error("Could not insert Pic into database '{}'. No rows affected: {}", tableName, entry.getContainerURL());
+		} else {
+			// Set ID on entry
+			try (ResultSet generatedKeys = statement.getGeneratedKeys()) {
+				if (generatedKeys.next()) {
+					int id = generatedKeys.getInt(1);
+					entry.setId(id);
+					logger.debug("Set ID for inserted Pic: ID={}, ContainerURL={}", id, entry.getContainerURL());
+				} else {
+					logger.error("Could not get generated ID of Pic from database '{}': {}", tableName, entry.getContainerURL());
+				}
+			}
+		}
+	}
+
 	@Override
 	public synchronized boolean insertEntries(List<Pic> entries) {
 		boolean result = true;
-		for (Pic entry : entries) {
-			if (!insertEntry(entry)) {
-				result = false;
+		try (Connection con = getDatabaseConnection()) {
+			con.setAutoCommit(false);
+			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+				for (Pic entry : entries) {
+					try {
+						insertEntry(entry, statement);
+					} catch (SQLException e) {
+						logger.error("Could not insert Pic into database '{}': {}", tableName, entry.getContainerURL(), e);
+						result = false;
+					}
+				}
 			}
+			con.commit();
+		} catch (SQLException | ClassNotFoundException e) {
+			logger.error("Could not insert Pics into database '{}'", tableName, e);
+			result = false;
 		}
 		return result;
 	}
 
 	@Override
 	public synchronized boolean updateEntry(Pic entry) {
-		if (entry.getId() <= 0) {
-			logger.warn("Could not update Pic in database, because the Pic has no valid ID: {}. Adding it to database instead.", entry.getId());
-			return insertEntry(entry);
-		}
-
 		try (Connection con = getDatabaseConnection()) {
 			con.setAutoCommit(true);
 			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				statement.setString(1, entry.getContainerURL());
-				statement.setString(2, entry.getThreadURL());
-				statement.setString(3, entry.getThumb());
-				statement.setString(4, entry.getDownloadURL());
-				statement.setString(5, entry.getTargetPath());
-				statement.setString(6, entry.getTargetFilename());
-				statement.setBoolean(7, entry.isFixedTargetFilename());
-				statement.setLong(8, entry.getLastModified());
-				statement.setBoolean(9, entry.isFixedLastModified());
-				statement.setLong(10, entry.getSize());
-				statement.setInt(11, entry.getStatus().getValue());
-				statement.setString(12, entry.getErrMsg());
-				statement.setBoolean(13, entry.isDeactivated());
-				statement.setBoolean(14, entry.isRenameWithContentDisposition());
-				statement.setLong(15, entry.getDateTimeSimple());
-				statement.setInt(16, entry.getId());
-				statement.executeUpdate();
+				return updateEntry(entry, statement);
 			}
-			return true;
 		} catch (SQLException | ClassNotFoundException e) {
 			logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
 			return false;
 		}
 	}
 
+	/**
+	 * Update Entry
+	 * 
+	 * @param entry Entry
+	 * @param statement Prepared Statement
+	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
+	 * @throws SQLException
+	 */
+	private synchronized boolean updateEntry(Pic entry, PreparedStatement statement) throws SQLException {
+		if (entry.getId() <= 0) {
+			logger.warn("Could not update Pic in database, because the Pic has no valid ID: {}. Adding it to database instead.", entry.getId());
+			return insertEntry(entry);
+		}
+
+		statement.setString(1, entry.getContainerURL());
+		statement.setString(2, entry.getThreadURL());
+		statement.setString(3, entry.getThumb());
+		statement.setString(4, entry.getDownloadURL());
+		statement.setString(5, entry.getTargetPath());
+		statement.setString(6, entry.getTargetFilename());
+		statement.setBoolean(7, entry.isFixedTargetFilename());
+		statement.setLong(8, entry.getLastModified());
+		statement.setBoolean(9, entry.isFixedLastModified());
+		statement.setLong(10, entry.getSize());
+		statement.setInt(11, entry.getStatus().getValue());
+		statement.setString(12, entry.getErrMsg());
+		statement.setBoolean(13, entry.isDeactivated());
+		statement.setBoolean(14, entry.isRenameWithContentDisposition());
+		statement.setLong(15, entry.getDateTimeSimple());
+		statement.setInt(16, entry.getId());
+		statement.executeUpdate();
+		return true;
+	}
+
 	@Override
 	public synchronized boolean updateEntries(List<Pic> entries) {
 		boolean result = true;
-		for (Pic entry : entries) {
-			if (!updateEntry(entry)) {
-				result = false;
+		try (Connection con = getDatabaseConnection()) {
+			con.setAutoCommit(false);
+			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+				for (Pic entry : entries) {
+					try {
+						if (!updateEntry(entry, statement)) {
+							result = false;
+						}
+					} catch (SQLException e) {
+						logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+						result = false;
+					}
+				}
 			}
+			con.commit();
+		} catch (SQLException | ClassNotFoundException e) {
+			logger.error("Could not update Pics in database '{}'", tableName, e);
+			result = false;
 		}
 		return result;
 	}
 
 	@Override
 	public synchronized boolean deleteEntry(Pic entry) {
-		if (entry.getId() <= 0) {
-			logger.error("Could not delete Pic in database, because the Pic has no valid ID: {}", entry.getId());
-			return false;
-		}
-
 		try (Connection con = getDatabaseConnection()) {
 			con.setAutoCommit(true);
 			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				statement.setInt(1, entry.getId());
-				statement.executeUpdate();
+				deleteEntry(entry, statement);
 			}
 			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
 			return true;
@@ -320,13 +363,43 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 		}
 	}
 
+	/**
+	 * Delete Entry
+	 * 
+	 * @param entry Entry
+	 * @param statement Prepared Statement
+	 * @throws SQLException
+	 */
+	private synchronized void deleteEntry(Pic entry, PreparedStatement statement) throws SQLException {
+		if (entry.getId() <= 0) {
+			logger.error("Could not delete Pic in database, because the Pic has no valid ID: {}", entry.getId());
+			return;
+		}
+
+		statement.setInt(1, entry.getId());
+		statement.executeUpdate();
+	}
+
 	@Override
 	public synchronized boolean deleteEntries(List<Pic> entries) {
 		boolean result = true;
-		for (Pic entry : entries) {
-			if (!deleteEntry(entry)) {
-				result = false;
+		try (Connection con = getDatabaseConnection()) {
+			con.setAutoCommit(false);
+			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+				for (Pic entry : entries) {
+					try {
+						deleteEntry(entry, statement);
+						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
+					} catch (SQLException e) {
+						logger.error("Could not delete Pic into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+						result = false;
+					}
+				}
 			}
+			con.commit();
+		} catch (SQLException | ClassNotFoundException e) {
+			logger.error("Could not delete Pics in database '{}'", tableName, e);
+			result = false;
 		}
 		return result;
 	}

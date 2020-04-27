@@ -1218,6 +1218,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				int lastModifiedColumnModelIndex = jtAdder.getColumn("LastModified").getModelIndex();
 				int blacklistColumnModelIndex = jtAdder.getColumn("Blacklist").getModelIndex();
 
+				List<Pic> picsToAdd = new ArrayList<>();
 				for (int i = 0; i < rowCount; i++) {
 					int rowModelIndex = jtAdder.convertRowIndexToModel(i);
 
@@ -1258,9 +1259,10 @@ public class AdderPanel extends JFrame implements ActionListener {
 									p.setFixedLastModified(true);
 								}
 							}
-							queueManager.addPic(p);
+							picsToAdd.add(p);
 						}
 					}
+
 					progressCounter++;
 					if (progressCounter >= progressChangeInterval) {
 						progressCounter = 0;
@@ -1268,6 +1270,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 						setPGText(String.format(progressBarTextFormat, (i + 1) * 100 / rowCount));
 					}
 				}
+				queueManager.addPics(picsToAdd);
 
 				dispose();
 				queueManager.saveDatabase();

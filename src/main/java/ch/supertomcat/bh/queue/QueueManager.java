@@ -244,11 +244,11 @@ public class QueueManager implements IPicListener {
 				if (!(pics.contains(pic))) {
 					pics.add(pic);
 					picsAdded.add(pic);
-					queueSQLiteDB.insertEntry(pic);
 					pic.removeAllListener();
 					pic.addPicListener(this);
 				}
 			}
+			queueSQLiteDB.insertEntries(picList);
 
 			Runnable r = new Runnable() {
 				@Override
@@ -328,15 +328,17 @@ public class QueueManager implements IPicListener {
 		}
 
 		synchronized (syncObject) {
+			List<Pic> picsToDelete = new ArrayList<>();
 			for (int i = indices.length - 1; i > -1; i--) {
 				if ((indices[i] < 0) || (indices[i] >= pics.size())) {
 					continue;
 				}
 				Pic pic = pics.get(indices[i]);
 				pic.removeAllListener();
-				queueSQLiteDB.deleteEntry(pic);
 				pics.remove(indices[i]);
+				picsToDelete.add(pic);
 			}
+			queueSQLiteDB.deleteEntries(picsToDelete);
 
 			Runnable r = new Runnable() {
 				@Override
