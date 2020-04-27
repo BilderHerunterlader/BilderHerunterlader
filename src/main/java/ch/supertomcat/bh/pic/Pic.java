@@ -246,7 +246,7 @@ public class Pic {
 			return;
 		}
 		if (this.failedCount >= maxFailedCount) {
-			setDeactivated(true);
+			setDeactivated(true, true);
 		}
 	}
 
@@ -552,12 +552,15 @@ public class Pic {
 	 * updates the object in the database. But does not commit the database!
 	 * 
 	 * @param deactivated Deactivated
+	 * @param callListeners True if listeners should be called, false otherwise
 	 */
-	public void setDeactivated(boolean deactivated) {
+	public void setDeactivated(boolean deactivated, boolean callListeners) {
 		this.deactivated = deactivated;
 		this.failedCount = 0;
-		for (IPicListener listener : listeners) {
-			listener.deactivatedChanged(this);
+		if (callListeners) {
+			for (IPicListener listener : listeners) {
+				listener.deactivatedChanged(this);
+			}
 		}
 	}
 

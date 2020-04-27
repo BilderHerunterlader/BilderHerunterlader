@@ -148,7 +148,7 @@ public class ImportQueue extends ImportExportBase {
 						pic.setLastModified(lastModified);
 						pic.setFixedTargetFilename(fixedTargetFilename);
 						pic.setFixedLastModified(fixedLastModified);
-						pic.setDeactivated(deactivated);
+						pic.setDeactivated(deactivated, false);
 						picsToAdd.add(pic);
 					}
 

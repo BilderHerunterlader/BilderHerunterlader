@@ -918,7 +918,9 @@ public class Queue extends JPanel {
 		synchronized (queueManager.getSyncObject()) {
 			int s[] = jtQueue.getSelectedRows();
 			for (int i = 0; i < s.length; i++) {
-				queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(false);
+				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
+				pic.setDeactivated(false, false);
+				queueManager.updatePic(pic);
 			}
 			model.fireTableDataChanged();
 			queueManager.asyncSaveDatabase();
@@ -932,7 +934,9 @@ public class Queue extends JPanel {
 		synchronized (queueManager.getSyncObject()) {
 			int s[] = jtQueue.getSelectedRows();
 			for (int i = 0; i < s.length; i++) {
-				queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i])).setDeactivated(true);
+				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
+				pic.setDeactivated(true, false);
+				queueManager.updatePic(pic);
 			}
 			model.fireTableDataChanged();
 			queueManager.asyncSaveDatabase();
