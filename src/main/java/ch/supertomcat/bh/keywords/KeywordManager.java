@@ -94,8 +94,8 @@ public class KeywordManager {
 	public synchronized void addKeywords(List<Keyword> keywords) {
 		for (Keyword keyword : keywords) {
 			this.keywords.add(keyword);
-			keywordsSQLiteDB.insertEntry(keyword);
 		}
+		keywordsSQLiteDB.insertEntries(keywords);
 		keywordsChanged();
 	}
 
@@ -148,14 +148,16 @@ public class KeywordManager {
 	 * @param indices Indices
 	 */
 	public void removeKeywords(int indices[]) {
+		List<Keyword> keywordsToDelete = new ArrayList<>();
 		for (int i = indices.length - 1; i > -1; i--) {
 			if ((indices[i] < 0) || (indices[i] >= keywords.size())) {
 				continue;
 			}
 			Keyword keyword = keywords.get(indices[i]);
-			keywordsSQLiteDB.deleteEntry(keyword);
 			keywords.remove(indices[i]);
+			keywordsToDelete.add(keyword);
 		}
+		keywordsSQLiteDB.deleteEntries(keywordsToDelete);
 		keywordsChanged();
 	}
 
