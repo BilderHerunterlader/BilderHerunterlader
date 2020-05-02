@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- Root Element -->
+	<xs:element name="rule">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="urlPattern" type="xs:string" />
+				
+				<xs:element name="usecontentdisposition" type="xs:boolean" />
+				<xs:element name="reducePathLength" type="xs:boolean" />
+				<xs:element name="reduceFilenameLength" type="xs:boolean" />
+				
+				<xs:element name="referrerMode" type="ReferrerMode" />
+				<xs:element name="customReferrer" type="xs:string" />
+				
+				<xs:element name="downloadReferrerMode" type="ReferrerMode" />
+				<xs:element name="downloadCustomReferrer" type="xs:string" />
+				
+				<xs:element name="duplicateRemoveMode" type="DuplicateRemoveMode" />
+				
+				<xs:element name="sendCookies" type="xs:boolean" />
+				
+				<!-- TODO Does this actually work or do I have to specify a choice here between regex and javascript ? -->
+				<xs:element name="pipes" type="URLPipeline" minOccurs="0" maxOccurs="unbounded" />
+				
+				<xs:element name="failuresPipes" type="FailuresPipeline" minOccurs="0" maxOccurs="unbounded" />
+				
+				<xs:element name="filenamePipeline" type="FilenamePipeline" />
+				
+				<xs:element name="filenameDownloadSelectionPipeline" type="FilenameDownloadSelectionPipeline" />
+				
+				<xs:element name="restriction" type="Restriction" />
+			</xs:sequence>
+			<!-- Required Rule Name -->
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<!-- Required Rule Version -->
+			<xs:attribute name="version" type="xs:string" use="required" />
+			<!-- Required Redirect Flag -->
+			<xs:attribute name="redirect" type="xs:boolean" use="required" />
+			<!-- Required Required Resend Flag -->
+			<xs:attribute name="resend" type="xs:boolean" use="required" />
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- Restriction -->
+	<xs:complexType name="Restriction">
+		<xs:sequence>
+			<!-- Domain List -->
+			<xs:element name="domain" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<xs:attribute name="maxConnections" type="xs:int" use="required" />
+	</xs:complexType>
+	
+	<!-- Referrer Mode -->
+	<xs:simpleType name="ReferrerMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NO_REFERRER" />
+			<xs:enumeration value="LAST_CONTAINER_URL" />
+			<xs:enumeration value="FIRST_CONTAINER_URL" />
+			<xs:enumeration value="ORIGIN_PAGE" />
+			<xs:enumeration value="CUSTOM" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Duplicate Remove Mode -->
+	<xs:simpleType name="DuplicateRemoveMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DEFAULT" />
+			<xs:enumeration value="CONTAINER_URL_ONLY" />
+			<xs:enumeration value="CONTAINER_URL_AND_THUMBNAIL_URL" />
+			<xs:enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST" />
+			<xs:enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST" />
+			<xs:enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST" />
+			<xs:enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Pipeline Base -->
+	<xs:complexType name="Pipeline">
+		<xs:sequence>
+			<!-- Regex List -->
+			<xs:element name="regexp" type="RuleRegex" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Regex -->
+	<xs:complexType name="RuleRegex">
+		<xs:sequence>
+			<!-- Required Regex Pattern -->
+			<xs:element name="pattern" type="xs:string" />
+			<!-- Required replacement -->
+			<xs:element name="replacement" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- URL Pipeline -->
+	<xs:complexType name="URLPipeline">
+		<xs:complexContent>
+			<xs:extension base="Pipeline">
+				<xs:attribute name="waitBeforeExecute" type="xs:int" use="required" />
+				<xs:attribute name="urlDecodeResult" type="xs:boolean" use="required" />
+				<xs:attribute name="sendCookies" type="xs:boolean" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- URL Regex Pipeline -->
+	<xs:complexType name="URLRegexPipeline">
+		<xs:complexContent>
+			<xs:extension base="URLPipeline">
+				<xs:attribute name="mode" type="URLRegexPipelineMode" use="required" />
+				<!-- Only used when urlRegexMode is CONTAINER_OR_THUMBNAIL_URL -->
+				<xs:attribute name="urlMode" type="URLMode" default="CONTAINER_URL" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- URL Regex Mode -->
+	<xs:simpleType name="URLRegexPipelineMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CONTAINER_OR_THUMBNAIL_URL" />
+			<xs:enumeration value="CONTAINER_PAGE_SOURCECODE" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- URL Mode -->
+	<xs:simpleType name="URLMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CONTAINER_URL" />
+			<xs:enumeration value="THUMBNAIL_URL" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- URL Javascript Pipeline -->
+	<xs:complexType name="URLJavascriptPipeline">
+		<xs:complexContent>
+			<xs:extension base="URLPipeline">
+				<xs:sequence>
+					<!-- Required Javascript Code -->
+					<xs:element name="javascriptCode" type="xs:string" />
+				</xs:sequence>
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- Filename Pipeline -->
+	<xs:complexType name="FilenamePipeline">
+		<xs:complexContent>
+			<xs:extension base="Pipeline">
+				<xs:attribute name="mode" type="FilenameMode" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- Filename Mode -->
+	<xs:simpleType name="FilenameMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CONTAINER_URL_FILENAME_PART" />
+			<xs:enumeration value="CONTAINER_URL" />
+			<xs:enumeration value="THUMBNAIL_URL_FILENAME_PART" />
+			<xs:enumeration value="THUMBNAIL_URL" />
+			<xs:enumeration value="CONTAINER_PAGE_SOURCECODE" />
+			<xs:enumeration value="DOWNLOAD_URL" />
+			<xs:enumeration value="DOWNLOAD_URL_FILENAME_PART" />
+			<xs:enumeration value="LAST_CONTAINER_URL_FILENAME_PART" />
+			<xs:enumeration value="LAST_CONTAINER_URL" />
+			<xs:enumeration value="FIRST_CONTAINER_PAGE_SOURCECODE" />
+			<xs:enumeration value="LAST_CONTAINER_PAGE_SOURCECODE" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- Filename Download Selection Pipeline -->
+	<xs:complexType name="FilenameDownloadSelectionPipeline">
+		<xs:complexContent>
+			<xs:extension base="Pipeline">
+				<xs:attribute name="mode" type="FilenameDownloadSelectionMode" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- Filename Download Selection Mode -->
+	<xs:simpleType name="FilenameDownloadSelectionMode">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="CONTAINER_URL_FILENAME_PART" />
+			<xs:enumeration value="CONTAINER_URL" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Failures Pipeline -->
+	<xs:complexType name="FailuresPipeline">
+		<xs:complexContent>
+			<xs:extension base="Pipeline">
+				<!-- Failure Type -->
+				<xs:attribute name="failureType" type="FailureType" use="required" />
+				<!-- Check URL Flag -->
+				<xs:attribute name="checkURL" type="xs:boolean" use="required" />
+				<!-- Check Thumb URL Flag -->
+				<xs:attribute name="checkThumbURL" type="xs:boolean"use="required" />
+				<!-- Check Page Source Code Flag -->
+				<xs:attribute name="checkPageSourceCode" type="xs:boolean" use="required" />
+			</xs:extension>
+		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- Failure Type -->
+	<xs:simpleType name="FailureType">
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="COMPLETE" />
+			<xs:enumeration value="SLEEPING" />
+			<xs:enumeration value="FAILED_FILE_TEMPORARY_OFFLINE" />
+			<xs:enumeration value="FAILED_FILE_NOT_EXIST" />
+			<xs:enumeration value="FAILED" />
+		</xs:restriction>
+	</xs:simpleType>
+</xs:schema>

@@ -24,6 +24,12 @@
 			<attribute name="test" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry excluding="module-info.java" kind="src" output="target/classes" path="src/generated/java">
+		<attributes>
+			<attribute name="optional" value="true"/>
+			<attribute name="maven.pomderived" value="true"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="src" output="hosts" path="hostssrc"/>
 	<classpathentry kind="src" output="developerhosts" path="developerhostssrc"/>
 	<classpathentry kind="con" path="org.eclipse.m2e.MAVEN2_CLASSPATH_CONTAINER">
