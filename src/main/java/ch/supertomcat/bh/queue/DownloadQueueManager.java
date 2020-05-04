@@ -218,15 +218,6 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	}
 
 	@Override
-	protected int compareTasks(PicDownloadListener t1, PicDownloadListener t2) {
-		int comparison = super.compareTasks(t1, t2);
-		if (comparison == 0) {
-			return Long.compare(t1.getPic().getDateTimeSimple(), t2.getPic().getDateTimeSimple());
-		}
-		return comparison;
-	}
-
-	@Override
 	protected void addTaskToExecutingTasks(QueueTask<PicDownloadListener, PicDownloadResult> task) {
 		if (calculateRateTimerTask == null) {
 			timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(syncObject, calculateRateListeners), 1000, 1000);
