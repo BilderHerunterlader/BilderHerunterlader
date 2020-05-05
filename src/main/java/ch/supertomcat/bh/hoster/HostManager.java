@@ -9,6 +9,7 @@ import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.StampedLock;
 
 import javax.swing.JFrame;
 
@@ -68,9 +69,9 @@ public class HostManager {
 	private HostSortImages hostSortImages = new HostSortImages();
 
 	/**
-	 * Sync Object
+	 * Stamped Lock
 	 */
-	private final Object syncObject = new Object();
+	private StampedLock lock = new StampedLock();
 
 	/**
 	 * Settings Manager
@@ -118,7 +119,8 @@ public class HostManager {
 	 * Create a sorted hostclass-array
 	 */
 	public void reInitHosterList() {
-		synchronized (syncObject) {
+		long stamp = lock.writeLock();
+		try {
 			Collections.sort(hosts, new Comparator<Host>() {
 				private boolean bRulesBeforeClasses = settingsManager.isRulesBeforeClasses();
 
@@ -170,6 +172,8 @@ public class HostManager {
 					return o1.getName().compareTo(o2.getName());
 				}
 			});
+		} finally {
+			lock.unlockWrite(stamp);
 		}
 	}
 
@@ -198,7 +202,8 @@ public class HostManager {
 	 * @return Version
 	 */
 	public String getHostVersion(String name) {
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			for (Host host : hosts) {
 				if (host.getName().equals(name)) {
 					String version = host.getVersion();
@@ -208,6 +213,8 @@ public class HostManager {
 					return version;
 				}
 			}
+		} finally {
+			lock.unlockRead(stamp);
 		}
 		return "";
 	}
@@ -218,8 +225,11 @@ public class HostManager {
 	 * @return Hostclasses-array
 	 */
 	public List<Host> getHosters() {
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			return new ArrayList<>(hosts);
+		} finally {
+			lock.unlockRead(stamp);
 		}
 	}
 
@@ -230,11 +240,14 @@ public class HostManager {
 	 * @return Rule
 	 */
 	public Host getHost(int index) {
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			if (index < 0 || index >= hosts.size()) {
 				return null;
 			}
 			return hosts.get(index);
+		} finally {
+			lock.unlockRead(stamp);
 		}
 	}
 
@@ -245,7 +258,8 @@ public class HostManager {
 	 * @return Hoster or null
 	 */
 	public Hoster getHosterForURL(String url) {
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			for (Host host : hosts) {
 				// Check if the hostclass accepts the url
 				if (host.isEnabled() && host.isFromThisHoster(url)) {
@@ -256,6 +270,8 @@ public class HostManager {
 					}
 				}
 			}
+		} finally {
+			lock.unlockRead(stamp);
 		}
 		return null;
 	}
@@ -271,7 +287,8 @@ public class HostManager {
 	 * @return List of URL-Objects if additional URLs were added or null
 	 */
 	public List<URL> checkURL(URL urlObject, AtomicBoolean bOK, ProgressObserver progress) {
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			for (Host host : hosts) {
 				// Check if the hostclass accepts the url
 				if (host.isEnabled() && host.isFromThisHoster(urlObject.getURL())) {
@@ -298,6 +315,8 @@ public class HostManager {
 					return null;
 				}
 			}
+		} finally {
+			lock.unlockRead(stamp);
 		}
 		return null;
 	}
@@ -315,7 +334,8 @@ public class HostManager {
 		}
 		String url = upo.getContainerURL();
 
-		synchronized (syncObject) {
+		long stamp = lock.readLock();
+		try {
 			for (Host host : hosts) {
 				/*
 				 * Check if the hostclass accepts the URL.
@@ -343,6 +363,8 @@ public class HostManager {
 					return upo;
 				}
 			}
+		} finally {
+			lock.unlockRead(stamp);
 		}
 		return upo;
 	}
