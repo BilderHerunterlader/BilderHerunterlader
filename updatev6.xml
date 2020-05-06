@@ -1,16 +1,16 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 
 <updates>
-	<setuprelease version="4.12.2">
+	<setuprelease version="4.13.0">
 		<description>
-			<mainDE>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainDE>
-			<mainEN>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainEN>
+			<mainDE>- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</mainDE>
+			<mainEN>- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.12.2" src="https://www.dropbox.com/s/gjn605y67a2bwcx/BH-4.12.2.zip?dl=1" filename="BH-4.12.2.zip" name="BilderHerunterlader" />
+	<main version="4.13.0" src="https://www.dropbox.com/s/btqsthr7y4j3u2v/BH-4.13.0.zip?dl=1" filename="BH-4.13.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainDE>
-		<mainEN>- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</mainEN>
+		<mainDE>- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</mainDE>
+		<mainEN>- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</mainEN>
 	</description>
 	<redirects>
 	</redirects>
@@ -144,6 +144,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.13.0" lng="de">- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</changes>
+		<changes version="4.13.0" lng="en">- Bug Fixed: Low performance because of synchronized blocks in HostManager. They are now replaced by read/write locks.\n- Performance improvement and bug fixes in QueueManagerBase\n- Performance improvement when adding, updating or deleting a lot of queue/keyword entries</changes>
 		<changes version="4.12.2" lng="de">- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</changes>
 		<changes version="4.12.2" lng="en">- Bug Fixed: Auto Retry Downloads was not working anymore\n- Bug Fixed: Downloads Complete Notification was not working anymore</changes>
 		<changes version="4.12.1" lng="de">- Bug Fixed: QueueScheduler was not executing tasks when maxConnectionCountPerHost is zero</changes>
