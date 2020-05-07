@@ -369,7 +369,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	}
 
 	private void actionExit() {
-		guiEvent.exitApp(false);
+		guiEvent.exitApp(false, false);
 	}
 
 	private void actionImportHTML() {

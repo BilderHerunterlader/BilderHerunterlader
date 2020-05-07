@@ -291,7 +291,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 				return;
 			}
 			// If no systemtray exit application
-			guiEvent.exitApp(false);
+			guiEvent.exitApp(false, false);
 		} else {
 			setVisible(false);
 		}

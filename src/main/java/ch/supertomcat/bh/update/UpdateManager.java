@@ -233,9 +233,9 @@ public class UpdateManager {
 		}
 
 		if (deleteUpdatesAvailable) {
-			guiEvent.exitAppForce(Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart"), Localization.getString("Update"), owner, false);
+			guiEvent.exitAppForced(Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart"), Localization.getString("Update"), owner, false, true);
 		} else {
-			guiEvent.exitAppForce(Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), owner, true);
+			guiEvent.exitAppForced(Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), owner, true, true);
 		}
 	}
 

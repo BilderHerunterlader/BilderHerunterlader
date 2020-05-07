@@ -34,6 +34,11 @@ public class TransmitterSocket implements Runnable {
 	private final TransmitterHelper transmitterHelper;
 
 	/**
+	 * Stop Flag
+	 */
+	private boolean stop = false;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param transmitterHelper Transmitter Helper
@@ -50,13 +55,13 @@ public class TransmitterSocket implements Runnable {
 			logger.info("Listening on Port {}", port);
 			writePortFile(port); // write the port number to a file (for browserextensions)
 
-			while (true) {
+			while (!stop) {
 				try {
 					// wait for incomming connection
 					@SuppressWarnings("resource")
 					Socket socket = ss.accept();
 					logger.info("Accepted connection at " + socket.getLocalAddress() + ":" + socket.getLocalPort() + " from " + socket.getInetAddress() + ":" + socket.getPort());
-					if (acceptConnections) {
+					if (!stop && acceptConnections) {
 						// Start new thread, which will read data from the stream
 						TransmitterThread t = new TransmitterThread(socket, transmitterHelper);
 						t.setName("TransmitterReader-" + t.getId());
@@ -114,5 +119,12 @@ public class TransmitterSocket implements Runnable {
 	 */
 	public void setAcceptConnections(boolean acceptConnections) {
 		this.acceptConnections = acceptConnections;
+	}
+
+	/**
+	 * Stop
+	 */
+	public void stop() {
+		stop = true;
 	}
 }

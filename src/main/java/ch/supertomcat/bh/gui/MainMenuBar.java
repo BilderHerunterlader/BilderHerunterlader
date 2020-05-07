@@ -138,7 +138,7 @@ public class MainMenuBar {
 		itemAbout.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F1, ActionEvent.SHIFT_MASK));
 		itemTutorial.setAccelerator(KeyStroke.getKeyStroke("F1"));
 
-		itemExit.addActionListener(e -> guiEvent.exitApp(false));
+		itemExit.addActionListener(e -> guiEvent.exitApp(false, false));
 
 		itemSettings.addActionListener(e -> new Settings(parentWindow, mainWindowAccess, proxyManger, settingsManager, cookieManager, hostManager));
 

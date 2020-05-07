@@ -84,7 +84,7 @@ public abstract class BH {
 	/**
 	 * Udpate-Window
 	 */
-	private UpdateWindow update;
+	private UpdateWindow updateWindow;
 
 	/**
 	 * Programm completely started
@@ -139,7 +139,7 @@ public abstract class BH {
 		GuiEvent guiEvent = new GuiEvent();
 		guiEvent.addListener(new IGuiEventListener() {
 			@Override
-			public void exitApp(boolean restart) {
+			public void exitApp(boolean restart, boolean update) {
 				if (!started) {
 					return;
 				}
@@ -147,7 +147,13 @@ public abstract class BH {
 					return;
 				}
 				removeShutdownHook();
-				exitBH(restart);
+				exitBH(restart, update);
+			}
+
+			@Override
+			public void exitAppForced(boolean restart, boolean update) {
+				removeShutdownHook();
+				exitBH(restart, update);
 			}
 
 			@Override
@@ -363,18 +369,18 @@ public abstract class BH {
 		if (settingsManager.isUpdates()) {
 			// If the user wants, we check if updates are available
 			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent);
-			update = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
-			if (update.checkForUpdates()) {
+			updateWindow = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
+			if (updateWindow.checkForUpdates()) {
 				// If Updates are available, show the Update-Window
 				EventQueue.invokeLater(() -> {
-					update.setVisible(true);
-					update.toFront();
+					updateWindow.setVisible(true);
+					updateWindow.toFront();
 				});
 			} else {
 				// If not, dispose it
 				EventQueue.invokeLater(() -> {
-					update.dispose();
-					update = null;
+					updateWindow.dispose();
+					updateWindow = null;
 				});
 			}
 		}
@@ -416,43 +422,51 @@ public abstract class BH {
 	 */
 	protected abstract void exitNow(boolean restart);
 
-	private synchronized void exitBH(boolean restart) {
-		exited = true;
+	private synchronized void exitBH(boolean restart, boolean update) {
+		try {
+			exited = true;
 
-		if (transmitterSocket != null) {
-			logger.debug("Stop TransmitterSocket");
-			transmitterSocket.setAcceptConnections(false);
-			transmitterSocket = null;
-		}
-		if (transmitterHTTP != null) {
-			logger.debug("Stop TransmitterHTTP");
-			transmitterHTTP.setAcceptConnections(false);
-			transmitterHTTP.stop();
-			transmitterHTTP = null;
-		}
+			if (!update) {
+				if (transmitterSocket != null) {
+					logger.info("Stop TransmitterSocket");
+					transmitterSocket.setAcceptConnections(false);
+					transmitterSocket.stop();
+					transmitterSocket = null;
+				}
+				if (transmitterHTTP != null) {
+					logger.info("Stop TransmitterHTTP");
+					transmitterHTTP.setAcceptConnections(false);
+					transmitterHTTP.stop();
+					transmitterHTTP = null;
+				}
 
-		if (downloadQueueManager != null) {
-			downloadQueueManager.stop();
-		}
-
-		if (update != null) {
-			update.setVisible(false);
-			update.dispose();
-		}
-		main.setVisible(false);
-
-		if (restart == false) {
-			// Save and close databases
-			if (queueManager != null) {
-				queueManager.closeDatabase();
+				if (downloadQueueManager != null) {
+					logger.info("Stop DownloadQueueManager");
+					downloadQueueManager.stop();
+				}
 			}
-			keywordManager.closeDatabase();
-		}
 
-		if (stt != null) {
-			logger.debug("Removing Trayicon");
-			// Remove icon from SytemTray
-			stt.remove();
+			if (updateWindow != null) {
+				updateWindow.setVisible(false);
+				updateWindow.dispose();
+			}
+			main.setVisible(false);
+
+			if (!update) {
+				// Save and close databases
+				if (queueManager != null) {
+					queueManager.closeDatabase();
+				}
+				keywordManager.closeDatabase();
+			}
+
+			if (stt != null) {
+				logger.debug("Removing Trayicon");
+				// Remove icon from SytemTray
+				stt.remove();
+			}
+		} catch (Throwable e) {
+			logger.error("Could not stop BH", e);
 		}
 
 		exitNow(restart);
@@ -574,7 +588,7 @@ public abstract class BH {
 			protected void shutdownHookExit() {
 				if (bh != null && !bh.exited) {
 					bh.stopDownloads();
-					bh.exitBH(false);
+					bh.exitBH(false, false);
 				}
 			}
 		};

@@ -41,25 +41,27 @@ public class GuiEvent {
 	 * Exit program
 	 * 
 	 * @param restart Restart
+	 * @param update True if exit is done, because of installed updates, false otherwise
 	 */
-	public void exitApp(boolean restart) {
+	public void exitApp(boolean restart, boolean update) {
 		for (IGuiEventListener listener : listeners) {
-			listener.exitApp(restart);
+			listener.exitApp(restart, update);
 		}
 	}
 
 	/**
-	 * Exit programm after update
+	 * Exit programm forced
 	 * 
 	 * @param message Message
 	 * @param title Title
 	 * @param owner Owner
 	 * @param restart Restart
+	 * @param update True if exit is done, because of installed updates, false otherwise
 	 */
-	public void exitAppForce(String message, String title, Component owner, boolean restart) {
+	public void exitAppForced(String message, String title, Component owner, boolean restart, boolean update) {
 		JOptionPane.showMessageDialog(owner, message, title, JOptionPane.WARNING_MESSAGE);
 		for (IGuiEventListener listener : listeners) {
-			listener.exitApp(restart);
+			listener.exitAppForced(restart, update);
 		}
 	}
 
