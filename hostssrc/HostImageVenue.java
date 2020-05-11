@@ -17,13 +17,13 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.2
+ * @version 4.3
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.2";
+	public static final String VERSION = "4.3";
 
 	/**
 	 * Name dieser Klasse
@@ -66,7 +66,7 @@ public class HostImageVenue extends Host implements IHoster {
 		regexImage.setReplace("$2");
 
 		urlAlternativePattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/ME[0-9A-Z]+$");
-		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?\\?full=1\"", "");
+		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?full=1\"", "");
 		regexAlternativeImage2 = new RuleRegExp("<img src=\"(.+?)\"", "$1");
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
 		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
@@ -75,7 +75,7 @@ public class HostImageVenue extends Host implements IHoster {
 		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
 		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
 
-		regexContinue.setSearch("Continue to your image");
+		regexContinue.setSearch("Continue to (?:your image|ImageVenue)");
 	}
 
 	@Override
@@ -119,22 +119,26 @@ public class HostImageVenue extends Host implements IHoster {
 				page = downloadContainerPage(url, url, null, client);
 			}
 
-			if (alternative) {
-				String parsedURL = pipeAlternativeImage.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
-				if (!parsedURL.isEmpty()) {
-					upo.setDirectLink(parsedURL);
-					String filename = pipeAlternativeFilename.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
-					if (!filename.isEmpty()) {
-						upo.setCorrectedFilename(filename);
-					}
-				}
-			} else {
+			if (!alternative) {
+				/*
+				 * Check first if old pattern works. Some of the old pattern links still return the old page design, but some already the new one.
+				 */
 				String parsedURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
 				if (!parsedURL.isEmpty()) {
 					String sf = getFirstPartURL(upo.getContainerURL());
 					String result = sf + parsedURL;
 					upo.setDirectLink(result);
 					upo.setCorrectedFilename(correctFilename(result));
+					return;
+				}
+			}
+
+			String parsedURL = pipeAlternativeImage.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
+			if (!parsedURL.isEmpty()) {
+				upo.setDirectLink(parsedURL);
+				String filename = pipeAlternativeFilename.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
+				if (!filename.isEmpty()) {
+					upo.setCorrectedFilename(filename);
 				}
 			}
 		} catch (HostFileNotExistException e) {
