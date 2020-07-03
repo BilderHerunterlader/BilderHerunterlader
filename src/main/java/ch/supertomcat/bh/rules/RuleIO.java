@@ -1,9 +1,12 @@
 package ch.supertomcat.bh.rules;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.List;
 
@@ -101,10 +104,13 @@ public class RuleIO {
 		}
 
 		unmarshaller = jaxbContext.createUnmarshaller();
-		unmarshaller.setSchema(schema);
+		/*
+		 * No Schema is set for unmarshaller so that backward compatibility is no problem.
+		 */
 
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setSchema(schema);
+		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}
 
 	/**
@@ -113,10 +119,33 @@ public class RuleIO {
 	 * @param file XML File
 	 * @return Rule Definition
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
 	public RuleDefinition readRule(String file) throws IOException, JAXBException {
-		// TODO Detect if rule is in old or new format
-		return readOldFormatRule(file);
+		if (checkNewFormat(file)) {
+			return readNewFormatRule(file);
+		} else {
+			return readOldFormatRule(file);
+		}
+	}
+
+	/**
+	 * Check if the XML file is in new format
+	 * 
+	 * @param file XML File
+	 * @return True if XML file is in new format, false otherwise
+	 * @throws IOException
+	 */
+	public boolean checkNewFormat(String file) throws IOException {
+		try (FileInputStream in = new FileInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				if (line.contains("<ruleDefinition")) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -125,6 +154,7 @@ public class RuleIO {
 	 * @param file XML File
 	 * @return Rule Definition
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
 	private RuleDefinition readNewFormatRule(String file) throws IOException, JAXBException {
 		try (FileInputStream in = new FileInputStream(file)) {
