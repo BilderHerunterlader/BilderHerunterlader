@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui.renderer;
 import java.awt.Component;
 import java.util.List;
 
+import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 
@@ -49,15 +50,15 @@ public class LocalizedEnumComboBoxRenderer<T extends Enum<T>> extends BasicCombo
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (enumClass.isInstance(value)) {
+		if (comp instanceof JLabel && enumClass.isInstance(value)) {
 			T enumValue = enumClass.cast(value);
 			if (localizedStrings != null) {
 				int ordinal = enumValue.ordinal();
 				if (ordinal >= 0 && ordinal < localizedStrings.size()) {
-					Localization.getString(localizedStrings.get(ordinal));
+					((JLabel)comp).setText(Localization.getString(localizedStrings.get(ordinal)));
 				}
 			} else {
-				Localization.getString(enumValue.name());
+				((JLabel)comp).setText(Localization.getString(enumValue.name()));
 			}
 		}
 		return comp;
