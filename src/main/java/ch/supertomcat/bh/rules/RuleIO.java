@@ -46,6 +46,7 @@ import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLMode;
 import ch.supertomcat.bh.rules.xml.URLPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 
 /**
  * Class for reading and writing rules from xml files
@@ -336,6 +337,7 @@ public class RuleIO {
 							urlRegexPipeline.setWaitBeforeExecute(0);
 							urlRegexPipeline.setUrlDecodeResult(false);
 							urlRegexPipeline.setSendCookies(true);
+							urlRegexPipeline.setMode(URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL);
 
 							parseURLPipelineValues(currentElement, urlRegexPipeline);
 
@@ -343,12 +345,16 @@ public class RuleIO {
 								// Set default Value
 								urlRegexPipeline.setUrlMode(URLMode.CONTAINER_URL);
 
+								urlRegexPipeline.setMode(URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL);
+
 								String strURLMode = currentElement.getAttributeValue("urlmode");
 								try {
 									urlRegexPipeline.setUrlMode(mapURLMode(Integer.parseInt(strURLMode)));
 								} catch (NumberFormatException ex) {
 									logger.error("Could not parse urlmode: {}", strURLMode, ex);
 								}
+							} else if (currentMode.equals(String.valueOf(OLD_RULE_MODE_CONTAINER_PAGE_SOURCECODE))) {
+								urlRegexPipeline.setMode(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 							}
 
 							ruleDefinition.getPipes().add(urlRegexPipeline);
