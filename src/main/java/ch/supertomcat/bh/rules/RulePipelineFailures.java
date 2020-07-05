@@ -37,7 +37,7 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
-		e.setAttribute("mode", "5");
+		e.setAttribute("mode", "4");
 		e.setAttribute("checkURL", String.valueOf(definition.isCheckURL()));
 		e.setAttribute("checkThumbURL", String.valueOf(definition.isCheckThumbURL()));
 		e.setAttribute("checkPageSourceCode", String.valueOf(definition.isCheckPageSourceCode()));
