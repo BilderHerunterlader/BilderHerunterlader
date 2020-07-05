@@ -248,7 +248,7 @@ public class RuleIO {
 			ruleDefinition.setCustomReferrer("");
 			ruleDefinition.setDownloadCustomReferrer("");
 			ruleDefinition.setSendCookies(true);
-			ruleDefinition.setDuplicateRemoveMode(ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.CONTAINER_URL_ONLY);
+			ruleDefinition.setDuplicateRemoveMode(ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.DEFAULT);
 			Restriction restriction = new Restriction();
 			restriction.setMaxConnections(0);
 			ruleDefinition.setRestriction(restriction);
@@ -533,6 +533,7 @@ public class RuleIO {
 	private ch.supertomcat.bh.rules.xml.DuplicateRemoveMode mapDuplicateRemoveMode(int value) {
 		switch (value) {
 			case 0:
+				return ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.DEFAULT;
 			case 1:
 				return ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.CONTAINER_URL_ONLY;
 			case 2:
@@ -546,7 +547,7 @@ public class RuleIO {
 			case 6:
 				return ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST;
 			default:
-				return ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.CONTAINER_URL_ONLY;
+				return ch.supertomcat.bh.rules.xml.DuplicateRemoveMode.DEFAULT;
 		}
 	}
 
