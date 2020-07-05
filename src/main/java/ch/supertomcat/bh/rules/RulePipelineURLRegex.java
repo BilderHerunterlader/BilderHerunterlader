@@ -46,16 +46,15 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	}
 
 	@Override
-	public Element getXmlElement() {
-		Element e = super.getXmlElement();
+	public void fillXmlElement(Element e) {
 		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
 			e.setAttribute("mode", "0");
 			e.setAttribute("urlmode", String.valueOf(definition.getUrlMode().ordinal()));
 		} else if (definition.getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
 			e.setAttribute("mode", "1");
 		}
+		super.fillXmlElement(e);
 		// TODO Maybe i need to remove sendcookie attribute, because it seems to be only used by javascript?
-		return e;
 	}
 
 	/**

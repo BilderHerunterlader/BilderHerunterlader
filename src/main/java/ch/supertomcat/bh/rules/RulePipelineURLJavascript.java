@@ -62,14 +62,12 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 	}
 
 	@Override
-	public Element getXmlElement() {
-		super.getXmlElement();
-		Element e = new Element("pipeline");
+	public void fillXmlElement(Element e) {
 		e.setAttribute("mode", "5");
+		super.fillXmlElement(e);
 		Element elJavascript = new Element("javascript");
 		elJavascript.setText(definition.getJavascriptCode());
 		e.addContent(elJavascript);
-		return e;
 	}
 
 	/**

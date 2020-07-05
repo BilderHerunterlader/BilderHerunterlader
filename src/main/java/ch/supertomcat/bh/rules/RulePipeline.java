@@ -69,13 +69,22 @@ public abstract class RulePipeline<T extends Pipeline> {
 	 */
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
+		fillXmlElement(e);
+		return e;
+	}
+
+	/**
+	 * Returns the Element for creating the XML-File
+	 * 
+	 * @param e Element
+	 */
+	public void fillXmlElement(Element e) {
 		for (RuleRegExp regexp : regexps) {
 			Element elRegex = new Element("regexp");
 			elRegex.setAttribute("search", regexp.getSearch());
 			elRegex.setAttribute("replace", regexp.getReplace());
 			e.addContent(elRegex);
 		}
-		return e;
 	}
 
 	/**

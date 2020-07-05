@@ -20,11 +20,10 @@ public abstract class RuleURLPipeline<T extends URLPipeline> extends RulePipelin
 	}
 
 	@Override
-	public Element getXmlElement() {
-		Element e = super.getXmlElement();
+	public void fillXmlElement(Element e) {
+		super.fillXmlElement(e);
 		e.setAttribute("waitBeforeExecute", String.valueOf(definition.getWaitBeforeExecute()));
 		e.setAttribute("urlDecodeResult", String.valueOf(definition.isUrlDecodeResult()));
 		e.setAttribute("sendCookies", String.valueOf(definition.isSendCookies()));
-		return e;
 	}
 }
