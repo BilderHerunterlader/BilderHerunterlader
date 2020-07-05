@@ -3,7 +3,8 @@ package ch.supertomcat.bh.gui.rules;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -35,8 +36,19 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Rul
 	public RulePipelineFilenamePanel(Rule rule, RulePipelineFilename pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
-		LocalizedEnumComboBoxRenderer<FilenameMode> filenameModeRenderer = new LocalizedEnumComboBoxRenderer<>(FilenameMode.class, Arrays
-				.asList("filenameContainerUrlFilenamePart", "filenameContainerUrl", "filenameThumbnailUrlFilenamePart", "filenameThumbnailUrl", "filenameContainerPageSourcecode", "filenameDownloadUrl", "filenameDownloadUrlFilenamePart", "filenameLastContainerUrlFilenamePart", "filenameLastContainerUrl", "filenameFirstContainerPageSourcecode", "filenameLastContainerPageSourcecode"));
+		Map<FilenameMode, String> filenameModeLocalizationStrings = new HashMap<>();
+		filenameModeLocalizationStrings.put(FilenameMode.CONTAINER_URL_FILENAME_PART, "filenameContainerUrlFilenamePart");
+		filenameModeLocalizationStrings.put(FilenameMode.CONTAINER_URL, "filenameContainerUrl");
+		filenameModeLocalizationStrings.put(FilenameMode.THUMBNAIL_URL_FILENAME_PART, "filenameThumbnailUrlFilenamePart");
+		filenameModeLocalizationStrings.put(FilenameMode.THUMBNAIL_URL, "filenameThumbnailUrl");
+		filenameModeLocalizationStrings.put(FilenameMode.CONTAINER_PAGE_SOURCECODE, "filenameContainerPageSourcecode");
+		filenameModeLocalizationStrings.put(FilenameMode.DOWNLOAD_URL, "filenameDownloadUrl");
+		filenameModeLocalizationStrings.put(FilenameMode.DOWNLOAD_URL_FILENAME_PART, "filenameDownloadUrlFilenamePart");
+		filenameModeLocalizationStrings.put(FilenameMode.LAST_CONTAINER_URL_FILENAME_PART, "filenameLastContainerUrlFilenamePart");
+		filenameModeLocalizationStrings.put(FilenameMode.LAST_CONTAINER_URL, "filenameLastContainerUrl");
+		filenameModeLocalizationStrings.put(FilenameMode.FIRST_CONTAINER_PAGE_SOURCECODE, "filenameFirstContainerPageSourcecode");
+		filenameModeLocalizationStrings.put(FilenameMode.LAST_CONTAINER_PAGE_SOURCECODE, "filenameLastContainerPageSourcecode");
+		LocalizedEnumComboBoxRenderer<FilenameMode> filenameModeRenderer = new LocalizedEnumComboBoxRenderer<>(FilenameMode.class, filenameModeLocalizationStrings);
 		cbFilenameMode.setRenderer(filenameModeRenderer);
 		for (FilenameMode duplicateRemoveMode : FilenameMode.values()) {
 			cbFilenameMode.addItem(duplicateRemoveMode);

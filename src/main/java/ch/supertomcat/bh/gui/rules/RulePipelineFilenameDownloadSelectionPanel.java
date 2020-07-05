@@ -2,7 +2,8 @@ package ch.supertomcat.bh.gui.rules;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JDialog;
 import javax.swing.JPanel;
@@ -34,8 +35,10 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 	public RulePipelineFilenameDownloadSelectionPanel(Rule rule, RulePipelineFilenameDownloadSelection pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
-		LocalizedEnumComboBoxRenderer<FilenameDownloadSelectionMode> filenameModeRenderer = new LocalizedEnumComboBoxRenderer<>(FilenameDownloadSelectionMode.class, Arrays
-				.asList("filenameContainerUrlFilenamePart", "filenameContainerUrl"));
+		Map<FilenameDownloadSelectionMode, String> filenameModeLocalizationStrings = new HashMap<>();
+		filenameModeLocalizationStrings.put(FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART, "filenameContainerUrlFilenamePart");
+		filenameModeLocalizationStrings.put(FilenameDownloadSelectionMode.CONTAINER_URL, "filenameContainerUrl");
+		LocalizedEnumComboBoxRenderer<FilenameDownloadSelectionMode> filenameModeRenderer = new LocalizedEnumComboBoxRenderer<>(FilenameDownloadSelectionMode.class, filenameModeLocalizationStrings);
 		cbFilenameMode.setRenderer(filenameModeRenderer);
 		for (FilenameDownloadSelectionMode duplicateRemoveMode : FilenameDownloadSelectionMode.values()) {
 			cbFilenameMode.addItem(duplicateRemoveMode);

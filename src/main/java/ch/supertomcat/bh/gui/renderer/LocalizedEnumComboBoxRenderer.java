@@ -1,7 +1,7 @@
 package ch.supertomcat.bh.gui.renderer;
 
 import java.awt.Component;
-import java.util.List;
+import java.util.Map;
 
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -23,9 +23,9 @@ public class LocalizedEnumComboBoxRenderer<T extends Enum<T>> extends BasicCombo
 	private Class<T> enumClass;
 
 	/**
-	 * Localization String (needs to be filled to match Enum ordinal)
+	 * Localization Strings
 	 */
-	private List<String> localizedStrings;
+	private Map<T, String> localizedStrings;
 
 	/**
 	 * Constructor
@@ -42,7 +42,7 @@ public class LocalizedEnumComboBoxRenderer<T extends Enum<T>> extends BasicCombo
 	 * @param enumClass Enum Class
 	 * @param localizedStrings Localization String (needs to be filled to match Enum ordinal)
 	 */
-	public LocalizedEnumComboBoxRenderer(Class<T> enumClass, List<String> localizedStrings) {
+	public LocalizedEnumComboBoxRenderer(Class<T> enumClass, Map<T, String> localizedStrings) {
 		this.enumClass = enumClass;
 		this.localizedStrings = localizedStrings;
 	}
@@ -53,9 +53,9 @@ public class LocalizedEnumComboBoxRenderer<T extends Enum<T>> extends BasicCombo
 		if (comp instanceof JLabel && enumClass.isInstance(value)) {
 			T enumValue = enumClass.cast(value);
 			if (localizedStrings != null) {
-				int ordinal = enumValue.ordinal();
-				if (ordinal >= 0 && ordinal < localizedStrings.size()) {
-					((JLabel)comp).setText(Localization.getString(localizedStrings.get(ordinal)));
+				String localizationString = localizedStrings.get(enumValue);
+				if (localizationString != null) {
+					((JLabel)comp).setText(Localization.getString(localizationString));
 				}
 			} else {
 				((JLabel)comp).setText(Localization.getString(enumValue.name()));

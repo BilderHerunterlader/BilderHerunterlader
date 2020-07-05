@@ -4,7 +4,8 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -112,16 +113,28 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 
 		chkSendCookies.setSelected(this.rule.getDefinition().isSendCookies());
 
-		LocalizedEnumComboBoxRenderer<DuplicateRemoveMode> duplicateRemoveModeRenderer = new LocalizedEnumComboBoxRenderer<>(DuplicateRemoveMode.class, Arrays
-				.asList("DuplicatesBHDefault", "DuplicatesContainerURLOnly", "DuplicatesContainerURLAndThumbnailURL", "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysFirst", "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysLast", "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysFirst", "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysLast"));
+		Map<DuplicateRemoveMode, String> duplicateRemoveModeLocalizationStrings = new HashMap<>();
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.DEFAULT, "DuplicatesBHDefault");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_ONLY, "DuplicatesContainerURLOnly");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_AND_THUMBNAIL_URL, "DuplicatesContainerURLAndThumbnailURL");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST, "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysFirst");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST, "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysLast");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST, "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysFirst");
+		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST, "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysLast");
+		LocalizedEnumComboBoxRenderer<DuplicateRemoveMode> duplicateRemoveModeRenderer = new LocalizedEnumComboBoxRenderer<>(DuplicateRemoveMode.class, duplicateRemoveModeLocalizationStrings);
 		cbDuplicateRemoveMode.setRenderer(duplicateRemoveModeRenderer);
 		for (DuplicateRemoveMode duplicateRemoveMode : DuplicateRemoveMode.values()) {
 			cbDuplicateRemoveMode.addItem(duplicateRemoveMode);
 		}
 		cbDuplicateRemoveMode.setSelectedItem(rule.getDefinition().getDuplicateRemoveMode());
 
-		LocalizedEnumComboBoxRenderer<ReferrerMode> referrerModeRenderer = new LocalizedEnumComboBoxRenderer<>(ReferrerMode.class, Arrays
-				.asList("ReferrerNoReferrer", "ReferrerLastContainerURL", "ReferrerFirstContainerURL", "ReferrerOriginPage", "ReferrerCustom"));
+		Map<ReferrerMode, String> referrerModeLocalizationStrings = new HashMap<>();
+		referrerModeLocalizationStrings.put(ReferrerMode.NO_REFERRER, "ReferrerNoReferrer");
+		referrerModeLocalizationStrings.put(ReferrerMode.LAST_CONTAINER_URL, "ReferrerLastContainerURL");
+		referrerModeLocalizationStrings.put(ReferrerMode.FIRST_CONTAINER_URL, "ReferrerFirstContainerURL");
+		referrerModeLocalizationStrings.put(ReferrerMode.ORIGIN_PAGE, "ReferrerOriginPage");
+		referrerModeLocalizationStrings.put(ReferrerMode.CUSTOM, "ReferrerCustom");
+		LocalizedEnumComboBoxRenderer<ReferrerMode> referrerModeRenderer = new LocalizedEnumComboBoxRenderer<>(ReferrerMode.class, referrerModeLocalizationStrings);
 		cbReferrerMode.setRenderer(referrerModeRenderer);
 		for (ReferrerMode referrerMode : ReferrerMode.values()) {
 			cbReferrerMode.addItem(referrerMode);
