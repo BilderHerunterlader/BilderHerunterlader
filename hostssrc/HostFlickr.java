@@ -11,10 +11,9 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 
 /**
  * Host class for <code>http://www.flickr.com</code> <br>
@@ -31,11 +30,11 @@ import ch.supertomcat.bh.rules.RuleRegExp;
  * If that fails (e.g. original image is not available for download) it
  * will load the embedded image from the container site.
  *
- * @version 3.2
+ * @version 3.3
  */
 public class HostFlickr extends Host implements IHoster {
 	/** the version of this class **/
-	public static final String VERSION = "3.2";
+	public static final String VERSION = "3.3";
 
 	/** the name of this class **/
 	public static final String NAME = "HostFlickr";
@@ -202,7 +201,7 @@ public class HostFlickr extends Host implements IHoster {
 	/**
 	 * pipeOriginalDateTime
 	 */
-	private final RulePipeline pipeOriginalDateTime;
+	private final RulePipelineURLRegex pipeOriginalDateTime;
 
 	/**
 	 * regexOriginalDateTime1
@@ -252,7 +251,7 @@ public class HostFlickr extends Host implements IHoster {
 		this.regexTitle.setSearch("<meta name=\"title\" content=\"(.+?)\"[^>]*>");
 		this.regexTitle.setReplace("$1");
 
-		pipeOriginalDateTime = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+		pipeOriginalDateTime = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 
 		// TODO not working anymore
 		this.regexOriginalDateTime1 = new RuleRegExp();

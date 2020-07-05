@@ -4,6 +4,7 @@ import java.util.regex.Matcher;
 import java.util.regex.PatternSyntaxException;
 
 import ch.supertomcat.bh.pic.Pic;
+import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 
 /**
@@ -11,9 +12,28 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplace;
  */
 public class RuleRegExp extends RegexReplace {
 	/**
+	 * Definition
+	 */
+	private final RuleRegex definition;
+
+	/**
 	 * Constructor
 	 */
 	public RuleRegExp() {
+		this.definition = new RuleRegex();
+		this.definition.setPattern("");
+		this.definition.setReplacement("");
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param definition Definition
+	 * @throws PatternSyntaxException
+	 */
+	public RuleRegExp(RuleRegex definition) throws PatternSyntaxException {
+		super(definition.getPattern(), definition.getReplacement());
+		this.definition = definition;
 	}
 
 	/**
@@ -25,6 +45,30 @@ public class RuleRegExp extends RegexReplace {
 	 */
 	public RuleRegExp(String search, String replace) throws PatternSyntaxException {
 		super(search, replace);
+		this.definition = new RuleRegex();
+		this.definition.setPattern(search);
+		this.definition.setReplacement(replace);
+	}
+
+	/**
+	 * Returns the definition
+	 * 
+	 * @return definition
+	 */
+	public RuleRegex getDefinition() {
+		return definition;
+	}
+
+	@Override
+	public void setSearch(String search) throws PatternSyntaxException {
+		super.setSearch(search);
+		definition.setPattern(search);
+	}
+
+	@Override
+	public void setReplace(String replace) {
+		super.setReplace(replace);
+		definition.setReplacement(replace);
 	}
 
 	/**

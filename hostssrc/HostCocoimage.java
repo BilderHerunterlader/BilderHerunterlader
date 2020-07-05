@@ -5,30 +5,29 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 
 /**
  * Host class for www.cocoimage.com
  * 
- * @version 1.6
+ * @version 1.7
  */
 public class HostCocoimage extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.6";
+	public static final String VERSION = "1.7";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostCocoimage";
 
-	private RulePipeline pipe1 = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	private RulePipelineURLRegex pipe1 = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 
-	private RulePipeline pipe2 = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	private RulePipelineURLRegex pipe2 = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 
 	private RuleRegExp regex1 = new RuleRegExp();
 

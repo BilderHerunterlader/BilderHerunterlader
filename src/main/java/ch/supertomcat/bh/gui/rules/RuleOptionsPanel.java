@@ -4,6 +4,7 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Arrays;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
@@ -11,11 +12,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import ch.supertomcat.bh.rules.DuplicateRemoveMode;
-import ch.supertomcat.bh.rules.ReferrerMode;
+import ch.supertomcat.bh.gui.renderer.LocalizedEnumComboBoxRenderer;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.bh.rules.xml.DuplicateRemoveMode;
+import ch.supertomcat.bh.rules.xml.ReferrerMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Rule-Referrer-Panel
@@ -39,7 +41,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cbDuplicateRemoveMode = new JComboBox<>();
+	private JComboBox<DuplicateRemoveMode> cbDuplicateRemoveMode = new JComboBox<>();
 
 	/**
 	 * Label
@@ -49,7 +51,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cbReferrerMode = new JComboBox<>();
+	private JComboBox<ReferrerMode> cbReferrerMode = new JComboBox<>();
 
 	/**
 	 * Label
@@ -69,7 +71,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cbReferrerModeDownload = new JComboBox<>();
+	private JComboBox<ReferrerMode> cbReferrerModeDownload = new JComboBox<>();
 
 	/**
 	 * Label
@@ -101,43 +103,43 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	 * 
 	 * @param rule Rule
 	 */
+	@SuppressWarnings("unchecked")
 	public RuleOptionsPanel(Rule rule) {
 		this.rule = rule;
 
-		txtCustomReferrer.setText(rule.getCustomReferrer());
-		txtCustomReferrerDownload.setText(rule.getCustomReferrerDownload());
+		txtCustomReferrer.setText(rule.getDefinition().getCustomReferrer());
+		txtCustomReferrerDownload.setText(rule.getDefinition().getDownloadCustomReferrer());
 
-		chkSendCookies.setSelected(this.rule.isSendCookies());
+		chkSendCookies.setSelected(this.rule.getDefinition().isSendCookies());
 
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesBHDefault"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnly"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLAndThumbnailURL"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysFirst"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysLast"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysFirst"));
-		cbDuplicateRemoveMode.addItem(Localization.getString("DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysLast"));
-		cbDuplicateRemoveMode.setSelectedIndex(rule.getDuplicateRemoveMode().getValue());
+		LocalizedEnumComboBoxRenderer<DuplicateRemoveMode> duplicateRemoveModeRenderer = new LocalizedEnumComboBoxRenderer<>(DuplicateRemoveMode.class, Arrays
+				.asList("DuplicatesBHDefault", "DuplicatesContainerURLOnly", "DuplicatesContainerURLAndThumbnailURL", "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysFirst", "DuplicatesContainerURLOnlyRemoveWithThumbThumbsAlwaysLast", "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysFirst", "DuplicatesContainerURLOnlyRemoveWithoutThumbThumbsAlwaysLast"));
+		cbDuplicateRemoveMode.setRenderer(duplicateRemoveModeRenderer);
+		for (DuplicateRemoveMode duplicateRemoveMode : DuplicateRemoveMode.values()) {
+			cbDuplicateRemoveMode.addItem(duplicateRemoveMode);
+		}
+		cbDuplicateRemoveMode.setSelectedItem(rule.getDefinition().getDuplicateRemoveMode());
 
-		cbReferrerMode.addItem(Localization.getString("ReferrerNoReferrer"));
-		cbReferrerMode.addItem(Localization.getString("ReferrerLastContainerURL"));
-		cbReferrerMode.addItem(Localization.getString("ReferrerFirstContainerURL"));
-		cbReferrerMode.addItem(Localization.getString("ReferrerOriginPage"));
-		cbReferrerMode.addItem(Localization.getString("ReferrerCustom"));
-		cbReferrerMode.setSelectedIndex(rule.getReferrerMode().getValue());
-		if (cbReferrerMode.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
+		LocalizedEnumComboBoxRenderer<ReferrerMode> referrerModeRenderer = new LocalizedEnumComboBoxRenderer<>(ReferrerMode.class, Arrays
+				.asList("ReferrerNoReferrer", "ReferrerLastContainerURL", "ReferrerFirstContainerURL", "ReferrerOriginPage", "ReferrerCustom"));
+		cbReferrerMode.setRenderer(referrerModeRenderer);
+		for (ReferrerMode referrerMode : ReferrerMode.values()) {
+			cbReferrerMode.addItem(referrerMode);
+		}
+		cbReferrerMode.setSelectedItem(rule.getDefinition().getReferrerMode());
+		if ((ReferrerMode)cbReferrerMode.getSelectedItem() == ReferrerMode.CUSTOM) {
 			txtCustomReferrer.setEnabled(true);
 		} else {
 			txtCustomReferrer.setEnabled(false);
 		}
 		cbReferrerMode.addItemListener(this);
 
-		cbReferrerModeDownload.addItem(Localization.getString("ReferrerNoReferrer"));
-		cbReferrerModeDownload.addItem(Localization.getString("ReferrerLastContainerURL"));
-		cbReferrerModeDownload.addItem(Localization.getString("ReferrerFirstContainerURL"));
-		cbReferrerModeDownload.addItem(Localization.getString("ReferrerOriginPage"));
-		cbReferrerModeDownload.addItem(Localization.getString("ReferrerCustom"));
-		cbReferrerModeDownload.setSelectedIndex(rule.getReferrerModeDownload().getValue());
-		if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
+		cbReferrerModeDownload.setRenderer(referrerModeRenderer);
+		for (ReferrerMode referrerMode : ReferrerMode.values()) {
+			cbReferrerModeDownload.addItem(referrerMode);
+		}
+		cbReferrerModeDownload.setSelectedItem(rule.getDefinition().getReferrerMode());
+		if ((ReferrerMode)cbReferrerModeDownload.getSelectedItem() == ReferrerMode.CUSTOM) {
 			txtCustomReferrerDownload.setEnabled(true);
 		} else {
 			txtCustomReferrerDownload.setEnabled(false);
@@ -182,29 +184,24 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 	 * Apply
 	 */
 	public void applyRuleOptions() {
-		rule.setSendCookies(chkSendCookies.isSelected());
-		rule.setReferrerMode(ReferrerMode.getByValue(cbReferrerMode.getSelectedIndex()));
-		rule.setReferrerModeDownload(ReferrerMode.getByValue(cbReferrerModeDownload.getSelectedIndex()));
-		rule.setCustomReferrer(txtCustomReferrer.getText());
-		rule.setCustomReferrerDownload(txtCustomReferrerDownload.getText());
-		rule.setDuplicateRemoveMode(DuplicateRemoveMode.getByValue(cbDuplicateRemoveMode.getSelectedIndex()));
+		rule.getDefinition().setSendCookies(chkSendCookies.isSelected());
+		rule.getDefinition().setReferrerMode((ReferrerMode)cbReferrerMode.getSelectedItem());
+		rule.getDefinition().setDownloadReferrerMode((ReferrerMode)cbReferrerModeDownload.getSelectedItem());
+		rule.getDefinition().setCustomReferrer(txtCustomReferrer.getText());
+		rule.getDefinition().setDownloadCustomReferrer(txtCustomReferrerDownload.getText());
+		rule.getDefinition().setDuplicateRemoveMode((DuplicateRemoveMode)cbDuplicateRemoveMode.getSelectedItem());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
-	 */
 	@Override
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() == cbReferrerMode) {
-			if (cbReferrerMode.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
+			if ((ReferrerMode)cbReferrerMode.getSelectedItem() == ReferrerMode.CUSTOM) {
 				txtCustomReferrer.setEnabled(true);
 			} else {
 				txtCustomReferrer.setEnabled(false);
 			}
 		} else if (e.getSource() == cbReferrerModeDownload) {
-			if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
+			if ((ReferrerMode)cbReferrerModeDownload.getSelectedItem() == ReferrerMode.CUSTOM) {
 				txtCustomReferrerDownload.setEnabled(true);
 			} else {
 				txtCustomReferrerDownload.setEnabled(false);
@@ -227,7 +224,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 		txtCustomReferrerDownload.setEnabled(!enabled);
 
 		if (!enabled) {
-			if (cbReferrerModeDownload.getSelectedIndex() == ReferrerMode.REFERRER_CUSTOM.getValue()) {
+			if ((ReferrerMode)cbReferrerModeDownload.getSelectedItem() == ReferrerMode.CUSTOM) {
 				txtCustomReferrerDownload.setEnabled(true);
 			} else {
 				txtCustomReferrerDownload.setEnabled(false);

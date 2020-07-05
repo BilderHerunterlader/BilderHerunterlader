@@ -19,8 +19,9 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RuleURLMode;
+import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.rules.xml.URLMode;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
@@ -226,12 +227,17 @@ public class RuleTest extends JDialog implements ActionListener {
 			this.dispose();
 		} else if (e.getSource() == btnTest) {
 			txtMessage.setText("");
-			if (rule.getPipelines().size() > 0 && rule.getPipelines().get(0).getMode() == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL
-					&& rule.getPipelines().get(0).getURLMode() == RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL && txtThumbnail.getText().length() == 0) {
-				txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
-				return;
+			if (!rule.getPipelines().isEmpty()) {
+				if (rule.getPipelines().get(0) instanceof RulePipelineURLRegex) {
+					RulePipelineURLRegex urlRegexPipeline = (RulePipelineURLRegex)rule.getPipelines().get(0);
+					if (urlRegexPipeline.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL && urlRegexPipeline.getDefinition().getUrlMode() == URLMode.THUMBNAIL_URL
+							&& txtThumbnail.getText().isEmpty()) {
+						txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
+						return;
+					}
+				}
 			}
-			if (txtContainer.getText().matches(rule.getPattern()) == false) {
+			if (txtContainer.getText().matches(rule.getDefinition().getUrlPattern()) == false) {
 				txtMessage.setText(Localization.getString("ContainerURLNotMatch"));
 				return;
 			}

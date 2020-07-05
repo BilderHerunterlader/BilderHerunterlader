@@ -13,24 +13,18 @@ import org.mozilla.javascript.Context;
 import org.mozilla.javascript.FunctionObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.ScriptableObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
+import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * RulePipeline
  */
-public class RulePipelineURLJavascript extends RulePipeline {
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
-
+public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipeline> {
 	/**
 	 * Make Package for logging accessable in javascript
 	 */
@@ -47,79 +41,47 @@ public class RulePipelineURLJavascript extends RulePipeline {
 		}
 	}
 
-	private String javascriptCode = "";
-
-	/**
-	 * Amount of milliseconds to wait before getURL is executed
-	 */
-	private int waitBeforeExecute = 0;
-
-	/**
-	 * Flag if the result should be decoded (application/x-www-form-urlencoded)
-	 */
-	private boolean urlDecodeResult = false;
-
-	/**
-	 * Flag if cookies should be sent
-	 */
-	private boolean sendCookies = true;
-
 	/**
 	 * Constructor
-	 * 
-	 * @param mode Rule-Mode
 	 */
-	public RulePipelineURLJavascript(RuleMode mode) {
-		super(mode);
+	public RulePipelineURLJavascript() {
+		super(new URLJavascriptPipeline());
+		definition.setWaitBeforeExecute(0);
+		definition.setUrlDecodeResult(false);
+		definition.setSendCookies(true);
+		definition.setJavascriptCode("");
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param e Element
+	 * @param definition Definition
 	 */
-	public RulePipelineURLJavascript(Element e) {
-		super(e);
-
-		String javascriptCode = e.getChildText("javascript");
-		if (javascriptCode != null) {
-			this.javascriptCode = javascriptCode;
-		}
-
-		String strWaitBeforeExecute = e.getAttributeValue("waitBeforeExecute");
-		if (strWaitBeforeExecute != null) {
-			try {
-				this.waitBeforeExecute = Integer.parseInt(e.getAttributeValue("waitBeforeExecute"));
-			} catch (NumberFormatException ex) {
-				logger.error("Could not parse waitBeforeExecute: {}", strWaitBeforeExecute, ex);
-			}
-		}
-
-		String strUrlDecodeResult = e.getAttributeValue("urlDecodeResult");
-		if (strUrlDecodeResult != null) {
-			urlDecodeResult = Boolean.parseBoolean(strUrlDecodeResult);
-		}
-
-		String strSendCookies = e.getAttributeValue("sendCookies");
-		if (strSendCookies != null) {
-			sendCookies = Boolean.parseBoolean(strSendCookies);
-		}
+	public RulePipelineURLJavascript(URLJavascriptPipeline definition) {
+		super(definition);
 	}
 
 	@Override
 	public Element getXmlElement() {
+		super.getXmlElement();
 		Element e = new Element("pipeline");
-		e.setAttribute("mode", String.valueOf(this.mode.getValue()));
-		e.setAttribute("waitBeforeExecute", String.valueOf(this.waitBeforeExecute));
-		e.setAttribute("urlDecodeResult", String.valueOf(urlDecodeResult));
-		e.setAttribute("sendCookies", String.valueOf(sendCookies));
+		e.setAttribute("mode", "5");
 		Element elJavascript = new Element("javascript");
-		elJavascript.setText(javascriptCode);
+		elJavascript.setText(definition.getJavascriptCode());
 		e.addContent(elJavascript);
 		return e;
 	}
 
-	@Override
+	/**
+	 * Get URL by Javascript
+	 * 
+	 * @param url Container-URL
+	 * @param thumbURL Thumbnail-URL
+	 * @param htmlcode Sourcecode
+	 * @param upo URLParseObject
+	 * @return URL
+	 * @throws HostException
+	 */
 	public String getURLByJavascript(String url, String thumbURL, String htmlcode, URLParseObject upo) throws HostException {
 		Context context = Context.enter();
 
@@ -163,7 +125,7 @@ public class RulePipelineURLJavascript extends RulePipeline {
 			ScriptableObject.putProperty(scope, "correctedFilename", Context.javaToJS(upo.getCorrectedFilename(), scope));
 
 			// Execute javascript code
-			context.evaluateString(scope, javascriptContextProvidedFunctions + javascriptCode, this.toString(), 1, null);
+			context.evaluateString(scope, javascriptContextProvidedFunctions + definition.getJavascriptCode(), this.toString(), 1, null);
 
 			// Read out output properties from javascript
 			String retval = (String)Context.jsToJava(ScriptableObject.getProperty(scope, "directLink"), String.class);
@@ -186,46 +148,6 @@ public class RulePipelineURLJavascript extends RulePipeline {
 		} finally {
 			Context.exit();
 		}
-	}
-
-	@Override
-	public int getWaitBeforeExecute() {
-		return waitBeforeExecute;
-	}
-
-	@Override
-	public void setWaitBeforeExecute(int waitBeforeExecute) {
-		this.waitBeforeExecute = waitBeforeExecute;
-	}
-
-	@Override
-	public boolean isUrlDecodeResult() {
-		return urlDecodeResult;
-	}
-
-	@Override
-	public void setUrlDecodeResult(boolean urlDecodeResult) {
-		this.urlDecodeResult = urlDecodeResult;
-	}
-
-	@Override
-	public boolean isSendCookies() {
-		return sendCookies;
-	}
-
-	@Override
-	public void setSendCookies(boolean sendCookies) {
-		this.sendCookies = sendCookies;
-	}
-
-	@Override
-	public String getJavascript() {
-		return javascriptCode;
-	}
-
-	@Override
-	public void setJavascript(String javascriptCode) {
-		this.javascriptCode = javascriptCode;
 	}
 
 	private static class InfoMap extends ScriptableObject {

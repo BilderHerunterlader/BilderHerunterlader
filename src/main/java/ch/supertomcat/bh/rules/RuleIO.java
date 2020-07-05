@@ -3,10 +3,12 @@ package ch.supertomcat.bh.rules;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.util.Iterator;
 import java.util.List;
 
@@ -23,10 +25,13 @@ import javax.xml.validation.SchemaFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
+import org.jdom2.output.Format;
+import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
+import ch.supertomcat.bh.rules.xml.FailureType;
 import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionPipeline;
@@ -82,6 +87,11 @@ public class RuleIO {
 	private final Unmarshaller unmarshaller;
 
 	/**
+	 * Validated Unmarshaller
+	 */
+	private final Unmarshaller unmarshallerValidated;
+
+	/**
 	 * Marshaller
 	 */
 	private final Marshaller marshaller;
@@ -103,10 +113,15 @@ public class RuleIO {
 			schema = sf.newSchema(schemaSource);
 		}
 
-		unmarshaller = jaxbContext.createUnmarshaller();
 		/*
 		 * No Schema is set for unmarshaller so that backward compatibility is no problem.
 		 */
+		unmarshaller = jaxbContext.createUnmarshaller();
+		/*
+		 * Unmarshaller with validation is only used to read default rule
+		 */
+		unmarshallerValidated = jaxbContext.createUnmarshaller();
+		unmarshallerValidated.setSchema(schema);
 
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setSchema(schema);
@@ -123,9 +138,22 @@ public class RuleIO {
 	 */
 	public RuleDefinition readRule(String file) throws IOException, JAXBException {
 		if (checkNewFormat(file)) {
-			return readNewFormatRule(file);
+			return readRuleNewFormat(file);
 		} else {
-			return readOldFormatRule(file);
+			return readRuleOldFormat(file);
+		}
+	}
+
+	/**
+	 * Read Default Rule
+	 * 
+	 * @return Default Rule
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	public RuleDefinition readDefaultRule() throws IOException, JAXBException {
+		try (InputStream in = getClass().getResourceAsStream("NewRule.xml")) {
+			return readRuleNewFormat(in, true);
 		}
 	}
 
@@ -156,9 +184,26 @@ public class RuleIO {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	private RuleDefinition readNewFormatRule(String file) throws IOException, JAXBException {
+	private RuleDefinition readRuleNewFormat(String file) throws IOException, JAXBException {
 		try (FileInputStream in = new FileInputStream(file)) {
-			return (RuleDefinition)unmarshaller.unmarshal(in);
+			return readRuleNewFormat(in, false);
+		}
+	}
+
+	/**
+	 * Read rule in new format from XML file
+	 * 
+	 * @param in Input Stream
+	 * @param validate True if validate xml, false otherwise
+	 * @return Rule Definition
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	private RuleDefinition readRuleNewFormat(InputStream in, boolean validate) throws IOException, JAXBException {
+		if (validate) {
+			return unmarshallerValidated.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
+		} else {
+			return unmarshaller.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
 		}
 	}
 
@@ -169,7 +214,7 @@ public class RuleIO {
 	 * @return True if successful
 	 * @throws IOException
 	 */
-	private RuleDefinition readOldFormatRule(String strFile) throws IOException {
+	private RuleDefinition readRuleOldFormat(String strFile) throws IOException {
 		File file = new File(strFile);
 		try {
 			// Create new XML-Parser
@@ -336,6 +381,13 @@ public class RuleIO {
 				while (it.hasNext()) {
 					Element eFailurePipeline = it.next();
 					FailuresPipeline failuresPipeline = new FailuresPipeline();
+
+					// Set default values
+					failuresPipeline.setFailureType(FailureType.FAILED);
+					failuresPipeline.setCheckURL(false);
+					failuresPipeline.setCheckThumbURL(false);
+					failuresPipeline.setCheckPageSourceCode(false);
+
 					failuresPipeline.setFailureType(mapFailureType(Integer.parseInt(eFailurePipeline.getAttributeValue("failureType"))));
 					failuresPipeline.setCheckURL(Boolean.parseBoolean(eFailurePipeline.getAttributeValue("checkURL")));
 					failuresPipeline.setCheckThumbURL(Boolean.parseBoolean(eFailurePipeline.getAttributeValue("checkThumbURL")));
@@ -385,6 +437,79 @@ public class RuleIO {
 			return ruleDefinition;
 		} catch (Exception e) {
 			throw new IOException("Could not load rule: " + file, e);
+		}
+	}
+
+	/**
+	 * Saves the rule to the XML-File
+	 * 
+	 * @param rule Rule
+	 * 
+	 * @return True if successful
+	 */
+	public boolean writeRule(Rule rule) {
+		/*
+		 * TODO Write rule in new format instead of old
+		 */
+		try {
+			return writeRuleOldFormat(rule);
+		} catch (IOException e) {
+			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
+			return false;
+		}
+	}
+
+	/**
+	 * Saves the rule to the XML-File
+	 * 
+	 * @param file XML File
+	 * @param ruleDefinition RuleDefinition
+	 * 
+	 * @throws IOException
+	 * @throws JAXBException
+	 */
+	public void writeRule(String file, RuleDefinition ruleDefinition) throws IOException, JAXBException {
+		File folder = new File(file).getParentFile();
+		if (folder != null) {
+			Files.createDirectories(folder.toPath());
+		}
+
+		try (FileOutputStream out = new FileOutputStream(file)) {
+			marshaller.marshal(ruleDefinition, out);
+		}
+	}
+
+	/**
+	 * Saves the rule to the XML-File
+	 * 
+	 * @param rule Rule
+	 * 
+	 * @return True if successful
+	 * @throws IOException
+	 */
+	private boolean writeRuleOldFormat(Rule rule) throws IOException {
+		File folder = rule.getFile().getParentFile();
+		if (folder != null) {
+			Files.createDirectories(folder.toPath());
+		}
+
+		// Get the the Element
+		Element root = rule.getXmlElement();
+		// Create new document
+		Document doc = new Document(root);
+		try (FileOutputStream fos = new FileOutputStream(rule.getFile())) {
+			// Create new outputter
+			XMLOutputter serializer = new XMLOutputter();
+			// This will create nice formated xml-file
+			serializer.setFormat(Format.getPrettyFormat());
+			// Write the data to the file
+			serializer.output(doc, fos);
+			// Close the file
+			fos.flush();
+			return true;
+		} catch (IOException e) {
+			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
+			return false;
 		}
 	}
 

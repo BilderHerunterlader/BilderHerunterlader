@@ -1,30 +1,31 @@
 package ch.supertomcat.bh.rules;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.pic.Pic;
-import ch.supertomcat.bh.pic.PicState;
+import ch.supertomcat.bh.rules.xml.Pipeline;
+import ch.supertomcat.bh.rules.xml.RuleRegex;
 
 /**
  * RulePipeline
+ * 
+ * @param <T> Pipeline Type
  */
-public abstract class RulePipeline {
+public abstract class RulePipeline<T extends Pipeline> {
 	/**
 	 * Logger
 	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
+	protected Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Mode
+	 * Definition
 	 */
-	protected RuleMode mode = RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
+	protected final T definition;
 
 	/**
 	 * RuleRegExps
@@ -34,33 +35,31 @@ public abstract class RulePipeline {
 	/**
 	 * Constructor
 	 * 
-	 * @param mode Rule-Mode
+	 * @param definition Definition
 	 */
-	public RulePipeline(RuleMode mode) {
-		this.mode = mode;
+	public RulePipeline(T definition) {
+		this.definition = definition;
+		updateFromDefinition();
 	}
 
 	/**
-	 * Constructor
-	 * 
-	 * @param e Element
+	 * Update internal variables from definition
 	 */
-	public RulePipeline(Element e) {
-		try {
-			this.mode = RuleMode.getByValue(Integer.parseInt(e.getAttributeValue("mode")));
-		} catch (Exception ex) {
+	public void updateFromDefinition() {
+		regexps.clear();
+		for (RuleRegex regexDefinition : definition.getRegexp()) {
+			RuleRegExp ruleRegExp = new RuleRegExp(regexDefinition);
+			regexps.add(ruleRegExp);
 		}
+	}
 
-		for (Element child : e.getChildren("regexp")) {
-			try {
-				String search = child.getAttributeValue("search");
-				String replace = child.getAttributeValue("replace");
-				RuleRegExp regexp = new RuleRegExp(search, replace);
-				regexps.add(regexp);
-			} catch (Exception ex) {
-				logger.error("Could not parse regexp: {}", child, ex);
-			}
-		}
+	/**
+	 * Returns the definition
+	 * 
+	 * @return definition
+	 */
+	public T getDefinition() {
+		return definition;
 	}
 
 	/**
@@ -70,7 +69,6 @@ public abstract class RulePipeline {
 	 */
 	public Element getXmlElement() {
 		Element e = new Element("pipeline");
-		e.setAttribute("mode", String.valueOf(this.mode.getValue()));
 		for (RuleRegExp regexp : regexps) {
 			Element elRegex = new Element("regexp");
 			elRegex.setAttribute("search", regexp.getSearch());
@@ -81,34 +79,12 @@ public abstract class RulePipeline {
 	}
 
 	/**
-	 * Returns the mode
-	 * 
-	 * @return Mode
-	 */
-	public RuleMode getMode() {
-		return mode;
-	}
-
-	/**
-	 * Sets the Mode
-	 * 
-	 * @param mode Mode
-	 */
-	public void setMode(RuleMode mode) {
-		this.mode = mode;
-	}
-
-	/*
-	 * All Pipelines except Javascript
-	 */
-
-	/**
-	 * Returns all RuleRegExps
+	 * Returns all RuleRegExps. The returned list can't be modified.
 	 * 
 	 * @return RuleRegExps
 	 */
 	public List<RuleRegExp> getRegexps() {
-		return regexps;
+		return Collections.unmodifiableList(regexps);
 	}
 
 	/**
@@ -131,6 +107,7 @@ public abstract class RulePipeline {
 			return;
 		}
 		regexps.add(rre);
+		definition.getRegexp().add(rre.getDefinition());
 	}
 
 	/**
@@ -151,9 +128,13 @@ public abstract class RulePipeline {
 		}
 
 		RuleRegExp regex1 = regexps.get(index1);
+		RuleRegex definition1 = definition.getRegexp().get(index1);
 		RuleRegExp regex2 = regexps.get(index2);
+		RuleRegex definition2 = definition.getRegexp().get(index2);
 		regexps.set(index2, regex1);
+		definition.getRegexp().set(index2, definition1);
 		regexps.set(index1, regex2);
+		definition.getRegexp().set(index1, definition2);
 	}
 
 	/**
@@ -166,278 +147,6 @@ public abstract class RulePipeline {
 			return;
 		}
 		regexps.remove(index);
-	}
-
-	/*
-	 * ONLY Javascript
-	 */
-	/**
-	 * @return Javascript Code
-	 */
-	public String getJavascript() {
-		return "";
-	}
-
-	/**
-	 * Sets Javascript Code
-	 * 
-	 * @param javascriptCode Javascript Code
-	 */
-	public void setJavascript(String javascriptCode) {
-	}
-
-	/*
-	 * ONLY URL Regex Pipelines
-	 */
-
-	/**
-	 * Returns the UrlMode
-	 * 
-	 * @return UrlMode
-	 */
-	public RuleURLMode getURLMode() {
-		return null;
-	}
-
-	/**
-	 * Sets the UrlMode
-	 * 
-	 * @param urlMode UrlMode
-	 */
-	public void setURLMode(RuleURLMode urlMode) {
-	}
-
-	/**
-	 * Returns parsed URL
-	 * 
-	 * @param url Container-URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
-	 * @param pic Pic
-	 * @return URL
-	 * @throws HostException
-	 */
-	public String getURL(String url, String thumbURL, String htmlcode, Pic pic) throws HostException {
-		return "";
-	}
-
-	/*
-	 * ONLY URL Javascript Pipelines
-	 */
-
-	/**
-	 * @param url Container-URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
-	 * @param upo URLParseObject
-	 * @return URL
-	 * @throws HostException
-	 */
-	public String getURLByJavascript(String url, String thumbURL, String htmlcode, URLParseObject upo) throws HostException {
-		return "";
-	}
-
-	/*
-	 * ONLY URL Pipelines
-	 */
-
-	/**
-	 * Returns the waitBeforeExecute
-	 * 
-	 * @return waitBeforeExecute
-	 */
-	public int getWaitBeforeExecute() {
-		return 0;
-	}
-
-	/**
-	 * Sets the waitBeforeExecute
-	 * 
-	 * @param waitBeforeExecute waitBeforeExecute
-	 */
-	public void setWaitBeforeExecute(int waitBeforeExecute) {
-	}
-
-	/**
-	 * Returns the urlDecodeResult
-	 * 
-	 * @return urlDecodeResult
-	 */
-	public boolean isUrlDecodeResult() {
-		return false;
-	}
-
-	/**
-	 * Sets the urlDecodeResult
-	 * 
-	 * @param urlDecodeResult urlDecodeResult
-	 */
-	public void setUrlDecodeResult(boolean urlDecodeResult) {
-	}
-
-	/**
-	 * Returns if cookies should be sent
-	 * 
-	 * @return True if cookies should be sent, false otherwise
-	 */
-	public boolean isSendCookies() {
-		return true;
-	}
-
-	/**
-	 * Sets if cookies should be sent
-	 * 
-	 * @param sendCookies True if cookies should be sent, false otherwise
-	 */
-	public void setSendCookies(boolean sendCookies) {
-	}
-
-	/*
-	 * ONLY Filename Pipelines
-	 */
-
-	/**
-	 * Returns the filenameMode
-	 * 
-	 * @return filenameMode
-	 */
-	public RuleFilenameMode getFilenameMode() {
-		return null;
-	}
-
-	/**
-	 * Sets the filenameMode
-	 * 
-	 * @param filenameMode filenameMode
-	 */
-	public void setFilenameMode(RuleFilenameMode filenameMode) {
-	}
-
-	/**
-	 * Returns the filenameDownloadSelectionMode
-	 * 
-	 * @return filenameDownloadSelectionMode
-	 */
-	public RuleFilenameMode getFilenameDownloadSelectionMode() {
-		return null;
-	}
-
-	/**
-	 * Sets the filenameDownloadSelectionMode
-	 * 
-	 * @param filenameDownloadSelectionMode filenameDownloadSelectionMode
-	 */
-	public void setFilenameDownloadSelectionMode(RuleFilenameMode filenameDownloadSelectionMode) {
-	}
-
-	/**
-	 * Returns the filename after replacement
-	 * 
-	 * @param url URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Container-Page-Sourcecode
-	 * @param pic Pic
-	 * @return Filename
-	 */
-	public String getCorrectedFilename(String url, String thumbURL, String htmlcode, Pic pic) {
-		return "";
-	}
-
-	/**
-	 * Returns the filename after replacement
-	 * 
-	 * @param url URL
-	 * @return Filename
-	 */
-	public String getCorrectedFilenameOnDownloadSelection(String url) {
-		return "";
-	}
-
-	/*
-	 * ONLY Failure Pipelines
-	 */
-
-	/**
-	 * Returns the failureType
-	 * 
-	 * @return failureType
-	 */
-	public PicState getFailureType() {
-		return null;
-	}
-
-	/**
-	 * Sets the failureType
-	 * 
-	 * @param failureType failureType
-	 */
-	public void setFailureType(PicState failureType) {
-	}
-
-	/**
-	 * Returns the checkURL
-	 * 
-	 * @return checkURL
-	 */
-	public boolean isCheckURL() {
-		return false;
-	}
-
-	/**
-	 * Sets the checkURL
-	 * 
-	 * @param checkURL checkURL
-	 */
-	public void setCheckURL(boolean checkURL) {
-	}
-
-	/**
-	 * Returns the checkThumbURL
-	 * 
-	 * @return checkThumbURL
-	 */
-	public boolean isCheckThumbURL() {
-		return false;
-	}
-
-	/**
-	 * Sets the checkThumbURL
-	 * 
-	 * @param checkThumbURL checkThumbURL
-	 */
-	public void setCheckThumbURL(boolean checkThumbURL) {
-	}
-
-	/**
-	 * Returns the checkPageSourceCode
-	 * 
-	 * @return checkPageSourceCode
-	 */
-	public boolean isCheckPageSourceCode() {
-		return false;
-	}
-
-	/**
-	 * Sets the checkPageSourceCode
-	 * 
-	 * @param checkPageSourceCode checkPageSourceCode
-	 */
-	public void setCheckPageSourceCode(boolean checkPageSourceCode) {
-	}
-
-	/**
-	 * @param url URL
-	 * @throws HostException
-	 */
-	public void checkForFailure(String url) throws HostException {
-	}
-
-	/**
-	 * @param url URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode HTML-Code
-	 * @throws HostException
-	 */
-	public void checkForFailure(String url, String thumbURL, String htmlcode) throws HostException {
+		definition.getRegexp().remove(index);
 	}
 }

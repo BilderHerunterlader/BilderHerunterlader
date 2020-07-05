@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ruleDefinition name="" version="0.1" redirect="false" resend="false">
+	<urlPattern></urlPattern>
+	<useContentDisposition>false</useContentDisposition>
+	<reducePathLength>true</reducePathLength>
+	<reduceFilenameLength>true</reduceFilenameLength>
+	<referrerMode>NO_REFERRER</referrerMode>
+	<customReferrer></customReferrer>
+	<downloadReferrerMode>NO_REFERRER</downloadReferrerMode>
+	<downloadCustomReferrer></downloadCustomReferrer>
+	<duplicateRemoveMode>CONTAINER_URL_ONLY</duplicateRemoveMode>
+	<sendCookies>true</sendCookies>
+	<filenamePipeline mode="CONTAINER_URL_FILENAME_PART" />
+	<filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART" />
+	<restriction maxConnections="0" />
+</ruleDefinition>

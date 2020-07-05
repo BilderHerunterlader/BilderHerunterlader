@@ -21,8 +21,7 @@ import javax.swing.border.TitledBorder;
 
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
+import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import de.sciss.syntaxpane.DefaultSyntaxKit;
 
@@ -45,7 +44,7 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 	/**
 	 * RulePipeline
 	 */
-	private RulePipeline pipe = null;
+	private RulePipelineURLJavascript pipe = null;
 
 	/**
 	 * Rule
@@ -96,7 +95,7 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 */
-	public RulePipelineJavascriptPanel(Rule rule, RulePipeline pipe, JDialog owner) {
+	public RulePipelineJavascriptPanel(Rule rule, RulePipelineURLJavascript pipe, JDialog owner) {
 		super();
 		this.owner = owner;
 		this.rule = rule;
@@ -110,18 +109,18 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 
 		txtJavascript = new JEditorPane();
 		txtJavascript.setContentType("text/javascript");
-		txtJavascript.setText(pipe.getJavascript());
+		txtJavascript.setText(pipe.getDefinition().getJavascriptCode());
 		FontMetrics fontMetrics = txtJavascript.getFontMetrics(txtJavascript.getFont());
 		int fontHeight = fontMetrics.getLeading() + fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
 		txtJavascript.setPreferredSize(new Dimension(120 * fontMetrics.charWidth('A'), 20 * fontHeight));
 		sp = new JScrollPane(txtJavascript);
 
-		txtWaitBeforeExecute.setText(String.valueOf(this.pipe.getWaitBeforeExecute()));
+		txtWaitBeforeExecute.setText(String.valueOf(this.pipe.getDefinition().getWaitBeforeExecute()));
 
 		chkURLDecodeResult.setToolTipText(Localization.getString("RulePipelineURLDecodeResultToolTip"));
-		chkURLDecodeResult.setSelected(this.pipe.isUrlDecodeResult());
+		chkURLDecodeResult.setSelected(this.pipe.getDefinition().isUrlDecodeResult());
 
-		chkSendCookies.setSelected(this.pipe.isSendCookies());
+		chkSendCookies.setSelected(this.pipe.getDefinition().isSendCookies());
 
 		txtNote.setText(Localization.getString("RuleJavascript"));
 		txtNote.setEditable(false);
@@ -163,15 +162,14 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 	 */
 	@Override
 	public void apply() {
-		pipe.setMode(RuleMode.RULE_MODE_JAVASCRIPT);
-		pipe.setJavascript(txtJavascript.getText());
+		pipe.getDefinition().setJavascriptCode(txtJavascript.getText());
 		int waitBeforeExecute = 0;
 		try {
 			waitBeforeExecute = Integer.parseInt(txtWaitBeforeExecute.getText());
 		} catch (NumberFormatException nfe) {
 		}
-		pipe.setWaitBeforeExecute(waitBeforeExecute);
-		pipe.setUrlDecodeResult(chkURLDecodeResult.isSelected());
-		pipe.setSendCookies(chkSendCookies.isSelected());
+		pipe.getDefinition().setWaitBeforeExecute(waitBeforeExecute);
+		pipe.getDefinition().setUrlDecodeResult(chkURLDecodeResult.isSelected());
+		pipe.getDefinition().setSendCookies(chkSendCookies.isSelected());
 	}
 }

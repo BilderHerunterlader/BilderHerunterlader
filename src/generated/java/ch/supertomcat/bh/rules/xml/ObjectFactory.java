@@ -2,7 +2,7 @@
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2020.07.02 um 01:20:54 AM CEST 
+// Generiert: 2020.07.05 um 03:47:43 AM CEST 
 //
 
 
@@ -31,7 +31,7 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _Rule_QNAME = new QName("", "rule");
+    private final static QName _RuleDefinition_QNAME = new QName("", "ruleDefinition");
 
     /**
      * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: ch.supertomcat.bh.rules.xml
@@ -124,9 +124,9 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link RuleDefinition }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "", name = "rule")
-    public JAXBElement<RuleDefinition> createRule(RuleDefinition value) {
-        return new JAXBElement<RuleDefinition>(_Rule_QNAME, RuleDefinition.class, null, value);
+    @XmlElementDecl(namespace = "", name = "ruleDefinition")
+    public JAXBElement<RuleDefinition> createRuleDefinition(RuleDefinition value) {
+        return new JAXBElement<RuleDefinition>(_RuleDefinition_QNAME, RuleDefinition.class, null, value);
     }
 
 }

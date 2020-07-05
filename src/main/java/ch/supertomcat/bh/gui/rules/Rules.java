@@ -27,9 +27,11 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.TableModel;
 import javax.swing.table.TableRowSorter;
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
@@ -38,6 +40,8 @@ import ch.supertomcat.bh.gui.renderer.RulesColorRowRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleIO;
+import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
@@ -182,15 +186,23 @@ public class Rules extends JPanel {
 					JOptionPane.showMessageDialog(parentWindow, Localization.getString("RuleChangeWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 					return;
 				}
-				Rule r = new Rule("", "0.1", "", "");
-				RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
-				if (rme.getCanceled()) {
-					return;
+
+				try {
+					RuleIO ruleIO = new RuleIO();
+					RuleDefinition ruleDefinition = ruleIO.readDefaultRule();
+					Rule r = new Rule("", ruleDefinition, false);
+					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
+					if (rme.getCanceled()) {
+						return;
+					}
+					hostManager.getHostRules().addRule(r);
+					r.writeRule();
+					model.addRow(r);
+					sorter.sort();
+				} catch (IOException | SAXException | JAXBException ex) {
+					logger.error("Could not create new rule, ex");
+					JOptionPane.showMessageDialog(parentWindow, "Could not create new rule", "Error", JOptionPane.ERROR_MESSAGE);
 				}
-				hostManager.getHostRules().addRule(r);
-				r.writeRule();
-				model.addRow(r);
-				sorter.sort();
 			}
 		});
 		btnEdit.addActionListener(new ActionListener() {

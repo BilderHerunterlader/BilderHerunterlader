@@ -1,134 +1,48 @@
 package ch.supertomcat.bh.rules;
 
 import org.jdom2.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostAbortedException;
 import ch.supertomcat.bh.exceptions.HostCompletedException;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
-import ch.supertomcat.bh.pic.PicState;
+import ch.supertomcat.bh.rules.xml.FailureType;
+import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 
 /**
  * RulePipeline
  */
-public class RulePipelineFailures extends RulePipeline {
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
-
-	/**
-	 * failureType
-	 */
-	private PicState failureType = PicState.FAILED;
-
-	private boolean checkURL = false;
-
-	private boolean checkThumbURL = false;
-
-	private boolean checkPageSourceCode = false;
-
+public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 	/**
 	 * Constructor
-	 * 
-	 * @param mode Rule-Mode
 	 */
-	public RulePipelineFailures(RuleMode mode) {
-		super(mode);
+	public RulePipelineFailures() {
+		super(new FailuresPipeline());
+		definition.setFailureType(FailureType.FAILED);
+		definition.setCheckURL(false);
+		definition.setCheckThumbURL(false);
+		definition.setCheckPageSourceCode(false);
 	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param e Element
+	 * @param definition Definition
 	 */
-	public RulePipelineFailures(Element e) {
-		super(e);
-
-		if (this.mode == RuleMode.RULE_MODE_FAILURES) {
-			try {
-				setFailureType(PicState.getByValue(Integer.parseInt(e.getAttributeValue("failureType"))));
-			} catch (Exception exx) {
-			}
-			try {
-				checkURL = Boolean.parseBoolean(e.getAttributeValue("checkURL"));
-			} catch (Exception exx) {
-			}
-			try {
-				checkThumbURL = Boolean.parseBoolean(e.getAttributeValue("checkThumbURL"));
-			} catch (Exception exx) {
-			}
-			try {
-				checkPageSourceCode = Boolean.parseBoolean(e.getAttributeValue("checkPageSourceCode"));
-			} catch (Exception exx) {
-			}
-		}
+	public RulePipelineFailures(FailuresPipeline definition) {
+		super(definition);
 	}
 
 	@Override
 	public Element getXmlElement() {
 		Element e = super.getXmlElement();
-		if (this.mode == RuleMode.RULE_MODE_FAILURES) {
-			e.setAttribute("checkURL", String.valueOf(this.checkURL));
-			e.setAttribute("checkThumbURL", String.valueOf(this.checkThumbURL));
-			e.setAttribute("checkPageSourceCode", String.valueOf(this.checkPageSourceCode));
-			e.setAttribute("failureType", String.valueOf(this.failureType.getValue()));
-		}
+		e.setAttribute("mode", "5");
+		e.setAttribute("checkURL", String.valueOf(definition.isCheckURL()));
+		e.setAttribute("checkThumbURL", String.valueOf(definition.isCheckThumbURL()));
+		e.setAttribute("checkPageSourceCode", String.valueOf(definition.isCheckPageSourceCode()));
+		e.setAttribute("failureType", String.valueOf(definition.getFailureType().ordinal()));
 		return e;
-	}
-
-	@Override
-	public boolean isCheckURL() {
-		return checkURL;
-	}
-
-	@Override
-	public void setCheckURL(boolean checkURL) {
-		this.checkURL = checkURL;
-	}
-
-	@Override
-	public boolean isCheckThumbURL() {
-		return checkThumbURL;
-	}
-
-	@Override
-	public void setCheckThumbURL(boolean checkThumbURL) {
-		this.checkThumbURL = checkThumbURL;
-	}
-
-	@Override
-	public boolean isCheckPageSourceCode() {
-		return checkPageSourceCode;
-	}
-
-	@Override
-	public void setCheckPageSourceCode(boolean checkPageSourceCode) {
-		this.checkPageSourceCode = checkPageSourceCode;
-	}
-
-	@Override
-	public PicState getFailureType() {
-		return failureType;
-	}
-
-	@Override
-	public void setFailureType(PicState failureType) {
-		switch (failureType) {
-			case COMPLETE:
-			case SLEEPING:
-			case FAILED_FILE_TEMPORARY_OFFLINE:
-			case FAILED_FILE_NOT_EXIST:
-			case FAILED:
-				this.failureType = failureType;
-				break;
-			default:
-				// Do nothing, other failure types are not supported
-				break;
-		}
 	}
 
 	private String check(String input) {
@@ -150,16 +64,21 @@ public class RulePipelineFailures extends RulePipeline {
 		return result;
 	}
 
-	@Override
+	/**
+	 * Check for failure
+	 * 
+	 * @param url URL
+	 * @throws HostException
+	 */
 	public void checkForFailure(String url) throws HostException {
 		String message = "";
 
-		if (checkURL) {
+		if (definition.isCheckURL()) {
 			message = check(url);
 		}
 
 		if (!message.isEmpty()) {
-			switch (failureType) {
+			switch (definition.getFailureType()) {
 				case COMPLETE:
 					throw new HostCompletedException(message);
 				case SLEEPING:
@@ -177,24 +96,31 @@ public class RulePipelineFailures extends RulePipeline {
 		}
 	}
 
-	@Override
+	/**
+	 * Check for failure
+	 * 
+	 * @param url URL
+	 * @param thumbURL Thumbnail-URL
+	 * @param htmlcode HTML-Code
+	 * @throws HostException
+	 */
 	public void checkForFailure(String url, String thumbURL, String htmlcode) throws HostException {
 		String message = "";
 
-		if (checkURL) {
+		if (definition.isCheckURL()) {
 			message = check(url);
 		}
 
-		if (checkThumbURL && message.isEmpty()) {
+		if (definition.isCheckThumbURL() && message.isEmpty()) {
 			message = check(thumbURL);
 		}
 
-		if (checkPageSourceCode && message.isEmpty()) {
+		if (definition.isCheckPageSourceCode() && message.isEmpty()) {
 			message = check(htmlcode);
 		}
 
 		if (!message.isEmpty()) {
-			switch (failureType) {
+			switch (definition.getFailureType()) {
 				case COMPLETE:
 					throw new HostCompletedException(message);
 				case SLEEPING:

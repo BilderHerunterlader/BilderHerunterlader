@@ -79,21 +79,21 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		Hoster lastHoster = result.getLastHoster();
 		if ((lastHoster != null) && (lastHoster instanceof Rule)) {
 			Rule lastRule = (Rule)lastHoster;
-			switch (lastRule.getReferrerModeDownload()) {
-				case REFERRER_NO_REFERRER:
+			switch (lastRule.getDefinition().getDownloadReferrerMode()) {
+				case NO_REFERRER:
 					referrer = "";
 					break;
-				case REFERRER_LAST_CONTAINER_URL:
+				case LAST_CONTAINER_URL:
 					referrer = result.getContainerURL();
 					break;
-				case REFERRER_FIRST_CONTAINER_URL:
+				case FIRST_CONTAINER_URL:
 					referrer = result.getFirstContainerURL();
 					break;
-				case REFERRER_ORIGIN_PAGE:
+				case ORIGIN_PAGE:
 					referrer = pic.getThreadURL();
 					break;
-				case REFERRER_CUSTOM:
-					referrer = lastRule.getCustomReferrerDownload();
+				case CUSTOM:
+					referrer = lastRule.getDefinition().getDownloadCustomReferrer();
 					break;
 			}
 		}

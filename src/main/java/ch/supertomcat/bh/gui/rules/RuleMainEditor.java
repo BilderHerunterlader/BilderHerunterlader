@@ -11,6 +11,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.AbstractAction;
@@ -34,7 +35,6 @@ import javax.swing.KeyStroke;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -73,7 +73,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 	/**
 	 * RulePipelinePanel
 	 */
-	private RulePipelineFilenamePanel pnlFilenameDownloadSelection;
+	private RulePipelineFilenameDownloadSelectionPanel pnlFilenameDownloadSelection;
 
 	/**
 	 * RuleOptionsPanel
@@ -214,7 +214,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		btnCancel.addActionListener(this);
 
 		txtName.setText(rule.getName());
-		txtUrlpattern.setText(rule.getPattern());
+		txtUrlpattern.setText(rule.getDefinition().getUrlPattern());
 		txtVersion.setText(rule.getVersion());
 		txtError.setEditable(false);
 		txtError.setVisible(false);
@@ -225,7 +225,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		txtError.setForeground(Color.RED);
 		txtError.setFont(new Font("Monospaced", Font.PLAIN, txtName.getFont().getSize()));
 
-		chkResend.setSelected(rule.isResend());
+		chkResend.setSelected(rule.getDefinition().isResend());
 
 		chkDeveloper.setSelected(rule.isDeveloper());
 		if ((rule.getFile().exists()) && (rule.getFile().getAbsoluteFile().length() > 0)) {
@@ -270,9 +270,8 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 
 		pnlPipesFailures = new RulePipesFailuresPanel(this.rule, this, settingsManager);
 
-		pnlFilename = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME, this.rule, this.rule.getPipelineFilename(), this, settingsManager);
-		pnlFilenameDownloadSelection = new RulePipelineFilenamePanel(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION, this.rule, this.rule
-				.getPipelineFilenameDownloadSelection(), this, settingsManager);
+		pnlFilename = new RulePipelineFilenamePanel(this.rule, this.rule.getPipelineFilename(), this, settingsManager);
+		pnlFilenameDownloadSelection = new RulePipelineFilenameDownloadSelectionPanel(this.rule, this.rule.getPipelineFilenameDownloadSelection(), this, settingsManager);
 
 		pnlRuleOptions = new RuleOptionsPanel(this.rule);
 		pnlConnections = new RuleConnectionsPanel(this.rule);
@@ -293,7 +292,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		 * Everything is now setup, so we can set redirect-checkbox-state
 		 */
 		chkRedirect.addItemListener(this);
-		chkRedirect.setSelected(rule.isRedirect());
+		chkRedirect.setSelected(rule.getDefinition().isRedirect());
 		chkRedirect.setToolTipText(Localization.getString("RuleRedirectToolTip"));
 
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtName);
@@ -366,7 +365,9 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 	 */
 	private boolean apply() {
 		try {
-			rule.setPattern(txtUrlpattern.getText());
+			// Check if pattern compiles, before setting it in rule definition
+			Pattern.compile(txtUrlpattern.getText());
+			rule.getDefinition().setUrlPattern(txtUrlpattern.getText());
 			txtError.setText("");
 			txtError.setVisible(false);
 			lblError.setVisible(false);
@@ -396,10 +397,10 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		if (rule.getFile() == null || rule.getFile().length() == 0) {
 			rule.setFile(new File(file));
 		}
-		rule.setName(txtName.getText());
-		rule.setVersion(txtVersion.getText());
-		rule.setRedirect(chkRedirect.isSelected());
-		rule.setResend(chkResend.isSelected());
+		rule.getDefinition().setName(txtName.getText());
+		rule.getDefinition().setVersion(txtVersion.getText());
+		rule.getDefinition().setRedirect(chkRedirect.isSelected());
+		rule.getDefinition().setResend(chkResend.isSelected());
 		rule.setDeveloper(chkDeveloper.isSelected());
 		pnlPipes.apply();
 		pnlPipesFailures.apply();
@@ -407,6 +408,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 		pnlFilenameDownloadSelection.apply();
 		pnlRuleOptions.applyRuleOptions();
 		pnlConnections.applyMaxConnections();
+		rule.updateFromDefinition();
 		return true;
 	}
 

@@ -10,20 +10,20 @@ import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.rules.RuleMode;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 
 /**
  * Host class for ImageVenue
  * 
- * @version 4.3
+ * @version 4.4
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.3";
+	public static final String VERSION = "4.4";
 
 	/**
 	 * Name dieser Klasse
@@ -47,11 +47,11 @@ public class HostImageVenue extends Host implements IHoster {
 
 	private RuleRegExp regexImage = new RuleRegExp();
 
-	RulePipelineURLRegex pipeAlternativeImage = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	RulePipelineURLRegex pipeAlternativeImage = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 	private RuleRegExp regexAlternativeImage1;
 	private RuleRegExp regexAlternativeImage2;
 
-	RulePipelineURLRegex pipeAlternativeFilename = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+	RulePipelineURLRegex pipeAlternativeFilename = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 	private RuleRegExp regexAlternativeFilename;
 
 	private RuleRegExp regexContinue = new RuleRegExp();

@@ -37,7 +37,7 @@ public class RulesColorRowRenderer extends DefaultStringColorRowRenderer impleme
 			Rule r = (Rule)table.getModel().getValueAt(table.convertRowIndexToModel(row), 0);
 			if (r.isDeveloper()) {
 				cf = Color.BLUE;
-			} else if (r.isRedirect()) {
+			} else if (r.getDefinition().isRedirect()) {
 				cf = REDIRECT_COLOR;
 			} else {
 				cf = table.getForeground();

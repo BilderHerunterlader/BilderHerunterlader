@@ -17,10 +17,9 @@ import javax.swing.event.ListSelectionListener;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.rules.RuleURLPipeline;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
@@ -54,12 +53,12 @@ public class RulePipesPanel extends JPanel {
 	/**
 	 * pipelines
 	 */
-	private List<RulePipeline> originalPipelines = null;
+	private List<RuleURLPipeline<?>> originalPipelines = null;
 
 	/**
 	 * pipelines
 	 */
-	private List<RulePipeline> pipelines = new ArrayList<>();
+	private List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
 
 	/**
 	 * RulePipelinePanel
@@ -108,14 +107,16 @@ public class RulePipesPanel extends JPanel {
 
 		originalPipelines = this.rule.getPipelines();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
-			if (originalPipelines.get(iPipe).getMode() == RuleMode.RULE_MODE_JAVASCRIPT) {
-				RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, originalPipelines.get(iPipe), owner);
+			if (originalPipelines.get(iPipe) instanceof RulePipelineURLJavascript) {
+				RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, (RulePipelineURLJavascript)originalPipelines.get(iPipe), owner);
 				pnlPipelines.add(pnlPipe);
 				modelPipelines.addElement("Javascript Pipeline");
-			} else {
-				RulePipelinePanel pnlPipe = new RulePipelinePanel(originalPipelines.get(iPipe).getMode(), this.rule, originalPipelines.get(iPipe), owner, settingsManager);
+			} else if (originalPipelines.get(iPipe) instanceof RulePipelineURLRegex) {
+				RulePipelinePanel pnlPipe = new RulePipelinePanel(this.rule, (RulePipelineURLRegex)originalPipelines.get(iPipe), owner, settingsManager);
 				pnlPipelines.add(pnlPipe);
 				modelPipelines.addElement("Regex Pipeline");
+			} else {
+				throw new IllegalArgumentException("Unknown pipeline type: " + originalPipelines.get(iPipe).getClass());
 			}
 			pipelines.add(originalPipelines.get(iPipe));
 		}
@@ -172,14 +173,14 @@ public class RulePipesPanel extends JPanel {
 			}
 		});
 		btnPipelineRegexNew.addActionListener(e -> {
-			RulePipeline pipe = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
-			RulePipelinePanel pnlPipeRegex = new RulePipelinePanel(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL, this.rule, pipe, owner, settingsManager);
+			RulePipelineURLRegex pipe = new RulePipelineURLRegex();
+			RulePipelinePanel pnlPipeRegex = new RulePipelinePanel(this.rule, pipe, owner, settingsManager);
 			pnlPipelines.add(pnlPipeRegex);
 			modelPipelines.addElement("Regex Pipeline");
 			pipelines.add(pipe);
 		});
 		btnPipelineJavascriptNew.addActionListener(e -> {
-			RulePipeline pipe = new RulePipelineURLJavascript(RuleMode.RULE_MODE_JAVASCRIPT);
+			RulePipelineURLJavascript pipe = new RulePipelineURLJavascript();
 			RulePipelineJavascriptPanel pnlPipeJavascript = new RulePipelineJavascriptPanel(this.rule, pipe, owner);
 			pnlPipelines.add(pnlPipeJavascript);
 			modelPipelines.addElement("Javascript Pipeline");
@@ -229,8 +230,8 @@ public class RulePipesPanel extends JPanel {
 		modelPipelines.setElementAt(o2, index1);
 
 		// Pipelines
-		RulePipeline rp1 = pipelines.get(index1);
-		RulePipeline rp2 = pipelines.get(index2);
+		RuleURLPipeline<?> rp1 = pipelines.get(index1);
+		RuleURLPipeline<?> rp2 = pipelines.get(index2);
 		pipelines.set(index2, rp1);
 		pipelines.set(index1, rp2);
 

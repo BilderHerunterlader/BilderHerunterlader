@@ -20,6 +20,8 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleIO;
+import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
@@ -202,7 +204,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 				String result[] = rule.getURLAndFilename(upo);
 				upo.setDirectLink(result[0]);
 				upo.setCorrectedFilename(result[1]);
-				if (rule.isResend()) {
+				if (rule.getDefinition().isResend()) {
 					upo.setContainerURL(result[0]);
 					hostManager.parseURL(upo);
 				}
@@ -286,13 +288,11 @@ public class HostRules extends Host implements IHoster, IRedirect {
 				logger.debug("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
 
 				try {
-					Rule r = new Rule(subFile.getAbsolutePath(), developerRules);
-					if (r.getStatusOK()) {
-						rules.add(r);
-						logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getName());
-					} else {
-						logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
-					}
+					RuleIO ruleIO = new RuleIO();
+					RuleDefinition ruleDefinition = ruleIO.readRule(subFile.getAbsolutePath());
+					Rule r = new Rule(subFile.getAbsolutePath(), ruleDefinition, developerRules);
+					rules.add(r);
+					logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getName());
 				} catch (Exception e) {
 					logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath(), e);
 				}

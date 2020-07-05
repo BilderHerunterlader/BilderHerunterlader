@@ -1,21 +1,23 @@
 package ch.supertomcat.bh.gui.rules;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.util.Iterator;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
-import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -25,18 +27,20 @@ import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RulePipelineFailures;
+import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.rules.xml.FailureType;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
 
 /**
- * Rule-Pipeline-Panel
+ * Base class for Rule-Pipeline-Panels
+ * 
+ * @param <T> Pipeline Type
+ * @param <S> Filename Mode Type
  */
-public class RulePipelineFailuresPanel extends JPanel implements ActionListener {
+public abstract class RulePipelineFilenamePanelBase<T extends RulePipeline<?>, S extends Enum<S>> extends JPanel implements ActionListener, ItemListener {
 	/**
 	 * UID
 	 */
@@ -45,93 +49,106 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 	/**
 	 * Table
 	 */
-	private JTable table;
+	protected JTable table;
 
 	/**
 	 * ScrollPane
 	 */
-	private JScrollPane sp;
+	protected JScrollPane sp;
 
 	/**
 	 * TableModel
 	 */
-	private RulePipelineFailuresTableModel model = new RulePipelineFailuresTableModel();
-
-	/**
-	 * RulePipeline
-	 */
-	private RulePipelineFailures pipe = null;
+	protected RulePipelineTableModel model = new RulePipelineTableModel();
 
 	/**
 	 * Rule
 	 */
-	@SuppressWarnings("unused")
-	private Rule rule = null;
+	protected Rule rule = null;
 
-	private JComboBox<FailureType> cmbFailureType = new JComboBox<>();
+	/**
+	 * CheckBox
+	 */
+	protected JCheckBox chkUseContentDisposition = new JCheckBox(Localization.getString("UseContentDisposition"));
 
-	private JCheckBox cbURL = new JCheckBox(Localization.getString("ContainerURL"));
+	/**
+	 * CheckBox
+	 */
+	protected JCheckBox chkReducePathLength = new JCheckBox(Localization.getString("ReducePathLength"), true);
 
-	private JCheckBox cbThumbURL = new JCheckBox(Localization.getString("ThumbnailURL"));
+	/**
+	 * CheckBox
+	 */
+	protected JCheckBox chkReduceFilenameLength = new JCheckBox(Localization.getString("ReduceFilenameLength"), true);
 
-	private JCheckBox cbContainerPage = new JCheckBox(Localization.getString("ContainerPage"));
+	/**
+	 * ComboBox
+	 */
+	protected JComboBox<S> cbFilenameMode = new JComboBox<>();
+
+	/**
+	 * Label
+	 */
+	protected JLabel lblSource = new JLabel(Localization.getString("Source"));
 
 	/**
 	 * Panel
 	 */
-	private JPanel pnlRB = new JPanel();
+	protected JPanel pnlRB = new JPanel();
 
 	/**
 	 * Button
 	 */
-	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	protected JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	protected JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnUp = new JButton(Localization.getString("Up"), Icons.getTangoIcon("actions/go-up.png", 16));
+	protected JButton btnUp = new JButton(Localization.getString("Up"), Icons.getTangoIcon("actions/go-up.png", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnDown = new JButton(Localization.getString("Down"), Icons.getTangoIcon("actions/go-down.png", 16));
+	protected JButton btnDown = new JButton(Localization.getString("Down"), Icons.getTangoIcon("actions/go-down.png", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	protected JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
 
 	/**
 	 * Panel
 	 */
-	private JPanel pnlButtons = new JPanel();
+	protected JPanel pnlButtons = new JPanel();
 
 	/**
 	 * Owner
 	 */
-	private JDialog owner = null;
+	protected JDialog owner = null;
+
+	/**
+	 * RulePipeline
+	 */
+	protected T pipe = null;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param rule Rule
-	 * @param pipe Pipeline
+	 * @param pipe Pipe
 	 * @param owner Owner
 	 * @param settingsManager Settings Manager
 	 */
-	public RulePipelineFailuresPanel(Rule rule, RulePipelineFailures pipe, JDialog owner, SettingsManager settingsManager) {
+	public RulePipelineFilenamePanelBase(Rule rule, T pipe, JDialog owner, SettingsManager settingsManager) {
 		this.owner = owner;
 		this.rule = rule;
 		this.pipe = pipe;
 		setLayout(new BorderLayout());
-
-		TitledBorder brd = BorderFactory.createTitledBorder(Localization.getString("Pipeline"));
-		this.setBorder(brd);
 
 		table = new JTable(model);
 
@@ -169,28 +186,12 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 		Iterator<RuleRegExp> it = pipe.getRegexps().iterator();
 		while (it.hasNext()) {
 			RuleRegExp rre = it.next();
-			model.addRow(rre.getSearch());
+			model.addRow(rre.getSearch(), rre.getReplace());
 		}
+
+		Dimension preferredScrollableTableSize = new Dimension(table.getPreferredScrollableViewportSize().width, 15 * table.getRowHeight());
+		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		sp = new JScrollPane(table);
-
-		cmbFailureType.addItem(FailureType.FAILED);
-		cmbFailureType.addItem(FailureType.FAILED_FILE_NOT_EXIST);
-		cmbFailureType.addItem(FailureType.FAILED_FILE_TEMPORARY_OFFLINE);
-		cmbFailureType.addItem(FailureType.SLEEPING);
-		cmbFailureType.addItem(FailureType.COMPLETE);
-		cmbFailureType.setSelectedItem(pipe.getDefinition().getFailureType());
-
-		cbURL.setSelected(pipe.getDefinition().isCheckURL());
-		cbThumbURL.setSelected(pipe.getDefinition().isCheckThumbURL());
-		cbContainerPage.setSelected(pipe.getDefinition().isCheckPageSourceCode());
-
-		pnlRB.add(cmbFailureType);
-		pnlRB.add(cbURL);
-		pnlRB.add(cbThumbURL);
-		pnlRB.add(cbContainerPage);
-
-		add(pnlRB, BorderLayout.NORTH);
-
 		add(sp, BorderLayout.CENTER);
 
 		pnlButtons.setLayout(new SpringLayout());
@@ -207,17 +208,18 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 		btnUp.addActionListener(this);
 		btnDown.addActionListener(this);
 		btnDelete.addActionListener(this);
+		chkUseContentDisposition.addItemListener(this);
 	}
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnNew) {
 			RuleRegExp rre = new RuleRegExp();
-			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
+			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
 			if (rme.getCanceled()) {
 				return;
 			}
-			model.addRow(rre.getSearch());
+			model.addRow(rre.getSearch(), rre.getReplace());
 			pipe.addRegExp(rre);
 		} else if (e.getSource() == btnEdit) {
 			int row = table.getSelectedRow();
@@ -225,11 +227,12 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 				return;
 			}
 			RuleRegExp rre = pipe.getRegexp(row);
-			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
+			RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre);
 			if (rme.getCanceled()) {
 				return;
 			}
 			model.setValueAt(rre.getSearch(), row, 0);
+			model.setValueAt(rre.getReplace(), row, 1);
 		} else if (e.getSource() == btnDelete) {
 			int row = table.getSelectedRow();
 			if (row < 0) {
@@ -257,11 +260,19 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 	/**
 	 * Apply
 	 */
-	public void apply() {
-		pipe.getDefinition().setFailureType((FailureType)cmbFailureType.getSelectedItem());
-		pipe.getDefinition().setCheckURL(cbURL.isSelected());
-		pipe.getDefinition().setCheckThumbURL(cbThumbURL.isSelected());
-		pipe.getDefinition().setCheckPageSourceCode(cbContainerPage.isSelected());
+	public abstract void apply();
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		if (e.getSource() == chkUseContentDisposition) {
+			table.setEnabled(!chkUseContentDisposition.isSelected());
+			btnNew.setEnabled(!chkUseContentDisposition.isSelected());
+			btnEdit.setEnabled(!chkUseContentDisposition.isSelected());
+			btnUp.setEnabled(!chkUseContentDisposition.isSelected());
+			btnDown.setEnabled(!chkUseContentDisposition.isSelected());
+			btnDelete.setEnabled(!chkUseContentDisposition.isSelected());
+			lblSource.setEnabled(!chkUseContentDisposition.isSelected());
+		}
 	}
 
 	/**
@@ -269,7 +280,7 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 	 * 
 	 * @param settingsManager SettingsManager
 	 */
-	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
+	protected void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
 		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
@@ -282,10 +293,35 @@ public class RulePipelineFailuresPanel extends JPanel implements ActionListener 
 	 * 
 	 * @param settingsManager SettingsManager
 	 */
-	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
+	protected void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
 		if (settingsManager.isSaveTableColumnSizes() == false) {
 			return;
 		}
 		TableUtil.applyColWidths(table, settingsManager.getColWidthsRulesEditor());
+	}
+
+	/**
+	 * @param enabled Enabled
+	 */
+	public void redirectEnabled(boolean enabled) {
+		table.setEnabled(!enabled);
+		chkUseContentDisposition.setEnabled(!enabled);
+		cbFilenameMode.setEnabled(!enabled);
+		lblSource.setEnabled(!enabled);
+		btnNew.setEnabled(!enabled);
+		btnEdit.setEnabled(!enabled);
+		btnUp.setEnabled(!enabled);
+		btnDown.setEnabled(!enabled);
+		btnDelete.setEnabled(!enabled);
+
+		if (!enabled) {
+			table.setEnabled(!chkUseContentDisposition.isSelected());
+			btnNew.setEnabled(!chkUseContentDisposition.isSelected());
+			btnEdit.setEnabled(!chkUseContentDisposition.isSelected());
+			btnUp.setEnabled(!chkUseContentDisposition.isSelected());
+			btnDown.setEnabled(!chkUseContentDisposition.isSelected());
+			btnDelete.setEnabled(!chkUseContentDisposition.isSelected());
+			lblSource.setEnabled(!chkUseContentDisposition.isSelected());
+		}
 	}
 }

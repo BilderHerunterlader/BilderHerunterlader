@@ -17,8 +17,8 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Rule-Referrer-Panel
@@ -97,8 +97,8 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 		txtMaxConnections.setToolTipText(Localization.getString("MaxConnectionCountToolTip"));
 		btnMaxConnectionsDomainsAdd.addActionListener(this);
 		btnMaxConnectionsDomainsRemove.addActionListener(this);
-		txtMaxConnections.setText(String.valueOf(rule.getMaxConnections()));
-		List<String> domains = rule.getMaxConnectionDomains();
+		txtMaxConnections.setText(String.valueOf(rule.getDefinition().getRestriction().getMaxConnections()));
+		List<String> domains = rule.getDefinition().getRestriction().getDomain();
 		for (int i = 0; i < domains.size(); i++) {
 			modelMaxConnectionsDomains.addElement(domains.get(i));
 		}
@@ -132,14 +132,15 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 	 */
 	public void applyMaxConnections() {
 		try {
-			rule.setMaxConnections(Integer.parseInt(txtMaxConnections.getText()));
+			rule.getDefinition().getRestriction().setMaxConnections(Integer.parseInt(txtMaxConnections.getText()));
 		} catch (NumberFormatException nfe) {
 		}
 		List<String> domains = new ArrayList<>();
 		for (int i = 0; i < modelMaxConnectionsDomains.size(); i++) {
 			domains.add(modelMaxConnectionsDomains.get(i));
 		}
-		rule.setMaxConnectionDomains(domains);
+		rule.getDefinition().getRestriction().getDomain().clear();
+		rule.getDefinition().getRestriction().getDomain().addAll(domains);
 	}
 
 	/*

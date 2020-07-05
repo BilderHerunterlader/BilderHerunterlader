@@ -5,21 +5,20 @@ import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 
 /**
  * Host class for Picfoco
  * 
- * @version 1.3
+ * @version 1.4
  */
 public class HostPicfoco extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.3";
+	public static final String VERSION = "1.4";
 
 	/**
 	 * Name dieser Klasse
@@ -35,7 +34,7 @@ public class HostPicfoco extends Host implements IHoster {
 
 	private RuleRegExp regexFilename;
 
-	private RulePipeline pipeURL;
+	private RulePipelineURLRegex pipeURL;
 
 	/**
 	 * Konstruktor
@@ -47,7 +46,7 @@ public class HostPicfoco extends Host implements IHoster {
 		regexForwarding.setSearch("window\\.location=\"([^\"]+)\"");
 		regexForwarding.setReplace("$1");
 
-		pipeURL = new RulePipelineURLRegex(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE);
+		pipeURL = new RulePipelineURLRegex(URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE);
 		RuleRegExp regex1 = new RuleRegExp();
 		regex1.setSearch("<img id=\"img\"");
 		regex1.setReplace("");

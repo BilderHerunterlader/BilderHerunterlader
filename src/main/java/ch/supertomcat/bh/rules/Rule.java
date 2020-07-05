@@ -1,26 +1,23 @@
 package ch.supertomcat.bh.rules;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
+import javax.xml.bind.JAXBException;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Hoster;
@@ -30,7 +27,11 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadRestriction;
-import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
+import ch.supertomcat.bh.rules.xml.FilenameMode;
+import ch.supertomcat.bh.rules.xml.RuleDefinition;
+import ch.supertomcat.bh.rules.xml.URLPipeline;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -52,106 +53,37 @@ public class Rule extends Hoster {
 	/**
 	 * Logger for this class
 	 */
-	public Logger logger = LoggerFactory.getLogger(getClass());
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Name
+	 * Rule Definition
 	 */
-	private String name = "";
-
-	/**
-	 * Version
-	 */
-	private String version = "";
-
-	/**
-	 * redirect
-	 */
-	private boolean redirect = false;
-
-	/**
-	 * Flag if the URL should be parsed again by the hostermanager after the replacement
-	 */
-	private boolean resend = false;
-
-	/**
-	 * Flag if the filename is used from the content-disposition in http-header
-	 */
-	private boolean useContentDisposition = false;
-
-	private boolean reducePathLength = true;
-
-	private boolean reduceFilenameLength = true;
-
-	/**
-	 * Referrer-Mode
-	 */
-	private ReferrerMode referrerMode = ReferrerMode.REFERRER_NO_REFERRER;
-
-	/**
-	 * referrerModeDownload
-	 */
-	private ReferrerMode referrerModeDownload = ReferrerMode.REFERRER_LAST_CONTAINER_URL;
-
-	/**
-	 * Custom referrer
-	 */
-	private String customReferrer = "";
-
-	/**
-	 * Custom referrer
-	 */
-	private String customReferrerDownload = "";
-
-	/**
-	 * Pattern for the Container-URL
-	 */
-	private String pattern = "";
+	private final RuleDefinition definition;
 
 	/**
 	 * Compiled Pattern
 	 */
-	private Pattern urlPattern;
+	private Pattern compiledUrlPattern;
 
 	/**
 	 * Pipelines
 	 */
-	private List<RulePipeline> pipelines = new ArrayList<>();
+	private List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
 
 	/**
 	 * Pipeline
 	 */
-	private RulePipeline pipelineFilename = null;
+	private RulePipelineFilename pipelineFilename = null;
 
 	/**
 	 * Pipeline
 	 */
-	private RulePipeline pipelineFilenameDownloadSelection = null;
+	private RulePipelineFilenameDownloadSelection pipelineFilenameDownloadSelection = null;
 
 	/**
 	 * pipelinesFailures
 	 */
-	private List<RulePipeline> pipelinesFailures = new ArrayList<>();
-
-	/**
-	 * sendCookies
-	 */
-	private boolean sendCookies = true;
-
-	/**
-	 * duplicateRemoveMode
-	 */
-	private DuplicateRemoveMode duplicateRemoveMode = DuplicateRemoveMode.DUPLICATES_BH_DEFAULT;
-
-	/**
-	 * maxConnection
-	 */
-	private int maxConnections = 0;
-
-	/**
-	 * maxConnectionDomains
-	 */
-	private List<String> maxConnectionDomains = new ArrayList<>();
+	private List<RulePipelineFailures> pipelinesFailures = new ArrayList<>();
 
 	/**
 	 * restriction
@@ -159,11 +91,6 @@ public class Rule extends Hoster {
 	private DownloadRestriction restriction = null;
 
 	private DeactivateOption deactivateOption = null;
-
-	/**
-	 * Flag if the object is ok (Pattern could be compiled, and all needed definitions are defined)
-	 */
-	private boolean statusOK = true;
 
 	/**
 	 * Path to the XML-File
@@ -174,39 +101,24 @@ public class Rule extends Hoster {
 	 * Constructor
 	 * 
 	 * @param file Path to the XML-File
+	 * @param definition Rule Definition
 	 * @param developer True if is developer rule, false otherwise
 	 * @throws PatternSyntaxException
 	 */
-	public Rule(String file, boolean developer) throws PatternSyntaxException {
+	public Rule(String file, RuleDefinition definition, boolean developer) throws PatternSyntaxException {
 		this.strFile = file;
+		this.definition = definition;
 		setDeveloper(developer);
 		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
-		boolean b = readRule();
-		this.urlPattern = Pattern.compile(this.pattern);
-		if (!b) {
-			statusOK = false;
-		}
+		updateFromDefinition();
 	}
 
 	/**
-	 * Constructor
-	 * 
-	 * @param name Name
-	 * @param version Version
-	 * @param pattern Container-URL-Pattern
-	 * @param file Path to the XML-File
-	 * @throws PatternSyntaxException
+	 * Updates internal members from definition. This method should always be called, when the definition was changed
 	 */
-	public Rule(String name, String version, String pattern, String file) throws PatternSyntaxException {
-		this.name = name;
-		this.version = version;
-		this.pattern = pattern;
-		this.urlPattern = Pattern.compile(this.pattern);
-		// Create Pipelines
-		pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
-		pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
-		this.strFile = file;
-		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
+	public void updateFromDefinition() {
+		this.compiledUrlPattern = Pattern.compile(definition.getUrlPattern());
+		applyRestriction();
 	}
 
 	/**
@@ -223,20 +135,11 @@ public class Rule extends Hoster {
 		if (deactivateOption.isDeactivated()) {
 			return false;
 		}
-		Matcher urlMatcher = urlPattern.matcher(url);
+		Matcher urlMatcher = compiledUrlPattern.matcher(url);
 		if (urlMatcher.matches()) {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * Returns if the status of the object is ok
-	 * 
-	 * @return True if ok
-	 */
-	public boolean getStatusOK() {
-		return this.statusOK;
 	}
 
 	/**
@@ -265,7 +168,7 @@ public class Rule extends Hoster {
 		String retval[] = new String[2];
 
 		if (pipelines.size() == 0) {
-			for (RulePipeline failurePipe : pipelinesFailures) {
+			for (RulePipelineFailures failurePipe : pipelinesFailures) {
 				failurePipe.checkForFailure(url, thumbURL, "");
 			}
 		}
@@ -299,20 +202,22 @@ public class Rule extends Hoster {
 		String pipelineReferrer = getReferrer(upo);
 		String pipelineResult = "";
 		for (int i = 0; i < pipelines.size(); i++) {
-			int waitBeforeExecute = pipelines.get(i).getWaitBeforeExecute();
+			RuleURLPipeline<?> rulePipeline = pipelines.get(i);
+			URLPipeline pipelineDefinition = rulePipeline.getDefinition();
+			int waitBeforeExecute = pipelineDefinition.getWaitBeforeExecute();
 			if (waitBeforeExecute > 0) {
 				try {
 					Thread.sleep(waitBeforeExecute);
 				} catch (InterruptedException e) {
 				}
 			}
-			boolean sendCookies = pipelines.get(i).isSendCookies();
-			if (pipelines.get(i).getMode() == RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE) {
-				htmlcode = downloadContainerPage(this.name, pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
+			boolean sendCookies = pipelineDefinition.isSendCookies();
+			if (rulePipeline instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)rulePipeline).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
+				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
 				if (pagesourcecode) {
 					upo.addInfo("PageSourceCode", htmlcode);
 				}
-				logger.debug(this.name + " -> " + url + " -> Download Container-Page done -> Result: " + htmlcode);
+				logger.debug(definition.getName() + " -> " + url + " -> Download Container-Page done -> Result: " + htmlcode);
 				if (i == 0) {
 					htmlCodeFromFirstURL = htmlcode;
 					bHtmlCodeFromFirstURL = true;
@@ -332,18 +237,17 @@ public class Rule extends Hoster {
 			/*
 			 * Check for failures before replace
 			 */
-			for (RulePipeline failurePipe : pipelinesFailures) {
+			for (RulePipelineFailures failurePipe : pipelinesFailures) {
 				failurePipe.checkForFailure(pipelineURL, pipelineThumbURL, htmlcode);
 			}
 
-			RulePipeline rulePipeline = pipelines.get(i);
 			if (rulePipeline instanceof RulePipelineURLRegex) {
-				pipelineResult = rulePipeline.getURL(pipelineURL, pipelineThumbURL, htmlcode, pic);
+				pipelineResult = ((RulePipelineURLRegex)rulePipeline).getURL(pipelineURL, pipelineThumbURL, htmlcode, pic);
 			} else if (rulePipeline instanceof RulePipelineURLJavascript) {
-				pipelineResult = rulePipeline.getURLByJavascript(pipelineURL, pipelineThumbURL, htmlcode, upo);
+				pipelineResult = ((RulePipelineURLJavascript)rulePipeline).getURLByJavascript(pipelineURL, pipelineThumbURL, htmlcode, upo);
 			}
 
-			if (rulePipeline.isUrlDecodeResult()) {
+			if (pipelineDefinition.isUrlDecodeResult()) {
 				URLCodec urlCodec = new URLCodec("UTF-8");
 				try {
 					pipelineResult = urlCodec.decode(pipelineResult);
@@ -353,12 +257,12 @@ public class Rule extends Hoster {
 			}
 
 			pipelineResult = HTTPUtil.decodeURL(pipelineResult);
-			logger.debug(this.name + " -> " + url + " -> pipe[" + i + "] -> Result: " + pipelineResult);
+			logger.debug(definition.getName() + " -> " + url + " -> pipe[" + i + "] -> Result: " + pipelineResult);
 
 			/*
 			 * Check for failures after replace
 			 */
-			for (RulePipeline failurePipe : pipelinesFailures) {
+			for (RulePipelineFailures failurePipe : pipelinesFailures) {
 				failurePipe.checkForFailure(pipelineResult);
 			}
 
@@ -376,7 +280,7 @@ public class Rule extends Hoster {
 			pipelineResult = url;
 		}
 
-		logger.debug(this.name + " -> " + url + " -> Final URL Result: " + pipelineResult);
+		logger.debug(definition.getName() + " -> " + url + " -> Final URL Result: " + pipelineResult);
 		retval[0] = pipelineResult;
 		retval[1] = upo.getCorrectedFilename(); // Corrected Filename
 		if (pic != null && pic.getTargetFilename().length() == 0) {
@@ -384,43 +288,43 @@ public class Rule extends Hoster {
 		}
 
 		if (pipelineFilename != null && retval[0].length() > 0 && pipelineFilename.getRegexps().size() > 0) {
+			FilenameMode filenameMode = pipelineFilename.getDefinition().getMode();
 			// First Container-URL
-			if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
+			if (filenameMode == FilenameMode.CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(url);
 				if (filename.length() > 0) {
 					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 				}
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL) {
+			} else if (filenameMode == FilenameMode.CONTAINER_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
 
 				// Thumbnail-URL
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL_FILENAME_PART) {
+			} else if (filenameMode == FilenameMode.THUMBNAIL_URL_FILENAME_PART) {
 				String filename = getFilenamePart(thumbURL);
 				if (filename.length() > 0) {
 					retval[1] = pipelineFilename.getCorrectedFilename(url, filename, "", pic);
 				}
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_THUMBNAIL_URL) {
+			} else if (filenameMode == FilenameMode.THUMBNAIL_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
 
 				// Container-Page-Sourcecode
-			} else if ((pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)
-					|| (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)
-					|| (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
+			} else if ((filenameMode == FilenameMode.CONTAINER_PAGE_SOURCECODE) || (filenameMode == FilenameMode.FIRST_CONTAINER_PAGE_SOURCECODE)
+					|| (filenameMode == FilenameMode.LAST_CONTAINER_PAGE_SOURCECODE)) {
 				String filenamePageSourceURL = url;
 				String filenamePageSourceReferrer = getReferrer(upo);
 
-				if (bHtmlCodeFromFirstURL && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_FIRST_CONTAINER_PAGE_SOURCECODE)) {
+				if (bHtmlCodeFromFirstURL && (filenameMode == FilenameMode.FIRST_CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeFromFirstURL;
-				} else if (bHtmlCodeFirst && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_PAGE_SOURCECODE)) {
+				} else if (bHtmlCodeFirst && (filenameMode == FilenameMode.CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeFirst;
 					filenamePageSourceURL = htmlCodeFirstURL;
 					filenamePageSourceReferrer = htmlCodeFirstReferrer;
-				} else if (bHtmlCodeLast && (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_PAGE_SOURCECODE)) {
+				} else if (bHtmlCodeLast && (filenameMode == FilenameMode.LAST_CONTAINER_PAGE_SOURCECODE)) {
 					htmlcode = htmlCodeLast;
 					filenamePageSourceURL = htmlCodeLastURL;
 					filenamePageSourceReferrer = htmlCodeLastReferrer;
 				} else {
-					htmlcode = downloadContainerPage(this.name, filenamePageSourceURL, filenamePageSourceReferrer);
+					htmlcode = downloadContainerPage(definition.getName(), filenamePageSourceURL, filenamePageSourceReferrer);
 					if (pagesourcecode) {
 						upo.addInfo("PageSourceCode", htmlcode);
 					}
@@ -439,17 +343,17 @@ public class Rule extends Hoster {
 				}
 
 				// Download-URL
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL) {
+			} else if (filenameMode == FilenameMode.DOWNLOAD_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(retval[0], thumbURL, "", pic);
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_DOWNLOAD_URL_FILENAME_PART) {
+			} else if (filenameMode == FilenameMode.DOWNLOAD_URL_FILENAME_PART) {
 				String filename = getFilenamePart(retval[0]);
 				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
 
 				// Last Container-URL
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL_FILENAME_PART) {
+			} else if (filenameMode == FilenameMode.LAST_CONTAINER_URL_FILENAME_PART) {
 				String filename = getFilenamePart(pipelineURL);
 				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-			} else if (pipelineFilename.getFilenameMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_LAST_CONTAINER_URL) {
+			} else if (filenameMode == FilenameMode.LAST_CONTAINER_URL) {
 				retval[1] = pipelineFilename.getCorrectedFilename(pipelineURL, thumbURL, "", pic);
 			}
 		}
@@ -457,12 +361,12 @@ public class Rule extends Hoster {
 			retval[1] = getFilenamePart(retval[0]);
 		}
 		if (pic != null) {
-			pic.setRenameWithContentDisposition(useContentDisposition);
+			pic.setRenameWithContentDisposition(definition.isUseContentDisposition());
 		}
 
-		upo.addInfo("sendCookies", sendCookies);
-		upo.addInfo("ReducePathLength", reducePathLength);
-		upo.addInfo("ReduceFilenameLength", reduceFilenameLength);
+		upo.addInfo("sendCookies", definition.isSendCookies());
+		upo.addInfo("ReducePathLength", definition.isReducePathLength());
+		upo.addInfo("ReduceFilenameLength", definition.isReduceFilenameLength());
 
 		return retval;
 	}
@@ -502,21 +406,21 @@ public class Rule extends Hoster {
 	 */
 	private String getReferrer(final URLParseObject upo) {
 		String referrer = "";
-		switch (this.referrerMode) {
-			case REFERRER_NO_REFERRER:
+		switch (definition.getReferrerMode()) {
+			case NO_REFERRER:
 				referrer = "";
 				break;
-			case REFERRER_LAST_CONTAINER_URL:
+			case LAST_CONTAINER_URL:
 				referrer = upo.getContainerURL();
 				break;
-			case REFERRER_FIRST_CONTAINER_URL:
+			case FIRST_CONTAINER_URL:
 				referrer = upo.getFirstContainerURL();
 				break;
-			case REFERRER_ORIGIN_PAGE:
+			case ORIGIN_PAGE:
 				referrer = upo.getPic().getThreadURL();
 				break;
-			case REFERRER_CUSTOM:
-				referrer = this.customReferrer;
+			case CUSTOM:
+				referrer = definition.getCustomReferrer();
 				break;
 			default:
 				referrer = "";
@@ -533,7 +437,7 @@ public class Rule extends Hoster {
 	 */
 	public String getFilename(String url) {
 		String retval = url;
-		if (pipelineFilenameDownloadSelection.getFilenameDownloadSelectionMode() == RuleFilenameMode.RULEPIPELINE_MODE_FILENAME_CONTAINER_URL_FILENAME_PART) {
+		if (pipelineFilenameDownloadSelection.getDefinition().getMode() == FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART) {
 			retval = getFilenamePart(url);
 		}
 		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval);
@@ -546,225 +450,11 @@ public class Rule extends Hoster {
 		if (restriction != null) {
 			removeRestriction(restriction);
 		}
-		if (maxConnections > 0 && maxConnectionDomains.size() > 0) {
-			restriction = new DownloadRestriction(maxConnectionDomains, maxConnections);
+		if (definition.getRestriction().getMaxConnections() > 0 && !definition.getRestriction().getDomain().isEmpty()) {
+			restriction = new DownloadRestriction(definition.getRestriction().getDomain(), definition.getRestriction().getMaxConnections());
 			addRestriction(restriction);
 		} else {
 			restriction = null;
-		}
-	}
-
-	/**
-	 * Read the rule from the XML-File
-	 * 
-	 * @return True if successful
-	 */
-	private boolean readRule() {
-		Document doc = null;
-		File file = new File(strFile);
-		try {
-			// Create new XML-Parser
-			SAXBuilder b = new SAXBuilder();
-			// Parse the file
-			doc = b.build(file);
-
-			// Check if there are all required elements
-			Element root = doc.getRootElement();
-			if (!(root.getName().equals("rule"))) {
-				doc = null;
-				root = null;
-				b = null;
-				logger.error("Could not load rule, because root tag is wrong: {}", file);
-				return false;
-			}
-
-			try {
-				this.name = root.getAttributeValue("name");
-				this.version = root.getAttributeValue("version");
-				try {
-					this.redirect = Boolean.parseBoolean(root.getAttributeValue("redirect"));
-				} catch (Exception exc) {
-				}
-				try {
-					this.resend = Boolean.parseBoolean(root.getAttributeValue("resend"));
-				} catch (Exception exc) {
-				}
-				try {
-					this.useContentDisposition = Boolean.parseBoolean(root.getAttributeValue("usecontentdisposition"));
-				} catch (Exception exc) {
-				}
-				try {
-					String strReducePathLength = root.getAttributeValue("reducePathLength");
-					if (strReducePathLength != null) {
-						this.reducePathLength = Boolean.parseBoolean(strReducePathLength);
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					String strReduceFilenameLength = root.getAttributeValue("reduceFilenameLength");
-					if (strReduceFilenameLength != null) {
-						this.reduceFilenameLength = Boolean.parseBoolean(strReduceFilenameLength);
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					int iRef = Integer.parseInt(root.getAttributeValue("referrermode"));
-					if (iRef >= 0 && iRef <= 4) {
-						this.referrerMode = ReferrerMode.getByValue(iRef);
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					int iRef = Integer.parseInt(root.getAttributeValue("referrermodedownload"));
-					if (iRef >= 0 && iRef <= 4) {
-						this.referrerModeDownload = ReferrerMode.getByValue(iRef);
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					if (root.getAttributeValue("customreferrer") != null) {
-						this.customReferrer = root.getAttributeValue("customreferrer");
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					if (root.getAttributeValue("customreferrerdownload") != null) {
-						this.customReferrerDownload = root.getAttributeValue("customreferrerdownload");
-					}
-				} catch (Exception exc) {
-				}
-				try {
-					if (root.getAttributeValue("duplicateRemoveMode") != null) {
-						int iDuplicateRemoveMode = Integer.parseInt(root.getAttributeValue("duplicateRemoveMode"));
-						this.duplicateRemoveMode = DuplicateRemoveMode.getByValue(iDuplicateRemoveMode);
-					}
-				} catch (Exception exc) {
-				}
-				if (root.getAttributeValue("sendCookies") != null) {
-					this.sendCookies = Boolean.parseBoolean(root.getAttributeValue("sendCookies"));
-				}
-			} catch (Exception ex) {
-				logger.error("Could not load rule: {}", file, ex);
-				return false;
-			}
-
-			Element ePipes = root.getChild("pipes");
-			if (ePipes != null) {
-				List<Element> liPipelines = ePipes.getChildren("pipeline");
-				Iterator<Element> it = liPipelines.iterator();
-				Element currentElement = null;
-				String currentMode = null;
-				while (it.hasNext()) {
-					currentElement = it.next();
-					currentMode = currentElement.getAttributeValue("mode");
-					if (currentMode != null) {
-						if (currentMode.equals(String.valueOf(RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL.getValue()))
-								|| currentMode.equals(String.valueOf(RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE.getValue()))) {
-							RulePipeline rp = new RulePipelineURLRegex(currentElement);
-							pipelines.add(rp);
-						} else if (currentMode.equals(String.valueOf(RuleMode.RULE_MODE_JAVASCRIPT.getValue()))) {
-							RulePipeline rp = new RulePipelineURLJavascript(currentElement);
-							pipelines.add(rp);
-						}
-					}
-				}
-			}
-
-			Element ePipesFailures = root.getChild("pipesFailures");
-			if (ePipesFailures != null) {
-				List<Element> liPipelines = ePipesFailures.getChildren("pipeline");
-				Iterator<Element> it = liPipelines.iterator();
-				while (it.hasNext()) {
-					RulePipeline rp = new RulePipelineFailures(it.next());
-					pipelinesFailures.add(rp);
-				}
-			}
-
-			/*
-			 * Now we look for Filename-Pipelines
-			 */
-			List<Element> li = root.getChildren("pipeline");
-			Iterator<Element> it = li.iterator();
-			while (it.hasNext()) {
-				RulePipeline rp = new RulePipelineFilename(it.next());
-				if (rp.getMode() == RuleMode.RULE_MODE_FILENAME) {
-					pipelineFilename = rp;
-				} else if (rp.getMode() == RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION) {
-					pipelineFilenameDownloadSelection = rp;
-				}
-			}
-
-			if (pipelineFilename == null) {
-				pipelineFilename = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME);
-			}
-			if (pipelineFilenameDownloadSelection == null) {
-				pipelineFilenameDownloadSelection = new RulePipelineFilename(RuleMode.RULE_MODE_FILENAME_ON_DOWNLOAD_SELECTION);
-			}
-
-			Element ep = root.getChild("urlpattern");
-			this.pattern = ep.getValue();
-
-			try {
-				Element eMaxConnections = root.getChild("maxConnections");
-				int iMaxCon = Integer.parseInt(eMaxConnections.getAttributeValue("value"));
-				if (iMaxCon > -1) {
-					this.maxConnections = iMaxCon;
-				}
-				List<Element> liMaxConDomains = eMaxConnections.getChildren("domain");
-				Iterator<Element> itMaxConDomains = liMaxConDomains.iterator();
-				while (itMaxConDomains.hasNext()) {
-					Element eMaxConDomain = itMaxConDomains.next();
-					String dom = eMaxConDomain.getAttributeValue("name");
-					if (dom.length() > 0) {
-						maxConnectionDomains.add(dom);
-					}
-				}
-				applyRestriction();
-			} catch (Exception ex) {
-			}
-
-			doc = null;
-			root = null;
-			b = null;
-			file = null;
-			return true;
-		} catch (Exception e) {
-			logger.error("Could not load rule: {}", file, e);
-			return false;
-		}
-	}
-
-	/**
-	 * Saves the rule to the XML-File
-	 * 
-	 * @return True if successful
-	 */
-	public boolean writeRule() {
-		File settingsPath = new File(ApplicationProperties.getProperty("ApplicationPath") + "rules");
-
-		// If the directory does not exist, create it
-		if (!settingsPath.exists()) {
-			settingsPath.mkdirs();
-		}
-
-		// Get the the Element
-		Element root = getXmlElement();
-		// Create new document
-		Document doc = new Document(root);
-		File file = new File(strFile);
-		try (FileOutputStream fos = new FileOutputStream(file)) {
-			// Create new outputter
-			XMLOutputter serializer = new XMLOutputter();
-			// This will create nice formated xml-file
-			serializer.setFormat(Format.getPrettyFormat());
-			// Write the data to the file
-			serializer.output(doc, fos);
-			// Close the file
-			fos.flush();
-			return true;
-		} catch (IOException e) {
-			logger.error("Could not save rule {} {}: {}", name, version, file.getAbsolutePath(), e);
-			return false;
 		}
 	}
 
@@ -773,23 +463,23 @@ public class Rule extends Hoster {
 	 * 
 	 * @return Element
 	 */
-	private Element getXmlElement() {
+	public Element getXmlElement() {
 		Element e = new Element("rule");
-		e.setAttribute("name", this.name);
-		e.setAttribute("version", this.version);
-		e.setAttribute("redirect", String.valueOf(this.redirect));
-		e.setAttribute("resend", String.valueOf(this.resend));
-		e.setAttribute("usecontentdisposition", String.valueOf(this.useContentDisposition));
-		e.setAttribute("reducePathLength", String.valueOf(this.reducePathLength));
-		e.setAttribute("reduceFilenameLength", String.valueOf(this.reduceFilenameLength));
-		e.setAttribute("referrermode", String.valueOf(this.referrerMode.getValue()));
-		e.setAttribute("referrermodedownload", String.valueOf(this.referrerModeDownload.getValue()));
-		e.setAttribute("customreferrer", this.customReferrer);
-		e.setAttribute("customreferrerdownload", this.customReferrerDownload);
-		e.setAttribute("duplicateRemoveMode", String.valueOf(this.duplicateRemoveMode.getValue()));
-		e.setAttribute("sendCookies", String.valueOf(this.sendCookies));
+		e.setAttribute("name", definition.getName());
+		e.setAttribute("version", definition.getVersion());
+		e.setAttribute("redirect", String.valueOf(definition.isRedirect()));
+		e.setAttribute("resend", String.valueOf(definition.isResend()));
+		e.setAttribute("usecontentdisposition", String.valueOf(definition.isUseContentDisposition()));
+		e.setAttribute("reducePathLength", String.valueOf(definition.isReducePathLength()));
+		e.setAttribute("reduceFilenameLength", String.valueOf(definition.isReduceFilenameLength()));
+		e.setAttribute("referrermode", String.valueOf(definition.getReferrerMode().ordinal()));
+		e.setAttribute("referrermodedownload", String.valueOf(definition.getDownloadReferrerMode().ordinal()));
+		e.setAttribute("customreferrer", definition.getCustomReferrer());
+		e.setAttribute("customreferrerdownload", definition.getDownloadCustomReferrer());
+		e.setAttribute("duplicateRemoveMode", String.valueOf(definition.getDuplicateRemoveMode().ordinal()));
+		e.setAttribute("sendCookies", String.valueOf(definition.isSendCookies()));
 		Element eup = new Element("urlpattern");
-		eup.setText(this.pattern);
+		eup.setText(definition.getUrlPattern());
 		e.addContent(eup);
 
 		Element ePipes = new Element("pipes");
@@ -809,14 +499,23 @@ public class Rule extends Hoster {
 			e.addContent(this.pipelineFilenameDownloadSelection.getXmlElement());
 		}
 		Element eMaxConnections = new Element("maxConnections");
-		eMaxConnections.setAttribute("value", String.valueOf(this.maxConnections));
-		for (int i = 0; i < maxConnectionDomains.size(); i++) {
+		eMaxConnections.setAttribute("value", String.valueOf(definition.getRestriction().getMaxConnections()));
+		for (int i = 0; i < definition.getRestriction().getDomain().size(); i++) {
 			Element eMaxConnectionDomain = new Element("domain");
-			eMaxConnectionDomain.setAttribute("name", maxConnectionDomains.get(i));
+			eMaxConnectionDomain.setAttribute("name", definition.getRestriction().getDomain().get(i));
 			eMaxConnections.addContent(eMaxConnectionDomain);
 		}
 		e.addContent(eMaxConnections);
 		return e;
+	}
+
+	/**
+	 * Returns the definition
+	 * 
+	 * @return definition
+	 */
+	public RuleDefinition getDefinition() {
+		return definition;
 	}
 
 	/**
@@ -825,16 +524,7 @@ public class Rule extends Hoster {
 	 * @return Name
 	 */
 	public String getName() {
-		return name;
-	}
-
-	/**
-	 * Sets the name
-	 * 
-	 * @param name Name
-	 */
-	public void setName(String name) {
-		this.name = name;
+		return definition.getName();
 	}
 
 	/**
@@ -843,36 +533,7 @@ public class Rule extends Hoster {
 	 * @return Version
 	 */
 	public String getVersion() {
-		return version;
-	}
-
-	/**
-	 * Sets the version
-	 * 
-	 * @param version Version
-	 */
-	public void setVersion(String version) {
-		this.version = version;
-	}
-
-	/**
-	 * Returns the Container-URL-Pattern
-	 * 
-	 * @return Container-URL-Pattern
-	 */
-	public String getPattern() {
-		return pattern;
-	}
-
-	/**
-	 * Sets the Container-URL-Pattern
-	 * 
-	 * @param pattern Container-URL-Pattern
-	 * @throws PatternSyntaxException
-	 */
-	public void setPattern(String pattern) throws PatternSyntaxException {
-		this.urlPattern = Pattern.compile(pattern);
-		this.pattern = pattern;
+		return definition.getVersion();
 	}
 
 	/**
@@ -881,7 +542,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return Pipelines
 	 */
-	public List<RulePipeline> getPipelines() {
+	public List<RuleURLPipeline<?>> getPipelines() {
 		return pipelines;
 	}
 
@@ -890,7 +551,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return pipelinesFailures
 	 */
-	public List<RulePipeline> getPipelinesFailures() {
+	public List<RulePipelineFailures> getPipelinesFailures() {
 		return pipelinesFailures;
 	}
 
@@ -899,7 +560,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return pipelineFilename
 	 */
-	public RulePipeline getPipelineFilename() {
+	public RulePipelineFilename getPipelineFilename() {
 		return pipelineFilename;
 	}
 
@@ -908,7 +569,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return pipelineFilenameDownloadSelection
 	 */
-	public RulePipeline getPipelineFilenameDownloadSelection() {
+	public RulePipelineFilenameDownloadSelection getPipelineFilenameDownloadSelection() {
 		return pipelineFilenameDownloadSelection;
 	}
 
@@ -930,206 +591,6 @@ public class Rule extends Hoster {
 		this.strFile = file.getAbsolutePath();
 	}
 
-	/**
-	 * Returns the redirect
-	 * 
-	 * @return redirect
-	 */
-	public boolean isRedirect() {
-		return redirect;
-	}
-
-	/**
-	 * Sets the redirect
-	 * 
-	 * @param redirect redirect
-	 */
-	public void setRedirect(boolean redirect) {
-		this.redirect = redirect;
-	}
-
-	/**
-	 * Returns if the URL must again be parsed by the HostManager
-	 * 
-	 * @return True if the URL must again be parsed by the HostManager
-	 */
-	public boolean isResend() {
-		return resend;
-	}
-
-	/**
-	 * Sets the flag
-	 * 
-	 * @param resend Flag if the URL must again be parsed by the HostManager
-	 */
-	public void setResend(boolean resend) {
-		this.resend = resend;
-	}
-
-	/**
-	 * Returns the useContentDisposition
-	 * 
-	 * @return useContentDisposition
-	 */
-	public boolean isUseContentDisposition() {
-		return useContentDisposition;
-	}
-
-	/**
-	 * Sets the useContentDisposition
-	 * 
-	 * @param useContentDisposition useContentDisposition
-	 */
-	public void setUseContentDisposition(boolean useContentDisposition) {
-		this.useContentDisposition = useContentDisposition;
-	}
-
-	/**
-	 * Returns the referrerMode
-	 * 
-	 * @return referrerMode
-	 */
-	public ReferrerMode getReferrerMode() {
-		return referrerMode;
-	}
-
-	/**
-	 * Sets the referrerMode
-	 * 
-	 * @param referrerMode referrerMode
-	 */
-	public void setReferrerMode(ReferrerMode referrerMode) {
-		this.referrerMode = referrerMode;
-	}
-
-	/**
-	 * Returns the referrerModeDownload
-	 * 
-	 * @return referrerModeDownload
-	 */
-	public ReferrerMode getReferrerModeDownload() {
-		return referrerModeDownload;
-	}
-
-	/**
-	 * Sets the referrerModeDownload
-	 * 
-	 * @param referrerModeDownload referrerModeDownload
-	 */
-	public void setReferrerModeDownload(ReferrerMode referrerModeDownload) {
-		this.referrerModeDownload = referrerModeDownload;
-	}
-
-	/**
-	 * Returns the customReferrer
-	 * 
-	 * @return customReferrer
-	 */
-	public String getCustomReferrer() {
-		return customReferrer;
-	}
-
-	/**
-	 * Sets the customReferrer
-	 * 
-	 * @param customReferrer customReferrer
-	 */
-	public void setCustomReferrer(String customReferrer) {
-		this.customReferrer = customReferrer;
-	}
-
-	/**
-	 * Returns the customReferrerDownload
-	 * 
-	 * @return customReferrerDownload
-	 */
-	public String getCustomReferrerDownload() {
-		return customReferrerDownload;
-	}
-
-	/**
-	 * Sets the customReferrerDownload
-	 * 
-	 * @param customReferrerDownload customReferrerDownload
-	 */
-	public void setCustomReferrerDownload(String customReferrerDownload) {
-		this.customReferrerDownload = customReferrerDownload;
-	}
-
-	/**
-	 * Returns the maxConnections
-	 * 
-	 * @return maxConnections
-	 */
-	public int getMaxConnections() {
-		return maxConnections;
-	}
-
-	/**
-	 * Sets the maxConnections
-	 * 
-	 * @param maxConnections maxConnections
-	 */
-	public void setMaxConnections(int maxConnections) {
-		this.maxConnections = maxConnections;
-		applyRestriction();
-	}
-
-	/**
-	 * Returns the maxConnectionDomains
-	 * 
-	 * @return maxConnectionDomains
-	 */
-	public List<String> getMaxConnectionDomains() {
-		return maxConnectionDomains;
-	}
-
-	/**
-	 * Sets the maxConnectionDomains
-	 * 
-	 * @param maxConnectionDomains maxConnectionDomains
-	 */
-	public void setMaxConnectionDomains(List<String> maxConnectionDomains) {
-		this.maxConnectionDomains = maxConnectionDomains;
-		applyRestriction();
-	}
-
-	/**
-	 * Returns the duplicateRemoveMode
-	 * 
-	 * @return duplicateRemoveMode
-	 */
-	public DuplicateRemoveMode getDuplicateRemoveMode() {
-		return duplicateRemoveMode;
-	}
-
-	/**
-	 * Sets the duplicateRemoveMode
-	 * 
-	 * @param duplicateRemoveMode duplicateRemoveMode
-	 */
-	public void setDuplicateRemoveMode(DuplicateRemoveMode duplicateRemoveMode) {
-		this.duplicateRemoveMode = duplicateRemoveMode;
-	}
-
-	/**
-	 * Returns the sendCookies
-	 * 
-	 * @return sendCookies
-	 */
-	public boolean isSendCookies() {
-		return sendCookies;
-	}
-
-	/**
-	 * Sets the sendCookies
-	 * 
-	 * @param sendCookies sendCookies
-	 */
-	public void setSendCookies(boolean sendCookies) {
-		this.sendCookies = sendCookies;
-	}
-
 	@Override
 	public boolean isEnabled() {
 		return !deactivateOption.isDeactivated();
@@ -1147,58 +608,22 @@ public class Rule extends Hoster {
 		return true;
 	}
 
-	/**
-	 * Returns the reducePathLength
-	 * 
-	 * @return reducePathLength
-	 */
-	public boolean isReducePathLength() {
-		return reducePathLength;
-	}
-
-	/**
-	 * Sets the reducePathLength
-	 * 
-	 * @param reducePathLength reducePathLength
-	 */
-	public void setReducePathLength(boolean reducePathLength) {
-		this.reducePathLength = reducePathLength;
-	}
-
-	/**
-	 * Returns the reduceFilenameLength
-	 * 
-	 * @return reduceFilenameLength
-	 */
-	public boolean isReduceFilenameLength() {
-		return reduceFilenameLength;
-	}
-
-	/**
-	 * Sets the reduceFilenameLength
-	 * 
-	 * @param reduceFilenameLength reduceFilenameLength
-	 */
-	public void setReduceFilenameLength(boolean reduceFilenameLength) {
-		this.reduceFilenameLength = reduceFilenameLength;
-	}
-
 	@Override
 	public boolean removeDuplicateEqualsMethod(URL url1, URL url2) {
 		boolean sameURL = super.removeDuplicateEqualsMethod(url1, url2);
-		switch (duplicateRemoveMode) {
-			case DUPLICATES_CONTAINER_URL_AND_THUMBNAIL_URL:
+		switch (definition.getDuplicateRemoveMode()) {
+			case CONTAINER_URL_AND_THUMBNAIL_URL:
 				return sameURL && url1.getThumb().equals(url2.getThumb());
-			case DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST:
+			case CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST:
 				return sameURL && url2.getThumb().isEmpty();
-			case DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST:
+			case CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST:
 				return sameURL && url2.getThumb().isEmpty();
-			case DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST:
+			case CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST:
 				return sameURL && url1.getThumb().isEmpty();
-			case DUPLICATES_CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST:
+			case CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST:
 				return sameURL && url1.getThumb().isEmpty();
-			case DUPLICATES_BH_DEFAULT:
-			case DUPLICATES_CONTAINER_URL_ONLY:
+			case DEFAULT:
+			case CONTAINER_URL_ONLY:
 			default:
 				return sameURL;
 		}
@@ -1206,7 +631,7 @@ public class Rule extends Hoster {
 
 	@Override
 	public String toString() {
-		return name;
+		return definition.getName();
 	}
 
 	/**
@@ -1217,16 +642,33 @@ public class Rule extends Hoster {
 	 * @return True if this rule can parse the URL
 	 */
 	public boolean isFromThisRedirect(String url, Rule sourceRule) {
-		if (redirect == false || sourceRule == this) {
+		if (definition.isRedirect() == false || sourceRule == this) {
 			return false;
 		}
 		if (deactivateOption.isDeactivated()) {
 			return false;
 		}
-		Matcher urlMatcher = urlPattern.matcher(url);
+		Matcher urlMatcher = compiledUrlPattern.matcher(url);
 		if (urlMatcher.matches()) {
 			return true;
 		}
 		return false;
+	}
+
+	/**
+	 * TODO Change to void method
+	 * TODO Maybe even remove the method
+	 * Write Rule
+	 * 
+	 * @return True if successful, false otherwise
+	 */
+	public boolean writeRule() {
+		try {
+			RuleIO ruleIO = new RuleIO();
+			return ruleIO.writeRule(this);
+		} catch (IOException | SAXException | JAXBException e) {
+			logger.error("Could not instance RuleIO");
+			return false;
+		}
 	}
 }

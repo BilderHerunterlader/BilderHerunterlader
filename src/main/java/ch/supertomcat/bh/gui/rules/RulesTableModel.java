@@ -3,7 +3,9 @@ package ch.supertomcat.bh.gui.rules;
 import javax.swing.table.DefaultTableModel;
 
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
+import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.rules.RuleURLPipeline;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -66,7 +68,7 @@ public class RulesTableModel extends DefaultTableModel {
 	}
 
 	private String getModeString(Rule rule) {
-		String strRedirect = rule.isRedirect() ? "Redirect | " : "";
+		String strRedirect = rule.getDefinition().isRedirect() ? "Redirect | " : "";
 		if (!rule.getPipelines().isEmpty()) {
 			int pipeCount = rule.getPipelines().size();
 
@@ -77,8 +79,8 @@ public class RulesTableModel extends DefaultTableModel {
 				strPipeCount = "";
 			}
 
-			RuleMode mode = rule.getPipelines().get(0).getMode();
-			if (mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+			RuleURLPipeline<?> firstPipe = rule.getPipelines().get(0);
+			if (firstPipe instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)firstPipe).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
 				return strRedirect + Localization.getString("RuleModeZeroShort") + strPipeCount;
 			} else {
 				return strRedirect + Localization.getString("RuleModeOneShort") + strPipeCount;

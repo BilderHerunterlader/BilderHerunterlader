@@ -30,10 +30,10 @@ import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RuleMode;
-import ch.supertomcat.bh.rules.RulePipeline;
+import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.bh.rules.RuleURLMode;
+import ch.supertomcat.bh.rules.xml.URLMode;
+import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
@@ -66,7 +66,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * RulePipeline
 	 */
-	private RulePipeline pipe = null;
+	private RulePipelineURLRegex pipe = null;
 
 	/**
 	 * Rule
@@ -77,7 +77,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * Mode
 	 */
-	private RuleMode mode = RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL;
+	private URLRegexPipelineMode mode = URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL;
 
 	/**
 	 * ButtonGroup
@@ -97,7 +97,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * URL-Mode
 	 */
-	private RuleURLMode urlMode = RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL;
+	private URLMode urlMode = URLMode.CONTAINER_URL;
 
 	/**
 	 * ButtonGroup
@@ -171,19 +171,17 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	/**
 	 * Constructor
 	 * 
-	 * @param mode Mode
 	 * @param rule Rule
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 * @param settingsManager Settings Manager
 	 */
-	public RulePipelinePanel(RuleMode mode, Rule rule, RulePipeline pipe, JDialog owner, SettingsManager settingsManager) {
-		super();
+	public RulePipelinePanel(Rule rule, RulePipelineURLRegex pipe, JDialog owner, SettingsManager settingsManager) {
 		this.owner = owner;
 		this.rule = rule;
 		this.pipe = pipe;
-		this.mode = mode;
-		this.urlMode = pipe.getURLMode();
+		this.mode = pipe.getDefinition().getMode();
+		this.urlMode = pipe.getDefinition().getUrlMode();
 		setLayout(new BorderLayout());
 
 		TitledBorder brd = BorderFactory.createTitledBorder(Localization.getString("Pipeline"));
@@ -232,7 +230,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		sp = new JScrollPane(table);
 
-		boolean bMode = (mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL);
+		boolean bMode = (mode == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL);
 		rbModeZero.setSelected(bMode);
 		rbModeOne.setSelected(!bMode);
 		bgMode.add(rbModeZero);
@@ -244,18 +242,18 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		bgURLMode.add(rbURLModeZero);
 		bgURLMode.add(rbURLModeOne);
 
-		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
-			boolean b = (urlMode == RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL);
+		if (this.mode == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
+			boolean b = (urlMode == URLMode.CONTAINER_URL);
 			rbURLModeZero.setSelected(b);
 			rbURLModeOne.setSelected(!b);
 		}
 
-		txtWaitBeforeExecute.setText(String.valueOf(this.pipe.getWaitBeforeExecute()));
+		txtWaitBeforeExecute.setText(String.valueOf(this.pipe.getDefinition().getWaitBeforeExecute()));
 
 		chkURLDecodeResult.setToolTipText(Localization.getString("RulePipelineURLDecodeResultToolTip"));
-		chkURLDecodeResult.setSelected(this.pipe.isUrlDecodeResult());
+		chkURLDecodeResult.setSelected(this.pipe.getDefinition().isUrlDecodeResult());
 
-		chkSendCookies.setSelected(this.pipe.isSendCookies());
+		chkSendCookies.setSelected(this.pipe.getDefinition().isSendCookies());
 
 		pnlRB.setLayout(new GridLayout(4, 3));
 		pnlRB.add(rbModeZero);
@@ -330,7 +328,7 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 		} else if (e.getSource() == rbModeZero || e.getSource() == rbModeOne) {
 			rbURLModeZero.setEnabled(rbModeZero.isSelected());
 			rbURLModeOne.setEnabled(rbModeZero.isSelected());
-			mode = rbModeZero.isSelected() ? RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL : RuleMode.RULE_MODE_CONTAINER_PAGE_SOURCECODE;
+			mode = rbModeZero.isSelected() ? URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL : URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE;
 		} else if (e.getSource() == btnUp) {
 			int row = table.getSelectedRow();
 			if (row > 0) {
@@ -353,12 +351,12 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 	 */
 	@Override
 	public void apply() {
-		pipe.setMode(mode);
-		if (this.mode == RuleMode.RULE_MODE_CONTAINER_OR_THUMBNAIL_URL) {
+		pipe.getDefinition().setMode(mode);
+		if (this.mode == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
 			if (rbURLModeZero.isSelected()) {
-				pipe.setURLMode(RuleURLMode.RULEPIPELINE_MODE_CONTAINER_URL);
+				pipe.getDefinition().setUrlMode(URLMode.CONTAINER_URL);
 			} else {
-				pipe.setURLMode(RuleURLMode.RULEPIPELINE_MODE_THUMBNAIL_URL);
+				pipe.getDefinition().setUrlMode(URLMode.THUMBNAIL_URL);
 			}
 		}
 		int waitBeforeExecute = 0;
@@ -366,9 +364,9 @@ public class RulePipelinePanel extends JPanel implements IRulePipelineURLPanel, 
 			waitBeforeExecute = Integer.parseInt(txtWaitBeforeExecute.getText());
 		} catch (NumberFormatException nfe) {
 		}
-		pipe.setWaitBeforeExecute(waitBeforeExecute);
-		pipe.setUrlDecodeResult(chkURLDecodeResult.isSelected());
-		pipe.setSendCookies(chkSendCookies.isSelected());
+		pipe.getDefinition().setWaitBeforeExecute(waitBeforeExecute);
+		pipe.getDefinition().setUrlDecodeResult(chkURLDecodeResult.isSelected());
+		pipe.getDefinition().setSendCookies(chkSendCookies.isSelected());
 	}
 
 	/**
