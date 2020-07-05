@@ -27,10 +27,13 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadRestriction;
+import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
 import ch.supertomcat.bh.rules.xml.FilenameMode;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
+import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLPipeline;
+import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -68,7 +71,7 @@ public class Rule extends Hoster {
 	/**
 	 * Pipelines
 	 */
-	private List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
+	private final List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
 
 	/**
 	 * Pipeline
@@ -83,7 +86,7 @@ public class Rule extends Hoster {
 	/**
 	 * pipelinesFailures
 	 */
-	private List<RulePipelineFailures> pipelinesFailures = new ArrayList<>();
+	private final List<RulePipelineFailures> pipelinesFailures = new ArrayList<>();
 
 	/**
 	 * restriction
@@ -118,6 +121,23 @@ public class Rule extends Hoster {
 	 */
 	public void updateFromDefinition() {
 		this.compiledUrlPattern = Pattern.compile(definition.getUrlPattern());
+		pipelines.clear();
+		for (URLPipeline pipeDefinition : definition.getPipes()) {
+			if (pipeDefinition instanceof URLRegexPipeline) {
+				pipelines.add(new RulePipelineURLRegex((URLRegexPipeline)pipeDefinition));
+			} else if (pipeDefinition instanceof URLJavascriptPipeline) {
+				pipelines.add(new RulePipelineURLJavascript((URLJavascriptPipeline)pipeDefinition));
+			}
+		}
+
+		pipelineFilename = new RulePipelineFilename(definition.getFilenamePipeline());
+
+		pipelineFilenameDownloadSelection = new RulePipelineFilenameDownloadSelection(definition.getFilenameDownloadSelectionPipeline());
+
+		for (FailuresPipeline failurePipeDefinition : definition.getFailuresPipes()) {
+			pipelinesFailures.add(new RulePipelineFailures(failurePipeDefinition));
+		}
+
 		applyRestriction();
 	}
 
