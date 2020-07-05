@@ -54,7 +54,10 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			e.setAttribute("mode", "1");
 		}
 		super.fillXmlElement(e);
-		// TODO Maybe i need to remove sendcookie attribute, because it seems to be only used by javascript?
+		/*
+		 * sendCookies was not saved previously for URLPipelines, which was probably a bug. So we remove the attribute here.
+		 */
+		e.removeAttribute("sendCookies");
 	}
 
 	/**

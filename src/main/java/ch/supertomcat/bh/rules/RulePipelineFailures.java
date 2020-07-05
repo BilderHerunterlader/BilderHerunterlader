@@ -41,7 +41,26 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 		e.setAttribute("checkURL", String.valueOf(definition.isCheckURL()));
 		e.setAttribute("checkThumbURL", String.valueOf(definition.isCheckThumbURL()));
 		e.setAttribute("checkPageSourceCode", String.valueOf(definition.isCheckPageSourceCode()));
-		e.setAttribute("failureType", String.valueOf(definition.getFailureType().ordinal()));
+		int mappedFailureType;
+		switch (definition.getFailureType()) {
+			case COMPLETE:
+				mappedFailureType = 3;
+				break;
+			case SLEEPING:
+				mappedFailureType = 0;
+				break;
+			case FAILED_FILE_TEMPORARY_OFFLINE:
+				mappedFailureType = 7;
+				break;
+			case FAILED_FILE_NOT_EXIST:
+				mappedFailureType = 6;
+				break;
+			case FAILED:
+			default:
+				mappedFailureType = 4;
+				break;
+		}
+		e.setAttribute("failureType", String.valueOf(mappedFailureType));
 		return e;
 	}
 
