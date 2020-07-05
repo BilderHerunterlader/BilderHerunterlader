@@ -62,13 +62,25 @@ public class RuleRegExp extends RegexReplace {
 	@Override
 	public void setSearch(String search) throws PatternSyntaxException {
 		super.setSearch(search);
-		definition.setPattern(search);
+		/*
+		 * defintion is null when the super constructor with parameters is called, but the constructors in this class will set the pattern anyway, so we can
+		 * just do nothing here
+		 */
+		if (definition != null) {
+			definition.setPattern(search);
+		}
 	}
 
 	@Override
 	public void setReplace(String replace) {
 		super.setReplace(replace);
-		definition.setReplacement(replace);
+		/*
+		 * defintion is null when the super constructor with parameters is called, but the constructors in this class will set the replacement anyway, so we can
+		 * just do nothing here
+		 */
+		if (definition != null) {
+			definition.setReplacement(replace);
+		}
 	}
 
 	/**
