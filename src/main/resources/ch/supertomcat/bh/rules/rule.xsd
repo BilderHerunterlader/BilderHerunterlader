@@ -86,12 +86,10 @@
 	
 	<!-- Regex -->
 	<xs:complexType name="RuleRegex">
-		<xs:sequence>
-			<!-- Required Regex Pattern -->
-			<xs:element name="pattern" type="xs:string" />
-			<!-- Required replacement -->
-			<xs:element name="replacement" type="xs:string" />
-		</xs:sequence>
+		<!-- Required Regex Pattern -->
+		<xs:attribute name="pattern" type="xs:string" use="required" />
+		<!-- Required replacement -->
+		<xs:attribute name="replacement" type="xs:string" use="required" />
 	</xs:complexType>
 	
 	<!-- URL Pipeline -->

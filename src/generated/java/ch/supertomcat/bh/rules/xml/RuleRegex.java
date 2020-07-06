@@ -2,7 +2,7 @@
 // Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
 // Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2020.07.06 um 10:52:58 PM CEST 
+// Generiert: 2020.07.06 um 11:08:45 PM CEST 
 //
 
 
@@ -10,7 +10,7 @@ package ch.supertomcat.bh.rules.xml;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlType;
 
 
@@ -23,10 +23,8 @@ import javax.xml.bind.annotation.XmlType;
  * &lt;complexType name="RuleRegex">
  *   &lt;complexContent>
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="pattern" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="replacement" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *       &lt;/sequence>
+ *       &lt;attribute name="pattern" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
+ *       &lt;attribute name="replacement" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     &lt;/restriction>
  *   &lt;/complexContent>
  * &lt;/complexType>
@@ -35,15 +33,12 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "RuleRegex", propOrder = {
-    "pattern",
-    "replacement"
-})
+@XmlType(name = "RuleRegex")
 public class RuleRegex {
 
-    @XmlElement(required = true)
+    @XmlAttribute(name = "pattern", required = true)
     protected String pattern;
-    @XmlElement(required = true)
+    @XmlAttribute(name = "replacement", required = true)
     protected String replacement;
 
     /**
