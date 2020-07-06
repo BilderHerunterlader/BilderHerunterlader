@@ -146,7 +146,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		for (Rule rule : rules) {
 			try {
 				ruleIO.writeRule(rule);
-			} catch (IOException e) {
+			} catch (IOException | JAXBException e) {
 				logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
 				result = false;
 			}
@@ -165,7 +165,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		try {
 			ruleIO.writeRule(rule);
 			return true;
-		} catch (IOException e) {
+		} catch (IOException | JAXBException e) {
 			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
 			return false;
 		}

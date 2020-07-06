@@ -459,12 +459,10 @@ public class RuleIO {
 	 * 
 	 * @param rule Rule
 	 * @throws IOException
+	 * @throws JAXBException
 	 */
-	public void writeRule(Rule rule) throws IOException {
-		/*
-		 * TODO Write rule in new format instead of old
-		 */
-		writeRuleOldFormat(rule);
+	public void writeRule(Rule rule) throws IOException, JAXBException {
+		writeRule(rule.getFile().getAbsolutePath(), rule.getDefinition());
 	}
 
 	/**
@@ -488,11 +486,13 @@ public class RuleIO {
 	}
 
 	/**
+	 * TODO Remove this method some time in the future, but keep it for now, just in case...
 	 * Saves the rule to the XML-File
 	 * 
 	 * @param rule Rule
 	 * @throws IOException
 	 */
+	@SuppressWarnings("unused")
 	private void writeRuleOldFormat(Rule rule) throws IOException {
 		File folder = rule.getFile().getParentFile();
 		if (folder != null) {
