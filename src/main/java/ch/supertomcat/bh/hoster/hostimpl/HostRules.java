@@ -8,8 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.xml.bind.JAXBException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
@@ -66,13 +69,22 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	private final HostManager hostManager;
 
 	/**
+	 * Rule IO
+	 */
+	private final RuleIO ruleIO;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param hostManager Host Manager
+	 * @throws JAXBException
+	 * @throws SAXException
+	 * @throws IOException
 	 */
-	public HostRules(HostManager hostManager) {
+	public HostRules(HostManager hostManager) throws IOException, SAXException, JAXBException {
 		super(NAME, VERSION, false);
 		this.hostManager = hostManager;
+		this.ruleIO = new RuleIO();
 		domains = new ArrayList<>();
 		domains.add("NODOMAINS");
 
@@ -132,11 +144,31 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	public synchronized boolean saveAllRules() {
 		boolean result = true;
 		for (Rule rule : rules) {
-			if (!rule.writeRule()) {
+			try {
+				ruleIO.writeRule(rule);
+			} catch (IOException e) {
+				logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
 				result = false;
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Save rule
+	 * 
+	 * @param rule Rule
+	 * 
+	 * @return True if rule was saved successfully, false otherwise
+	 */
+	public synchronized boolean saveRule(Rule rule) {
+		try {
+			ruleIO.writeRule(rule);
+			return true;
+		} catch (IOException e) {
+			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
+			return false;
+		}
 	}
 
 	/**

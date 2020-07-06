@@ -21,9 +21,11 @@ import java.util.concurrent.Executors;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
@@ -249,7 +251,14 @@ public abstract class BH {
 			@Override
 			public void run() {
 				DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
-				hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
+				try {
+					hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
+				} catch (IOException | SAXException | JAXBException e) {
+					logger.error("Could not initialize HostManager", e);
+					JOptionPane.showMessageDialog(null, "Could not initialize HostManager", "Error", JOptionPane.ERROR_MESSAGE);
+					System.exit(1);
+					return;
+				}
 				QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<PicDownloadListener, PicDownloadResult>() {
 					@Override
 					public QueueTask<PicDownloadListener, PicDownloadResult> createTaskCallable(PicDownloadListener task) {

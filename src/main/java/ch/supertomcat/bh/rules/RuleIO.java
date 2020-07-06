@@ -9,6 +9,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Iterator;
 import java.util.List;
 
@@ -141,7 +144,12 @@ public class RuleIO {
 		if (checkNewFormat(file)) {
 			return readRuleNewFormat(file);
 		} else {
-			return readRuleOldFormat(file);
+			RuleDefinition ruleDefinition = readRuleOldFormat(file);
+			Path oldFile = Paths.get(file);
+			Path backupFile = Paths.get(file + ".bak");
+			Files.move(oldFile, backupFile, StandardCopyOption.REPLACE_EXISTING);
+			writeRule(file, ruleDefinition);
+			return ruleDefinition;
 		}
 	}
 
@@ -165,7 +173,7 @@ public class RuleIO {
 	 * @return True if XML file is in new format, false otherwise
 	 * @throws IOException
 	 */
-	public boolean checkNewFormat(String file) throws IOException {
+	private boolean checkNewFormat(String file) throws IOException {
 		try (FileInputStream in = new FileInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -450,19 +458,13 @@ public class RuleIO {
 	 * Saves the rule to the XML-File
 	 * 
 	 * @param rule Rule
-	 * 
-	 * @return True if successful
+	 * @throws IOException
 	 */
-	public boolean writeRule(Rule rule) {
+	public void writeRule(Rule rule) throws IOException {
 		/*
 		 * TODO Write rule in new format instead of old
 		 */
-		try {
-			return writeRuleOldFormat(rule);
-		} catch (IOException e) {
-			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
-			return false;
-		}
+		writeRuleOldFormat(rule);
 	}
 
 	/**
@@ -474,7 +476,7 @@ public class RuleIO {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public void writeRule(String file, RuleDefinition ruleDefinition) throws IOException, JAXBException {
+	private void writeRule(String file, RuleDefinition ruleDefinition) throws IOException, JAXBException {
 		File folder = new File(file).getParentFile();
 		if (folder != null) {
 			Files.createDirectories(folder.toPath());
@@ -489,11 +491,9 @@ public class RuleIO {
 	 * Saves the rule to the XML-File
 	 * 
 	 * @param rule Rule
-	 * 
-	 * @return True if successful
 	 * @throws IOException
 	 */
-	private boolean writeRuleOldFormat(Rule rule) throws IOException {
+	private void writeRuleOldFormat(Rule rule) throws IOException {
 		File folder = rule.getFile().getParentFile();
 		if (folder != null) {
 			Files.createDirectories(folder.toPath());
@@ -512,10 +512,6 @@ public class RuleIO {
 			serializer.output(doc, fos);
 			// Close the file
 			fos.flush();
-			return true;
-		} catch (IOException e) {
-			logger.error("Could not save rule {} {}: {}", rule.getName(), rule.getVersion(), rule.getFile(), e);
-			return false;
 		}
 	}
 

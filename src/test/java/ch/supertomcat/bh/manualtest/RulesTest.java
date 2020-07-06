@@ -4,9 +4,12 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 
+import javax.xml.bind.JAXBException;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.BH;
 import ch.supertomcat.bh.exceptions.HostException;
@@ -46,7 +49,7 @@ class RulesTest {
 	}
 
 	@BeforeEach
-	public void beforeTest() {
+	public void beforeTest() throws IOException, SAXException, JAXBException {
 		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);

@@ -196,7 +196,7 @@ public class Rules extends JPanel {
 						return;
 					}
 					hostManager.getHostRules().addRule(r);
-					r.writeRule();
+					hostManager.getHostRules().saveRule(r);
 					model.addRow(r);
 					sorter.sort();
 				} catch (IOException | SAXException | JAXBException ex) {
@@ -222,7 +222,7 @@ public class Rules extends JPanel {
 					if (rme.getCanceled()) {
 						return;
 					}
-					r.writeRule();
+					hostManager.getHostRules().saveRule(r);
 					model.updateRow(row);
 					sorter.sort();
 				}

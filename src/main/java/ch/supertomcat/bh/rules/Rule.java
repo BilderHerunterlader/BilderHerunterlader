@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.rules;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -10,14 +9,11 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import javax.xml.bind.JAXBException;
-
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Hoster;
@@ -673,22 +669,5 @@ public class Rule extends Hoster {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * TODO Change to void method
-	 * TODO Maybe even remove the method
-	 * Write Rule
-	 * 
-	 * @return True if successful, false otherwise
-	 */
-	public boolean writeRule() {
-		try {
-			RuleIO ruleIO = new RuleIO();
-			return ruleIO.writeRule(this);
-		} catch (IOException | SAXException | JAXBException e) {
-			logger.error("Could not instance RuleIO");
-			return false;
-		}
 	}
 }

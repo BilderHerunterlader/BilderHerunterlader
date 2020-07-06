@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.hoster;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -12,9 +13,11 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.StampedLock;
 
 import javax.swing.JFrame;
+import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.classloader.HostClassesLoader;
@@ -86,8 +89,12 @@ public class HostManager {
 	 * @param proxyManager Proxy Manager
 	 * @param settingsManager Settings Manager
 	 * @param cookieManager Cookie Manager
+	 * @throws JAXBException
+	 * @throws SAXException
+	 * @throws IOException
 	 */
-	public HostManager(JFrame mainWindow, RestrictionAccess restrictionAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager) {
+	public HostManager(JFrame mainWindow, RestrictionAccess restrictionAccess, ProxyManager proxyManager, SettingsManager settingsManager,
+			CookieManager cookieManager) throws IOException, SAXException, JAXBException {
 		this.settingsManager = settingsManager;
 		Hoster.setMainWindow(mainWindow);
 		Hoster.setRestrictionAccess(restrictionAccess);
