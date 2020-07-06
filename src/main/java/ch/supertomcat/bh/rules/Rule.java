@@ -130,6 +130,7 @@ public class Rule extends Hoster {
 
 		pipelineFilenameDownloadSelection = new RulePipelineFilenameDownloadSelection(definition.getFilenameDownloadSelectionPipeline());
 
+		pipelinesFailures.clear();
 		for (FailuresPipeline failurePipeDefinition : definition.getFailuresPipes()) {
 			pipelinesFailures.add(new RulePipelineFailures(failurePipeDefinition));
 		}

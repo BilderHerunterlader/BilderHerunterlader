@@ -53,11 +53,6 @@ public class RulePipesPanel extends JPanel {
 	/**
 	 * pipelines
 	 */
-	private List<RuleURLPipeline<?>> originalPipelines = null;
-
-	/**
-	 * pipelines
-	 */
 	private List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
 
 	/**
@@ -105,7 +100,7 @@ public class RulePipesPanel extends JPanel {
 	public RulePipesPanel(Rule rule, JDialog owner, SettingsManager settingsManager) {
 		this.rule = rule;
 
-		originalPipelines = this.rule.getPipelines();
+		List<RuleURLPipeline<?>> originalPipelines = this.rule.getPipelines();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
 			if (originalPipelines.get(iPipe) instanceof RulePipelineURLJavascript) {
 				RulePipelineJavascriptPanel pnlPipe = new RulePipelineJavascriptPanel(this.rule, (RulePipelineURLJavascript)originalPipelines.get(iPipe), owner);
@@ -249,9 +244,14 @@ public class RulePipesPanel extends JPanel {
 		for (int i = 0; i < pnlPipelines.size(); i++) {
 			pnlPipelines.get(i).apply();
 		}
-		originalPipelines.clear();
+
+		rule.getDefinition().getPipes().clear();
 		for (int iPipe = 0; iPipe < pipelines.size(); iPipe++) {
-			originalPipelines.add(pipelines.get(iPipe));
+			/*
+			 * TODO all the editor classes should only edit the definition and not the wrapper classes.
+			 */
+			RuleURLPipeline<?> pipe = pipelines.get(iPipe);
+			rule.getDefinition().getPipes().add(pipe.getDefinition());
 		}
 	}
 }

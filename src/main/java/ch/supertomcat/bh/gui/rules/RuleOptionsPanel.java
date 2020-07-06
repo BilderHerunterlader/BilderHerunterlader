@@ -151,7 +151,7 @@ public class RuleOptionsPanel extends JPanel implements ItemListener {
 		for (ReferrerMode referrerMode : ReferrerMode.values()) {
 			cbReferrerModeDownload.addItem(referrerMode);
 		}
-		cbReferrerModeDownload.setSelectedItem(rule.getDefinition().getReferrerMode());
+		cbReferrerModeDownload.setSelectedItem(rule.getDefinition().getDownloadReferrerMode());
 		if ((ReferrerMode)cbReferrerModeDownload.getSelectedItem() == ReferrerMode.CUSTOM) {
 			txtCustomReferrerDownload.setEnabled(true);
 		} else {

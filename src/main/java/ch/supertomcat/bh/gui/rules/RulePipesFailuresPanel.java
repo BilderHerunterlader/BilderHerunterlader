@@ -51,11 +51,6 @@ public class RulePipesFailuresPanel extends JPanel {
 	/**
 	 * pipelines
 	 */
-	private List<RulePipelineFailures> originalPipelines = null;
-
-	/**
-	 * pipelines
-	 */
 	private List<RulePipelineFailures> pipelines = new ArrayList<>();
 
 	/**
@@ -98,7 +93,7 @@ public class RulePipesFailuresPanel extends JPanel {
 	public RulePipesFailuresPanel(Rule rule, JDialog owner, SettingsManager settingsManager) {
 		this.rule = rule;
 
-		originalPipelines = this.rule.getPipelinesFailures();
+		List<RulePipelineFailures> originalPipelines = this.rule.getPipelinesFailures();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
 			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, originalPipelines.get(iPipe), owner, settingsManager);
 			pnlPipelines.add(pnlPipe);
@@ -218,9 +213,14 @@ public class RulePipesFailuresPanel extends JPanel {
 		for (int i = 0; i < pnlPipelines.size(); i++) {
 			pnlPipelines.get(i).apply();
 		}
-		originalPipelines.clear();
+
+		rule.getDefinition().getFailuresPipes().clear();
 		for (int iPipe = 0; iPipe < pipelines.size(); iPipe++) {
-			originalPipelines.add(pipelines.get(iPipe));
+			RulePipelineFailures failurePipeline = pipelines.get(iPipe);
+			/*
+			 * TODO all the editor classes should only edit the definition and not the wrapper classes.
+			 */
+			rule.getDefinition().getFailuresPipes().add(failurePipeline.getDefinition());
 		}
 	}
 }
