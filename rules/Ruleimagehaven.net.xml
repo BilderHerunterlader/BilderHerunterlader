@@ -1,17 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="imagehaven.net" version="1.9" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://(www\.|(img|a)[0-9]+\.)?imagehaven\.net//?(vievver|img)\.php\?id=.+</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;img.+?src=[&quot;']./(.+?)[&quot;'].+?id=&quot;image&quot;" replace="$SRV$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="0">
-    <regexp search=".+?id=(.+)" replace="$1" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="0">
-    <regexp search=".+?id=(.+)" replace="$1" />
-  </pipeline>
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="imagehaven.net" version="1.10" redirect="false" resend="false">
+    <urlPattern>http://(www\.|(img|a)[0-9]+\.)?imagehaven\.net//?(vievver|img)\.php\?id=.+</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;img.+?src=[&quot;']./(.+?)[&quot;'].+?id=&quot;image&quot;" replacement="$SRV$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART">
+        <regexp pattern=".+?id=(.+)" replacement="$1"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART">
+        <regexp pattern=".+?id=(.+)" replacement="$1"/>
+    </filenameDownloadSelectionPipeline>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

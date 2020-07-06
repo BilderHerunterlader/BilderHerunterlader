@@ -1,16 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="imgiga.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="1" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://img[0-9]+\.imgiga\.com/img\.php\?id=.+</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;script type=&quot;text/javascript&quot; src=&quot;(imgiga/showimg\.php.+?)&quot;" replace="$URL$1" />
-    </pipeline>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;img id=&quot;scaled_image&quot;.+?src=&quot;(.+?)&quot;" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="0" />
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="imgiga.com" version="0.2" redirect="false" resend="false">
+    <urlPattern>http://img[0-9]+\.imgiga\.com/img\.php\?id=.+</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>LAST_CONTAINER_URL</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;script type=&quot;text/javascript&quot; src=&quot;(imgiga/showimg\.php.+?)&quot;" replacement="$URL$1"/>
+    </pipes>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;img id=&quot;scaled_image&quot;.+?src=&quot;(.+?)&quot;" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

@@ -1,13 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="Redirecthc-bb-international.com" version="0.5" redirect="true" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>^http://www\.hc-bb-international\.com/redirector\.php\?url=(.*)</urlpattern>
-  <pipes>
-    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="^http://www\.hc-bb-international\.com/redirector\.php\?url=(.*)" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="0" />
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="Redirecthc-bb-international.com" version="0.6" redirect="true" resend="false">
+    <urlPattern>^http://www\.hc-bb-international\.com/redirector\.php\?url=(.*)</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="^http://www\.hc-bb-international\.com/redirector\.php\?url=(.*)" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

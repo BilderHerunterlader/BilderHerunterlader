@@ -1,15 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="artstation.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>https://www\.artstation\.com/artwork/.+?</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&quot;image_url\\&quot;:\\&quot;(.+?)large(.+?)&quot;" replace="$1large$2" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="4">
-    <regexp search="&lt;title&gt;(.+?) - (.+?), (.+?)&lt;\/title&gt;" replace="$2_by_$3\.jpg" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="artstation.com" version="0.2" redirect="false" resend="false">
+    <urlPattern>https://www\.artstation\.com/artwork/.+?</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&quot;image_url\\&quot;:\\&quot;(.+?)large(.+?)&quot;" replacement="$1large$2"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="&lt;title&gt;(.+?) - (.+?), (.+?)&lt;\/title&gt;" replacement="$2_by_$3\.jpg"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

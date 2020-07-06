@@ -1,13 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="sexybabepics.net" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>^https?://(?:www\.)?sexybabepics\.net/img-.+?\.html$</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;a href='(.+?)'.+?&lt;img class='centred_resized' src='.+?' alt='image'" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="0" />
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="sexybabepics.net" version="0.2" redirect="false" resend="false">
+    <urlPattern>^https?://(?:www\.)?sexybabepics\.net/img-.+?\.html$</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;a href='(.+?)'.+?&lt;img class='centred_resized' src='.+?' alt='image'" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

@@ -1,17 +1,22 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="500px.com" version="0.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="false" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>https://500px\.com/photo/.+?</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="1" urlDecodeResult="true">
-      <regexp search="&lt;meta content=[&quot;'](https://.+?\.500px\.org/photo/.+?/.+?/.+?)[&quot;'] property=[&quot;']og:image[&quot;']&gt;" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures>
-    <pipeline mode="4" checkURL="true" checkThumbURL="true" checkPageSourceCode="false" failureType="6" />
-  </pipesFailures>
-  <pipeline mode="2" filenamemode="4">
-    <regexp search="&lt;title&gt;(.+?) / 500px&lt;/title&gt;" replace="$1.jpg" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="500px.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https://500px\.com/photo/.+?</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>false</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="1" urlDecodeResult="true" sendCookies="true">
+        <regexp pattern="&lt;meta content=[&quot;'](https://.+?\.500px\.org/photo/.+?/.+?/.+?)[&quot;'] property=[&quot;']og:image[&quot;']&gt;" replacement="$1"/>
+    </pipes>
+    <failuresPipes failureType="FAILED_FILE_NOT_EXIST" checkURL="true" checkThumbURL="true" checkPageSourceCode="false"/>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="&lt;title&gt;(.+?) / 500px&lt;/title&gt;" replacement="$1.jpg"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

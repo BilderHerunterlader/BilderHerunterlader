@@ -1,17 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="directupload.net" version="1.9" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;meta property=&quot;og:image&quot; content=&quot;(.+?)&quot;" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="1">
-    <regexp search="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replace="$2.$3" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="1">
-    <regexp search="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replace="$2.$3" />
-  </pipeline>
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="directupload.net" version="1.10" redirect="false" resend="false">
+    <urlPattern>(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;meta property=&quot;og:image&quot; content=&quot;(.+?)&quot;" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL">
+        <regexp pattern="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL">
+        <regexp pattern="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
+    </filenameDownloadSelectionPipeline>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

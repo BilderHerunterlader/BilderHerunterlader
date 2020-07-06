@@ -1,17 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="images-box.com_image" version="0.7" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://(www\.)?images-box\.com/([a-z]-[a-zA-Z0-9]+/)?[a-z]-[a-zA-Z0-9]+(.+?)?\.html</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;img src='(http://(www\.)?images-box\.com/(./)?(gallerie/)?uploads/.*?)'" replace="$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="6">
-    <regexp search="[a-zA-Z0-9]+_(.+)" replace="$1" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="0">
-    <regexp search="[a-z]-[a-zA-Z0-9]+_?(.+?)?\.html" replace="$1" />
-  </pipeline>
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="images-box.com_image" version="0.8" redirect="false" resend="false">
+    <urlPattern>http://(www\.)?images-box\.com/([a-z]-[a-zA-Z0-9]+/)?[a-z]-[a-zA-Z0-9]+(.+?)?\.html</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;img src='(http://(www\.)?images-box\.com/(./)?(gallerie/)?uploads/.*?)'" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="DOWNLOAD_URL_FILENAME_PART">
+        <regexp pattern="[a-zA-Z0-9]+_(.+)" replacement="$1"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART">
+        <regexp pattern="[a-z]-[a-zA-Z0-9]+_?(.+?)?\.html" replacement="$1"/>
+    </filenameDownloadSelectionPipeline>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

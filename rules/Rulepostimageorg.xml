@@ -1,15 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="postimageorg" version="1.2" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="1" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>https?://(www\.)?post(?:image|img)\.(?:org|cc)/(?:image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)|[0-9a-zA-Z]+)</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="(?:&lt;img id=&quot;main-image&quot; src=&quot;(https?:).+?&quot;.+?data-full=&quot;(//.+?)&quot;|&lt;a.+?href=&quot;(.+?)\?dl=1&quot;)" replace="$1$2$3" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="4" />
-  <pipeline mode="3" filenameDownloadSelectionMode="0">
-    <regexp search="https?://post(?:image|img)\.(?:org|cc)/(?:image/)?(.+?)/" replace="$1.jpg" />
-  </pipeline>
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="postimageorg" version="1.3" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?post(?:image|img)\.(?:org|cc)/(?:image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)|[0-9a-zA-Z]+)</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>LAST_CONTAINER_URL</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="(?:&lt;img id=&quot;main-image&quot; src=&quot;(https?:).+?&quot;.+?data-full=&quot;(//.+?)&quot;|&lt;a.+?href=&quot;(.+?)\?dl=1&quot;)" replacement="$1$2$3"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE"/>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART">
+        <regexp pattern="https?://post(?:image|img)\.(?:org|cc)/(?:image/)?(.+?)/" replacement="$1.jpg"/>
+    </filenameDownloadSelectionPipeline>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

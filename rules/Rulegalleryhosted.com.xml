@@ -1,18 +1,24 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="galleryhosted.com" version="0.1" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://www\.galleryhosted\.com/.+?/.+?</urlpattern>
-  <pipes>
-    <pipeline mode="1" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="&lt;div.+?id=&quot;preview&quot;.+?&gt;&lt;img src=&quot;(.+?)&quot;" replace="$SRV$1" />
-    </pipeline>
-    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="thumbs_.+?/" replace="original/" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="4">
-    <regexp search="(?s)&lt;title&gt;(.+?) - Free Image Hosting.+?&lt;div.+?id=&quot;preview&quot;.+?&gt;&lt;img src=&quot;.+?\.([^.]+?)&quot;" replace="$1.$2" />
-  </pipeline>
-  <pipeline mode="3" filenameDownloadSelectionMode="0" />
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="galleryhosted.com" version="0.2" redirect="false" resend="false">
+    <urlPattern>http://www\.galleryhosted\.com/.+?/.+?</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;div.+?id=&quot;preview&quot;.+?&gt;&lt;img src=&quot;(.+?)&quot;" replacement="$SRV$1"/>
+    </pipes>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="thumbs_.+?/" replacement="original/"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="(?s)&lt;title&gt;(.+?) - Free Image Hosting.+?&lt;div.+?id=&quot;preview&quot;.+?&gt;&lt;img src=&quot;.+?\.([^.]+?)&quot;" replacement="$1.$2"/>
+    </filenamePipeline>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <restriction maxConnections="0"/>
+</ruleDefinition>

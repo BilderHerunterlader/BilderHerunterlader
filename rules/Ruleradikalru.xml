@@ -1,15 +1,21 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule name="radikal.ru" version="0.4" redirect="false" resend="false" usecontentdisposition="false" reducePathLength="true" reduceFilenameLength="true" referrermode="0" referrermodedownload="1" customreferrer="" customreferrerdownload="" duplicateRemoveMode="0" sendCookies="true">
-  <urlpattern>http://.*?radikal\.ru/[a-zA-Z]+/.*?(\.html)</urlpattern>
-  <pipes>
-    <pipeline mode="0" urlmode="0" waitBeforeExecute="0" urlDecodeResult="false">
-      <regexp search="http://.*?radikal\.ru/[a-zA-Z]+/(.*?)(\.html)" replace="http://$1" />
-    </pipeline>
-  </pipes>
-  <pipesFailures />
-  <pipeline mode="2" filenamemode="0" />
-  <pipeline mode="3" filenameDownloadSelectionMode="0">
-    <regexp search="(.*?)(\.html)" replace="$1" />
-  </pipeline>
-  <maxConnections value="0" />
-</rule>
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ruleDefinition name="radikal.ru" version="0.5" redirect="false" resend="false">
+    <urlPattern>http://.*?radikal\.ru/[a-zA-Z]+/.*?(\.html)</urlPattern>
+    <useContentDisposition>false</useContentDisposition>
+    <reducePathLength>true</reducePathLength>
+    <reduceFilenameLength>true</reduceFilenameLength>
+    <referrerMode>NO_REFERRER</referrerMode>
+    <customReferrer></customReferrer>
+    <downloadReferrerMode>LAST_CONTAINER_URL</downloadReferrerMode>
+    <downloadCustomReferrer></downloadCustomReferrer>
+    <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
+    <sendCookies>true</sendCookies>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="http://.*?radikal\.ru/[a-zA-Z]+/(.*?)(\.html)" replacement="http://$1"/>
+    </pipes>
+    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART">
+        <regexp pattern="(.*?)(\.html)" replacement="$1"/>
+    </filenameDownloadSelectionPipeline>
+    <restriction maxConnections="0"/>
+</ruleDefinition>
