@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.rules;
+package ch.supertomcat.bh.manualtest;
 
 import java.io.IOException;
 
@@ -8,7 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.xml.sax.SAXException;
 
-class RuleTest {
+import ch.supertomcat.bh.rules.RuleIO;
+
+class DefaultRuleTest {
 	private RuleIO ruleIO;
 
 	@BeforeEach
