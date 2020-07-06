@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
 	<!-- Root Element -->
-	<xs:element name="ruleDefinition" type="RuleDefinition" />
-	
-	<!-- Rule Definition -->
-	<xs:complexType name="RuleDefinition">
-		<xs:sequence>
-			<xs:element name="urlPattern" type="xs:string" />
-			
-			<xs:element name="useContentDisposition" type="xs:boolean" />
-			<xs:element name="reducePathLength" type="xs:boolean" />
-			<xs:element name="reduceFilenameLength" type="xs:boolean" />
-			
-			<xs:element name="referrerMode" type="ReferrerMode" />
-			<xs:element name="customReferrer" type="xs:string" />
-			
-			<xs:element name="downloadReferrerMode" type="ReferrerMode" />
-			<xs:element name="downloadCustomReferrer" type="xs:string" />
-			
-			<xs:element name="duplicateRemoveMode" type="DuplicateRemoveMode" />
-			
-			<xs:element name="sendCookies" type="xs:boolean" />
-			
-			<!-- TODO Does this actually work or do I have to specify a choice here between regex and javascript ? -->
-			<xs:element name="pipes" type="URLPipeline" minOccurs="0" maxOccurs="unbounded" />
-			
-			<xs:element name="failuresPipes" type="FailuresPipeline" minOccurs="0" maxOccurs="unbounded" />
-			
-			<xs:element name="filenamePipeline" type="FilenamePipeline" />
-			
-			<xs:element name="filenameDownloadSelectionPipeline" type="FilenameDownloadSelectionPipeline" />
-			
-			<xs:element name="restriction" type="Restriction" />
-		</xs:sequence>
-		<!-- Required Rule Name -->
-		<xs:attribute name="name" type="xs:string" use="required" />
-		<!-- Required Rule Version -->
-		<xs:attribute name="version" type="xs:string" use="required" />
-		<!-- Required Redirect Flag -->
-		<xs:attribute name="redirect" type="xs:boolean" use="required" />
-		<!-- Required Required Resend Flag -->
-		<xs:attribute name="resend" type="xs:boolean" use="required" />
-	</xs:complexType>
+	<xs:element name="ruleDefinition">
+		<!-- Rule Definition -->
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="urlPattern" type="xs:string" />
+				
+				<xs:element name="useContentDisposition" type="xs:boolean" />
+				<xs:element name="reducePathLength" type="xs:boolean" />
+				<xs:element name="reduceFilenameLength" type="xs:boolean" />
+				
+				<xs:element name="referrerMode" type="ReferrerMode" />
+				<xs:element name="customReferrer" type="xs:string" />
+				
+				<xs:element name="downloadReferrerMode" type="ReferrerMode" />
+				<xs:element name="downloadCustomReferrer" type="xs:string" />
+				
+				<xs:element name="duplicateRemoveMode" type="DuplicateRemoveMode" />
+				
+				<xs:element name="sendCookies" type="xs:boolean" />
+				
+				<!-- TODO Does this actually work or do I have to specify a choice here between regex and javascript ? -->
+				<xs:element name="pipes" type="URLPipeline" minOccurs="0" maxOccurs="unbounded" />
+				
+				<xs:element name="failuresPipes" type="FailuresPipeline" minOccurs="0" maxOccurs="unbounded" />
+				
+				<xs:element name="filenamePipeline" type="FilenamePipeline" />
+				
+				<xs:element name="filenameDownloadSelectionPipeline" type="FilenameDownloadSelectionPipeline" />
+				
+				<xs:element name="restriction" type="Restriction" />
+			</xs:sequence>
+			<!-- Required Rule Name -->
+			<xs:attribute name="name" type="xs:string" use="required" />
+			<!-- Required Rule Version -->
+			<xs:attribute name="version" type="xs:string" use="required" />
+			<!-- Required Redirect Flag -->
+			<xs:attribute name="redirect" type="xs:boolean" use="required" />
+			<!-- Required Required Resend Flag -->
+			<xs:attribute name="resend" type="xs:boolean" use="required" />
+		</xs:complexType>
+	</xs:element>
 	
 	<!-- Restriction -->
 	<xs:complexType name="Restriction">
