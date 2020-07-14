@@ -435,6 +435,7 @@ public class RuleMainEditor extends JDialog implements ActionListener, ItemListe
 			pnlFilename.redirectEnabled(enabled);
 			pnlFilenameDownloadSelection.redirectEnabled(enabled);
 			pnlRuleOptions.redirectEnabled(enabled);
+			pnlConnections.redirectEnabled(enabled);
 		}
 	}
 }

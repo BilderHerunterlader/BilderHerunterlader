@@ -90,7 +90,6 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 	 * @param rule Rule
 	 */
 	public RuleConnectionsPanel(Rule rule) {
-		super();
 		this.rule = rule;
 
 		lstMaxConnectionsDomains.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -143,11 +142,6 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 		rule.getDefinition().getRestriction().getDomain().addAll(domains);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnMaxConnectionsDomainsAdd) {
