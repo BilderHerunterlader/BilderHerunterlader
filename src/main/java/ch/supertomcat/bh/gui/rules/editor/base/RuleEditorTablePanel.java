@@ -1,6 +1,5 @@
 package ch.supertomcat.bh.gui.rules.editor.base;
 
-import java.awt.event.ActionEvent;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -47,7 +46,7 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 	/**
 	 * Button Panel
 	 */
-	protected final RuleEditorButtonPanel buttonPanel;
+	protected final RuleEditorDefaultButtonPanel buttonPanel;
 
 	/**
 	 * Constructor
@@ -63,38 +62,13 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 		this.table = new JTable(model);
 		this.scrollPane = new JScrollPane(this.table);
 		this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		this.buttonPanel = new RuleEditorButtonPanel(true) {
 
-			/**
-			 * serialVersionUID
-			 */
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void actionNew(ActionEvent e) {
-				RuleEditorTablePanel.this.actionNew();
-			}
-
-			@Override
-			protected void actionEdit(ActionEvent e) {
-				RuleEditorTablePanel.this.actionEdit();
-			}
-
-			@Override
-			protected void actionUp(ActionEvent e) {
-				RuleEditorTablePanel.this.actionUp();
-			}
-
-			@Override
-			protected void actionDown(ActionEvent e) {
-				RuleEditorTablePanel.this.actionDown();
-			}
-
-			@Override
-			protected void actionDelete(ActionEvent e) {
-				RuleEditorTablePanel.this.actionDelete();
-			}
-		};
+		this.buttonPanel = new RuleEditorDefaultButtonPanel(true);
+		this.buttonPanel.addNewActionListener(e -> actionNew());
+		this.buttonPanel.addEditActionListener(e -> actionEdit());
+		this.buttonPanel.addUpActionListener(e -> actionUp());
+		this.buttonPanel.addDownActionListener(e -> actionDown());
+		this.buttonPanel.addDeleteActionListener(e -> actionDelete());
 	}
 
 	private void actionNew() {

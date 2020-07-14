@@ -1,105 +1,117 @@
 package ch.supertomcat.bh.gui.rules.editor.base;
 
-import java.awt.event.ActionEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
-import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
- * Panel with buttons to edit a table or list
+ * Panel with buttons
  */
 public abstract class RuleEditorButtonPanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Button
+	 * List of Buttons
 	 */
-	protected JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	protected final List<JButton> buttons = new ArrayList<>();
 
 	/**
-	 * Button
+	 * Constructor
 	 */
-	protected JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
-
-	/**
-	 * Button
-	 */
-	protected JButton btnUp = new JButton(Localization.getString("Up"), Icons.getTangoIcon("actions/go-up.png", 16));
-
-	/**
-	 * Button
-	 */
-	protected JButton btnDown = new JButton(Localization.getString("Down"), Icons.getTangoIcon("actions/go-down.png", 16));
-
-	/**
-	 * Button
-	 */
-	protected JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	public RuleEditorButtonPanel() {
+		this((List<JButton>)null);
+	}
 
 	/**
 	 * Constructor
 	 * 
-	 * @param editButton True if edit button is available, false otherwise
+	 * @param buttons Buttons
 	 */
-	public RuleEditorButtonPanel(boolean editButton) {
-		setLayout(new SpringLayout());
-		add(btnNew);
-		if (editButton) {
-			add(btnEdit);
-		}
-		add(btnUp);
-		add(btnDown);
-		add(btnDelete);
-		int buttonCount = 4;
-		if (editButton) {
-			buttonCount++;
-		}
-		SpringUtilities.makeCompactGrid(this, buttonCount, 1, 0, 0, 5, 5);
-
-		btnNew.addActionListener(e -> actionNew(e));
-		btnEdit.addActionListener(e -> actionEdit(e));
-		btnUp.addActionListener(e -> actionUp(e));
-		btnDown.addActionListener(e -> actionDown(e));
-		btnDelete.addActionListener(e -> actionDelete(e));
+	public RuleEditorButtonPanel(JButton... buttons) {
+		this(Arrays.asList(buttons));
 	}
 
 	/**
-	 * Action New
+	 * Constructor
 	 * 
-	 * @param e ActionEvent
+	 * @param buttons Buttons
 	 */
-	protected abstract void actionNew(ActionEvent e);
+	public RuleEditorButtonPanel(List<JButton> buttons) {
+		setLayout(new SpringLayout());
+
+		if (buttons != null) {
+			addButtons(buttons);
+		}
+	}
 
 	/**
-	 * Action Edit
-	 * 
-	 * @param e ActionEvent
+	 * Update Layout
 	 */
-	protected abstract void actionEdit(ActionEvent e);
+	protected void updateLayout() {
+		SpringUtilities.makeCompactGrid(this, buttons.size(), 1, 0, 0, 5, 5);
+	}
 
 	/**
-	 * Action Up
+	 * Add Button
 	 * 
-	 * @param e ActionEvent
+	 * @param button Button
 	 */
-	protected abstract void actionUp(ActionEvent e);
+	public void addButton(JButton button) {
+		buttons.add(button);
+	}
 
 	/**
-	 * Action Down
+	 * Add Buttons
 	 * 
-	 * @param e ActionEvent
+	 * @param buttons Buttons
 	 */
-	protected abstract void actionDown(ActionEvent e);
+	public void addButtons(List<JButton> buttons) {
+		for (JButton button : buttons) {
+			addButton(button);
+		}
+	}
 
 	/**
-	 * Action Delete
+	 * Add Buttons
 	 * 
-	 * @param e ActionEvent
+	 * @param buttons Buttons
 	 */
-	protected abstract void actionDelete(ActionEvent e);
+	public void addButtons(JButton... buttons) {
+		addButtons(Arrays.asList(buttons));
+	}
+
+	/**
+	 * Remove Button
+	 * 
+	 * @param button Button
+	 */
+	public void removeButton(JButton button) {
+		buttons.remove(button);
+	}
+
+	/**
+	 * Remove Buttons
+	 * 
+	 * @param buttons Buttons
+	 */
+	public void removeButtons(List<JButton> buttons) {
+		for (JButton button : buttons) {
+			removeButton(button);
+		}
+	}
+
+	/**
+	 * Remove Buttons
+	 * 
+	 * @param buttons Buttons
+	 */
+	public void removeButtons(JButton... buttons) {
+		removeButtons(Arrays.asList(buttons));
+	}
 }

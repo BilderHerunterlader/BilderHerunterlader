@@ -15,7 +15,7 @@ import javax.swing.event.ListSelectionListener;
  * @param <E> Element Type
  * @param <T> Table Model Type
  */
-public class RuleEditorListSelectionPanel<E extends JComponent, T extends DefaultListModel<E>> extends RuleEditorListPanelBase<E, T> {
+public class RuleEditorListSelectionPanel<E extends JComponent, T extends DefaultListModel<E>> extends RuleEditorListPanelBase<E, T, RuleEditorDefaultButtonPanel> {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -30,7 +30,13 @@ public class RuleEditorListSelectionPanel<E extends JComponent, T extends Defaul
 	 * @param actionNewSupplier Supplier for action new
 	 */
 	public RuleEditorListSelectionPanel(T model, Supplier<E> actionNewSupplier) {
-		super(model, actionNewSupplier, false);
+		super(model, actionNewSupplier, new RuleEditorDefaultButtonPanel(false));
+
+		buttonPanel.addNewActionListener(e -> actionNew());
+		buttonPanel.addEditActionListener(e -> actionEdit());
+		buttonPanel.addUpActionListener(e -> actionUp());
+		buttonPanel.addDownActionListener(e -> actionDown());
+		buttonPanel.addDeleteActionListener(e -> actionDelete());
 
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override

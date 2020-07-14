@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.gui.rules.editor.base;
 
 import java.awt.BorderLayout;
-import java.awt.event.ActionEvent;
 import java.util.function.Supplier;
 
 import javax.swing.DefaultListModel;
@@ -15,8 +14,9 @@ import javax.swing.ListSelectionModel;
  * 
  * @param <E> Element Type
  * @param <T> Table Model Type
+ * @param <B> Button Panel Type
  */
-public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>> extends JPanel {
+public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>, B extends RuleEditorButtonPanel> extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -42,48 +42,21 @@ public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>> extends J
 	/**
 	 * Button Panel
 	 */
-	protected final RuleEditorButtonPanel buttonPanel;
+	protected final B buttonPanel;
 
 	/**
 	 * Constructor
 	 * 
 	 * @param model Table Model
 	 * @param actionNewSupplier Supplier for action new
-	 * @param editButton True if edit button is available, false otherwise
+	 * @param buttonPanel Button Panel
 	 */
-	public RuleEditorListPanelBase(T model, Supplier<E> actionNewSupplier, boolean editButton) {
+	public RuleEditorListPanelBase(T model, Supplier<E> actionNewSupplier, B buttonPanel) {
 		this.model = model;
 		this.actionNewSupplier = actionNewSupplier;
 		this.list = new JList<>(model);
 		this.scrollPane = new JScrollPane(this.list);
-		this.buttonPanel = new RuleEditorButtonPanel(editButton) {
-			private static final long serialVersionUID = 1L;
-
-			@Override
-			protected void actionNew(ActionEvent e) {
-				RuleEditorListPanelBase.this.actionNew();
-			}
-
-			@Override
-			protected void actionEdit(ActionEvent e) {
-				RuleEditorListPanelBase.this.actionEdit();
-			}
-
-			@Override
-			protected void actionUp(ActionEvent e) {
-				RuleEditorListPanelBase.this.actionUp();
-			}
-
-			@Override
-			protected void actionDown(ActionEvent e) {
-				RuleEditorListPanelBase.this.actionDown();
-			}
-
-			@Override
-			protected void actionDelete(ActionEvent e) {
-				RuleEditorListPanelBase.this.actionDelete();
-			}
-		};
+		this.buttonPanel = buttonPanel;
 
 		this.list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.list.setVisibleRowCount(10);

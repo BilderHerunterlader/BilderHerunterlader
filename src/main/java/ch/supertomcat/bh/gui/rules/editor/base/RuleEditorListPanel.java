@@ -11,7 +11,7 @@ import javax.swing.DefaultListModel;
  * @param <E> Element Type
  * @param <T> Table Model Type
  */
-public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleEditorListPanelBase<E, T> {
+public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleEditorListPanelBase<E, T, RuleEditorDefaultButtonPanel> {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -27,8 +27,14 @@ public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleE
 	 * @param actionEditFunction Function for action edit
 	 */
 	public RuleEditorListPanel(T model, Supplier<E> actionNewSupplier, Function<E, E> actionEditFunction) {
-		super(model, actionNewSupplier, true);
+		super(model, actionNewSupplier, new RuleEditorDefaultButtonPanel(true));
 		this.actionEditFunction = actionEditFunction;
+
+		buttonPanel.addNewActionListener(e -> actionNew());
+		buttonPanel.addEditActionListener(e -> actionEdit());
+		buttonPanel.addUpActionListener(e -> actionUp());
+		buttonPanel.addDownActionListener(e -> actionDown());
+		buttonPanel.addDeleteActionListener(e -> actionDelete());
 	}
 
 	@Override
