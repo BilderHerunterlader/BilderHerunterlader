@@ -16,6 +16,7 @@ import javax.swing.event.ListSelectionListener;
 
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
+import ch.supertomcat.bh.gui.rules.editor.RulePipelineFailuresPanel;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RulePipelineFailures;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -95,7 +96,7 @@ public class RulePipesFailuresPanel extends JPanel {
 
 		List<RulePipelineFailures> originalPipelines = this.rule.getPipelinesFailures();
 		for (int iPipe = 0; iPipe < originalPipelines.size(); iPipe++) {
-			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(this.rule, originalPipelines.get(iPipe), owner, settingsManager);
+			RulePipelineFailuresPanel pnlPipe = new RulePipelineFailuresPanel(originalPipelines.get(iPipe), owner, settingsManager);
 			pnlPipelines.add(pnlPipe);
 			modelPipelines.addElement("Pipeline");
 			pipelines.add(originalPipelines.get(iPipe));
@@ -146,7 +147,7 @@ public class RulePipesFailuresPanel extends JPanel {
 		});
 		btnPipelineNew.addActionListener(e -> {
 			RulePipelineFailures pipe = new RulePipelineFailures();
-			RulePipelineFailuresPanel pnlPipeFailures = new RulePipelineFailuresPanel(this.rule, pipe, owner, settingsManager);
+			RulePipelineFailuresPanel pnlPipeFailures = new RulePipelineFailuresPanel(pipe, owner, settingsManager);
 			pnlPipelines.add(pnlPipeFailures);
 			modelPipelines.addElement("Pipeline");
 			pipelines.add(pipe);

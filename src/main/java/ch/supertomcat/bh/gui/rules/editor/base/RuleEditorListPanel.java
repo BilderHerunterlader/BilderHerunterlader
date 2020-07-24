@@ -46,6 +46,9 @@ public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleE
 
 		E originalElement = model.get(row);
 		E changedElement = actionEditFunction.apply(originalElement);
+		if (changedElement == null) {
+			return;
+		}
 		model.set(row, changedElement);
 	}
 }

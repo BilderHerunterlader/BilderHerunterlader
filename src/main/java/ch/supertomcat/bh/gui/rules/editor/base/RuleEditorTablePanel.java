@@ -10,6 +10,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableModel;
 
+import ch.supertomcat.bh.gui.BHGUIConstants;
+import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
+
 /**
  * Panel with buttons to edit a table
  * 
@@ -60,15 +64,31 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 		this.actionNewSupplier = actionNewSupplier;
 		this.actionEditFunction = actionEditFunction;
 		this.table = new JTable(model);
-		this.scrollPane = new JScrollPane(this.table);
+		this.scrollPane = new JScrollPane(table);
 		this.table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
+		TableUtil.internationalizeColumns(table);
+
+		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
+		table.getTableHeader().setReorderingAllowed(false);
+		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
+		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
+
 		this.buttonPanel = new RuleEditorDefaultButtonPanel(true);
-		this.buttonPanel.addNewActionListener(e -> actionNew());
-		this.buttonPanel.addEditActionListener(e -> actionEdit());
-		this.buttonPanel.addUpActionListener(e -> actionUp());
-		this.buttonPanel.addDownActionListener(e -> actionDown());
-		this.buttonPanel.addDeleteActionListener(e -> actionDelete());
+		buttonPanel.addNewActionListener(e -> actionNew());
+		buttonPanel.addEditActionListener(e -> actionEdit());
+		buttonPanel.addUpActionListener(e -> actionUp());
+		buttonPanel.addDownActionListener(e -> actionDown());
+		buttonPanel.addDeleteActionListener(e -> actionDelete());
+	}
+
+	/**
+	 * Returns the table
+	 * 
+	 * @return table
+	 */
+	public JTable getTable() {
+		return table;
 	}
 
 	private void actionNew() {
@@ -88,6 +108,9 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 
 		Object[] originalRowData = ((Vector<?>)model.getDataVector().elementAt(modelRow)).toArray();
 		Object[] rowData = actionEditFunction.apply(originalRowData);
+		if (rowData == null) {
+			return;
+		}
 		int columnIndex = 0;
 		for (Object obj : rowData) {
 			model.setValueAt(obj, modelRow, columnIndex);
