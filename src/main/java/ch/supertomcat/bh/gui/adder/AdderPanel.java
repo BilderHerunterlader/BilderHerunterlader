@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -645,7 +646,10 @@ public class AdderPanel extends JFrame implements ActionListener {
 		tableColumnHider.hideColumn("FilenameOverride");
 		tableColumnHider.hideColumn("TargetFolderOverride");
 		tableColumnHider.hideColumn("TargetFolderOverrideValue");
-		if (localFiles == false) {
+		if (!localFiles) {
+			/*
+			 * Delete file is only available when sorting files
+			 */
 			tableColumnHider.hideColumn("DeleteFile");
 		}
 		tableColumnHider.hideColumn("LastModified");
@@ -1231,18 +1235,14 @@ public class AdderPanel extends JFrame implements ActionListener {
 					} else if (bDownload) {
 						if (localFiles && (boolean)model.getValueAt(rowModelIndex, deleteColumnModelIndex)) {
 							/*
-							 * In the GUI there is no Setting anymore to define this option.
-							 * In the SettingsManager the option still exists, but i don't know why.
-							 * So i think it is the best way, to remove the functionality, that this option has.
-							 * Especially that this option can delete files on the harddisk of the users.
+							 * When sorting files it is possible to mark files to be deleted
 							 */
-							/*
-							 * File f = new File(url);
-							 * if (f.exists()) {
-							 * f.delete();
-							 * }
-							 * f = null;
-							 */
+							File f = new File(url);
+							try {
+								Files.deleteIfExists(f.toPath());
+							} catch (IOException e) {
+								logger.error("File could not be deleted: {}", f);
+							}
 						} else {
 							String filenameCorrected = (String)model.getValueAt(rowModelIndex, filenameColumnModelIndex);
 							String targetDir = (String)model.getValueAt(rowModelIndex, folderColumnModelIndex);

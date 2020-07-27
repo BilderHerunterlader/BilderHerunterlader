@@ -42,6 +42,9 @@ public class AdderTableModel extends DefaultTableModel {
 			case 0:
 				// Selection
 				return true;
+			case 6:
+				// Delete File
+				return true;
 			case 10:
 				// Blacklist
 				return true;
@@ -55,6 +58,9 @@ public class AdderTableModel extends DefaultTableModel {
 		switch (columnIndex) {
 			case 0:
 				// Selection
+				return Boolean.class;
+			case 6:
+				// Delete File
 				return Boolean.class;
 			case 10:
 				// Blacklist
