@@ -7,18 +7,6 @@ package ch.supertomcat.bh.queue;
  */
 public interface IDownloadListener {
 	/**
-	 * Allows a Pic to start the download
-	 * The Pic should then return true, if it
-	 * has really started the pic or false if not.
-	 * If it does return a wrong value, QueueData would
-	 * start too many downloads or would not increase the counter
-	 * and would not increase the slots used.
-	 * 
-	 * @return True/False
-	 */
-	public boolean downloadAllowed();
-
-	/**
 	 * Returns the Container-URL of a listener
 	 * Since QueueData contains counters for the connections per domain
 	 * the removeListener-Method needs the Container-URL to decrause the

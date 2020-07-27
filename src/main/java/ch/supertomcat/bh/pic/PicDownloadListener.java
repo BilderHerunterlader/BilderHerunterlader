@@ -48,37 +48,6 @@ public class PicDownloadListener implements IDownloadListener {
 		return pic;
 	}
 
-	@Override
-	public boolean downloadAllowed() {
-		/*
-		 * When the startDownload-Method is called, the download requests the
-		 * Queue for a download-slot. The Queue fires this method, as soon as there is
-		 * free download-slot.
-		 * This method returns true if the download is really started.
-		 * If the status is something else than Pic.WAITING here, then
-		 * we don't start the download! So we return false!
-		 */
-		PicState status = pic.getStatus();
-		if (status == PicState.WAITING) {
-			// Set the status to DOWNLOADING
-			pic.setStatus(PicState.DOWNLOADING);
-
-			// Now we make this Pic to a thread and start it
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					executeDownload();
-				}
-			});
-			t.setName("Download-Thread-" + t.getId());
-			// We set the priority to a minimum, to reduce CPU-Usage
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start(); // Now we start the thread
-			return true;
-		}
-		return false;
-	}
-
 	/**
 	 * Download
 	 * 
@@ -98,8 +67,13 @@ public class PicDownloadListener implements IDownloadListener {
 			// Set the status to DOWNLOADING
 			pic.setStatus(PicState.DOWNLOADING);
 
-			executeDownload();
-			return true;
+			try {
+				executeDownload();
+				return true;
+			} catch (Exception e) {
+				pic.setStatus(PicState.FAILED);
+				throw e;
+			}
 		}
 		return false;
 	}
@@ -151,13 +125,19 @@ public class PicDownloadListener implements IDownloadListener {
 		}
 
 		String containerURL = pic.getContainerURL();
-		logger.info("Downloading: {}", containerURL);
 
 		FileDownloader downloader;
-		String encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
+		String encodedContainerURL;
+		if (containerURL.startsWith("http:") || containerURL.startsWith("https:")) {
+			encodedContainerURL = HTTPUtil.encodeURL(containerURL, true);
+		} else {
+			encodedContainerURL = containerURL;
+		}
 		if (HTTPUtil.isURL(encodedContainerURL)) {
+			logger.info("Downloading: {}", containerURL);
 			downloader = fileDownloaderFactory.createHTTPFileDownloader();
 		} else {
+			logger.info("Sorting: {}", containerURL);
 			downloader = fileDownloaderFactory.createLocalFileDownloader();
 		}
 		try {
