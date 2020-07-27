@@ -251,6 +251,15 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 		pipe.setWaitBeforeExecute(waitBeforeExecute);
 		pipe.setUrlDecodeResult(chkURLDecodeResult.isSelected());
 		pipe.setSendCookies(chkSendCookies.isSelected());
+
+		pipe.getRegexp().clear();
+		for (int i = 0; i < model.getRowCount(); i++) {
+			RuleRegex ruleRegex = new RuleRegex();
+			ruleRegex.setPattern((String)model.getValueAt(i, 0));
+			ruleRegex.setReplacement((String)model.getValueAt(i, 1));
+			pipe.getRegexp().add(ruleRegex);
+		}
+
 		return true;
 	}
 
