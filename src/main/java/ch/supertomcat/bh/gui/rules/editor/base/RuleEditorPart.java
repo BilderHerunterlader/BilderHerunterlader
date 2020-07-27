@@ -13,6 +13,8 @@ public interface RuleEditorPart {
 
 	/**
 	 * Called when changes should be applied to the rule definition
+	 * 
+	 * @return True if changes were successfully applied, false otherwise
 	 */
-	public void apply();
+	public boolean apply();
 }

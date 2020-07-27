@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules.editor;
+package ch.supertomcat.bh.gui.rules.editor.failures;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -32,15 +32,5 @@ public class RulePipelineFailuresTableModel extends DefaultTableModel {
 		Object data[] = new Object[1];
 		data[0] = search;
 		this.addRow(data);
-	}
-
-	/**
-	 * Edit row
-	 * 
-	 * @param search Search
-	 * @param row Row
-	 */
-	public void editRow(String search, int row) {
-		this.setValueAt(search, row, 0);
 	}
 }

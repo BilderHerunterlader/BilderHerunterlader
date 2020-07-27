@@ -1,5 +1,7 @@
 package ch.supertomcat.bh.gui.rules.editor.base;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -74,12 +76,19 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 
+		Dimension preferredScrollableTableSize = new Dimension(table.getPreferredScrollableViewportSize().width, 15 * table.getRowHeight());
+		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
+
 		this.buttonPanel = new RuleEditorDefaultButtonPanel(true);
 		buttonPanel.addNewActionListener(e -> actionNew());
 		buttonPanel.addEditActionListener(e -> actionEdit());
 		buttonPanel.addUpActionListener(e -> actionUp());
 		buttonPanel.addDownActionListener(e -> actionDown());
 		buttonPanel.addDeleteActionListener(e -> actionDelete());
+
+		setLayout(new BorderLayout());
+		add(scrollPane, BorderLayout.CENTER);
+		add(buttonPanel, BorderLayout.EAST);
 	}
 
 	/**
@@ -152,5 +161,21 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 
 		int modelRow = table.convertRowIndexToModel(row);
 		model.removeRow(modelRow);
+	}
+
+	/**
+	 * Enable Table
+	 */
+	public void enableTable() {
+		table.setEnabled(true);
+		buttonPanel.enableButtons();
+	}
+
+	/**
+	 * Disable Table
+	 */
+	public void disableTable() {
+		table.setEnabled(false);
+		buttonPanel.disableButtons();
 	}
 }

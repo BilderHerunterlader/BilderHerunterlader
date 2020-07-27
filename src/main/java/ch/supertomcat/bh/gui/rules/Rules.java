@@ -37,6 +37,7 @@ import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.RulesColorRowRenderer;
+import ch.supertomcat.bh.gui.rules.editor.RuleMainEditor;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
@@ -191,8 +192,8 @@ public class Rules extends JPanel {
 					RuleIO ruleIO = new RuleIO();
 					RuleDefinition ruleDefinition = ruleIO.readDefaultRule();
 					Rule r = new Rule("", ruleDefinition, false);
-					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
-					if (rme.getCanceled()) {
+					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager.getHostRules().isDeveloperRulesEnabled());
+					if (rme.isCanceled()) {
 						return;
 					}
 					hostManager.getHostRules().addRule(r);
@@ -218,8 +219,8 @@ public class Rules extends JPanel {
 						return;
 					}
 					Rule r = (Rule)model.getValueAt(jtRules.convertRowIndexToModel(row), 0);
-					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager);
-					if (rme.getCanceled()) {
+					RuleMainEditor rme = new RuleMainEditor(parentWindow, r, settingsManager, hostManager.getHostRules().isDeveloperRulesEnabled());
+					if (rme.isCanceled()) {
 						return;
 					}
 					hostManager.getHostRules().saveRule(r);

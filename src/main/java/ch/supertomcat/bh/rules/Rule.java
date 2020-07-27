@@ -108,7 +108,6 @@ public class Rule extends Hoster {
 		this.strFile = file;
 		this.definition = definition;
 		setDeveloper(developer);
-		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
 		updateFromDefinition();
 	}
 
@@ -116,7 +115,10 @@ public class Rule extends Hoster {
 	 * Updates internal members from definition. This method should always be called, when the definition was changed
 	 */
 	public void updateFromDefinition() {
+		deactivateOption = new DeactivateOption(FileUtil.getFilename(this.strFile), getSettingsManager());
+
 		this.compiledUrlPattern = Pattern.compile(definition.getUrlPattern());
+
 		pipelines.clear();
 		for (URLPipeline pipeDefinition : definition.getPipes()) {
 			if (pipeDefinition instanceof URLRegexPipeline) {
@@ -606,6 +608,19 @@ public class Rule extends Hoster {
 	 */
 	public void setFile(File file) {
 		this.strFile = file.getAbsolutePath();
+	}
+
+	/**
+	 * Checks if the file for this rule exists
+	 * 
+	 * @return True if file exists, false otherwise
+	 */
+	public boolean isFileExists() {
+		if (strFile.isEmpty()) {
+			return false;
+		}
+		File file = getFile();
+		return file.exists() && file.isFile() && file.length() > 0;
 	}
 
 	@Override

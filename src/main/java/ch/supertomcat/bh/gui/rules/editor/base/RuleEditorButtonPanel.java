@@ -64,6 +64,8 @@ public abstract class RuleEditorButtonPanel extends JPanel {
 	 */
 	public void addButton(JButton button) {
 		buttons.add(button);
+		add(button);
+		updateLayout();
 	}
 
 	/**
@@ -93,6 +95,8 @@ public abstract class RuleEditorButtonPanel extends JPanel {
 	 */
 	public void removeButton(JButton button) {
 		buttons.remove(button);
+		remove(button);
+		updateLayout();
 	}
 
 	/**
@@ -113,5 +117,23 @@ public abstract class RuleEditorButtonPanel extends JPanel {
 	 */
 	public void removeButtons(JButton... buttons) {
 		removeButtons(Arrays.asList(buttons));
+	}
+
+	/**
+	 * Enable Buttons
+	 */
+	public void enableButtons() {
+		for (JButton button : buttons) {
+			button.setEnabled(true);
+		}
+	}
+
+	/**
+	 * Disable Buttons
+	 */
+	public void disableButtons() {
+		for (JButton button : buttons) {
+			button.setEnabled(false);
+		}
 	}
 }

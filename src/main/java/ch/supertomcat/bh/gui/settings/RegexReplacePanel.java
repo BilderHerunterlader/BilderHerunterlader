@@ -20,7 +20,7 @@ import javax.swing.event.TableColumnModelListener;
 
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.SpringUtilities;
-import ch.supertomcat.bh.gui.rules.RulePipelineTableModel;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipelineURLRegexTableModel;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
@@ -50,7 +50,7 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	/**
 	 * TableModel
 	 */
-	private RulePipelineTableModel model = new RulePipelineTableModel();
+	private RulePipelineURLRegexTableModel model = new RulePipelineURLRegexTableModel();
 
 	/**
 	 * pipe

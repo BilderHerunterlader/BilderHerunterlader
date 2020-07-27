@@ -151,4 +151,20 @@ public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>, B extends
 			}
 		}
 	}
+
+	/**
+	 * Enable List
+	 */
+	public void enableList() {
+		list.setEnabled(true);
+		buttonPanel.enableButtons();
+	}
+
+	/**
+	 * Disable List
+	 */
+	public void disableList() {
+		list.setEnabled(false);
+		buttonPanel.disableButtons();
+	}
 }

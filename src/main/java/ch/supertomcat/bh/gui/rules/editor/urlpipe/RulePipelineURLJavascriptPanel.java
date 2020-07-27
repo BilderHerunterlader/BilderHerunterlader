@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor.urlpipe;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -20,37 +20,25 @@ import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RulePipelineURLJavascript;
+import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import de.sciss.syntaxpane.DefaultSyntaxKit;
 
 /**
  * Rule-Pipeline-Panel
  */
-public class RulePipelineJavascriptPanel extends JPanel implements IRulePipelineURLPanel {
-	/**
-	 * UID
-	 */
+public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URLJavascriptPipeline> {
 	private static final long serialVersionUID = 1L;
 
+	/**
+	 * Javascript Text Area
+	 */
 	private JEditorPane txtJavascript;
 
 	/**
 	 * ScrollPane
 	 */
 	private JScrollPane sp;
-
-	/**
-	 * RulePipeline
-	 */
-	private RulePipelineURLJavascript pipe = null;
-
-	/**
-	 * Rule
-	 */
-	@SuppressWarnings("unused")
-	private Rule rule = null;
 
 	/**
 	 * lblWaitBeforeExecute
@@ -91,15 +79,12 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 	/**
 	 * Constructor
 	 * 
-	 * @param rule Rule
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 */
-	public RulePipelineJavascriptPanel(Rule rule, RulePipelineURLJavascript pipe, JDialog owner) {
-		super();
+	public RulePipelineURLJavascriptPanel(URLJavascriptPipeline pipe, JDialog owner) {
+		super(pipe);
 		this.owner = owner;
-		this.rule = rule;
-		this.pipe = pipe;
 		setLayout(new BorderLayout());
 
 		TitledBorder brd = BorderFactory.createTitledBorder(Localization.getString("PipelineJavascript"));
@@ -109,18 +94,18 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 
 		txtJavascript = new JEditorPane();
 		txtJavascript.setContentType("text/javascript");
-		txtJavascript.setText(pipe.getDefinition().getJavascriptCode());
+		txtJavascript.setText(pipe.getJavascriptCode());
 		FontMetrics fontMetrics = txtJavascript.getFontMetrics(txtJavascript.getFont());
 		int fontHeight = fontMetrics.getLeading() + fontMetrics.getMaxAscent() + fontMetrics.getMaxDescent();
 		txtJavascript.setPreferredSize(new Dimension(120 * fontMetrics.charWidth('A'), 20 * fontHeight));
 		sp = new JScrollPane(txtJavascript);
 
-		txtWaitBeforeExecute.setText(String.valueOf(this.pipe.getDefinition().getWaitBeforeExecute()));
+		txtWaitBeforeExecute.setText(String.valueOf(pipe.getWaitBeforeExecute()));
 
 		chkURLDecodeResult.setToolTipText(Localization.getString("RulePipelineURLDecodeResultToolTip"));
-		chkURLDecodeResult.setSelected(this.pipe.getDefinition().isUrlDecodeResult());
+		chkURLDecodeResult.setSelected(pipe.isUrlDecodeResult());
 
-		chkSendCookies.setSelected(this.pipe.getDefinition().isSendCookies());
+		chkSendCookies.setSelected(pipe.isSendCookies());
 
 		txtNote.setText(Localization.getString("RuleJavascript"));
 		txtNote.setEditable(false);
@@ -157,19 +142,23 @@ public class RulePipelineJavascriptPanel extends JPanel implements IRulePipeline
 		add(sp, BorderLayout.CENTER);
 	}
 
-	/**
-	 * Apply
-	 */
 	@Override
-	public void apply() {
-		pipe.getDefinition().setJavascriptCode(txtJavascript.getText());
+	public boolean apply() {
+		pipe.setJavascriptCode(txtJavascript.getText());
 		int waitBeforeExecute = 0;
 		try {
 			waitBeforeExecute = Integer.parseInt(txtWaitBeforeExecute.getText());
 		} catch (NumberFormatException nfe) {
+			logger.error("WaitBeforeExecute Text is not an integer: {}", txtWaitBeforeExecute.getText());
 		}
-		pipe.getDefinition().setWaitBeforeExecute(waitBeforeExecute);
-		pipe.getDefinition().setUrlDecodeResult(chkURLDecodeResult.isSelected());
-		pipe.getDefinition().setSendCookies(chkSendCookies.isSelected());
+		pipe.setWaitBeforeExecute(waitBeforeExecute);
+		pipe.setUrlDecodeResult(chkURLDecodeResult.isSelected());
+		pipe.setSendCookies(chkSendCookies.isSelected());
+		return true;
+	}
+
+	@Override
+	public void redirectEnabled(boolean enabled) {
+		// Nothing to do
 	}
 }

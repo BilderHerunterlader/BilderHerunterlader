@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules.editor;
+package ch.supertomcat.bh.gui.rules.editor.failures;
 
 import java.awt.BorderLayout;
 import java.util.function.Function;
@@ -15,12 +15,11 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 
-import ch.supertomcat.bh.gui.rules.RuleRegexpEditor;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorTablePanel;
-import ch.supertomcat.bh.rules.RulePipelineFailures;
-import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.bh.gui.rules.editor.base.RuleRegexpEditor;
 import ch.supertomcat.bh.rules.xml.FailureType;
+import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -52,11 +51,6 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	 */
 	private RuleEditorTablePanel<RulePipelineFailuresTableModel> pnlTable = new RuleEditorTablePanel<>(model, actionNewSupplier, actionEditFunction);
 
-	/**
-	 * RulePipeline
-	 */
-	private RulePipelineFailures pipe = null;
-
 	private JComboBox<FailureType> cmbFailureType = new JComboBox<>();
 
 	private JCheckBox cbURL = new JCheckBox(Localization.getString("ContainerURL"));
@@ -76,13 +70,18 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	private JDialog owner = null;
 
 	/**
+	 * RulePipeline
+	 */
+	private final FailuresPipeline pipe;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param pipe Pipeline
 	 * @param owner Owner
 	 * @param settingsManager Settings Manager
 	 */
-	public RulePipelineFailuresPanel(RulePipelineFailures pipe, JDialog owner, SettingsManager settingsManager) {
+	public RulePipelineFailuresPanel(FailuresPipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		this.owner = owner;
 		this.pipe = pipe;
 		setLayout(new BorderLayout());
@@ -114,8 +113,8 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 			}
 		});
 
-		for (RuleRegExp regexp : pipe.getRegexps()) {
-			model.addRow(regexp.getSearch());
+		for (RuleRegex regexp : pipe.getRegexp()) {
+			model.addRow(regexp.getPattern());
 		}
 
 		cmbFailureType.addItem(FailureType.FAILED);
@@ -123,11 +122,11 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 		cmbFailureType.addItem(FailureType.FAILED_FILE_TEMPORARY_OFFLINE);
 		cmbFailureType.addItem(FailureType.SLEEPING);
 		cmbFailureType.addItem(FailureType.COMPLETE);
-		cmbFailureType.setSelectedItem(pipe.getDefinition().getFailureType());
+		cmbFailureType.setSelectedItem(pipe.getFailureType());
 
-		cbURL.setSelected(pipe.getDefinition().isCheckURL());
-		cbThumbURL.setSelected(pipe.getDefinition().isCheckThumbURL());
-		cbContainerPage.setSelected(pipe.getDefinition().isCheckPageSourceCode());
+		cbURL.setSelected(pipe.isCheckURL());
+		cbThumbURL.setSelected(pipe.isCheckThumbURL());
+		cbContainerPage.setSelected(pipe.isCheckPageSourceCode());
 
 		pnlRB.add(cmbFailureType);
 		pnlRB.add(cbURL);
@@ -139,39 +138,36 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	}
 
 	private Object[] createRegexp() {
-		// TODO RuleRegexpEditor should edit definition model object
-		RuleRegExp rre = new RuleRegExp();
-		RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
-		if (rme.getCanceled()) {
+		RuleRegexpEditor rme = new RuleRegexpEditor(owner, true);
+		if (rme.isCanceled()) {
 			return null;
 		}
-		return new Object[] { rre.getSearch() };
+		return new Object[] { rme.getSearch() };
 	}
 
 	private Object[] editRegexp(Object[] originalData) {
-		// TODO RuleRegexpEditor should edit definition model object
-		RuleRegExp rre = new RuleRegExp((String)originalData[0], "");
-		RuleRegexpEditor rme = new RuleRegexpEditor(owner, rre, true);
-		if (rme.getCanceled()) {
+		RuleRegexpEditor rme = new RuleRegexpEditor(owner, (String)originalData[0]);
+		if (rme.isCanceled()) {
 			return null;
 		}
-		return new Object[] { rre.getSearch() };
+		return new Object[] { rme.getSearch() };
 	}
 
 	@Override
-	public void apply() {
-		pipe.getDefinition().setFailureType((FailureType)cmbFailureType.getSelectedItem());
-		pipe.getDefinition().setCheckURL(cbURL.isSelected());
-		pipe.getDefinition().setCheckThumbURL(cbThumbURL.isSelected());
-		pipe.getDefinition().setCheckPageSourceCode(cbContainerPage.isSelected());
+	public boolean apply() {
+		pipe.setFailureType((FailureType)cmbFailureType.getSelectedItem());
+		pipe.setCheckURL(cbURL.isSelected());
+		pipe.setCheckThumbURL(cbThumbURL.isSelected());
+		pipe.setCheckPageSourceCode(cbContainerPage.isSelected());
 
-		pipe.getDefinition().getRegexp().clear();
+		pipe.getRegexp().clear();
 		for (int i = 0; i < model.getRowCount(); i++) {
 			RuleRegex ruleRegex = new RuleRegex();
 			ruleRegex.setPattern((String)model.getValueAt(i, 0));
 			ruleRegex.setReplacement("");
-			pipe.getDefinition().getRegexp().add(ruleRegex);
+			pipe.getRegexp().add(ruleRegex);
 		}
+		return true;
 	}
 
 	@Override
@@ -180,12 +176,21 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	}
 
 	/**
+	 * Returns the pipe
+	 * 
+	 * @return pipe
+	 */
+	public FailuresPipeline getPipe() {
+		return pipe;
+	}
+
+	/**
 	 * updateColWidthsToSettingsManager
 	 * 
 	 * @param settingsManager SettingsManager
 	 */
 	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(pnlTable.getTable()));
@@ -198,7 +203,7 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	 * @param settingsManager SettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(pnlTable.getTable(), settingsManager.getColWidthsRulesEditor());

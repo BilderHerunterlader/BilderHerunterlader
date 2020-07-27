@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor.filename;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -9,18 +9,15 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import ch.supertomcat.bh.gui.renderer.LocalizedEnumComboBoxRenderer;
-import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RulePipelineFilenameDownloadSelection;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
+import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionPipeline;
+import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
  * Rule-Pipeline-Panel
  */
-public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFilenamePanelBase<RulePipelineFilenameDownloadSelection, FilenameDownloadSelectionMode> {
-	/**
-	 * UID
-	 */
+public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFilenamePanelBase<FilenameDownloadSelectionPipeline, FilenameDownloadSelectionMode> {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -32,7 +29,7 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 	 * @param settingsManager Settings Manager
 	 */
 	@SuppressWarnings("unchecked")
-	public RulePipelineFilenameDownloadSelectionPanel(Rule rule, RulePipelineFilenameDownloadSelection pipe, JDialog owner, SettingsManager settingsManager) {
+	public RulePipelineFilenameDownloadSelectionPanel(RuleDefinition rule, FilenameDownloadSelectionPipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
 		Map<FilenameDownloadSelectionMode, String> filenameModeLocalizationStrings = new HashMap<>();
@@ -43,7 +40,7 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 		for (FilenameDownloadSelectionMode duplicateRemoveMode : FilenameDownloadSelectionMode.values()) {
 			cbFilenameMode.addItem(duplicateRemoveMode);
 		}
-		cbFilenameMode.setSelectedItem(pipe.getDefinition().getMode());
+		cbFilenameMode.setSelectedItem(pipe.getMode());
 
 		JPanel pnlFilenameDownloadSelectionMode = new JPanel();
 		pnlFilenameDownloadSelectionMode.add(lblSource);
@@ -54,7 +51,13 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 	}
 
 	@Override
-	public void apply() {
-		pipe.getDefinition().setMode((FilenameDownloadSelectionMode)cbFilenameMode.getSelectedItem());
+	public boolean apply() {
+		pipe.setMode((FilenameDownloadSelectionMode)cbFilenameMode.getSelectedItem());
+		return super.apply();
+	}
+
+	@Override
+	protected void updateCompomentEnabledState() {
+		// Nothing to do
 	}
 }

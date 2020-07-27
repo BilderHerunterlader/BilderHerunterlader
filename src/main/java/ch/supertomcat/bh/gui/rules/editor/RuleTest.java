@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor;
 
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;

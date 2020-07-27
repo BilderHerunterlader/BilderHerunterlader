@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor.base;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -6,8 +6,8 @@ import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
 import javax.swing.AbstractAction;
@@ -23,18 +23,15 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import ch.supertomcat.bh.rules.RuleRegExp;
-import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
+import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
  * Rule-Regexp-Editor-Dialog
  */
-public class RuleRegexpEditor extends JDialog implements ActionListener {
-	/**
-	 * UID
-	 */
+public class RuleRegexpEditor extends JDialog {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -50,12 +47,12 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 	/**
 	 * Label
 	 */
-	private JLabel lblReplace = new JLabel(Localization.getString("ReplacePattern"));
+	private JLabel lblReplacement = new JLabel(Localization.getString("ReplacePattern"));
 
 	/**
 	 * TextField
 	 */
-	private JTextField txtReplace = new JTextField(80);
+	private JTextField txtReplacement = new JTextField(80);
 
 	/**
 	 * Panel
@@ -100,12 +97,7 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 	/**
 	 * Flag if cancel was pressed
 	 */
-	private boolean canceled = true;
-
-	/**
-	 * RuleRegExp
-	 */
-	private RuleRegExp rre = null;
+	private boolean canceled = false;
 
 	/**
 	 * GridBagLayout
@@ -121,31 +113,82 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 	 * Constructor
 	 * 
 	 * @param owner Owner
-	 * @param rre RuleRegExp
 	 */
-	public RuleRegexpEditor(JDialog owner, RuleRegExp rre) {
-		this(owner, rre, false);
+	public RuleRegexpEditor(JDialog owner) {
+		this(owner, "", "", false);
 	}
 
 	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
-	 * @param rre RuleRegExp
-	 * @param bSearchOnly Search Only
+	 * @param bSearchOnly Search Only Flag
 	 */
-	public RuleRegexpEditor(JDialog owner, RuleRegExp rre, boolean bSearchOnly) {
+	public RuleRegexpEditor(JDialog owner, boolean bSearchOnly) {
+		this(owner, "", "", bSearchOnly);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param owner Owner
+	 * @param ruleRegex RuleRegex
+	 */
+	public RuleRegexpEditor(JDialog owner, RuleRegex ruleRegex) {
+		this(owner, ruleRegex, false);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param owner Owner
+	 * @param ruleRegex RuleRegex
+	 * @param bSearchOnly Search Only Flag
+	 */
+	public RuleRegexpEditor(JDialog owner, RuleRegex ruleRegex, boolean bSearchOnly) {
+		this(owner, ruleRegex.getPattern(), ruleRegex.getReplacement(), bSearchOnly);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param owner Owner
+	 * @param search Search
+	 */
+	public RuleRegexpEditor(JDialog owner, String search) {
+		this(owner, search, "", true);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param owner Owner
+	 * @param search Search
+	 * @param replacement Replacement
+	 */
+	public RuleRegexpEditor(JDialog owner, String search, String replacement) {
+		this(owner, search, replacement, false);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param owner Owner
+	 * @param search Search
+	 * @param replacement Replacement
+	 * @param bSearchOnly Search Only Flag
+	 */
+	public RuleRegexpEditor(JDialog owner, String search, String replacement, boolean bSearchOnly) {
 		super(owner);
-		this.rre = rre;
 		setTitle(Localization.getString("RegExpEditor"));
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);
 		pnlButtons.add(btnCancel);
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> actionOK());
+		btnCancel.addActionListener(e -> actionCancel());
 
-		txtSearch.setText(this.rre.getSearch());
-		txtReplace.setText(this.rre.getReplace());
+		txtSearch.setText(search);
+		txtReplacement.setText(replacement);
 
 		Font textAreaFont = new Font("Monospaced", Font.PLAIN, txtSearch.getFont().getSize());
 		txtNote.setText(Localization.getString("RuleReplaceVariables"));
@@ -161,8 +204,8 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 		if (bSearchOnly) {
 			lblNote.setVisible(false);
 			txtNote.setVisible(false);
-			lblReplace.setVisible(false);
-			txtReplace.setVisible(false);
+			lblReplacement.setVisible(false);
+			txtReplacement.setVisible(false);
 		}
 
 		pnlMain.setLayout(gbl);
@@ -188,14 +231,14 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtSearch, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.2, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblReplace, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblReplacement, pnlMain);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.8, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtReplace, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtReplacement, pnlMain);
 
 		add(pnlMain, BorderLayout.CENTER);
 		add(pnlButtons, BorderLayout.SOUTH);
 
-		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtReplace);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtReplacement);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtSearch);
 
 		setModal(true);
@@ -236,36 +279,52 @@ public class RuleRegexpEditor extends JDialog implements ActionListener {
 		setVisible(true);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			try {
-				this.rre.setSearch(txtSearch.getText());
-			} catch (PatternSyntaxException pse) {
-				txtError.setText(pse.getLocalizedMessage());
-				txtError.setVisible(true);
-				lblError.setVisible(true);
-				return;
-			}
-			this.rre.setReplace(txtReplace.getText());
-			canceled = false;
-			this.dispose();
-		} else if (e.getSource() == btnCancel) {
-			this.dispose();
+	private void actionOK() {
+		try {
+			/*
+			 * Compile pattern to make sure it's a valid regex
+			 */
+			Pattern.compile(txtSearch.getText());
+		} catch (PatternSyntaxException pse) {
+			txtError.setText(pse.getLocalizedMessage());
+			txtError.setVisible(true);
+			lblError.setVisible(true);
+			return;
 		}
+
+		canceled = false;
+		dispose();
+	}
+
+	private void actionCancel() {
+		canceled = true;
+		dispose();
 	}
 
 	/**
-	 * Get-Method
+	 * Returns the canceled
 	 * 
-	 * @return True if canceled
+	 * @return canceled
 	 */
-	public boolean getCanceled() {
-		return this.canceled;
+	public boolean isCanceled() {
+		return canceled;
+	}
+
+	/**
+	 * Returns the search
+	 * 
+	 * @return search
+	 */
+	public String getSearch() {
+		return txtSearch.getText();
+	}
+
+	/**
+	 * Returns the replace
+	 * 
+	 * @return replace
+	 */
+	public String getReplacement() {
+		return txtReplacement.getText();
 	}
 }

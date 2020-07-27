@@ -1,28 +1,41 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor.filename;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.awt.event.ItemEvent;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
 import ch.supertomcat.bh.gui.renderer.LocalizedEnumComboBoxRenderer;
-import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.rules.RulePipelineFilename;
 import ch.supertomcat.bh.rules.xml.FilenameMode;
+import ch.supertomcat.bh.rules.xml.FilenamePipeline;
+import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Rule-Pipeline-Panel
  */
-public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<RulePipelineFilename, FilenameMode> {
-	/**
-	 * UID
-	 */
+public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<FilenamePipeline, FilenameMode> {
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox chkUseContentDisposition = new JCheckBox(Localization.getString("UseContentDisposition"));
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox chkReducePathLength = new JCheckBox(Localization.getString("ReducePathLength"), true);
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox chkReduceFilenameLength = new JCheckBox(Localization.getString("ReduceFilenameLength"), true);
 
 	/**
 	 * Constructor
@@ -33,7 +46,7 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Rul
 	 * @param settingsManager Settings Manager
 	 */
 	@SuppressWarnings("unchecked")
-	public RulePipelineFilenamePanel(Rule rule, RulePipelineFilename pipe, JDialog owner, SettingsManager settingsManager) {
+	public RulePipelineFilenamePanel(RuleDefinition rule, FilenamePipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
 		Map<FilenameMode, String> filenameModeLocalizationStrings = new HashMap<>();
@@ -53,51 +66,60 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Rul
 		for (FilenameMode duplicateRemoveMode : FilenameMode.values()) {
 			cbFilenameMode.addItem(duplicateRemoveMode);
 		}
-		cbFilenameMode.setSelectedItem(pipe.getDefinition().getMode());
+		cbFilenameMode.setSelectedItem(pipe.getMode());
 
-		chkUseContentDisposition.setSelected(rule.getDefinition().isUseContentDisposition());
-		chkReducePathLength.setSelected(rule.getDefinition().isReducePathLength());
-		chkReduceFilenameLength.setSelected(rule.getDefinition().isReduceFilenameLength());
-		table.setEnabled(!chkUseContentDisposition.isSelected());
-		btnNew.setEnabled(!chkUseContentDisposition.isSelected());
-		btnEdit.setEnabled(!chkUseContentDisposition.isSelected());
-		btnUp.setEnabled(!chkUseContentDisposition.isSelected());
-		btnDown.setEnabled(!chkUseContentDisposition.isSelected());
-		btnDelete.setEnabled(!chkUseContentDisposition.isSelected());
-		cbFilenameMode.setEnabled(!chkUseContentDisposition.isSelected());
-		lblSource.setEnabled(!chkUseContentDisposition.isSelected());
+		chkUseContentDisposition.setSelected(rule.isUseContentDisposition());
+		chkReducePathLength.setSelected(rule.isReducePathLength());
+		chkReduceFilenameLength.setSelected(rule.isReduceFilenameLength());
+
 		JPanel pnlFilenameMode = new JPanel();
 		pnlFilenameMode.add(lblSource);
 		pnlFilenameMode.add(cbFilenameMode);
+
 		pnlRB.setLayout(new GridLayout(4, 1));
 		pnlRB.add(chkUseContentDisposition);
 		pnlRB.add(chkReducePathLength);
 		pnlRB.add(chkReduceFilenameLength);
 		pnlRB.add(pnlFilenameMode);
 		add(pnlRB, BorderLayout.NORTH);
+
+		updateCompomentEnabledState();
+
+		chkUseContentDisposition.addItemListener(e -> {
+			updateCompomentEnabledState();
+		});
 	}
 
 	@Override
-	public void apply() {
-		rule.getDefinition().setUseContentDisposition(chkUseContentDisposition.isSelected());
-		rule.getDefinition().setReducePathLength(chkReducePathLength.isSelected());
-		rule.getDefinition().setReduceFilenameLength(chkReduceFilenameLength.isSelected());
-		pipe.getDefinition().setMode((FilenameMode)cbFilenameMode.getSelectedItem());
-	}
+	protected void updateCompomentEnabledState() {
+		if (redirectEnabled) {
+			pnlTable.disableTable();
+		} else {
+			pnlTable.enableTable();
+		}
+		chkUseContentDisposition.setEnabled(!redirectEnabled);
+		cbFilenameMode.setEnabled(!redirectEnabled);
+		lblSource.setEnabled(!redirectEnabled);
 
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		super.itemStateChanged(e);
-		if (e.getSource() == chkUseContentDisposition) {
+		if (!redirectEnabled) {
+			if (chkUseContentDisposition.isSelected()) {
+				pnlTable.disableTable();
+			} else {
+				pnlTable.enableTable();
+			}
 			cbFilenameMode.setEnabled(!chkUseContentDisposition.isSelected());
+			lblSource.setEnabled(!chkUseContentDisposition.isSelected());
 		}
 	}
 
 	@Override
-	public void redirectEnabled(boolean enabled) {
-		super.redirectEnabled(enabled);
-		if (!enabled) {
-			cbFilenameMode.setEnabled(!chkUseContentDisposition.isSelected());
-		}
+	public boolean apply() {
+		pipe.setMode((FilenameMode)cbFilenameMode.getSelectedItem());
+
+		rule.setUseContentDisposition(chkUseContentDisposition.isSelected());
+		rule.setReducePathLength(chkReducePathLength.isSelected());
+		rule.setReduceFilenameLength(chkReduceFilenameLength.isSelected());
+
+		return super.apply();
 	}
 }

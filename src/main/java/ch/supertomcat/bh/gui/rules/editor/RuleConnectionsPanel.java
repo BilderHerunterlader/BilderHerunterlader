@@ -1,9 +1,7 @@
-package ch.supertomcat.bh.gui.rules;
+package ch.supertomcat.bh.gui.rules.editor;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,23 +14,24 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
-import ch.supertomcat.bh.rules.Rule;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
+import ch.supertomcat.bh.rules.xml.Restriction;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
- * Rule-Referrer-Panel
+ * Rule-Connection-Panel
  */
-public class RuleConnectionsPanel extends JPanel implements ActionListener {
-	/**
-	 * UID
-	 */
+public class RuleConnectionsPanel extends JPanel implements RuleEditorPart {
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * Rule
+	 * Logger
 	 */
-	private Rule rule = null;
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Label
@@ -85,19 +84,24 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(5, 10, 5, 5);
 
 	/**
+	 * Rule
+	 */
+	private final Restriction restriction;
+
+	/**
 	 * Constructor
 	 * 
-	 * @param rule Rule
+	 * @param restriction Restriction
 	 */
-	public RuleConnectionsPanel(Rule rule) {
-		this.rule = rule;
+	public RuleConnectionsPanel(Restriction restriction) {
+		this.restriction = restriction;
 
 		lstMaxConnectionsDomains.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		txtMaxConnections.setToolTipText(Localization.getString("MaxConnectionCountToolTip"));
-		btnMaxConnectionsDomainsAdd.addActionListener(this);
-		btnMaxConnectionsDomainsRemove.addActionListener(this);
-		txtMaxConnections.setText(String.valueOf(rule.getDefinition().getRestriction().getMaxConnections()));
-		List<String> domains = rule.getDefinition().getRestriction().getDomain();
+		btnMaxConnectionsDomainsAdd.addActionListener(e -> actionAddDomain());
+		btnMaxConnectionsDomainsRemove.addActionListener(e -> actionRemoveDomain());
+		txtMaxConnections.setText(String.valueOf(restriction.getMaxConnections()));
+		List<String> domains = restriction.getDomain();
 		for (int i = 0; i < domains.size(); i++) {
 			modelMaxConnectionsDomains.addElement(domains.get(i));
 		}
@@ -126,42 +130,39 @@ public class RuleConnectionsPanel extends JPanel implements ActionListener {
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, btnMaxConnectionsDomainsAdd, this);
 	}
 
-	/**
-	 * Apply
-	 */
-	public void applyMaxConnections() {
+	private void actionAddDomain() {
+		String domainToAdd = txtMaxConnectionsDomainsAdd.getText();
+		if (domainToAdd.length() == 0) {
+			return;
+		}
+		if (modelMaxConnectionsDomains.contains(domainToAdd) == false) {
+			modelMaxConnectionsDomains.addElement(domainToAdd);
+		}
+	}
+
+	private void actionRemoveDomain() {
+		if (lstMaxConnectionsDomains.getSelectedIndex() > -1) {
+			modelMaxConnectionsDomains.remove(lstMaxConnectionsDomains.getSelectedIndex());
+		}
+	}
+
+	@Override
+	public boolean apply() {
 		try {
-			rule.getDefinition().getRestriction().setMaxConnections(Integer.parseInt(txtMaxConnections.getText()));
+			restriction.setMaxConnections(Integer.parseInt(txtMaxConnections.getText()));
 		} catch (NumberFormatException nfe) {
+			logger.error("MaxConnections Text is not an integer: {}", txtMaxConnections.getText());
 		}
 		List<String> domains = new ArrayList<>();
 		for (int i = 0; i < modelMaxConnectionsDomains.size(); i++) {
 			domains.add(modelMaxConnectionsDomains.get(i));
 		}
-		rule.getDefinition().getRestriction().getDomain().clear();
-		rule.getDefinition().getRestriction().getDomain().addAll(domains);
+		restriction.getDomain().clear();
+		restriction.getDomain().addAll(domains);
+		return true;
 	}
 
 	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnMaxConnectionsDomainsAdd) {
-			String domainToAdd = txtMaxConnectionsDomainsAdd.getText();
-			if (domainToAdd.length() == 0) {
-				return;
-			}
-			if (modelMaxConnectionsDomains.contains(domainToAdd) == false) {
-				modelMaxConnectionsDomains.addElement(domainToAdd);
-			}
-		} else if (e.getSource() == btnMaxConnectionsDomainsRemove) {
-			if (lstMaxConnectionsDomains.getSelectedIndex() > -1) {
-				modelMaxConnectionsDomains.remove(lstMaxConnectionsDomains.getSelectedIndex());
-			}
-		}
-	}
-
-	/**
-	 * @param enabled Enabled
-	 */
 	public void redirectEnabled(boolean enabled) {
 		txtMaxConnectionsDomainsAdd.setEnabled(!enabled);
 		btnMaxConnectionsDomainsRemove.setEnabled(!enabled);
