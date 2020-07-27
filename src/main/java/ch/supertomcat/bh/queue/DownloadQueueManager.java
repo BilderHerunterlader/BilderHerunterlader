@@ -174,13 +174,21 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	protected Restriction getRestrictionForTask(PicDownloadListener task) {
 		String domain = getDomainFromURL(task.getContainerURL());
 
+		/*
+		 * If the domain is null or an empty String (which is the case when sorting files), then
+		 * just use "NoDomain" as String, so there is no NullPointerException or IllegalArgumentException
+		 */
+		if (domain == null || domain.isEmpty()) {
+			domain = "NoDomain";
+		}
+
 		DownloadRestriction restriction = restrictions.getRestrictionForDomain(domain);
 		if (restriction != null) {
 			return restriction;
 		}
 
 		/*
-		 * If no restriction found, then just return a restriction, which does not restrict
+		 * If no restriction found, then just return a restriction, which does not restrict.
 		 */
 		return new DownloadRestriction(domain, 0);
 	}
