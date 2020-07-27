@@ -47,8 +47,9 @@ public class ImportLocalFiles extends AdderImportBase {
 	 * This method opens the Download-Selection-Dialog
 	 * 
 	 * @param files Files
+	 * @param title Title or null
 	 */
-	public void importLocalFiles(File files[]) {
+	public void importLocalFiles(File files[], String title) {
 		if (files == null) {
 			return;
 		}
@@ -62,10 +63,14 @@ public class ImportLocalFiles extends AdderImportBase {
 			}
 		}
 
+		if (title == null) {
+			title = Localization.getString("Unkown") + ": " + Localization.getString("Title");
+		}
+		String referrer = Localization.getString("Unkown") + ": " + Localization.getString("Referrer");
+
 		if (urls.size() > 0) {
 			// Open Download-Selection-Dialog
-			AdderPanel adderpnl = new AdderPanel(parentComponent, true, new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
-					+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+			AdderPanel adderpnl = new AdderPanel(parentComponent, true, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 			adderpnl.init();
 			adderpnl = null;
 		}

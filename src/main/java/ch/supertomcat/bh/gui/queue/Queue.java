@@ -903,7 +903,7 @@ public class Queue extends JPanel {
 				public void run() {
 					File files[] = folder.listFiles();
 					new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
-							.importLocalFiles(files);
+							.importLocalFiles(files, folder.getName());
 				}
 			});
 			t.setPriority(Thread.MIN_PRIORITY);
