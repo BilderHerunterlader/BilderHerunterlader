@@ -21,7 +21,6 @@
 				
 				<xs:element name="sendCookies" type="xs:boolean" />
 				
-				<!-- TODO Does this actually work or do I have to specify a choice here between regex and javascript ? -->
 				<xs:element name="pipes" type="URLPipeline" minOccurs="0" maxOccurs="unbounded" />
 				
 				<xs:element name="failuresPipes" type="FailuresPipeline" minOccurs="0" maxOccurs="unbounded" />
