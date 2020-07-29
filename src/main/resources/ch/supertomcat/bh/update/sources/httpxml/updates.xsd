@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- Root Element -->
+	<xs:element name="updates">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element name="setuprelease" type="SetupRelease" />
+				<xs:element name="main" type="MainVersion" />
+				<xs:element name="description" type="VersionDescription" />
+				<xs:element name="redirects" type="Redirects" />
+				<xs:element name="hoster" type="Hoster" />
+				<xs:element name="changelog" type="ChangeLog" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<!-- Setup Release -->
+	<xs:complexType name="SetupRelease">
+		<xs:sequence>
+			<!-- Domain List -->
+			<xs:element name="description" type="VersionDescription" />
+		</xs:sequence>
+		<xs:attribute name="version" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- Main Version -->
+	<xs:complexType name="MainVersion">
+		<!-- Version -->
+		<xs:attribute name="version" type="xs:string" use="required" />
+		<!-- Source -->
+		<xs:attribute name="src" type="xs:string" use="required" />
+		<!-- Filename -->
+		<xs:attribute name="filename" type="xs:string" use="required" />
+		<!-- Name -->
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- Version Description -->
+	<xs:complexType name="VersionDescription">
+		<xs:sequence>
+			<!-- German Description -->
+			<xs:element name="mainDE" type="xs:string" />
+			<!-- English Description -->
+			<xs:element name="mainEN" type="xs:string" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Update Data -->
+	<xs:complexType name="UpdateData">
+		<xs:sequence>
+			<!-- Additional Source Files (Only used for HostClasses or RedirectClasses -->
+			<xs:element name="source" type="UpdateDataAdditionalSource" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<!-- Version -->
+		<xs:attribute name="version" type="xs:string" use="required" />
+		<!-- Source -->
+		<xs:attribute name="src" type="xs:string" use="required" />
+		<!-- Filename -->
+		<xs:attribute name="filename" type="xs:string" use="required" />
+		<!-- Name -->
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<!-- Min Version -->
+		<xs:attribute name="bhminversion" type="xs:string" use="optional" />
+		<!-- Max Version -->
+		<xs:attribute name="bhmaxversion" type="xs:string" use="optional" />
+		<!-- Delete Comment (File will be deleted if this attribute is present) -->
+		<xs:attribute name="delete" type="xs:string" use="optional" />
+	</xs:complexType>
+	
+	<!-- Update Data Additional Source -->
+	<xs:complexType name="UpdateDataAdditionalSource">
+		<!-- Source -->
+		<xs:attribute name="src" type="xs:string" use="required" />
+		<!-- Filename -->
+		<xs:attribute name="filename" type="xs:string" use="required" />
+		<!-- Delete Comment (File will be deleted if this attribute is present) -->
+		<xs:attribute name="delete" type="xs:string" use="optional" />
+	</xs:complexType>
+	
+	<!-- Redirects -->
+	<xs:complexType name="Redirects">
+		<xs:sequence>
+			<!-- Redirects -->
+			<xs:element name="redirect" type="UpdateData" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Hoster -->
+	<xs:complexType name="Hoster">
+		<xs:sequence>
+			<!-- Redirects -->
+			<xs:element name="host" type="UpdateData" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- ChangeLog -->
+	<xs:complexType name="ChangeLog">
+		<xs:sequence>
+			<!-- Change -->
+			<xs:element name="changes" type="Change" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Change -->
+	<xs:complexType name="Change">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<!-- Version -->
+				<xs:attribute name="version" type="xs:string" use="required" />
+				<!-- Language -->
+				<xs:attribute name="lng" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+</xs:schema>
