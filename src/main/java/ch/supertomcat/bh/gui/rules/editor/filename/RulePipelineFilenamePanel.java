@@ -9,12 +9,12 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import ch.supertomcat.bh.gui.renderer.LocalizedEnumComboBoxRenderer;
 import ch.supertomcat.bh.rules.xml.FilenameMode;
 import ch.supertomcat.bh.rules.xml.FilenamePipeline;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.combobox.renderer.LocalizedEnumComboBoxRenderer;
 
 /**
  * Rule-Pipeline-Panel

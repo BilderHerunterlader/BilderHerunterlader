@@ -11,12 +11,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import ch.supertomcat.bh.gui.renderer.LocalizedEnumComboBoxRenderer;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
 import ch.supertomcat.bh.rules.xml.DuplicateRemoveMode;
 import ch.supertomcat.bh.rules.xml.ReferrerMode;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.combobox.renderer.LocalizedEnumComboBoxRenderer;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 
 /**
