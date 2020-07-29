@@ -1,8 +1,6 @@
 package ch.supertomcat.bh.rules;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -23,15 +21,17 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadRestriction;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoURL;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLDownloadContainerPage;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLReplace;
 import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
-import ch.supertomcat.bh.rules.xml.FilenameMode;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
-import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
@@ -176,17 +176,23 @@ public class Rule extends Hoster {
 	 * Returns parsed URL and filename
 	 * 
 	 * @param upo URLParseObject
-	 * @param pagesourcecode True if page source code should be set into UPO, false otherwise
+	 * @param trace Flag if trace is active and information like html codes and so on are added to the URLParseObject
 	 * @return URL and filename
 	 * @throws HostException
 	 */
-	public String[] getURLAndFilename(URLParseObject upo, boolean pagesourcecode) throws HostException {
+	public String[] getURLAndFilename(URLParseObject upo, boolean trace) throws HostException {
 		Pic pic = upo.getPic();
 		String url = upo.getContainerURL();
 		String thumbURL = upo.getThumbURL();
 		String retval[] = new String[2];
 
-		if (pipelines.size() == 0) {
+		RuleTraceInfo ruleTraceInfo = null;
+		if (trace) {
+			ruleTraceInfo = new RuleTraceInfo();
+			upo.addInfo("RuleTraceInfo", ruleTraceInfo);
+		}
+
+		if (pipelines.isEmpty()) {
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
 				failurePipe.checkForFailure(url, thumbURL, "");
 			}
@@ -201,20 +207,9 @@ public class Rule extends Hoster {
 		 * So now the search and replace is done for the first pipeline, which results in a new URL.
 		 * That URL is now used for the second pipeline by downloading it's source-code.
 		 */
-		boolean bHtmlCodeFromFirstURL = false;
-		String htmlCodeFromFirstURL = "";
-
-		boolean bHtmlCodeFirst = false;
-		String htmlCodeFirst = "";
-		String htmlCodeFirstURL = "";
-		String htmlCodeFirstReferrer = "";
-
-		boolean bHtmlCodeLast = false;
-		String htmlCodeLast = "";
-		String htmlCodeLastURL = "";
-		String htmlCodeLastReferrer = "";
-
-		String htmlcode = "";
+		RuleHtmlCode htmlCodeFromFirstURL = new RuleHtmlCode();
+		RuleHtmlCode htmlCodeFirst = new RuleHtmlCode();
+		RuleHtmlCode htmlCodeLast = new RuleHtmlCode();
 
 		String pipelineURL = url;
 		String pipelineThumbURL = thumbURL;
@@ -223,34 +218,39 @@ public class Rule extends Hoster {
 		for (int i = 0; i < pipelines.size(); i++) {
 			RuleURLPipeline<?> rulePipeline = pipelines.get(i);
 			URLPipeline pipelineDefinition = rulePipeline.getDefinition();
-			int waitBeforeExecute = pipelineDefinition.getWaitBeforeExecute();
-			if (waitBeforeExecute > 0) {
-				try {
-					Thread.sleep(waitBeforeExecute);
-				} catch (InterruptedException e) {
-				}
+
+			RuleTraceInfoURL ruleTraceInfoURL = null;
+			if (ruleTraceInfo != null) {
+				ruleTraceInfoURL = new RuleTraceInfoURL(pipelineURL);
+				ruleTraceInfo.addURLTraceInfo(ruleTraceInfoURL);
 			}
+
+			sleepIfRequired(pipelineDefinition);
+
 			boolean sendCookies = pipelineDefinition.isSendCookies();
+			String htmlcode = "";
 			if (rulePipeline instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)rulePipeline).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
 				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
-				if (pagesourcecode) {
-					upo.addInfo("PageSourceCode", htmlcode);
-				}
 				logger.debug(definition.getName() + " -> " + url + " -> Download Container-Page done -> Result: " + htmlcode);
+				if (ruleTraceInfoURL != null) {
+					ruleTraceInfoURL.addStep(new RuleTraceInfoURLDownloadContainerPage(i, pipelineURL, htmlcode));
+				}
 				if (i == 0) {
-					htmlCodeFromFirstURL = htmlcode;
-					bHtmlCodeFromFirstURL = true;
+					htmlCodeFromFirstURL.setData(htmlcode, pipelineURL, pipelineReferrer);
+					if (trace) {
+						upo.addInfo("PageSourceCodeFromFirstURL", htmlCodeFromFirstURL);
+					}
 				}
-				if (bHtmlCodeFirst == false) {
-					htmlCodeFirst = htmlcode;
-					htmlCodeFirstURL = pipelineURL;
-					htmlCodeFirstReferrer = pipelineReferrer;
-					bHtmlCodeFirst = true;
+				if (!htmlCodeFirst.isAvailable()) {
+					htmlCodeFirst.setData(htmlcode, pipelineURL, pipelineReferrer);
+					if (trace) {
+						upo.addInfo("PageSourceCodeFirst", htmlCodeFirst);
+					}
 				}
-				htmlCodeLast = htmlcode;
-				htmlCodeLastURL = pipelineURL;
-				htmlCodeLastReferrer = pipelineReferrer;
-				bHtmlCodeLast = true;
+				htmlCodeLast.setData(htmlcode, pipelineURL, pipelineReferrer);
+				if (trace) {
+					upo.addInfo("PageSourceCodeLast", htmlCodeLast);
+				}
 			}
 
 			/*
@@ -261,7 +261,7 @@ public class Rule extends Hoster {
 			}
 
 			if (rulePipeline instanceof RulePipelineURLRegex) {
-				pipelineResult = ((RulePipelineURLRegex)rulePipeline).getURL(pipelineURL, pipelineThumbURL, htmlcode, pic);
+				pipelineResult = ((RulePipelineURLRegex)rulePipeline).getURL(pipelineURL, pipelineThumbURL, htmlcode, pic, ruleTraceInfoURL);
 			} else if (rulePipeline instanceof RulePipelineURLJavascript) {
 				pipelineResult = ((RulePipelineURLJavascript)rulePipeline).getURLByJavascript(pipelineURL, pipelineThumbURL, htmlcode, upo);
 			}
@@ -277,6 +277,9 @@ public class Rule extends Hoster {
 
 			pipelineResult = HTTPUtil.decodeURL(pipelineResult);
 			logger.debug(definition.getName() + " -> " + url + " -> pipe[" + i + "] -> Result: " + pipelineResult);
+			if (ruleTraceInfoURL != null) {
+				ruleTraceInfoURL.addStep(new RuleTraceInfoURLReplace(i, pipelineResult));
+			}
 
 			/*
 			 * Check for failures after replace
@@ -295,90 +298,40 @@ public class Rule extends Hoster {
 			}
 		}
 
-		if (pipelines.size() == 0) {
+		/*
+		 * If there are no pipelines, then just use the container url as result
+		 */
+		if (pipelines.isEmpty()) {
 			pipelineResult = url;
 		}
 
 		logger.debug(definition.getName() + " -> " + url + " -> Final URL Result: " + pipelineResult);
 		retval[0] = pipelineResult;
 		retval[1] = upo.getCorrectedFilename(); // Corrected Filename
-		if (pic != null && pic.getTargetFilename().length() == 0) {
-			pic.setTargetFilename(getFilenamePart(retval[0]));
+		if (pic != null && pic.getTargetFilename().isEmpty()) {
+			pic.setTargetFilename(RuleUtil.getFilenamePart(retval[0]));
 		}
 
-		if (pipelineFilename != null && retval[0].length() > 0 && pipelineFilename.getRegexps().size() > 0) {
-			FilenameMode filenameMode = pipelineFilename.getDefinition().getMode();
-			// First Container-URL
-			if (filenameMode == FilenameMode.CONTAINER_URL_FILENAME_PART) {
-				String filename = getFilenamePart(url);
-				if (filename.length() > 0) {
-					retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-				}
-			} else if (filenameMode == FilenameMode.CONTAINER_URL) {
-				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
-
-				// Thumbnail-URL
-			} else if (filenameMode == FilenameMode.THUMBNAIL_URL_FILENAME_PART) {
-				String filename = getFilenamePart(thumbURL);
-				if (filename.length() > 0) {
-					retval[1] = pipelineFilename.getCorrectedFilename(url, filename, "", pic);
-				}
-			} else if (filenameMode == FilenameMode.THUMBNAIL_URL) {
-				retval[1] = pipelineFilename.getCorrectedFilename(url, thumbURL, "", pic);
-
-				// Container-Page-Sourcecode
-			} else if ((filenameMode == FilenameMode.CONTAINER_PAGE_SOURCECODE) || (filenameMode == FilenameMode.FIRST_CONTAINER_PAGE_SOURCECODE)
-					|| (filenameMode == FilenameMode.LAST_CONTAINER_PAGE_SOURCECODE)) {
-				String filenamePageSourceURL = url;
-				String filenamePageSourceReferrer = getReferrer(upo);
-
-				if (bHtmlCodeFromFirstURL && (filenameMode == FilenameMode.FIRST_CONTAINER_PAGE_SOURCECODE)) {
-					htmlcode = htmlCodeFromFirstURL;
-				} else if (bHtmlCodeFirst && (filenameMode == FilenameMode.CONTAINER_PAGE_SOURCECODE)) {
-					htmlcode = htmlCodeFirst;
-					filenamePageSourceURL = htmlCodeFirstURL;
-					filenamePageSourceReferrer = htmlCodeFirstReferrer;
-				} else if (bHtmlCodeLast && (filenameMode == FilenameMode.LAST_CONTAINER_PAGE_SOURCECODE)) {
-					htmlcode = htmlCodeLast;
-					filenamePageSourceURL = htmlCodeLastURL;
-					filenamePageSourceReferrer = htmlCodeLastReferrer;
-				} else {
-					htmlcode = downloadContainerPage(definition.getName(), filenamePageSourceURL, filenamePageSourceReferrer);
-					if (pagesourcecode) {
-						upo.addInfo("PageSourceCode", htmlcode);
-					}
-				}
-
-				retval[1] = pipelineFilename.getCorrectedFilename(filenamePageSourceURL, thumbURL, htmlcode, pic);
-				String encodedFilename = retval[1];
-				String encoding = HTMLUtil.getEncodingFromSourceCode(htmlcode);
-				if (encoding.length() > 0 && isEncodingAvailable(encoding)) {
-					try {
-						encodedFilename = new String(encodedFilename.getBytes(), encoding);
-						retval[1] = encodedFilename;
-					} catch (UnsupportedEncodingException e) {
-						logger.error(e.getMessage(), e);
-					}
-				}
-
-				// Download-URL
-			} else if (filenameMode == FilenameMode.DOWNLOAD_URL) {
-				retval[1] = pipelineFilename.getCorrectedFilename(retval[0], thumbURL, "", pic);
-			} else if (filenameMode == FilenameMode.DOWNLOAD_URL_FILENAME_PART) {
-				String filename = getFilenamePart(retval[0]);
-				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-
-				// Last Container-URL
-			} else if (filenameMode == FilenameMode.LAST_CONTAINER_URL_FILENAME_PART) {
-				String filename = getFilenamePart(pipelineURL);
-				retval[1] = pipelineFilename.getCorrectedFilename(filename, thumbURL, "", pic);
-			} else if (filenameMode == FilenameMode.LAST_CONTAINER_URL) {
-				retval[1] = pipelineFilename.getCorrectedFilename(pipelineURL, thumbURL, "", pic);
+		if (pipelineFilename != null && !retval[0].isEmpty() && !pipelineFilename.getRegexps().isEmpty()) {
+			RuleDownloadContainerPageSupplier<RuleHtmlCode> htmlCodeDownloadSupplier = () -> {
+				String referrer = getReferrer(upo);
+				String downloadedHtmlCode = downloadContainerPage(definition.getName(), url, referrer);
+				return new RuleHtmlCode(downloadedHtmlCode, url, referrer);
+			};
+			String filenamePipelineResult = pipelineFilename
+					.getCorrectedFilename(url, pipelineURL, thumbURL, retval[0], htmlCodeFromFirstURL, htmlCodeFirst, htmlCodeLast, htmlCodeDownloadSupplier, pic, upo, ruleTraceInfo);
+			if (filenamePipelineResult != null) {
+				retval[1] = filenamePipelineResult;
 			}
 		}
-		if (retval[1].length() == 0) {
-			retval[1] = getFilenamePart(retval[0]);
+
+		/*
+		 * If filename is still empty, then use filename part of download URL
+		 */
+		if (retval[1].isEmpty()) {
+			retval[1] = RuleUtil.getFilenamePart(retval[0]);
 		}
+
 		if (pic != null) {
 			pic.setRenameWithContentDisposition(definition.isUseContentDisposition());
 		}
@@ -390,31 +343,15 @@ public class Rule extends Hoster {
 		return retval;
 	}
 
-	/**
-	 * @param encoding Encoding
-	 * @return Available
-	 */
-	private boolean isEncodingAvailable(String encoding) {
-		return Charset.availableCharsets().containsKey(encoding);
-	}
-
-	private String getFilenamePart(String url) {
-		String filenamePart = url;
-		int posSlash = url.lastIndexOf('/');
-		if (posSlash > -1) {
-			filenamePart = url.substring(posSlash + 1);
+	private void sleepIfRequired(URLPipeline pipelineDefinition) {
+		int waitBeforeExecute = pipelineDefinition.getWaitBeforeExecute();
+		if (waitBeforeExecute > 0) {
+			try {
+				Thread.sleep(waitBeforeExecute);
+			} catch (InterruptedException e) {
+				logger.error("Sleep was interrupted", e);
+			}
 		}
-
-		int posQueryString = filenamePart.lastIndexOf('?');
-		if (posQueryString > -1) {
-			filenamePart = filenamePart.substring(0, posQueryString);
-		}
-
-		int posFragment = filenamePart.lastIndexOf('#');
-		if (posFragment > -1) {
-			filenamePart = filenamePart.substring(0, posFragment);
-		}
-		return filenamePart;
 	}
 
 	/**
@@ -457,7 +394,7 @@ public class Rule extends Hoster {
 	public String getFilename(String url) {
 		String retval = url;
 		if (pipelineFilenameDownloadSelection.getDefinition().getMode() == FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART) {
-			retval = getFilenamePart(url);
+			retval = RuleUtil.getFilenamePart(url);
 		}
 		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval);
 	}

@@ -11,6 +11,7 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
@@ -19,7 +20,9 @@ import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
+import ch.supertomcat.bh.rules.RuleHtmlCode;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
 import ch.supertomcat.bh.rules.xml.URLMode;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -103,7 +106,27 @@ public class RuleTest extends JDialog implements ActionListener {
 	/**
 	 * TextField
 	 */
-	private JTextArea txtResultPageSourceCode = new JTextArea(15, 80);
+	private JTextArea txtResultPageSourceCodeLast = new JTextArea(15, 80);
+
+	/**
+	 * TextField
+	 */
+	private JTextArea txtResultPageSourceCodeFirst = new JTextArea(15, 80);
+
+	/**
+	 * TextField
+	 */
+	private JTextArea txtResultPageSourceCodeFromFirstURL = new JTextArea(15, 80);
+
+	/**
+	 * TextField
+	 */
+	private JTextArea txtResultPageSourceCodeFilename = new JTextArea(15, 80);
+
+	/**
+	 * TextField
+	 */
+	private JTextArea txtRuleTraceInfo = new JTextArea(15, 80);
 
 	/**
 	 * Button
@@ -155,7 +178,12 @@ public class RuleTest extends JDialog implements ActionListener {
 		pnlButtons.add(btnClose);
 		add(pnlButtons, BorderLayout.SOUTH);
 
-		JScrollPane scrollpane = new JScrollPane(txtResultPageSourceCode);
+		JTabbedPane tabs = new JTabbedPane();
+		tabs.addTab("RuleTraceInfo", new JScrollPane(txtRuleTraceInfo));
+		tabs.addTab("LastPageSourceCode", new JScrollPane(txtResultPageSourceCodeLast));
+		tabs.addTab("FirstPageSourceCode", new JScrollPane(txtResultPageSourceCodeFirst));
+		tabs.addTab("PageSourceCodeFromFirstURL", new JScrollPane(txtResultPageSourceCodeFromFirstURL));
+		tabs.addTab("PageSourceCodeFilename", new JScrollPane(txtResultPageSourceCodeFilename));
 
 		txtMessage.setEditable(false);
 
@@ -198,7 +226,7 @@ public class RuleTest extends JDialog implements ActionListener {
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblResultPageSourceCode, pnlMain);
 		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.9, 0.5);
-		GridBagLayoutUtil.addItemToPanel(gbl, gbc, scrollpane, pnlMain);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, tabs, pnlMain);
 
 		add(pnlMain, BorderLayout.CENTER);
 
@@ -216,11 +244,6 @@ public class RuleTest extends JDialog implements ActionListener {
 		txtContainer.requestFocus();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		if (e.getSource() == btnClose) {
@@ -265,7 +288,30 @@ public class RuleTest extends JDialog implements ActionListener {
 				t.join();
 			} catch (InterruptedException e1) {
 			}
-			txtResultPageSourceCode.setText((String)upo.getInfo("PageSourceCode"));
+
+			setHtmlSourceCode(upo, "PageSourceCodeLast", txtResultPageSourceCodeLast);
+			setHtmlSourceCode(upo, "PageSourceCodeFirst", txtResultPageSourceCodeFirst);
+			setHtmlSourceCode(upo, "PageSourceCodeFromFirstURL", txtResultPageSourceCodeFromFirstURL);
+			setHtmlSourceCode(upo, "PageSourceCodeFilename", txtResultPageSourceCodeFilename);
+			setRuleTraceInfo(upo, txtRuleTraceInfo);
+		}
+	}
+
+	private void setHtmlSourceCode(URLParseObject upo, String upoInfoKey, JTextArea txt) {
+		RuleHtmlCode ruleHtmlCode = (RuleHtmlCode)upo.getInfo(upoInfoKey);
+		if (ruleHtmlCode != null && ruleHtmlCode.isAvailable()) {
+			txt.setText(ruleHtmlCode.getHtmlCode());
+		} else {
+			txt.setText("Not Available");
+		}
+	}
+
+	private void setRuleTraceInfo(URLParseObject upo, JTextArea txt) {
+		RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo("RuleTraceInfo");
+		if (ruleTraceInfo != null) {
+			txt.setText(ruleTraceInfo.toString());
+		} else {
+			txt.setText("Not Available");
 		}
 	}
 }
