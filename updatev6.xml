@@ -41,7 +41,7 @@
 		<!-- End of Host-Classes -->
 		<!-- Start of Rules -->
 		<host version="0.2" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" />
-		<host version="0.3" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
+		<host version="0.4" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/vsnvc3sz3qh1gmv/Ruleabload.xml?dl=1" filename="Ruleabload.xml" name="Ruleabload.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/cb76wq8dkay5t0l/Ruleallmoviephoto.com.xml?dl=1" filename="Ruleallmoviephoto.com.xml" name="Ruleallmoviephoto.com.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/92tyryl0uqu22l9/RuleAppleTrailer.xml?dl=1" filename="RuleAppleTrailer.xml" name="RuleAppleTrailer.xml" />

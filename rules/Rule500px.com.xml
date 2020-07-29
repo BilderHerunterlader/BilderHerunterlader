@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="500px.com" version="0.3" redirect="false" resend="false">
-    <urlPattern>https://500px\.com/photo/.+?</urlPattern>
+<ruleDefinition name="500px.com" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://500px\.com/photo/[0-9]+(?:/.+)?</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>false</reduceFilenameLength>
@@ -10,12 +10,14 @@
     <downloadCustomReferrer></downloadCustomReferrer>
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
-    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="1" urlDecodeResult="true" sendCookies="true">
-        <regexp pattern="&lt;meta content=[&quot;'](https://.+?\.500px\.org/photo/.+?/.+?/.+?)[&quot;'] property=[&quot;']og:image[&quot;']&gt;" replacement="$1"/>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="https?://500px\.com/photo/([0-9]+)(?:/.+)?" replacement="https://api.500px.com/v1/photos?ids=$1&amp;image_size%5B%5D=2048&amp;include_states=1&amp;expanded_user_info=true&amp;include_tags=true&amp;include_geo=true&amp;is_following=true&amp;include_equipment_info=true&amp;include_licensing=true&amp;include_releases=true&amp;liked_by=1&amp;include_vendor_photos=true"/>
     </pipes>
-    <failuresPipes failureType="FAILED_FILE_NOT_EXIST" checkURL="true" checkThumbURL="true" checkPageSourceCode="false"/>
-    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
-        <regexp pattern="&lt;title&gt;(.+?) / 500px&lt;/title&gt;" replacement="$1.jpg"/>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&quot;image_url&quot;:\[&quot;(.+?)&quot;" replacement="$1"/>
+    </pipes>
+    <filenamePipeline mode="LAST_CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="&quot;image_format&quot;:&quot;(.+?)&quot;.+?&quot;name&quot;:&quot;(.+?)&quot;," replacement="$2.$1"/>
     </filenamePipeline>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <restriction maxConnections="0"/>
