@@ -45,16 +45,31 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 	 * @return Filename
 	 */
 	public String getCorrectedFilename(String url, String thumbURL, String htmlcode, Pic pic) {
-
-		String result = url;
+		String result;
 		boolean bSourcecode = false;
-		if ((definition.getMode() == FilenameMode.THUMBNAIL_URL_FILENAME_PART) || (definition.getMode() == FilenameMode.THUMBNAIL_URL)) {
-			result = thumbURL;
-		} else if (definition.getMode() == FilenameMode.CONTAINER_PAGE_SOURCECODE) {
-			result = htmlcode;
-			bSourcecode = true;
+		switch (definition.getMode()) {
+			case THUMBNAIL_URL_FILENAME_PART:
+			case THUMBNAIL_URL:
+				result = thumbURL;
+				break;
+			case CONTAINER_PAGE_SOURCECODE:
+			case FIRST_CONTAINER_PAGE_SOURCECODE:
+			case LAST_CONTAINER_PAGE_SOURCECODE:
+				result = htmlcode;
+				bSourcecode = true;
+				break;
+			case CONTAINER_URL_FILENAME_PART:
+			case CONTAINER_URL:
+			case LAST_CONTAINER_URL_FILENAME_PART:
+			case LAST_CONTAINER_URL:
+			case DOWNLOAD_URL:
+			case DOWNLOAD_URL_FILENAME_PART:
+			default:
+				result = url;
+				break;
 		}
-		if (bSourcecode == false) {
+
+		if (!bSourcecode) {
 			for (int i = 0; i < regexps.size(); i++) {
 				result = regexps.get(i).doURLReplace(result, pic);
 				logger.debug(url + " -> Filename Replace done -> Step " + i + " -> Result: " + result);
