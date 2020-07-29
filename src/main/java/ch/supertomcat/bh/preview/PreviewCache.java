@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 
+ * Preview Cache
  */
 public class PreviewCache {
 	/**
@@ -24,7 +24,7 @@ public class PreviewCache {
 
 	private List<PreviewCacheListener> listeners = new CopyOnWriteArrayList<>();
 
-	private PreviewDiskCache diskCache = new PreviewDiskCache();
+	private static PreviewDiskCache diskCache = new PreviewDiskCache();
 
 	/**
 	 * Image Format

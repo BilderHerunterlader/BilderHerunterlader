@@ -13,7 +13,7 @@ public class PreviewDownloader implements Callable<PreviewDownloader.DownloadedP
 	private String url = null;
 	int previewHeight = 100;
 	private int connectTimeout = 1000;
-	private int readTimeout = 1000;
+	private int readTimeout = 2000;
 
 	/**
 	 * Constructor
@@ -45,11 +45,6 @@ public class PreviewDownloader implements Callable<PreviewDownloader.DownloadedP
 		this.readTimeout = readTimeout;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.util.concurrent.Callable#call()
-	 */
 	@Override
 	public DownloadedPreview call() throws Exception {
 		if (url == null) {

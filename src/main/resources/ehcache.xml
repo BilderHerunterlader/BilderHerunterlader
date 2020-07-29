@@ -1,28 +1,16 @@
-﻿<ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../config/ehcache.xsd">
-	<!--
-	The following properties are translated:
-	* user.home - User's home directory
-	* user.dir - User's current working directory
-	* java.io.tmpdir - Default temp file path
-	* ehcache.disk.store.dir - A system property you would normally specify on the command line
-	e.g. java -Dehcache.disk.store.dir=/u01/myapp/diskdir ...
-	
-	Subdirectories can be specified below the property e.g. java.io.tmpdir/one
-	-->
-	<diskStore path="java.io.tmpdir"/>
-	
-	<!--
-	Mandatory Default Cache configuration. These settings will be applied to caches
-	created programmtically using CacheManager.add(String cacheName)
-	-->
-	<defaultCache
-		maxElementsInMemory="10000"
-		eternal="false"
-		timeToIdleSeconds="120"
-		timeToLiveSeconds="120"
-		maxElementsOnDisk="10000000"
-		diskExpiryThreadIntervalSeconds="120"
-		memoryStoreEvictionPolicy="LRU">
-		<persistence strategy="localTempSwap"/>
-	</defaultCache>
-</ehcache>
+﻿<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.ehcache.org/v3" xsi:schemaLocation="http://www.ehcache.org/v3 http://www.ehcache.org/schema/ehcache-core.xsd">
+	<persistence directory="${java.io.tmpdir}/bh-cache-data"/>
+
+	<cache alias="previews">
+		<key-type>java.lang.String</key-type>
+		<value-type>[B</value-type>
+		<expiry>
+			<none />
+		</expiry>
+		<resources>
+			<heap unit="entries">1000</heap>
+			<offheap unit="MB">100</offheap>
+			<disk unit="MB" persistent="false">200</disk>
+		</resources>
+	</cache>
+</config>
