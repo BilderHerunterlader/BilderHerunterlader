@@ -210,9 +210,13 @@ public class RuleIO {
 	 */
 	private RuleDefinition readRuleNewFormat(InputStream in, boolean validate) throws IOException, JAXBException {
 		if (validate) {
-			return unmarshallerValidated.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
+			synchronized (unmarshallerValidated) {
+				return unmarshallerValidated.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
+			}
 		} else {
-			return unmarshaller.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
+			synchronized (unmarshaller) {
+				return unmarshaller.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
+			}
 		}
 	}
 
@@ -481,7 +485,9 @@ public class RuleIO {
 		}
 
 		try (FileOutputStream out = new FileOutputStream(file)) {
-			marshaller.marshal(ruleDefinition, out);
+			synchronized (marshaller) {
+				marshaller.marshal(ruleDefinition, out);
+			}
 		}
 	}
 
