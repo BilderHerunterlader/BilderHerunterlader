@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="&lt;img id=&quot;(.*?)&quot; src=&quot;(.*?)&quot;" replacement="$2"/>
+        <regexp pattern="&lt;img id=&quot;.*?&quot; src=&quot;(.*?)&quot;" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART">
         <regexp pattern="(.*)\.html$" replacement="$1"/>
