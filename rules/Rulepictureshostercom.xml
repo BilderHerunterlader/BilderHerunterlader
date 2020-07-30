@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="pictureshostercom" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?pictureshoster\.com/hosted-pictures/.+?/.+\.html</urlPattern>
+<ruleDefinition name="pictureshostercom" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?pictureshoster\.com/hosted-pictures/.+?/.+\.html</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="(http://(www\.)?pictureshoster\.com/)hosted-pictures/(.+?)/(.+)\.html" replacement="$1files/$4.$3"/>
+        <regexp pattern="(https?://(www\.)?pictureshoster\.com/)hosted-pictures/(.+?)/(.+)\.html" replacement="$1files/$4.$3"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

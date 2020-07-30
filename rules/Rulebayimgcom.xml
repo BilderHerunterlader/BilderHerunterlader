@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="bayimg.com" version="0.3" redirect="false" resend="false">
-    <urlPattern>^http://bayimg.com/[a-zA-Z0-9]+$</urlPattern>
+<ruleDefinition name="bayimg.com" version="0.4" redirect="false" resend="false">
+    <urlPattern>^https?://bayimg.com/[a-zA-Z0-9]+$</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="&lt;img.+?src=&quot;(http://image.bayimg.com/.+?)&quot;.+?id=&quot;mainImage&quot;" replacement="$1"/>
+        <regexp pattern="&lt;img.+?src=&quot;(https?://image.bayimg.com/.+?)&quot;.+?id=&quot;mainImage&quot;" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

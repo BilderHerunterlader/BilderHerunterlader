@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="fileden.com" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://www\.fileden\.com/pview\.php\?fid=(.*?)&amp;fname=(.*)</urlPattern>
+<ruleDefinition name="fileden.com" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www\.fileden\.com/pview\.php\?fid=(.*?)&amp;fname=(.*)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="src=&quot;(http://.*?fileden\.com/public/.*?)&quot;" replacement="$1"/>
+        <regexp pattern="src=&quot;(https?://.*?fileden\.com/public/.*?)&quot;" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

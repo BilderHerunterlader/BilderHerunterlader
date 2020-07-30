@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="gallery.bizhat.com" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://gallery\.bizhat\.com/showphoto\.php/(.*?)/size/big/</urlPattern>
+<ruleDefinition name="gallery.bizhat.com" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://gallery\.bizhat\.com/showphoto\.php/(.*?)/size/big/</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -12,7 +12,7 @@
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="Next image in category" replacement=""/>
-        <regexp pattern="&lt;a href=&quot;http://gallery\.bizhat\.com/showphoto\.php/" replacement=""/>
+        <regexp pattern="&lt;a href=&quot;https?://gallery\.bizhat\.com/showphoto\.php/" replacement=""/>
         <regexp pattern="&lt;img" replacement=""/>
         <regexp pattern="src=&quot;(.*?)&quot;" replacement="$1"/>
     </pipes>

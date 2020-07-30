@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="upix.me" version="0.6" redirect="false" resend="false">
-    <urlPattern>http://upix.me/files[0-9]*/.+?/#.+\.(?:jpg|png)</urlPattern>
+<ruleDefinition name="upix.me" version="0.7" redirect="false" resend="false">
+    <urlPattern>https?://upix.me/files[0-9]*/.+?/#.+\.(?:jpg|png)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="http://upix.me/(files[0-9]*)/(.+?)/#(.+\.(?:jpg|png))" replacement="$SRV$1/$2/$3"/>
+        <regexp pattern="https?://upix.me/(files[0-9]*)/(.+?)/#(.+\.(?:jpg|png))" replacement="$SRV$1/$2/$3"/>
     </pipes>
     <filenamePipeline mode="THUMBNAIL_URL_FILENAME_PART">
         <regexp pattern="#(.+)" replacement="$1"/>

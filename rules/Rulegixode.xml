@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="gixode" version="0.3" redirect="false" resend="false">
-    <urlPattern>http:\/\/www\.gixo\.de\/page\.php\?type=.*&amp;f=[a-zA-Z0-9]+</urlPattern>
+<ruleDefinition name="gixode" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www\.gixo\.de\/page\.php\?type=.*&amp;f=[a-zA-Z0-9]+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="(http:\/\/www\.gixo\.de\/)page\.php(\?type=.*&amp;f=[a-zA-Z0-9]+)" replacement="$1pic.php$2"/>
+        <regexp pattern="(https?://www\.gixo\.de\/)page\.php(\?type=.*&amp;f=[a-zA-Z0-9]+)" replacement="$1pic.php$2"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART">
         <regexp pattern="pic\.php\?type=(.*)&amp;f=([a-zA-Z0-9]+)" replacement="$2.$1"/>

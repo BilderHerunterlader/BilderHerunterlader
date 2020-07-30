@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="Redirectndtsventures.com" version="0.3" redirect="true" resend="false">
-    <urlPattern>http://(?:ndtsventures\.com/linksafe\.php|linksafe\.ndtsventures\.com/)\?u=.+</urlPattern>
+<ruleDefinition name="Redirectndtsventures.com" version="0.4" redirect="true" resend="false">
+    <urlPattern>https?://(?:ndtsventures\.com/linksafe\.php|linksafe\.ndtsventures\.com/)\?u=.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="true" sendCookies="true">
-        <regexp pattern="http://(?:ndtsventures\.com/linksafe\.php|linksafe\.ndtsventures\.com/)\?u=(.+)" replacement="$1"/>
+        <regexp pattern="https?://(?:ndtsventures\.com/linksafe\.php|linksafe\.ndtsventures\.com/)\?u=(.+)" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagebanana" version="0.3" redirect="false" resend="false">
-    <urlPattern>http:\/\/img[0-9]+\.imagebanana\.com\/view\/[0-9a-zA-Z]+\/.*</urlPattern>
+<ruleDefinition name="imagebanana" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://img[0-9]+\.imagebanana\.com\/view\/[0-9a-zA-Z]+\/.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="(http:\/\/img[0-9]+\.imagebanana\.com\/)view(\/[0-9a-zA-Z]+\/.*)" replacement="$1img$2"/>
+        <regexp pattern="(https?://img[0-9]+\.imagebanana\.com\/)view(\/[0-9a-zA-Z]+\/.*)" replacement="$1img$2"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

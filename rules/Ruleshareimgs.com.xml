@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="shareimgs.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://www.shareimgs.com/show\.php/.+?\.html$</urlPattern>
+<ruleDefinition name="shareimgs.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://www.shareimgs.com/show\.php/.+?\.html$</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -17,7 +17,7 @@
         <regexp pattern="&lt;img src=&quot;(?:.+?)&quot; alt=&quot;(.+?)&quot; id=&quot;?img_obj&quot;?" replacement="$1"/>
     </filenamePipeline>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART">
-        <regexp pattern="http://www.shareimgs.com/show\.php/(.+?)\.html$" replacement="$1"/>
+        <regexp pattern="https?://www.shareimgs.com/show\.php/(.+?)\.html$" replacement="$1"/>
     </filenameDownloadSelectionPipeline>
     <restriction maxConnections="0"/>
 </ruleDefinition>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="stooorage.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://www\.stooorage\.com/show/[0-9]+/.+</urlPattern>
+<ruleDefinition name="stooorage.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://www\.stooorage\.com/show/[0-9]+/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="&lt;img src=&quot;(http://img[0-9]+\.stooorage\.com/images/.+?)&quot;" replacement="$1"/>
+        <regexp pattern="&lt;img src=&quot;(https?://img[0-9]+\.stooorage\.com/images/.+?)&quot;" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
