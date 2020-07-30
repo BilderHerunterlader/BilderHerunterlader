@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="Imagehost (bizhat)" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://imagehost\.bizhat\.com/img_page\.php/</urlPattern>
+<ruleDefinition name="Imagehost (bizhat)" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://imagehost\.bizhat\.com/img_page\.php/</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="http://imagehost\.bizhat\.com/img_page\.php/([0-9]*)/([0-9]*)/(.*)" replacement="http://imagehost.bizhat.com/users/$1/$3"/>
+        <regexp pattern="(https?://imagehost\.bizhat\.com)/img_page\.php/([0-9]*)/([0-9]*)/(.*)" replacement="$1/users/$2/$4"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
