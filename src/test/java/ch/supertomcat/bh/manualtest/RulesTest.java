@@ -100,7 +100,7 @@ class RulesTest {
 
 	@Test
 	public void testRulesWithoutHttps() {
-		boolean changeRules = true;
+		boolean changeRules = false;
 
 		HostRules hostRules = hostManager.getHostRules();
 		for (Rule rule : hostRules.getRules()) {
