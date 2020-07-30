@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="free-picload.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>https://free-picload\.com/image/.+?</urlPattern>
+<ruleDefinition name="free-picload.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://free-picload\.com/image/.+?</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="fapp.to" version="0.2" redirect="true" resend="false">
-    <urlPattern>http://imgs.fapp.to/.+</urlPattern>
+<ruleDefinition name="fapp.to" version="0.3" redirect="true" resend="false">
+    <urlPattern>https?://imgs.fapp.to/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="http://imgs.fapp.to/(.+)" replacement="http://imgbox.com/$1"/>
+        <regexp pattern="(https?://)imgs.fapp.to/(.+)" replacement="$1imgbox.com/$2"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

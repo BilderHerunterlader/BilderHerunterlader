@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="directupload.net" version="1.10" redirect="false" resend="false">
-    <urlPattern>(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm</urlPattern>
+<ruleDefinition name="directupload.net" version="2.0" redirect="false" resend="false">
+    <urlPattern>(https?://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -14,10 +14,10 @@
         <regexp pattern="&lt;meta property=&quot;og:image&quot; content=&quot;(.+?)&quot;" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL">
-        <regexp pattern="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
+        <regexp pattern="(https?://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
     </filenamePipeline>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL">
-        <regexp pattern="(http://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
+        <regexp pattern="(https?://(?:s[0-9a-z]+|www)\.directupload\.net)/file/[a-z]+/[0-9]+/(.+?)_([a-zA-Z0-9]+)\.htm" replacement="$2.$3"/>
     </filenameDownloadSelectionPipeline>
     <restriction maxConnections="0"/>
 </ruleDefinition>

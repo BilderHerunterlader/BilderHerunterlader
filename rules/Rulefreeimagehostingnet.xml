@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="freeimagehosting.net" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://(.*?)freeimagehosting\.net/image\.php\?(.+)</urlPattern>
+<ruleDefinition name="freeimagehosting.net" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://(.*?)freeimagehosting\.net/image\.php\?(.+)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="http://(.*?)freeimagehosting\.net/image\.php\?(.+)" replacement="http://$1freeimagehosting.net/uploads/$2"/>
+        <regexp pattern="(https?://.*?)freeimagehosting\.net/image\.php\?(.+)" replacement="$1freeimagehosting.net/uploads/$2"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
