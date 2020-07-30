@@ -100,7 +100,7 @@ class RulesTest {
 
 	@Test
 	public void testRulesWithoutHttps() {
-		boolean changeRules = false;
+		boolean changeRules = true;
 
 		HostRules hostRules = hostManager.getHostRules();
 		for (Rule rule : hostRules.getRules()) {
@@ -110,27 +110,21 @@ class RulesTest {
 				continue;
 			}
 
-			if (!urlPattern.startsWith("https?") && !urlPattern.startsWith("^https?") && !urlPattern.startsWith("(?i)https?") && !urlPattern.startsWith("(?i)^https?")
-					&& !urlPattern.startsWith("(https?") && !urlPattern.startsWith(".+?/")) {
+			boolean urlPatternHttp = !urlPattern.startsWith("https?") && !urlPattern.startsWith("^https?") && !urlPattern.startsWith("(?i)https?") && !urlPattern.startsWith("(?i)^https?")
+					&& !urlPattern.startsWith("(https?") && !urlPattern.startsWith(".+?/");
+
+			boolean pipesRegexHttp = definition.getPipes().stream().filter(x -> x instanceof URLRegexPipeline).flatMap(x -> x.getRegexp().stream()).anyMatch(x -> checkHttpWithoutS(x.getPattern()));
+			boolean pipesJavascriptHttp = definition.getPipes().stream().filter(x -> x instanceof URLJavascriptPipeline).map(x -> (URLJavascriptPipeline)x)
+					.anyMatch(x -> checkHttpWithoutS(x.getJavascriptCode()));
+			boolean filenamePipesHttp = definition.getFilenamePipeline().getRegexp().stream().anyMatch(x -> checkHttpWithoutS(x.getPattern()));
+			boolean filenameDLSelPipesHttp = definition.getFilenameDownloadSelectionPipeline().getRegexp().stream().anyMatch(x -> checkHttpWithoutS(x.getPattern()));
+			boolean failurePipesHttp = definition.getFailuresPipes().stream().flatMap(x -> x.getRegexp().stream()).anyMatch(x -> checkHttpWithoutS(x.getPattern()));
+
+			if (urlPatternHttp || pipesRegexHttp || filenameDLSelPipesHttp || filenamePipesHttp || failurePipesHttp) {
 				LoggerFactory.getLogger(getClass()).info("Rule without https {}: {}", rule.getName(), urlPattern);
 
 				if (!changeRules) {
 					continue;
-				}
-
-				boolean pipesRegexHttp = definition.getPipes().stream().filter(x -> x instanceof URLRegexPipeline).flatMap(x -> x.getRegexp().stream()).anyMatch(x -> x.getPattern().contains("http"));
-				boolean pipesJavascriptHttp = definition.getPipes().stream().filter(x -> x instanceof URLJavascriptPipeline).map(x -> (URLJavascriptPipeline)x)
-						.anyMatch(x -> x.getJavascriptCode().contains("http"));
-				boolean filenamePipesHttp = definition.getFilenamePipeline().getRegexp().stream().anyMatch(x -> x.getPattern().contains("http"));
-				boolean filenameDLSelPipesHttp = definition.getFilenameDownloadSelectionPipeline().getRegexp().stream().anyMatch(x -> x.getPattern().contains("http"));
-				boolean failurePipesHttp = definition.getFailuresPipes().stream().flatMap(x -> x.getRegexp().stream()).anyMatch(x -> x.getPattern().contains("http"));
-
-				if (pipesJavascriptHttp) {
-					continue;
-				}
-
-				if (pipesRegexHttp || filenameDLSelPipesHttp || filenamePipesHttp || failurePipesHttp) {
-					// TODO check later for http without s
 				}
 
 				boolean saveRule = true;
@@ -142,23 +136,27 @@ class RulesTest {
 					definition.setUrlPattern(urlPattern.replace("http:\\/\\/", "https?://"));
 				} else if (urlPattern.startsWith("^http:\\/\\/")) {
 					definition.setUrlPattern(urlPattern.replace("^http:\\/\\/", "^https?://"));
-				} else {
+				} else if (!pipesRegexHttp && !filenameDLSelPipesHttp && !filenamePipesHttp && !failurePipesHttp && !pipesJavascriptHttp) {
 					saveRule = false;
 				}
 
 				if (saveRule) {
 					if (pipesRegexHttp) {
-						definition.getPipes().stream().filter(x -> x instanceof URLRegexPipeline).flatMap(x -> x.getRegexp().stream()).filter(x -> x.getPattern().contains("http"))
+						definition.getPipes().stream().filter(x -> x instanceof URLRegexPipeline).flatMap(x -> x.getRegexp().stream()).filter(x -> checkHttpWithoutS(x.getPattern()))
 								.forEach(x -> fixHttpsInRuleRegex(x));
 					}
 					if (filenameDLSelPipesHttp) {
-						definition.getFilenameDownloadSelectionPipeline().getRegexp().stream().filter(x -> x.getPattern().contains("http")).forEach(x -> fixHttpsInRuleRegex(x));
+						definition.getFilenameDownloadSelectionPipeline().getRegexp().stream().filter(x -> checkHttpWithoutS(x.getPattern())).forEach(x -> fixHttpsInRuleRegex(x));
 					}
 					if (filenamePipesHttp) {
-						definition.getFilenamePipeline().getRegexp().stream().filter(x -> x.getPattern().contains("http")).forEach(x -> fixHttpsInRuleRegex(x));
+						definition.getFilenamePipeline().getRegexp().stream().filter(x -> checkHttpWithoutS(x.getPattern())).forEach(x -> fixHttpsInRuleRegex(x));
 					}
 					if (failurePipesHttp) {
-						definition.getFailuresPipes().stream().flatMap(x -> x.getRegexp().stream()).filter(x -> x.getPattern().contains("http")).forEach(x -> fixHttpsInRuleRegex(x));
+						definition.getFailuresPipes().stream().flatMap(x -> x.getRegexp().stream()).filter(x -> checkHttpWithoutS(x.getPattern())).forEach(x -> fixHttpsInRuleRegex(x));
+					}
+					if (pipesJavascriptHttp) {
+						definition.getPipes().stream().filter(x -> x instanceof URLJavascriptPipeline).map(x -> (URLJavascriptPipeline)x).filter(x -> checkHttpWithoutS(x.getJavascriptCode()))
+								.forEach(x -> fixHttpsInJavascriptPipeline(x));
 					}
 
 					definition.setVersion(increaseVersion(definition.getVersion()));
@@ -173,6 +171,10 @@ class RulesTest {
 		ruleRegex.setReplacement(fixHttps(ruleRegex.getReplacement()));
 	}
 
+	private void fixHttpsInJavascriptPipeline(URLJavascriptPipeline javascriptPipeline) {
+		javascriptPipeline.setJavascriptCode(fixHttps(javascriptPipeline.getJavascriptCode()));
+	}
+
 	private String fixHttps(String original) {
 		String fixed = original;
 		fixed = fixed.replace("^http:\\/\\/", "^https?://");
@@ -180,6 +182,10 @@ class RulesTest {
 		fixed = fixed.replace("http:\\/\\/", "https?://");
 		fixed = fixed.replace("http://", "https?://");
 		return fixed;
+	}
+
+	private boolean checkHttpWithoutS(String input) {
+		return input.contains("^http:\\/\\/") || input.contains("^http://") || input.contains("http:\\/\\/") || input.contains("http://");
 	}
 
 	private String increaseVersion(String version) {
