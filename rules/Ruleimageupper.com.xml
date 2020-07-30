@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imageupper.com" version="0.4" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?imageupper\.com/[g]?i/\?(galID=)?[a-zA-Z0-9]+(&amp;n=[0-9]+&amp;m=[0-9]+)?</urlPattern>
+<ruleDefinition name="imageupper.com" version="0.5" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?imageupper\.com/[g]?i/\?(galID=)?[a-zA-Z0-9]+(&amp;n=[0-9]+&amp;m=[0-9]+)?</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

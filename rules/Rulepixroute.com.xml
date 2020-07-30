@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="pixroute.com" version="0.4" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?pixroute.com/[0-9a-zA-Z]+/.+\.html</urlPattern>
+<ruleDefinition name="pixroute.com" version="0.5" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?pixroute.com/[0-9a-zA-Z]+/.+\.html</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

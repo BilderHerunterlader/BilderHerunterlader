@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="root-space.eu" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://root-space.eu/file/.+</urlPattern>
+<ruleDefinition name="root-space.eu" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://root-space.eu/file/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

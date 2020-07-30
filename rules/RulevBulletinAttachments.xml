@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="vBulletinAttachments" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://([0-9a-zA-Z-]+\.)?[0-9a-zA-Z-.]+/(.*/)?(.*?\?page=Attachment&amp;attachmentID=|attachment\.php\?attachmentid=)[0-9a-zA-Z]+&amp;(h|d)=[0-9a-zA-Z]+</urlPattern>
+<ruleDefinition name="vBulletinAttachments" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://([0-9a-zA-Z-]+\.)?[0-9a-zA-Z-.]+/(.*/)?(.*?\?page=Attachment&amp;attachmentID=|attachment\.php\?attachmentid=)[0-9a-zA-Z]+&amp;(h|d)=[0-9a-zA-Z]+</urlPattern>
     <useContentDisposition>true</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

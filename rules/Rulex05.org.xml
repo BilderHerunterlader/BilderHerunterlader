@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="x05.org" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://x05\.org/show\.php/.+</urlPattern>
+<ruleDefinition name="x05.org" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://x05\.org/show\.php/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

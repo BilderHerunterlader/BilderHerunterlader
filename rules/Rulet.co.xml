@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="t.co" version="0.2" redirect="true" resend="false">
-    <urlPattern>http://t.co/.+</urlPattern>
+<ruleDefinition name="t.co" version="0.3" redirect="true" resend="false">
+    <urlPattern>https?://t.co/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

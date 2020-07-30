@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="tinypic.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://([a-z]+\.)?tinypic.com/view\.php\?pic=.*</urlPattern>
+<ruleDefinition name="tinypic.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://([a-z]+\.)?tinypic.com/view\.php\?pic=.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="keptarolo.hu" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://keptarolo\.hu/[0-9a-z]+/.+</urlPattern>
+<ruleDefinition name="keptarolo.hu" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://keptarolo\.hu/[0-9a-z]+/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

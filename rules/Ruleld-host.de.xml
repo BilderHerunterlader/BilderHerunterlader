@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="ld-host.de" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?ld-host\.de/show/.*</urlPattern>
+<ruleDefinition name="ld-host.de" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?ld-host\.de/show/.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

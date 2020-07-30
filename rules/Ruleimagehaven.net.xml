@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagehaven.net" version="1.10" redirect="false" resend="false">
-    <urlPattern>http://(www\.|(img|a)[0-9]+\.)?imagehaven\.net//?(vievver|img)\.php\?id=.+</urlPattern>
+<ruleDefinition name="imagehaven.net" version="2.0" redirect="false" resend="false">
+    <urlPattern>https?://(www\.|(img|a)[0-9]+\.)?imagehaven\.net//?(vievver|img)\.php\?id=.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

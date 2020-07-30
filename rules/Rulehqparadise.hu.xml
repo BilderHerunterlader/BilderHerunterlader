@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="hqparadise.hu / starity.hu" version="0.5" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?(hqparadise\.hu|starity\.hu)/(index\.php\?(s=[0-9a-zA-Z]+&amp;)?act=Attach&amp;type=post&amp;id=[0-9]+|forum/csatolas/[0-9]+/)</urlPattern>
+<ruleDefinition name="hqparadise.hu / starity.hu" version="0.6" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?(hqparadise\.hu|starity\.hu)/(index\.php\?(s=[0-9a-zA-Z]+&amp;)?act=Attach&amp;type=post&amp;id=[0-9]+|forum/csatolas/[0-9]+/)</urlPattern>
     <useContentDisposition>true</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

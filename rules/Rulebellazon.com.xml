@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="bellazon.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?bellazon\.com/http://(www\.)?bellazon\.com/main/index\.php\?s=[0-9a-z]+&amp;act=attach&amp;type=.*?&amp;id=[0-9]+</urlPattern>
+<ruleDefinition name="bellazon.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?bellazon\.com/https?://(www\.)?bellazon\.com/main/index\.php\?s=[0-9a-z]+&amp;act=attach&amp;type=.*?&amp;id=[0-9]+</urlPattern>
     <useContentDisposition>true</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

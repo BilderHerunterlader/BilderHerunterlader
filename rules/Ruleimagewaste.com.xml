@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagewaste.com / imagebunk.com" version="0.10" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?image(waste|bunk)\.com/([a-z]+/)?(pictures|imagewaste)/.+</urlPattern>
+<ruleDefinition name="imagewaste.com / imagebunk.com" version="1.0" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?image(waste|bunk)\.com/([a-z]+/)?(pictures|imagewaste)/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="storeimgs.net" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://storeimgs\.net/img-[0-9a-zA-Z]+\.html$</urlPattern>
+<ruleDefinition name="storeimgs.net" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://storeimgs\.net/img-[0-9a-zA-Z]+\.html$</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

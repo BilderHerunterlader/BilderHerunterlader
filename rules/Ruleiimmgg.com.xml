@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="iimmgg.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?iimmgg.com/image/.*</urlPattern>
+<ruleDefinition name="iimmgg.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?iimmgg.com/image/.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

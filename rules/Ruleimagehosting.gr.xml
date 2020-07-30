@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagehosting.gr" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?imagehosting\.gr/show\.php/[0-9a-z]+_.*.html</urlPattern>
+<ruleDefinition name="imagehosting.gr" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?imagehosting\.gr/show\.php/[0-9a-z]+_.*.html</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

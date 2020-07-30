@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="lupiupload.de" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?lupiupload\.de/file\.php\?dat=.*</urlPattern>
+<ruleDefinition name="lupiupload.de" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?lupiupload\.de/file\.php\?dat=.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

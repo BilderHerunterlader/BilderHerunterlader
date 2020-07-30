@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="picfront.org" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://www.picfront.org/[a-zA-Z0-9]+?/[a-zA-Z0-9]+?/.+</urlPattern>
+<ruleDefinition name="picfront.org" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www.picfront.org/[a-zA-Z0-9]+?/[a-zA-Z0-9]+?/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

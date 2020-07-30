@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="celebies.com" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?celebies\.com/picture/[0-9]+(/.*)?</urlPattern>
+<ruleDefinition name="celebies.com" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?celebies\.com/picture/[0-9]+(/.*)?</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

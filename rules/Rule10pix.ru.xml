@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="10pix.ru" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?10pix\.ru/view/[0-9]+/[0-9]+/</urlPattern>
+<ruleDefinition name="10pix.ru" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?10pix\.ru/view/[0-9]+/[0-9]+/</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

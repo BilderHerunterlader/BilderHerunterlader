@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="produto.mercadolivre.com.br" version="0.2" redirect="false" resend="false">
-    <urlPattern>http://produto.mercadolivre.com.br/MLB-[0-9]+-.+</urlPattern>
+<ruleDefinition name="produto.mercadolivre.com.br" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://produto.mercadolivre.com.br/MLB-[0-9]+-.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

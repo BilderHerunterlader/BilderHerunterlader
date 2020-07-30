@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="dumparum" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://www\.dumparump\.com/view\.php\?id=(.*)</urlPattern>
+<ruleDefinition name="dumparum" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www\.dumparump\.com/view\.php\?id=(.*)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

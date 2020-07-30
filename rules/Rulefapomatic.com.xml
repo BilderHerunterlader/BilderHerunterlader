@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="fapomatic.com" version="1.9" redirect="false" resend="false">
-    <urlPattern>http://(www\.)?fapomatic\.com/show\.php\?(loc=[0-9]+&amp;)?f=.+</urlPattern>
+<ruleDefinition name="fapomatic.com" version="2.0" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?fapomatic\.com/show\.php\?(loc=[0-9]+&amp;)?f=.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

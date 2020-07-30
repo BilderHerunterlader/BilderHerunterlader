@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="upmyphotocom" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://www\.upmyphoto\.com/img/image\.php\?image=.*</urlPattern>
+<ruleDefinition name="upmyphotocom" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www\.upmyphoto\.com/img/image\.php\?image=.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
