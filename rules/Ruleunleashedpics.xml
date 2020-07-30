@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="unleashedpics" version="0.3" redirect="false" resend="false">
-    <urlPattern>http://www.unleashedpics.com/Pics/Viewer.php\?file=(.*)</urlPattern>
+<ruleDefinition name="unleashedpics" version="0.4" redirect="false" resend="false">
+    <urlPattern>https?://www.unleashedpics.com/Pics/Viewer.php\?file=(.*)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="http://www\.unleashedpics\.com/Pics/Viewer.php\?file=(.*)" replacement="http://www.unleashedpics.com/Pics/$1"/>
+        <regexp pattern="(https?://www\.unleashedpics\.com/Pics/)Viewer.php\?file=(.*)" replacement="$1$2"/>
     </pipes>
     <filenamePipeline mode="THUMBNAIL_URL"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
