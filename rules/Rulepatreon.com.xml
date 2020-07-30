@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="patreon.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>https://www\.patreon\.com/file\?h=(.+?)</urlPattern>
+<ruleDefinition name="patreon.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://www\.patreon\.com/file\?h=(.+?)</urlPattern>
     <useContentDisposition>true</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

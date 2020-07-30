@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="artstation.com" version="0.2" redirect="false" resend="false">
-    <urlPattern>https://www\.artstation\.com/artwork/.+?</urlPattern>
+<ruleDefinition name="artstation.com" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://www\.artstation\.com/artwork/.+?</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

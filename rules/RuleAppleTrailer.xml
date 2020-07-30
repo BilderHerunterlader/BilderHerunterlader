@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="AppleTrailer" version="0.5" redirect="false" resend="false">
-    <urlPattern>^(http://(movietrailers|trailers|movies)\.apple\.com/movies/.+?/.+?/.+?-.+?_)h?([0-9]+[a-z]\.mov)</urlPattern>
+<ruleDefinition name="AppleTrailer" version="0.6" redirect="false" resend="false">
+    <urlPattern>^https?://(?:movietrailers|trailers|movies)\.apple\.com/movies/.+?/.+?/.+?-.+?_h?[0-9]+[a-z]\.mov</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLJavascriptPipeline" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <javascriptCode>var regexDownload = new RegExp("^(http://(movietrailers|trailers|movies)\\.apple\\.com/movies/.+?/.+?/.+?-.+?_)h?([0-9]+[a-z]\\.mov)", "i");&#13;
+        <javascriptCode>var regexDownload = new RegExp("^(https?://(movietrailers|trailers|movies)\\.apple\\.com/movies/.+?/.+?/.+?-.+?_)h?([0-9]+[a-z]\\.mov)", "i");&#13;
 &#13;
 var match = regexDownload.exec(containerURL);&#13;
 if (match) {&#13;

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="img.yt" version="0.2" redirect="false" resend="false">
-    <urlPattern>httpss?://img\.yt/img-[0-9A-Za-z]+\.html$</urlPattern>
+<ruleDefinition name="img.yt" version="0.3" redirect="false" resend="false">
+    <urlPattern>https?://img\.yt/img-[0-9A-Za-z]+\.html$</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
