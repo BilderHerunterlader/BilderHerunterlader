@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.supertomcat</groupId>
 	<artifactId>bh</artifactId>
-	<version>4.15.0</version>
+	<version>4.15.1-SNAPSHOT</version>
 	<name>BilderHerunterlader</name>
 	<properties>
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
@@ -276,7 +276,7 @@
 	<scm>
 		<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
 		<connection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</connection>
-		<tag>bh-4.15.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 	<distributionManagement>
 		<repository>
