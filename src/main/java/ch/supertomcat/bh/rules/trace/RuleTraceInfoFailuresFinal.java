@@ -1,9 +1,9 @@
 package ch.supertomcat.bh.rules.trace;
 
 /**
- * URL Pipeline Replace Rule Trace Info
+ * Failures Search Rule Final Info
  */
-public class RuleTraceInfoURLReplace extends RuleTraceInfoURLStep {
+public class RuleTraceInfoFailuresFinal extends RuleTraceInfoFailuresStep {
 	/**
 	 * Result
 	 */
@@ -13,10 +13,11 @@ public class RuleTraceInfoURLReplace extends RuleTraceInfoURLStep {
 	 * Constructor
 	 * 
 	 * @param step Step
+	 * @param start Start Position
 	 * @param result Result
 	 */
-	public RuleTraceInfoURLReplace(int step, String result) {
-		super(step);
+	public RuleTraceInfoFailuresFinal(int step, int start, String result) {
+		super(step, start);
 		this.result = result;
 	}
 
@@ -31,6 +32,6 @@ public class RuleTraceInfoURLReplace extends RuleTraceInfoURLStep {
 
 	@Override
 	public String toString() {
-		return step + " -> Result: " + result;
+		return "Failure Final Search done -> Step " + step + " -> Result: " + result;
 	}
 }

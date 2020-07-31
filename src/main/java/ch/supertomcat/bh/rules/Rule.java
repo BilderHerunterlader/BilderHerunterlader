@@ -194,7 +194,7 @@ public class Rule extends Hoster {
 
 		if (pipelines.isEmpty()) {
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(url, thumbURL, "");
+				failurePipe.checkForFailure(url, thumbURL, "", ruleTraceInfo);
 			}
 		}
 
@@ -257,7 +257,7 @@ public class Rule extends Hoster {
 			 * Check for failures before replace
 			 */
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(pipelineURL, pipelineThumbURL, htmlcode);
+				failurePipe.checkForFailure(pipelineURL, pipelineThumbURL, htmlcode, ruleTraceInfo);
 			}
 
 			if (rulePipeline instanceof RulePipelineURLRegex) {
@@ -285,7 +285,7 @@ public class Rule extends Hoster {
 			 * Check for failures after replace
 			 */
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(pipelineResult);
+				failurePipe.checkForFailure(pipelineResult, ruleTraceInfo);
 			}
 
 			if (i > 0 && i < (pipelines.size() - 1)) {
@@ -392,11 +392,22 @@ public class Rule extends Hoster {
 	 * @return Filename
 	 */
 	public String getFilename(String url) {
+		return getFilename(url, null);
+	}
+
+	/**
+	 * Returns the filename after replacement
+	 * 
+	 * @param url URL
+	 * @param ruleTraceInfo Rule Trace Info or null
+	 * @return Filename
+	 */
+	public String getFilename(String url, RuleTraceInfo ruleTraceInfo) {
 		String retval = url;
 		if (pipelineFilenameDownloadSelection.getDefinition().getMode() == FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART) {
 			retval = RuleUtil.getFilenamePart(url);
 		}
-		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval);
+		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval, ruleTraceInfo);
 	}
 
 	/**

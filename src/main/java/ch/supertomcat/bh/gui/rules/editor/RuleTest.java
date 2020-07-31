@@ -279,7 +279,8 @@ public class RuleTest extends JDialog implements ActionListener {
 						txtResultFilename.setText("");
 					}
 
-					String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL());
+					RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo("RuleTraceInfo");
+					String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL(), ruleTraceInfo);
 					txtResultFilenameDownloadSelection.setText(resultFilenameDownloadSelection);
 				}
 			});

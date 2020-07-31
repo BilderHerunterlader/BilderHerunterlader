@@ -124,7 +124,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 			}
 
 			if (trace) {
-				traceInfo = new RuleTraceInfoFilename(containerURL, result);
+				traceInfo = new RuleTraceInfoFilename(false, containerURL, result);
 				ruleTraceInfo.setFilenameTraceInfo(traceInfo);
 			}
 
@@ -145,7 +145,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 			result = htmlCode;
 			if (trace) {
 				upo.addInfo("PageSourceCodeFilename", ruleHtmlCode);
-				traceInfo = new RuleTraceInfoFilename(htmlCodeSourceURL, htmlCode);
+				traceInfo = new RuleTraceInfoFilename(false, htmlCodeSourceURL, htmlCode);
 				ruleTraceInfo.setFilenameTraceInfo(traceInfo);
 			}
 

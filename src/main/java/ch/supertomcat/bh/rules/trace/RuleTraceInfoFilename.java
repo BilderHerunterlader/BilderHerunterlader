@@ -8,6 +8,11 @@ import java.util.List;
  */
 public class RuleTraceInfoFilename {
 	/**
+	 * Download Selection Flag
+	 */
+	private final boolean downloadSelection;
+
+	/**
 	 * URL
 	 */
 	private final String url;
@@ -25,10 +30,12 @@ public class RuleTraceInfoFilename {
 	/**
 	 * Constructor
 	 * 
-	 * @param url
-	 * @param input
+	 * @param downloadSelection Download Selection Flag
+	 * @param url URL
+	 * @param input Input
 	 */
-	public RuleTraceInfoFilename(String url, String input) {
+	public RuleTraceInfoFilename(boolean downloadSelection, String url, String input) {
+		this.downloadSelection = downloadSelection;
 		this.url = url;
 		this.input = input;
 	}
@@ -40,6 +47,15 @@ public class RuleTraceInfoFilename {
 	 */
 	public void addStep(RuleTraceInfoFilenameStep step) {
 		steps.add(step);
+	}
+
+	/**
+	 * Returns the downloadSelection
+	 * 
+	 * @return downloadSelection
+	 */
+	public boolean isDownloadSelection() {
+		return downloadSelection;
 	}
 
 	/**
@@ -72,7 +88,11 @@ public class RuleTraceInfoFilename {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("Filename Pipeline Done:\n-> URL: ");
+		if (downloadSelection) {
+			sb.append("Filename on Download Selection Pipeline Done:\n-> URL: ");
+		} else {
+			sb.append("Filename Pipeline Done:\n-> URL: ");
+		}
 		sb.append(url);
 		sb.append("\n");
 		for (RuleTraceInfoFilenameStep step : steps) {

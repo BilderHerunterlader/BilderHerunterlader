@@ -2,6 +2,9 @@ package ch.supertomcat.bh.rules;
 
 import org.jdom2.Element;
 
+import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilename;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameReplace;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionPipeline;
 
@@ -38,13 +41,24 @@ public class RulePipelineFilenameDownloadSelection extends RulePipeline<Filename
 	 * Returns the filename after replacement
 	 * 
 	 * @param url URL
+	 * @param ruleTraceInfo Rule Trace Info or null
 	 * @return Filename
 	 */
-	public String getCorrectedFilenameOnDownloadSelection(String url) {
+	public String getCorrectedFilenameOnDownloadSelection(String url, RuleTraceInfo ruleTraceInfo) {
 		String result = url;
+
+		RuleTraceInfoFilename traceInfo = null;
+		if (ruleTraceInfo != null) {
+			traceInfo = new RuleTraceInfoFilename(true, url, url);
+			ruleTraceInfo.setFilenameOnDownloadSelectionTraceInfo(traceInfo);
+		}
+
 		for (int i = 0; i < regexps.size(); i++) {
 			result = regexps.get(i).doURLReplace(result, null);
 			logger.debug(url + " -> Filename on Download Selection Replace done -> Step " + i + " -> Result: " + result);
+			if (traceInfo != null) {
+				traceInfo.addStep(new RuleTraceInfoFilenameReplace(i, 0, result));
+			}
 		}
 		return result;
 	}
