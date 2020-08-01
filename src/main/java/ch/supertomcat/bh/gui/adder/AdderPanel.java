@@ -70,6 +70,7 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+import javax.swing.table.TableRowSorter;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -313,6 +314,11 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * Tablemodel
 	 */
 	private AdderTableModel model = new AdderTableModel();
+
+	/**
+	 * Table Row Sorter
+	 */
+	private TableRowSorter<AdderTableModel> sorter = new TableRowSorter<>(model);
 
 	/**
 	 * Table
@@ -660,6 +666,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 		jtAdder.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 
+		jtAdder.setRowSorter(sorter);
 		jtAdder.setDefaultRenderer(Object.class, crr);
 		DefaultBooleanColorRowRenderer dbcrr = new DefaultBooleanColorRowRenderer();
 		jtAdder.getColumn("Selection").setCellRenderer(dbcrr);
