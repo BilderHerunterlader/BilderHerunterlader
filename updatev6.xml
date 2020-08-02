@@ -87,6 +87,7 @@
 		<host version="0.3" src="https://www.dropbox.com/s/lnm4amwsu5wnsrw/Ruleimg.yt.xml?dl=1" filename="Ruleimg.yt.xml" name="Ruleimg.yt.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/nxzpf8271agezsj/Ruleimgbox.com.xml?dl=1" filename="Ruleimgbox.com.xml" name="Ruleimgbox.com.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/5zaxtdjve0aejej/Ruleimgchili.com.xml?dl=1" filename="Ruleimgchili.com.xml" name="Ruleimgchili.com.xml" />
+		<host version="0.1" src="https://www.dropbox.com/s/4ccqu7hga5mfrcl/Ruleimgcredit.xyz.xml?dl=1" filename="Ruleimgcredit.xyz.xml" name="Ruleimgcredit.xyz.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/djt4hdmv86ltrmn/Ruleimgiga.com.xml?dl=1" filename="Ruleimgiga.com.xml" name="Ruleimgiga.com.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/1qqoeaatv2yigis/Ruleimgpit.com.xml?dl=1" filename="Ruleimgpit.com.xml" name="Ruleimgpit.com.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/c1x81mccq92m40d/Ruleimgur.xml?dl=1" filename="Ruleimgur.xml" name="Ruleimgur.xml" />
@@ -141,7 +142,7 @@
 		<!--
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
-		-->		
+		-->
 		<changes version="4.15.0" lng="de">- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</changes>
 		<changes version="4.15.0" lng="en">- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</changes>
 		<changes version="4.14.0" lng="de">- Bug Fixed: Exceptions when trying to restart after update was installed\n- Bug Fixed: When a Pic is disabled, but the states is failed, the foreground color of the progress column must not be changed to red, because the brackground is already red\n- Rule XML Files are now read and written with JAXB based on an XSD File\n- Rule XML Files have a different format now. Rule files, which are still in the old format are automatically converted to the new format and a backup file of the old files is created (just in case something goes wrong).\n- Refactored Rule Editor classes to only change JAXB classes, instead of runtime wrapper classes\n- Removed duplicate code in Rule Editor classes\n- Use folder name as title when sorting files\n- Bug Fixed: Pic state maintained WAITING or DOWNLOADING state, when there was an exception on starting download instead of changing to FAILED state\n- Bug Fixed: Sorting files was not working anymore, because in that case restriction domain is empty, which lead to an exception</changes>

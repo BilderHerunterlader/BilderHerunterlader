@@ -143,7 +143,7 @@ public class UpdateUpdatesXMLTest {
 				}
 			} else {
 				UpdateData newRuleUpdate = new UpdateData();
-				newRuleUpdate.setName(rule.getName());
+				newRuleUpdate.setName(rule.getFile().getName());
 				newRuleUpdate.setVersion(rule.getVersion());
 				newRuleUpdate.setSrc("TODO");
 				newRuleUpdate.setFilename(rule.getFile().getName());
