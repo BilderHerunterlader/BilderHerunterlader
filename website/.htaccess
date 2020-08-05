@@ -1,0 +1,4 @@
+php_flag register_globals off
+php_flag register_long_arrays off
+ErrorDocument 404 /page/?loc=error404
+Options -Indexes

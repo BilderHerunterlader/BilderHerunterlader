@@ -1,0 +1,91 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2020-08-05 19:06+0200\n"
+"PO-Revision-Date: 2020-08-05 19:06+0200\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: de\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 2.4\n"
+"X-Poedit-Basepath: .\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-SearchPath-0: .\n"
+"X-Poedit-SearchPathExcluded-0: cache\n"
+"X-Poedit-SearchPathExcluded-1: configs\n"
+"X-Poedit-SearchPathExcluded-2: geshi\n"
+"X-Poedit-SearchPathExcluded-3: templates_c\n"
+
+#: language.php:9
+msgid "home"
+msgstr "Startseite"
+
+#: language.php:10 language.php:17
+msgid "useful"
+msgstr "Nützliches"
+
+#: language.php:11
+msgid "contact"
+msgstr "Kontakt"
+
+#: language.php:12
+msgid "features"
+msgstr "Features"
+
+#: language.php:13
+msgid "download"
+msgstr "Download"
+
+#: language.php:14
+msgid "changelog"
+msgstr "Changelog"
+
+#: language.php:15
+msgid "screenshots"
+msgstr "Screenshots"
+
+#: language.php:16
+msgid "faq"
+msgstr "FAQ"
+
+#: language.php:18
+msgid "tutorial"
+msgstr "Anleitung"
+
+#: language.php:19
+msgid "rules"
+msgstr "Regeln"
+
+#: language.php:20
+msgid "hostplugins"
+msgstr "Host-Plugins"
+
+#: language.php:21
+msgid "options"
+msgstr "Einstellungen"
+
+#: language.php:22
+msgid "portable"
+msgstr "Portable"
+
+#: language.php:23
+msgid "bilderherunterlader"
+msgstr "BilderHerunterlader"
+
+#: language.php:24
+msgid "error404"
+msgstr "Error"
+
+#: language.php:25
+msgid "irada"
+msgstr "Irada"
+
+#: language.php:26
+msgid "anleitung"
+msgstr "Anleitung"
+
+#: language.php:27
+msgid "hostini"
+msgstr "host.ini"

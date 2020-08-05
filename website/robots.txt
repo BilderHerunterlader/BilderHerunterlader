@@ -1,0 +1,9 @@
+User-agent: ChangeDetection
+Disallow: /
+
+User-agent: *
+Disallow: /bh/
+Disallow: /bu/
+Disallow: /share/
+Disallow: /smarty-3.1.35/
+Disallow: /smartyPlugins/
