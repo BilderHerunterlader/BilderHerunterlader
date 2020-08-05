@@ -75,9 +75,9 @@ if (isset($_GET['loc']) && ($_GET['loc'] != "")) {
 			$pageTemplateFile = $folderIndexTemplateFile;
 			$foundTemplateFile = true;
 		}
-	} else if (file_exists('templates/' . $loc . $pageLanguage . '.tpl')) {
-		$pageTemplateFile = $loc . $pageLanguage . ".tpl";
-		$subMenuTemplateFile = dirname($loc . $pageLanguage . '.tpl') . "/menu.tpl";
+	} else if (file_exists('templates/' . $loc . "_" . $pageLanguage . '.tpl')) {
+		$pageTemplateFile = $loc . "_" . $pageLanguage . ".tpl";
+		$subMenuTemplateFile = dirname($loc . "_" . $pageLanguage . '.tpl') . "/menu.tpl";
 		$foundTemplateFile = true;
 	} else if (file_exists('templates/' . $loc . '.tpl')) {
 		$pageTemplateFile = $loc . ".tpl";

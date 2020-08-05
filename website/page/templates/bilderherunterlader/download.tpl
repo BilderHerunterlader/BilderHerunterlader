@@ -19,8 +19,8 @@ Windows, Linux, MacOS, BSD und any other operating system for which the JRE (Jav
 <div class="download"><a name="bh"></a>
 <pre>
 <img src="bilderherunterlader/bilderherunterlader2-50.png" alt="Bilderherunterlader" />
-<span style="color: #FF0000; font-weight: bold;">Please read the <a href="?loc=bilderherunterlader/tutorial&amp;lng={$pageLanguage}">Tutorial</a> before installing</span>
-<b>Versions:</b>
+<span style="color: #FF0000; font-weight: bold;">Please read the <a href="?loc=bilderherunterlader/tutorial&amp;lng={$pageLanguage}">{gettext}tutorial{/gettext}</a> before installing</span>
+<b>Version:</b>
 {$BHSetupReleaseVersion}:
 <table summary="downloads" class="downloads">
 <tr><th>Download</th></tr>
@@ -52,7 +52,7 @@ The function can also be called directly by using the keyboard-shortcut Shift + 
 <b><i>Version {$ff57version}:
 Only for Firefox 57.0 or higher
 Requires BH 4.6.0 or higher</i></b>
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterladerwebext-{$ff57version}-an%2Bfx.xpi/download">Firefox - WebExtension installieren</a>
+<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterladerwebext-{$ff57version}-an%2Bfx.xpi/download">Install Firefox - WebExtension</a>
 
 Usage:
 On a page with images: Rightclick -> BilderHerunterlader -> Download files with BH

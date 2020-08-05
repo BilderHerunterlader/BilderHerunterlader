@@ -105,9 +105,5 @@ Upper and lower case at this point of the program is not respected.
 <b><a name="hostplugins" class="noStyle">Host-Classes</a></b>
 If this possibilities aren't enough and you can program in Java, then you can write your own classes which can be used as Hosters-Plugins.
 To compile such a class the sourcecode of the program is required.
-Because the class has to extend de.scheisseichfindemalkeinen.hoster.Host and has to implement the Interface de.scheisseichfindemalkeinen.hoster.IHoster.
-
-If it is required in the class to download the sourcecode of the webpage than you should use
-HttpClient client = de.scheisseichfindemalkeinen.settings.ProxyManager.instance().getHTTPClient();
-Then the proxy-settings from the program is used for the download.
+Because the class has to extend ch.supertomcat.bh.hoster.Host and has to implement the Interface ch.supertomcat.bh.hoster.IHoster.
 </pre>
