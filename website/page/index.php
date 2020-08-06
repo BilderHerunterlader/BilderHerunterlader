@@ -109,10 +109,10 @@ foreach ($pageTitleArr as $pageTitlePart) {
 
 $smarty = new Smarty();
 
-$smarty->setTemplateDir($_SERVER['DOCUMENT_ROOT'] . '/BHWebsiteNew/page/templates/');
-$smarty->setCompileDir($_SERVER['DOCUMENT_ROOT'] . '/BHWebsiteNew/page/templates_c/');
-$smarty->setConfigDir($_SERVER['DOCUMENT_ROOT'] . '/BHWebsiteNew/page/configs/');
-$smarty->setCacheDir($_SERVER['DOCUMENT_ROOT'] . '/BHWebsiteNew/page/cache/');
+$smarty->setTemplateDir(dirname(__FILE__) . '/templates/');
+$smarty->setCompileDir(dirname(__FILE__) . '/templates_c/');
+$smarty->setConfigDir(dirname(__FILE__) . '/configs/');
+$smarty->setCacheDir(dirname(__FILE__) . '/cache/');
 
 $smarty->assign('bhUpdatesXMLFile', realpath('../bh/updatev6.xml'));
 $smarty->assign('pageLocationTemplate', $pageTemplateFile);
