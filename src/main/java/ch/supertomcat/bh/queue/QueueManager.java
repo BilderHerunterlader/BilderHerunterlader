@@ -89,7 +89,8 @@ public class QueueManager implements IPicListener {
 		this.logManager = logManager;
 		this.settingsManager = settingsManager;
 		this.fileDownloaderFactory = fileDownloaderFactory;
-		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.isBackupDbOnStart());
+		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.isBackupDbOnStart(), settingsManager
+				.isDefragDBOnStart(), settingsManager.getDefragMinFilesize());
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
 			if (pic.getStatus() != PicState.COMPLETE) {

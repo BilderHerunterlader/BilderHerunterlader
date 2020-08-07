@@ -3,6 +3,7 @@ package ch.supertomcat.bh.database.sqlite;
 import java.io.File;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.text.SimpleDateFormat;
@@ -40,13 +41,20 @@ public abstract class SQLiteDB<T> {
 	protected final String tableName;
 
 	/**
+	 * Vacuum SQL Command
+	 */
+	private final String vacuumSQL = "VACUUM";
+
+	/**
 	 * Constructor
 	 * 
 	 * @param databaseFile Path to the database File
 	 * @param tableName Table Name
 	 * @param backupDatabaseOnStart True if database should be backed up on start, false otherwise
+	 * @param defragDatabaseOnStart True if database should be deframented on start, false otherwise
+	 * @param defragMinFileSize Minimum filesize for decision if database is actually defragmented or not
 	 */
-	public SQLiteDB(String databaseFile, String tableName, boolean backupDatabaseOnStart) {
+	public SQLiteDB(String databaseFile, String tableName, boolean backupDatabaseOnStart, boolean defragDatabaseOnStart, long defragMinFileSize) {
 		this.databaseFile = databaseFile;
 		this.tableName = tableName;
 
@@ -74,6 +82,15 @@ public abstract class SQLiteDB<T> {
 
 		if (openDBFailed) {
 			System.exit(0); // exit programm
+		}
+
+		if (defragDatabaseOnStart) {
+			File dbFile = new File(databaseFile);
+			if (dbFile.exists()) {
+				if (dbFile.length() >= defragMinFileSize) {
+					defragDatabase();
+				}
+			}
 		}
 	}
 
@@ -119,6 +136,23 @@ public abstract class SQLiteDB<T> {
 
 		// Delete old backup-Files
 		BHUtil.deleteOldBackupFiles(new File(ApplicationProperties.getProperty("DatabasePath")), dbFilename, 3);
+	}
+
+	/**
+	 * Defragment Database
+	 * 
+	 * @return True if successful, false otherwise
+	 */
+	private synchronized boolean defragDatabase() {
+		try (Connection con = getDatabaseConnection()) {
+			try (PreparedStatement statement = con.prepareStatement(vacuumSQL)) {
+				statement.executeUpdate();
+				return true;
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			logger.error("Could not fragement database '{}'", databaseFile, e);
+			return false;
+		}
 	}
 
 	/**

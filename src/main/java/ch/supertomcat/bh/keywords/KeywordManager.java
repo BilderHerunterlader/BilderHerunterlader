@@ -53,7 +53,8 @@ public class KeywordManager {
 	 * @param settingsManager Settings Manager
 	 */
 	public KeywordManager(SettingsManager settingsManager) {
-		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.isBackupDbOnStart());
+		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.isBackupDbOnStart(), settingsManager
+				.isDefragDBOnStart(), settingsManager.getDefragMinFilesize());
 		List<Keyword> keywordsFromDB = keywordsSQLiteDB.getAllEntries();
 		keywords.addAll(keywordsFromDB);
 	}

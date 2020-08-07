@@ -39,9 +39,11 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	 * 
 	 * @param databaseFile Path to the database File
 	 * @param backupDatabaseOnStart True if database should be backed up on start, false otherwise
+	 * @param defragDatabaseOnStart True if database should be deframented on start, false otherwise
+	 * @param defragMinFileSize Minimum filesize for decision if database is actually defragmented or not
 	 */
-	public KeywordsSQLiteDB(String databaseFile, boolean backupDatabaseOnStart) {
-		super(databaseFile, "bh_keywords", backupDatabaseOnStart);
+	public KeywordsSQLiteDB(String databaseFile, boolean backupDatabaseOnStart, boolean defragDatabaseOnStart, long defragMinFileSize) {
+		super(databaseFile, "bh_keywords", backupDatabaseOnStart, defragDatabaseOnStart, defragMinFileSize);
 
 		selectAllEntriesSQL = "SELECT * FROM " + tableName;
 
