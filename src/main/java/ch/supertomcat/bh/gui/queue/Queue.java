@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
+import java.awt.MouseInfo;
+import java.awt.Point;
+import java.awt.PointerInfo;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
@@ -386,22 +389,27 @@ public class Queue extends JPanel {
 		btnStop.addActionListener(e -> actionStop());
 		btnImport.addActionListener(e -> {
 			SwingUtilities.updateComponentTreeUI(menuImport);
-			menuImport.show(btnImport, menuImport.getX(), menuImport.getY());
-		});
-		btnImport.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (e.getSource() == btnImport && e.isPopupTrigger()) {
-					menuImport.show(btnImport, e.getX(), e.getY());
+			int x = 0;
+			int y = 0;
+			int buttonWidth = btnImport.getWidth();
+			int buttonHeight = btnImport.getHeight();
+			boolean mouseOnComponent = false;
+			PointerInfo pointInfo = MouseInfo.getPointerInfo();
+			if (pointInfo != null) {
+				Point mousePosition = pointInfo.getLocation();
+				SwingUtilities.convertPointFromScreen(mousePosition, btnImport);
+				if (btnImport.contains(mousePosition)) {
+					x = mousePosition.x;
+					y = mousePosition.y;
+					mouseOnComponent = true;
 				}
 			}
 
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (e.getSource() == btnImport && e.isPopupTrigger()) {
-					menuImport.show(btnImport, e.getX(), e.getY());
-				}
+			if (!mouseOnComponent && buttonWidth > 0 && buttonHeight > 0) {
+				x = buttonWidth / 2;
+				y = buttonHeight / 2;
 			}
+			menuImport.show(btnImport, x, y);
 		});
 		btnStop.setToolTipText(Localization.getString("StopTooltip"));
 		pnlButtons.add(btnStart);
