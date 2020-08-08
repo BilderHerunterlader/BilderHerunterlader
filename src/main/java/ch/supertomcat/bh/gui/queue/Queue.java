@@ -107,14 +107,34 @@ public class Queue extends JPanel {
 	private JButton btnStop = new JButton(Localization.getString("Stop"), Icons.getTangoIcon("actions/media-playback-stop.png", 16));
 
 	/**
+	 * MenuItem
+	 */
+	private JButton btnImportLinks = new JButton(Localization.getString("ImportLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JButton btnParseLinks = new JButton(Localization.getString("ParseLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
+
+	/**
 	 * Button
 	 */
-	private JButton btnImport = new JButton(Localization.getString("ImportExport"), Icons.getTangoIcon("actions/document-open.png", 16));
+	private JButton btnSortFiles = new JButton(Localization.getString("SortFiles"), Icons.getBHIcon("actions/data-transfer.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnImport = new JButton(Localization.getString("Import"), Icons.getTangoIcon("actions/document-open.png", 16));
+
+	/**
+	 * Button
+	 */
+	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoIcon("actions/document-save-as.png", 16));
 
 	/**
 	 * PopupMenu
 	 */
-	private JPopupMenu menuImport = new JPopupMenu(Localization.getString("ImportExport"));
+	private JPopupMenu menuImport = new JPopupMenu(Localization.getString("Import"));
 
 	/**
 	 * MenuItem
@@ -130,26 +150,6 @@ public class Queue extends JPanel {
 	 * MenuItem
 	 */
 	private JMenuItem itemImportQueue = new JMenuItem(Localization.getString("QueueImport"), Icons.getTangoIcon("actions/document-open.png", 16));
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem itemExportQueue = new JMenuItem(Localization.getString("ExportQueue"), Icons.getTangoIcon("actions/document-save-as.png", 16));
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem itemSort = new JMenuItem(Localization.getString("SortFiles"), Icons.getBHIcon("actions/data-transfer.png", 16));
-
-	/**
-	 * MenuItem
-	 */
-	private JButton btnImportLinks = new JButton(Localization.getString("ImportLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
-
-	/**
-	 * MenuItem
-	 */
-	private JButton btnParseLinks = new JButton(Localization.getString("ParseLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
 
 	/**
 	 * Panel
@@ -382,11 +382,16 @@ public class Queue extends JPanel {
 		btnStart.setMnemonic(KeyEvent.VK_S);
 		btnStop.setMnemonic(KeyEvent.VK_T);
 		btnImport.setMnemonic(KeyEvent.VK_I);
+		btnExport.setMnemonic(KeyEvent.VK_E);
 		btnImportLinks.setMnemonic(KeyEvent.VK_L);
 		btnParseLinks.setMnemonic(KeyEvent.VK_P);
 
 		btnStart.addActionListener(e -> actionStart());
 		btnStop.addActionListener(e -> actionStop());
+		btnStop.setToolTipText(Localization.getString("StopTooltip"));
+		btnImportLinks.addActionListener(e -> actionImportLinks());
+		btnParseLinks.addActionListener(e -> actionParseLinks());
+		btnSortFiles.addActionListener(e -> actionSort());
 		btnImport.addActionListener(e -> {
 			SwingUtilities.updateComponentTreeUI(menuImport);
 			int x = 0;
@@ -411,13 +416,17 @@ public class Queue extends JPanel {
 			}
 			menuImport.show(btnImport, x, y);
 		});
-		btnStop.setToolTipText(Localization.getString("StopTooltip"));
+		btnExport.addActionListener(e -> actionExportQueue());
+
 		pnlButtons.add(btnStart);
 		pnlButtons.add(btnStop);
-		pnlButtons.add(btnImport);
 		pnlButtons.add(btnImportLinks);
 		pnlButtons.add(btnParseLinks);
+		pnlButtons.add(btnSortFiles);
+		pnlButtons.add(btnImport);
+		pnlButtons.add(btnExport);
 		add(pnlButtons, BorderLayout.SOUTH);
+
 		JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		pnlStatus.add(lblRowCount);
 		pnlStatus.add(lblStatus);
@@ -504,17 +513,10 @@ public class Queue extends JPanel {
 
 		itemImportHTML.addActionListener(e -> actionImportHTML());
 		itemImportText.addActionListener(e -> actionImportTextfile());
-		btnImportLinks.addActionListener(e -> actionImportLinks());
-		btnParseLinks.addActionListener(e -> actionParseLinks());
-		itemExportQueue.addActionListener(e -> actionExportQueue());
 		itemImportQueue.addActionListener(e -> actionImportQueue());
-		itemSort.addActionListener(e -> actionSort());
-
 		menuImport.add(itemImportHTML);
 		menuImport.add(itemImportText);
 		menuImport.add(itemImportQueue);
-		menuImport.add(itemExportQueue);
-		menuImport.add(itemSort);
 
 		QueueColorRowRenderer crr = new QueueColorRowRenderer(settingsManager);
 		jtQueue.setDefaultRenderer(Object.class, crr);
@@ -960,8 +962,10 @@ public class Queue extends JPanel {
 		btnStart.setEnabled(false);
 		btnStop.setEnabled(false);
 		btnImport.setEnabled(false);
+		btnExport.setEnabled(false);
 		btnImportLinks.setEnabled(false);
 		btnParseLinks.setEnabled(false);
+		btnSortFiles.setEnabled(false);
 	}
 
 	private void enableComponents() {
@@ -969,8 +973,10 @@ public class Queue extends JPanel {
 		btnStart.setEnabled(true);
 		btnStop.setEnabled(true);
 		btnImport.setEnabled(true);
+		btnExport.setEnabled(true);
 		btnImportLinks.setEnabled(true);
 		btnParseLinks.setEnabled(true);
+		btnSortFiles.setEnabled(true);
 	}
 
 	private void showTablePopupMenu(MouseEvent e) {
