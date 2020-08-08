@@ -33,7 +33,7 @@
 			<source src="https://www.dropbox.com/s/jkw1ubnq4lf1p2u/HostPhotoSharingGallery%242.class?dl=1" filename="HostPhotoSharingGallery$2.class" />
 		</host>
 		<host version="1.4" src="https://www.dropbox.com/s/eaz6zedh1qaba7m/HostPicfoco.class?dl=1" filename="HostPicfoco.class" name="HostPicfoco" />
-		<host version="8.2" src="https://www.dropbox.com/s/jo7cavib8kr3x85/HostYoutube.class?dl=1" filename="HostYoutube.class" name="HostYoutube" bhminversion="3.1.8">
+		<host version="8.3" src="https://www.dropbox.com/s/jo7cavib8kr3x85/HostYoutube.class?dl=1" filename="HostYoutube.class" name="HostYoutube" bhminversion="3.1.8">
 			<source src="https://www.dropbox.com/s/ge2fr4ly2ltioek/HostYoutube%241.class?dl=1" filename="HostYoutube$1.class" />
 			<source src="https://www.dropbox.com/s/xg9h32vtmf63eac/HostYoutube%242.class?dl=1" filename="HostYoutube$2.class" />
 			<source src="https://www.dropbox.com/s/2uoarc4r1kmksvk/HostYoutube%243.class?dl=1" filename="HostYoutube$3.class" />

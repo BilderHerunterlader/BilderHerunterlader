@@ -37,7 +37,6 @@ import org.w3c.dom.Node;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostIOException;
-import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.IHosterURLAdder;
@@ -58,6 +57,7 @@ import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -65,13 +65,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Youtube
  * 
- * @version 8.2
+ * @version 8.3
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "8.2";
+	public static final String VERSION = "8.3";
 
 	/**
 	 * Name dieser Klasse

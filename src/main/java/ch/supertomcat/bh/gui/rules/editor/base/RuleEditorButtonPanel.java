@@ -8,7 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.SpringLayout;
 
-import ch.supertomcat.bh.gui.SpringUtilities;
+import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;
 
 /**
  * Panel with buttons

@@ -10,20 +10,13 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.supertomcat.bh.keywords.Keyword;
+import ch.supertomcat.supertomcatutils.database.sqlite.SQLiteDB;
 
 /**
  * Class for Sqlite Database connections for Queue Database
  */
 public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(KeywordsSQLiteDB.class);
-
 	private final String selectAllEntriesSQL;
 
 	private final String selectEntrySQL;

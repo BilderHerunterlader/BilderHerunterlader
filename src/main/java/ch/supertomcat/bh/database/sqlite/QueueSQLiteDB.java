@@ -10,21 +10,14 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
+import ch.supertomcat.supertomcatutils.database.sqlite.SQLiteDB;
 
 /**
  * Class for Sqlite Database connections for Queue Database
  */
 public class QueueSQLiteDB extends SQLiteDB<Pic> {
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(QueueSQLiteDB.class);
-
 	private final String selectAllEntriesSQL;
 
 	private final String selectEntrySQL;

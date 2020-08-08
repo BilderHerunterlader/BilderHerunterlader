@@ -21,11 +21,11 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SpringLayout;
 
-import ch.supertomcat.bh.gui.SpringUtilities;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;
 
 /**
  * Dialog for editing a new keyword
