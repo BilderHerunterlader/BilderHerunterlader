@@ -1,11 +1,14 @@
 package ch.supertomcat.bh.pic;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ch.supertomcat.bh.hoster.Hoster;
 import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -21,6 +24,11 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * And no, i'm not willing to rename this class ;-)
  */
 public class Pic {
+	/**
+	 * Date Format
+	 */
+	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.MEDIUM);
+
 	/**
 	 * Database ID
 	 */
@@ -129,7 +137,16 @@ public class Pic {
 	 */
 	private long dateTime;
 
+	/**
+	 * Download URL
+	 */
 	private String downloadURL = "";
+
+	/**
+	 * Hoster (This is the last detected hoster for this container URL, this member is only used for displaying the hoster in the queue. But it is not used for
+	 * anything else. When the download starts the hoster is evaluated again and this member update.)
+	 */
+	private Hoster hoster = null;
 
 	/**
 	 * Progress
@@ -597,13 +614,10 @@ public class Pic {
 	 * @return Formatted date and time
 	 */
 	public String getDateTime() {
-		String retval = "";
 		if (dateTime < 0) {
-			return retval;
+			return "";
 		}
-		DateFormat df = new SimpleDateFormat();
-		retval = df.format(new Date(dateTime));
-		return retval;
+		return DATE_FORMAT.format(LocalDateTime.ofInstant(Instant.ofEpochMilli(dateTime), ZoneId.systemDefault()));
 	}
 
 	/**
@@ -631,6 +645,30 @@ public class Pic {
 	 */
 	public void setDownloadURL(String downloadURL) {
 		this.downloadURL = downloadURL;
+		for (IPicListener listener : listeners) {
+			listener.downloadURLChanged(this);
+		}
+	}
+
+	/**
+	 * Returns the hoster
+	 * 
+	 * @return hoster
+	 */
+	public Hoster getHoster() {
+		return hoster;
+	}
+
+	/**
+	 * Sets the hoster
+	 * 
+	 * @param hoster hoster
+	 */
+	public void setHoster(Hoster hoster) {
+		this.hoster = hoster;
+		for (IPicListener listener : listeners) {
+			listener.hosterChanged(this);
+		}
 	}
 
 	/**

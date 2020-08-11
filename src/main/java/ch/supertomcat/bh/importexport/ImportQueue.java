@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import javax.swing.JOptionPane;
 
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.base.EncodingSelectionDialog;
 import ch.supertomcat.bh.importexport.base.ImportExportBase;
 import ch.supertomcat.bh.pic.Pic;
@@ -35,6 +36,11 @@ public class ImportQueue extends ImportExportBase {
 	private final QueueManager queueManager;
 
 	/**
+	 * Host Manager
+	 */
+	private final HostManager hostManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentComponent Parent Component
@@ -42,9 +48,10 @@ public class ImportQueue extends ImportExportBase {
 	 * @param queueManager Queue Manager
 	 * @param settingsManager Settings Manager
 	 */
-	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, SettingsManager settingsManager) {
+	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, SettingsManager settingsManager, HostManager hostManager) {
 		super(parentComponent, mainWindowAccess, settingsManager);
 		this.queueManager = queueManager;
+		this.hostManager = hostManager;
 	}
 
 	/**
@@ -149,6 +156,7 @@ public class ImportQueue extends ImportExportBase {
 						pic.setFixedTargetFilename(fixedTargetFilename);
 						pic.setFixedLastModified(fixedLastModified);
 						pic.setDeactivated(deactivated, false);
+						pic.setHoster(hostManager.getHosterForURL(containerURL));
 						picsToAdd.add(pic);
 					}
 

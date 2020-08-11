@@ -40,4 +40,18 @@ public interface IPicListener extends EventListener {
 	 * @param pic Pic
 	 */
 	public void deactivatedChanged(Pic pic);
+
+	/**
+	 * Hoster has changed
+	 * 
+	 * @param pic Pic
+	 */
+	public void hosterChanged(Pic pic);
+
+	/**
+	 * Download URL has changed
+	 * 
+	 * @param pic Pic
+	 */
+	public void downloadURLChanged(Pic pic);
 }

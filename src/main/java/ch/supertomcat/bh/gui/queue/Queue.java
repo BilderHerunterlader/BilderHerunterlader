@@ -73,6 +73,9 @@ import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumnHider;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumnHiderSizeBasedImpl;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableHeaderColumnSelector;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
@@ -95,6 +98,16 @@ public class Queue extends JPanel {
 	 * Table
 	 */
 	private JTable jtQueue;
+
+	/**
+	 * Table Column Hider
+	 */
+	private TableColumnHider tableColumnHider;
+
+	/**
+	 * Table Header Column Selector
+	 */
+	private TableHeaderColumnSelector tableHeaderColumnSelector;
 
 	/**
 	 * Button
@@ -318,6 +331,8 @@ public class Queue extends JPanel {
 		});
 		jtQueue = new JTable(model);
 		jsp = new JScrollPane(jtQueue);
+		tableColumnHider = new TableColumnHiderSizeBasedImpl(jtQueue);
+		tableHeaderColumnSelector = new TableHeaderColumnSelector(tableColumnHider, jtQueue);
 
 		TableUtil.internationalizeColumns(jtQueue);
 
@@ -373,6 +388,18 @@ public class Queue extends JPanel {
 			}
 		});
 		jtQueue.getTableHeader().setReorderingAllowed(false);
+
+		tableColumnHider.hideColumn("ThumbURL");
+		tableColumnHider.hideColumn("Host");
+		tableColumnHider.hideColumn("ThreadURL");
+		tableColumnHider.hideColumn("DownloadURL");
+		tableColumnHider.hideColumn("AddedDate");
+
+		tableHeaderColumnSelector.addColumn("ThumbURL");
+		tableHeaderColumnSelector.addColumn("Host");
+		tableHeaderColumnSelector.addColumn("ThreadURL");
+		tableHeaderColumnSelector.addColumn("DownloadURL");
+		tableHeaderColumnSelector.addColumn("AddedDate");
 
 		jtQueue.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		jtQueue.setRowHeight(TableUtil.calculateRowHeight(jtQueue, false, true));
@@ -583,7 +610,7 @@ public class Queue extends JPanel {
 		StringJoiner content = new StringJoiner("\n");
 		synchronized (queueManager.getSyncObject()) {
 			for (int selectedRow : jtQueue.getSelectedRows()) {
-				content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
+				content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
 			}
 		}
 		if (content.length() > 0) {
@@ -598,7 +625,7 @@ public class Queue extends JPanel {
 		final List<String> urls = new ArrayList<>();
 		synchronized (queueManager.getSyncObject()) {
 			for (int selectedRow : jtQueue.getSelectedRows()) {
-				urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), 0));
+				urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
 			}
 		}
 
@@ -778,7 +805,7 @@ public class Queue extends JPanel {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				new ImportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager).importQueue();
+				new ImportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager, hostManager).importQueue();
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
@@ -866,7 +893,7 @@ public class Queue extends JPanel {
 			String defaultvalue = "";
 			int s[] = jtQueue.getSelectedRows();
 			if (s.length > 0) {
-				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), 1);
+				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), QueueTableModel.TARGET_COLUMN_INDEX);
 				defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 				String input[] = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length, settingsManager);
 				if ((input != null)) {
@@ -880,7 +907,7 @@ public class Queue extends JPanel {
 						if (clearFilename == false) {
 							String fname = input[0];
 							if (keepOriginal) {
-								fname = (String)model.getValueAt(modelIndex, 1);
+								fname = (String)model.getValueAt(modelIndex, QueueTableModel.TARGET_COLUMN_INDEX);
 								fname = fname.substring(fname.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
 							}
 							fname = input[3] + fname + input[4];

@@ -46,7 +46,6 @@ import javax.swing.ImageIcon;
 import javax.swing.InputMap;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
@@ -111,8 +110,9 @@ import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
-import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumHiderSizeBasedImpl;
 import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumnHider;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableColumnHiderSizeBasedImpl;
+import ch.supertomcat.supertomcatutils.gui.table.hider.TableHeaderColumnSelector;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultNumberColorRowRenderer;
 import ch.supertomcat.supertomcatutils.image.ImageUtil;
@@ -328,7 +328,12 @@ public class AdderPanel extends JFrame implements ActionListener {
 	/**
 	 * Table Column Hider
 	 */
-	private TableColumnHider tableColumnHider = new TableColumHiderSizeBasedImpl(jtAdder);
+	private TableColumnHider tableColumnHider = new TableColumnHiderSizeBasedImpl(jtAdder);
+
+	/**
+	 * Table Header Column Selector
+	 */
+	private TableHeaderColumnSelector tableHeaderColumnSelector = new TableHeaderColumnSelector(tableColumnHider, jtAdder);
 
 	/**
 	 * Scrollpane
@@ -464,41 +469,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * MenuItem
 	 */
 	private JMenuItem menuItemSelectOther = new JMenuItem(Localization.getString("SelectOther"), Icons.getTangoIcon("actions/view-refresh.png", 16));
-
-	/**
-	 * PopupMenuTableHeader
-	 */
-	private JPopupMenu popupMenuTableHeader = new JPopupMenu();
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderThumb = new JCheckBoxMenuItem(Localization.getString("Thumb"), false);
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderFilenameOverride = new JCheckBoxMenuItem(Localization.getString("FilenameOverride"), false);
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderLastModified = new JCheckBoxMenuItem(Localization.getString("LastModified"), false);
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderHost = new JCheckBoxMenuItem(Localization.getString("Host"), false);
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderTargetFolderOverride = new JCheckBoxMenuItem(Localization.getString("TargetFolderOverride"), false);
-
-	/**
-	 * MenuItem
-	 */
-	private JMenuItem menuItemTableHeaderTargetFolderOverrideValue = new JCheckBoxMenuItem(Localization.getString("TargetFolderOverrideValue"), false);
 
 	/**
 	 * HostURLCheckerRunnable
@@ -664,6 +634,13 @@ public class AdderPanel extends JFrame implements ActionListener {
 		tableColumnHider.hideColumn("Keyword");
 		tableColumnHider.hideColumn("AlreadyDownloaded");
 
+		tableHeaderColumnSelector.addColumn("Thumb");
+		tableHeaderColumnSelector.addColumn("FilenameOverride");
+		tableHeaderColumnSelector.addColumn("LastModified");
+		tableHeaderColumnSelector.addColumn("Host");
+		tableHeaderColumnSelector.addColumn("TargetFolderOverride");
+		tableHeaderColumnSelector.addColumn("TargetFolderOverrideValue");
+
 		jtAdder.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 
 		jtAdder.setRowSorter(sorter);
@@ -723,35 +700,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 		menuItemSelect.addActionListener(this);
 		menuItemDeselect.addActionListener(this);
 		menuItemSelectOther.addActionListener(this);
-
-		jtAdder.getTableHeader().addMouseListener(new MouseAdapter() {
-			@Override
-			public void mousePressed(MouseEvent e) {
-				if (e.isPopupTrigger()) {
-					popupMenuTableHeader.show(e.getComponent(), e.getX(), e.getY());
-				}
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				if (e.isPopupTrigger()) {
-					popupMenuTableHeader.show(e.getComponent(), e.getX(), e.getY());
-				}
-			}
-		});
-
-		popupMenuTableHeader.add(menuItemTableHeaderThumb);
-		popupMenuTableHeader.add(menuItemTableHeaderFilenameOverride);
-		popupMenuTableHeader.add(menuItemTableHeaderLastModified);
-		popupMenuTableHeader.add(menuItemTableHeaderHost);
-		popupMenuTableHeader.add(menuItemTableHeaderTargetFolderOverride);
-		popupMenuTableHeader.add(menuItemTableHeaderTargetFolderOverrideValue);
-		menuItemTableHeaderThumb.addActionListener(this);
-		menuItemTableHeaderFilenameOverride.addActionListener(this);
-		menuItemTableHeaderLastModified.addActionListener(this);
-		menuItemTableHeaderHost.addActionListener(this);
-		menuItemTableHeaderTargetFolderOverride.addActionListener(this);
-		menuItemTableHeaderTargetFolderOverrideValue.addActionListener(this);
 
 		txtReferrer.setEditable(false);
 		btnTitleUpdate.addActionListener(new ActionListener() {
@@ -1139,8 +1087,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			data[5] = Boolean.valueOf(false);
 			data[6] = Boolean.valueOf(false);
 			data[7] = Long.valueOf(0);
-			Hoster hoster = url.getHost();
-			data[8] = hoster != null ? hoster : "";
+			data[8] = url.getHost();
 			data[9] = iconDummy;
 			data[10] = Boolean.valueOf(false);
 			data[11] = null;
@@ -1228,6 +1175,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				int deleteColumnModelIndex = jtAdder.getColumn("DeleteFile").getModelIndex();
 				int lastModifiedColumnModelIndex = jtAdder.getColumn("LastModified").getModelIndex();
 				int blacklistColumnModelIndex = jtAdder.getColumn("Blacklist").getModelIndex();
+				int hostColumnModelIndex = jtAdder.getColumn("Host").getModelIndex();
 
 				List<Pic> picsToAdd = new ArrayList<>();
 				for (int i = 0; i < rowCount; i++) {
@@ -1266,6 +1214,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 									p.setFixedLastModified(true);
 								}
 							}
+							p.setHoster((Hoster)model.getValueAt(rowModelIndex, hostColumnModelIndex));
 							picsToAdd.add(p);
 						}
 					}
@@ -1631,18 +1580,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 			actionCopyURLs();
 		} else if (e.getSource() == menuItemOpenURL) {
 			actionOpenURLs();
-		} else if (e.getSource() == menuItemTableHeaderThumb) {
-			tableColumnHider.setVisible("Thumb", menuItemTableHeaderThumb.isSelected());
-		} else if (e.getSource() == menuItemTableHeaderFilenameOverride) {
-			tableColumnHider.setVisible("FilenameOverride", menuItemTableHeaderFilenameOverride.isSelected());
-		} else if (e.getSource() == menuItemTableHeaderLastModified) {
-			tableColumnHider.setVisible("LastModified", menuItemTableHeaderLastModified.isSelected());
-		} else if (e.getSource() == menuItemTableHeaderHost) {
-			tableColumnHider.setVisible("Host", menuItemTableHeaderHost.isSelected());
-		} else if (e.getSource() == menuItemTableHeaderTargetFolderOverride) {
-			tableColumnHider.setVisible("TargetFolderOverride", menuItemTableHeaderTargetFolderOverride.isSelected());
-		} else if (e.getSource() == menuItemTableHeaderTargetFolderOverrideValue) {
-			tableColumnHider.setVisible("TargetFolderOverrideValue", menuItemTableHeaderTargetFolderOverrideValue.isSelected());
 		} else if (e.getSource() == btnShowPreviews) {
 			tableColumnHider.setVisible("Preview", btnShowPreviews.isSelected());
 			int newRowHeight = btnShowPreviews.isSelected() ? previewHeight : defaultRowHeight;

@@ -251,15 +251,16 @@ public abstract class FileDownloaderBase implements FileDownloader {
 
 		// Create a new URLParseObject
 		URLParseObject upo = new URLParseObject(pic.getContainerURL(), pic.getThumb(), pic);
-		URLParseObject result = null;
 
 		// Now we try to get the direct link
 		try {
 			// Now let the HostManager parse it
-			result = hostManager.parseURL(upo);
+			URLParseObject result = hostManager.parseURL(upo);
 			if (result == null) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
 			}
+
+			pic.setHoster(result.getLastHoster());
 
 			// Check if the direct link is not null and not empty
 			if (result.getDirectLink() == null && result.getDirectLink().isEmpty()) {

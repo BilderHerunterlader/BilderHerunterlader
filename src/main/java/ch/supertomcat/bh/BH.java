@@ -267,7 +267,7 @@ public abstract class BH {
 				};
 				downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager, queueTaskFactory);
 				FileDownloaderFactory fileDownloaderFactory = new FileDownloaderFactory(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
-				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, fileDownloaderFactory);
+				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, hostManager, fileDownloaderFactory);
 			}
 		}));
 		tasks.add(Executors.callable(new Runnable() {

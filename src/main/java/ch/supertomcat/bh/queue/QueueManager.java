@@ -11,6 +11,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.database.sqlite.QueueSQLiteDB;
 import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.gui.queue.QueueTableModel;
+import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
@@ -82,9 +83,10 @@ public class QueueManager implements IPicListener {
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param logManager Log Manager
 	 * @param settingsManager SettingsManager
+	 * @param hostManager Host Manager
 	 * @param fileDownloaderFactory File Downloader Factory
 	 */
-	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager, FileDownloaderFactory fileDownloaderFactory) {
+	public QueueManager(DownloadQueueManager downloadQueueManager, LogManager logManager, SettingsManager settingsManager, HostManager hostManager, FileDownloaderFactory fileDownloaderFactory) {
 		this.downloadQueueManager = downloadQueueManager;
 		this.logManager = logManager;
 		this.settingsManager = settingsManager;
@@ -97,6 +99,7 @@ public class QueueManager implements IPicListener {
 				if ((pic.getStatus() == PicState.WAITING) || (pic.getStatus() == PicState.DOWNLOADING) || (pic.getStatus() == PicState.ABORTING)) {
 					pic.setStatus(PicState.SLEEPING);
 				}
+				pic.setHoster(hostManager.getHosterForURL(pic.getContainerURL()));
 				pic.removeAllListener();
 				pic.addPicListener(this);
 				pics.add(pic);
@@ -504,7 +507,7 @@ public class QueueManager implements IPicListener {
 				@Override
 				public void run() {
 					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						tableModel.fireTableCellUpdated(index, 3);
+						tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
 					}
 				}
 			};
@@ -522,8 +525,8 @@ public class QueueManager implements IPicListener {
 				public void run() {
 					if ((index > -1) && (tableModel.getRowCount() > index)) {
 						// Change Cell
-						tableModel.setValueAt(pic.getSize(), index, 2);
-						tableModel.fireTableCellUpdated(index, 2);
+						tableModel.setValueAt(pic.getSize(), index, QueueTableModel.SIZE_COLUMN_INDEX);
+						tableModel.fireTableCellUpdated(index, QueueTableModel.SIZE_COLUMN_INDEX);
 					}
 				}
 			};
@@ -542,8 +545,8 @@ public class QueueManager implements IPicListener {
 				public void run() {
 					if ((index > -1) && (tableModel.getRowCount() > index)) {
 						// Change Cell
-						tableModel.setValueAt(pic.getTarget(), index, 1);
-						tableModel.fireTableCellUpdated(index, 1);
+						tableModel.setValueAt(pic.getTarget(), index, QueueTableModel.TARGET_COLUMN_INDEX);
+						tableModel.fireTableCellUpdated(index, QueueTableModel.TARGET_COLUMN_INDEX);
 					}
 				}
 			};
@@ -562,8 +565,8 @@ public class QueueManager implements IPicListener {
 					if (pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING || pic.getStatus() == PicState.WAITING
 							|| pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
 						if ((index > -1) && (tableModel.getRowCount() > index)) {
-							tableModel.setValueAt(pic, index, 3);
-							tableModel.fireTableCellUpdated(index, 3);
+							tableModel.setValueAt(pic, index, QueueTableModel.PROGRESS_COLUMN_INDEX);
+							tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
 						}
 					}
 				}
@@ -601,6 +604,45 @@ public class QueueManager implements IPicListener {
 				public void run() {
 					if ((index > -1) && (tableModel.getRowCount() > index)) {
 						tableModel.fireTableRowsUpdated(index, index);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
+		}
+		updatePic(pic);
+	}
+
+	@Override
+	public void hosterChanged(Pic pic) {
+		synchronized (syncObject) {
+			int index = pics.indexOf(pic);
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						// Change Cell
+						tableModel.setValueAt(pic.getHoster(), index, QueueTableModel.HOST_COLUMN_INDEX);
+						tableModel.fireTableCellUpdated(index, QueueTableModel.HOST_COLUMN_INDEX);
+					}
+				}
+			};
+			executeInEventQueueThread(r);
+		}
+	}
+
+	@Override
+	public void downloadURLChanged(Pic pic) {
+		synchronized (syncObject) {
+			int index = pics.indexOf(pic);
+
+			Runnable r = new Runnable() {
+				@Override
+				public void run() {
+					if ((index > -1) && (tableModel.getRowCount() > index)) {
+						// Change Cell
+						tableModel.setValueAt(pic.getDownloadURL(), index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
+						tableModel.fireTableCellUpdated(index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
 					}
 				}
 			};
