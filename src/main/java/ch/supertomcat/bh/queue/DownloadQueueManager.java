@@ -163,7 +163,7 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 		if (logEmpty) {
 			logger.info("Queue is empty after queueEmpty Listener: {}", localQueueEmpty);
 		}
-		if (localQueueEmpty) {
+		if (localQueueEmpty && !stop) {
 			for (IDownloadQueueManagerListener listener : listeners) {
 				listener.downloadsComplete(localQueueSize, localOpenSlots, localMaxConnectionCount);
 			}
