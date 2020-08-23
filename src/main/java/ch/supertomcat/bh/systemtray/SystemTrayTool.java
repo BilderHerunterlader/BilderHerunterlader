@@ -307,8 +307,10 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	 * Removes the icon from the SystemTray
 	 */
 	public void remove() {
-		tray.remove(trayIcon);
-		downloadQueueManager.removeDownloadQueueManagerListener(this);
+		if (tray != null) {
+			tray.remove(trayIcon);
+			downloadQueueManager.removeDownloadQueueManagerListener(this);
+		}
 	}
 
 	/**
@@ -427,7 +429,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 
 	@Override
 	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
-		if (settingsManager.isDownloadsCompleteNotification()) {
+		if (trayIcon != null && settingsManager.isDownloadsCompleteNotification()) {
 			String text = queueManager.getQueueSize() + " " + Localization.getString("DownloadsLeftInQueue");
 			trayIcon.displayMessage(Localization.getString("DownloadsComplete"), text, TrayIcon.MessageType.INFO);
 		}
