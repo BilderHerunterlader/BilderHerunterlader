@@ -137,17 +137,12 @@ public class Queue extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnImport = new JButton(Localization.getString("Import"), Icons.getTangoIcon("actions/document-open.png", 16));
-
-	/**
-	 * Button
-	 */
-	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoIcon("actions/document-save-as.png", 16));
+	private JButton btnImportExport = new JButton(Localization.getString("ImportExport"), Icons.getTangoIcon("actions/document-open.png", 16));
 
 	/**
 	 * PopupMenu
 	 */
-	private JPopupMenu menuImport = new JPopupMenu(Localization.getString("Import"));
+	private JPopupMenu menuImportExport = new JPopupMenu(Localization.getString("ImportExport"));
 
 	/**
 	 * MenuItem
@@ -163,6 +158,11 @@ public class Queue extends JPanel {
 	 * MenuItem
 	 */
 	private JMenuItem itemImportQueue = new JMenuItem(Localization.getString("QueueImport"), Icons.getTangoIcon("actions/document-open.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem itemExportQueue = new JMenuItem(Localization.getString("QueueExport"), Icons.getTangoIcon("actions/document-open.png", 16));
 
 	/**
 	 * Panel
@@ -408,8 +408,7 @@ public class Queue extends JPanel {
 
 		btnStart.setMnemonic(KeyEvent.VK_S);
 		btnStop.setMnemonic(KeyEvent.VK_T);
-		btnImport.setMnemonic(KeyEvent.VK_I);
-		btnExport.setMnemonic(KeyEvent.VK_E);
+		btnImportExport.setMnemonic(KeyEvent.VK_I);
 		btnImportLinks.setMnemonic(KeyEvent.VK_L);
 		btnParseLinks.setMnemonic(KeyEvent.VK_P);
 
@@ -419,18 +418,18 @@ public class Queue extends JPanel {
 		btnImportLinks.addActionListener(e -> actionImportLinks());
 		btnParseLinks.addActionListener(e -> actionParseLinks());
 		btnSortFiles.addActionListener(e -> actionSort());
-		btnImport.addActionListener(e -> {
-			SwingUtilities.updateComponentTreeUI(menuImport);
+		btnImportExport.addActionListener(e -> {
+			SwingUtilities.updateComponentTreeUI(menuImportExport);
 			int x = 0;
 			int y = 0;
-			int buttonWidth = btnImport.getWidth();
-			int buttonHeight = btnImport.getHeight();
+			int buttonWidth = btnImportExport.getWidth();
+			int buttonHeight = btnImportExport.getHeight();
 			boolean mouseOnComponent = false;
 			PointerInfo pointInfo = MouseInfo.getPointerInfo();
 			if (pointInfo != null) {
 				Point mousePosition = pointInfo.getLocation();
-				SwingUtilities.convertPointFromScreen(mousePosition, btnImport);
-				if (btnImport.contains(mousePosition)) {
+				SwingUtilities.convertPointFromScreen(mousePosition, btnImportExport);
+				if (btnImportExport.contains(mousePosition)) {
 					x = mousePosition.x;
 					y = mousePosition.y;
 					mouseOnComponent = true;
@@ -441,17 +440,15 @@ public class Queue extends JPanel {
 				x = buttonWidth / 2;
 				y = buttonHeight / 2;
 			}
-			menuImport.show(btnImport, x, y);
+			menuImportExport.show(btnImportExport, x, y);
 		});
-		btnExport.addActionListener(e -> actionExportQueue());
 
 		pnlButtons.add(btnStart);
 		pnlButtons.add(btnStop);
 		pnlButtons.add(btnImportLinks);
 		pnlButtons.add(btnParseLinks);
 		pnlButtons.add(btnSortFiles);
-		pnlButtons.add(btnImport);
-		pnlButtons.add(btnExport);
+		pnlButtons.add(btnImportExport);
 		add(pnlButtons, BorderLayout.SOUTH);
 
 		JPanel pnlStatus = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -541,9 +538,11 @@ public class Queue extends JPanel {
 		itemImportHTML.addActionListener(e -> actionImportHTML());
 		itemImportText.addActionListener(e -> actionImportTextfile());
 		itemImportQueue.addActionListener(e -> actionImportQueue());
-		menuImport.add(itemImportHTML);
-		menuImport.add(itemImportText);
-		menuImport.add(itemImportQueue);
+		itemExportQueue.addActionListener(e -> actionExportQueue());
+		menuImportExport.add(itemImportHTML);
+		menuImportExport.add(itemImportText);
+		menuImportExport.add(itemImportQueue);
+		menuImportExport.add(itemExportQueue);
 
 		QueueColorRowRenderer crr = new QueueColorRowRenderer(settingsManager);
 		jtQueue.setDefaultRenderer(Object.class, crr);
@@ -988,8 +987,7 @@ public class Queue extends JPanel {
 		jtQueue.setEnabled(false);
 		btnStart.setEnabled(false);
 		btnStop.setEnabled(false);
-		btnImport.setEnabled(false);
-		btnExport.setEnabled(false);
+		btnImportExport.setEnabled(false);
 		btnImportLinks.setEnabled(false);
 		btnParseLinks.setEnabled(false);
 		btnSortFiles.setEnabled(false);
@@ -999,8 +997,7 @@ public class Queue extends JPanel {
 		jtQueue.setEnabled(true);
 		btnStart.setEnabled(true);
 		btnStop.setEnabled(true);
-		btnImport.setEnabled(true);
-		btnExport.setEnabled(true);
+		btnImportExport.setEnabled(true);
 		btnImportLinks.setEnabled(true);
 		btnParseLinks.setEnabled(true);
 		btnSortFiles.setEnabled(true);
