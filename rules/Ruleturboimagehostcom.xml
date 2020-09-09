@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="turboimagehostcom" version="0.7" redirect="false" resend="false">
+<ruleDefinition name="turboimagehostcom" version="0.8" redirect="false" resend="false">
     <urlPattern>https?://(www\.)?turboimagehost\.com/[0-9a-zA-Z]/[0-9a-zA-Z]+/.*?\.html</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="&lt;img.+?id[ ]*=&quot;uImage&quot; src=&quot;(.+?)&quot;" replacement="$1"/>
+        <regexp pattern="&lt;img.+?id[ ]*=&quot;(?:uImage|imageid)&quot; src=&quot;(.+?)&quot;" replacement="$1"/>
     </pipes>
     <failuresPipes failureType="FAILED_FILE_NOT_EXIST" checkURL="false" checkThumbURL="false" checkPageSourceCode="true">
         <regexp pattern="Image (.+?) don`t exist on our server!" replacement=""/>

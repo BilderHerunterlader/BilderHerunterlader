@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="4.15.0">
+	<setuprelease version="4.16.0">
 		<description>
-			<mainDE>- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</mainDE>
-			<mainEN>- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</mainEN>
+			<mainDE>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainDE>
+			<mainEN>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.15.0" src="https://www.dropbox.com/s/dibkyk5dt9ssrii/BH-4.15.0.zip?dl=1" filename="BH-4.15.0.zip" name="BilderHerunterlader" />
+	<main version="4.16.0" src="https://www.dropbox.com/s/h8b33ux2e3w5asv/BH-4.16.0.zip?dl=1" filename="BH-4.16.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</mainDE>
-		<mainEN>- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</mainEN>
+		<mainDE>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainDE>
+		<mainEN>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -126,7 +126,7 @@
 		<host version="0.3" src="https://www.dropbox.com/s/2rvyschga6qa9ez/Rulestoreimgs.net.xml?dl=1" filename="Rulestoreimgs.net.xml" name="Rulestoreimgs.net.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/gn3nc89j96bxbit/Rulet.co.xml?dl=1" filename="Rulet.co.xml" name="Rulet.co.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/57piwuz9jbwoomw/Ruletinypic.com.xml?dl=1" filename="Ruletinypic.com.xml" name="Ruletinypic.com.xml" />
-		<host version="0.7" src="https://www.dropbox.com/s/4crelry93pfyn5z/Ruleturboimagehostcom.xml?dl=1" filename="Ruleturboimagehostcom.xml" name="Ruleturboimagehostcom.xml" />
+		<host version="0.8" src="https://www.dropbox.com/s/4crelry93pfyn5z/Ruleturboimagehostcom.xml?dl=1" filename="Ruleturboimagehostcom.xml" name="Ruleturboimagehostcom.xml" />
 		<host version="1.3" src="https://www.dropbox.com/s/a4oew2lxnuzdw42/Ruleuaimage.com.xml?dl=1" filename="Ruleuaimage.com.xml" name="Ruleuaimage.com.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/fb20vte6eeohdkq/Ruleunleashedpics.xml?dl=1" filename="Ruleunleashedpics.xml" name="Ruleunleashedpics.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/lpax8khiavz7wie/Ruleupix.me_alt01.xml?dl=1" filename="Ruleupix.me_alt01.xml" name="Ruleupix.me_alt01.xml" />
@@ -143,6 +143,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.16.0" lng="de">- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</changes>
+		<changes version="4.16.0" lng="en">- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</changes>
 		<changes version="4.15.0" lng="de">- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</changes>
 		<changes version="4.15.0" lng="en">- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</changes>
 		<changes version="4.14.0" lng="de">- Bug Fixed: Exceptions when trying to restart after update was installed\n- Bug Fixed: When a Pic is disabled, but the states is failed, the foreground color of the progress column must not be changed to red, because the brackground is already red\n- Rule XML Files are now read and written with JAXB based on an XSD File\n- Rule XML Files have a different format now. Rule files, which are still in the old format are automatically converted to the new format and a backup file of the old files is created (just in case something goes wrong).\n- Refactored Rule Editor classes to only change JAXB classes, instead of runtime wrapper classes\n- Removed duplicate code in Rule Editor classes\n- Use folder name as title when sorting files\n- Bug Fixed: Pic state maintained WAITING or DOWNLOADING state, when there was an exception on starting download instead of changing to FAILED state\n- Bug Fixed: Sorting files was not working anymore, because in that case restriction domain is empty, which lead to an exception</changes>
