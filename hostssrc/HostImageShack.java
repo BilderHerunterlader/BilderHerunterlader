@@ -13,13 +13,13 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Host class for ImageShack
  * 
- * @version 3.9
+ * @version 4.0
  */
 public class HostImageShack extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.9";
+	public static final String VERSION = "4.0";
 
 	/**
 	 * Name dieser Klasse
@@ -45,8 +45,8 @@ public class HostImageShack extends Host implements IHoster {
 	 */
 	public HostImageShack() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^http://(img[0-9]+\\.)?(imageshack\\.us|exs\\.cx)/(my\\.php\\?(loc=img[0-9]+\\&)?image=|i/|photo/my-images/[0-9]+/).+?[/]?");
-		urlPatternDirectLinked = Pattern.compile("^http://img[0-9]+\\.(imageshack\\.us|exs\\.cx)/img[0-9]+/[0-9]+/.*");
+		urlPattern = Pattern.compile("^https?://(img[0-9]+\\.)?(imageshack\\.us|exs\\.cx)/(my\\.php\\?(loc=img[0-9]+\\&)?image=|i/|photo/my-images/[0-9]+/).+?[/]?");
+		urlPatternDirectLinked = Pattern.compile("^https?://img[0-9]+\\.(imageshack\\.us|exs\\.cx)/img[0-9]+/[0-9]+/.*");
 
 		regexComplete = new RuleRegExp();
 		regexComplete.setSearch("<img[^>]+id=\"lp-image\"[^>]+src=\"([^\"]+)\"");

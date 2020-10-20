@@ -12,13 +12,13 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for Picfoco
  * 
- * @version 1.4
+ * @version 1.5
  */
 public class HostPicfoco extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.4";
+	public static final String VERSION = "1.5";
 
 	/**
 	 * Name dieser Klasse
@@ -41,7 +41,7 @@ public class HostPicfoco extends Host implements IHoster {
 	 */
 	public HostPicfoco() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^http://img[0-9]+\\.(picfoco)\\.com/img\\.php\\?id=([0-9]+)(&q=.*)?$");
+		urlPattern = Pattern.compile("^https?://img[0-9]+\\.(picfoco)\\.com/img\\.php\\?id=([0-9]+)(&q=.*)?$");
 		regexForwarding = new RuleRegExp();
 		regexForwarding.setSearch("window\\.location=\"([^\"]+)\"");
 		regexForwarding.setReplace("$1");

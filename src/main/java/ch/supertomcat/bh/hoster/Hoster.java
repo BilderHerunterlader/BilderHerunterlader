@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.hoster;
 
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -8,8 +9,11 @@ import javax.swing.JFrame;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -318,7 +322,7 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client) throws HostException {
-		HttpGet method = null;
+		HttpRequestBase method = null;
 		try {
 			String cookies = null;
 			if (options == null || options.isSendCookies()) {
@@ -326,7 +330,15 @@ public abstract class Hoster {
 			}
 
 			url = HTTPUtil.encodeURL(url);
-			method = new HttpGet(url);
+			if (options != null && "POST".equals(options.getHttpMethod())) {
+				HttpPost postMethod = new HttpPost(url);
+				if (!options.getPostData().isEmpty()) {
+					postMethod.setEntity(new UrlEncodedFormEntity(options.getPostData(), StandardCharsets.UTF_8));
+				}
+				method = postMethod;
+			} else {
+				method = new HttpGet(url);
+			}
 
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);

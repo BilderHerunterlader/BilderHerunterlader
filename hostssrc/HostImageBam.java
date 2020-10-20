@@ -19,13 +19,13 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Host class for ImageBam
  * 
- * @version 4.0
+ * @version 4.1
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.0";
+	public static final String VERSION = "4.1";
 
 	/**
 	 * Name dieser Klasse
@@ -59,7 +59,7 @@ public class HostImageBam extends Host implements IHoster {
 	 */
 	public HostImageBam() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^http://(www\\.)?imagebam\\.com/image/[a-z0-9]+(/)?");
+		urlPattern = Pattern.compile("^https?://(www\\.)?imagebam\\.com/image/[a-z0-9]+(/)?");
 
 		regexServerMaintenance = new RuleRegExp();
 		regexServerMaintenance.setSearch("<b>(ImageBam is currently offline.)</b><br><br>(.+?)<br><br>(.+?)<br><br>");

@@ -34,13 +34,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for BabesBoard
  * 
- * @version 3.1
+ * @version 3.2
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.1";
+	public static final String VERSION = "3.2";
 
 	/**
 	 * Name dieser Klasse
@@ -81,12 +81,12 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	public HostBabesBoard() {
 		super(NAME, VERSION);
 		urlPatterns = new Pattern[2];
-		urlPatterns[0] = Pattern.compile("^http://babeshack([0-9])?\\.babes-board\\.ch/shack.php\\?image=[0-9a-z]+\\..*$", Pattern.CASE_INSENSITIVE);
-		urlPatterns[1] = Pattern.compile("^http://babeshack([0-9])?\\.babes-board\\.ch/f/[0-9]+/[0-9]+/.*$", Pattern.CASE_INSENSITIVE);
+		urlPatterns[0] = Pattern.compile("^https?://babeshack([0-9])?\\.babes-board\\.ch/shack.php\\?image=[0-9a-z]+\\..*$", Pattern.CASE_INSENSITIVE);
+		urlPatterns[1] = Pattern.compile("^https?://babeshack([0-9])?\\.babes-board\\.ch/f/[0-9]+/[0-9]+/.*$", Pattern.CASE_INSENSITIVE);
 
-		urlContainerPattern = Pattern.compile("^http://(www\\.)?babes-board.ch/babegallery/[^/]+/(\\?sid=[^#]*)?(#[0-9]+)?", Pattern.CASE_INSENSITIVE);
+		urlContainerPattern = Pattern.compile("^https?://(www\\.)?babes-board.ch/babegallery/[^/]+/(\\?sid=[^#]*)?(#[0-9]+)?", Pattern.CASE_INSENSITIVE);
 
-		urlInternalContainerPattern = Pattern.compile("^(http://(www\\.)?babes-board.ch/babegallery/.*?)babeID=(.*?)&pageNumber=(.*?)&imagesPerPage=(.*)", Pattern.CASE_INSENSITIVE);
+		urlInternalContainerPattern = Pattern.compile("^(https?://(www\\.)?babes-board.ch/babegallery/.*?)babeID=(.*?)&pageNumber=(.*?)&imagesPerPage=(.*)", Pattern.CASE_INSENSITIVE);
 		regexBabeName.setSearch("<cmd n=\"[0-9a-zA-Z]+\" t=\"babename\" p=\"innerHTML\">(.*?)</cmd>");
 		regexBabeName.setReplace("$1");
 		regexDate.setSearch("<!\\[CDATA\\[Bilder vom <b>([0-9]{2}).([0-9]{2}).([0-9]{4})</b>( bis <b>([0-9]{2}).([0-9]{2}).([0-9]{4})</b>)?\\]\\]></cmd>");

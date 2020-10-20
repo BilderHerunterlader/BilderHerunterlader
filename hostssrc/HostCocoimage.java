@@ -12,13 +12,13 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for www.cocoimage.com
  * 
- * @version 1.7
+ * @version 1.8
  */
 public class HostCocoimage extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "1.7";
+	public static final String VERSION = "1.8";
 
 	/**
 	 * Name dieser Klasse
@@ -45,15 +45,15 @@ public class HostCocoimage extends Host implements IHoster {
 	 */
 	public HostCocoimage() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*");
-		regex1.setSearch("window\\.location=\"(http://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*?)\"");
+		urlPattern = Pattern.compile("^https?://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*");
+		regex1.setSearch("window\\.location=\"(https?://img[0-9]+\\.cocoimage\\.com/img\\.php\\?id=.*?)\"");
 		regex1.setReplace("$1");
 		regex2.setSearch("img.*?id=\"img\".*?src=\"(.*?)\"");
 		regex2.setReplace("$1");
 		pipe1.addRegExp(regex1);
 		pipe2.addRegExp(regex2);
 
-		regex3.setSearch("^http://img[0-9]+\\.cocoimage\\.com/showimg\\.php\\?id=([0-9]+).*");
+		regex3.setSearch("^https?://img[0-9]+\\.cocoimage\\.com/showimg\\.php\\?id=([0-9]+).*");
 		regex3.setReplace("$1.jpg");
 	}
 
