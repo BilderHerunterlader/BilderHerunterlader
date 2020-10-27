@@ -45,7 +45,8 @@ public class HostImxTo extends Host implements IHoster {
 
 		urlContainerPattern = Pattern.compile("https?://imx\\.to/i/[0-9a-zA-Z]+");
 
-		regexContinue = Pattern.compile("<form action='' method='POST'>.+?<input .+?type='submit' name='(imgContinue)' value='(Continue to image *... *)'");
+		regexContinue = Pattern
+				.compile("(?s)<form action=['\"]['\"] method=['\"]POST['\"]>.+?<input .+?type=['\"]submit['\"] name=['\"](imgContinue)['\"] value=['\"](Continue to( your)? image *... *)['\"]");
 
 		String imagePattern = "<a href=\"([^\"]+)\" title=\"([^\"]+)\"[^>]*><img class=\"centred\"";
 
