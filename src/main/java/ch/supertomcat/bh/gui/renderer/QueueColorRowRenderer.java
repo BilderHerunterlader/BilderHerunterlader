@@ -9,6 +9,7 @@ import java.util.Set;
 import javax.swing.JTable;
 import javax.swing.table.TableCellRenderer;
 
+import ch.supertomcat.bh.gui.queue.QueueTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
@@ -44,8 +45,8 @@ public class QueueColorRowRenderer extends DefaultStringColorRowRenderer impleme
 		if (isSelected) {
 			super.prepareForegroundColor(comp, table, value, isSelected, hasFocus, row, column);
 		} else {
-			boolean progressColumn = table.convertColumnIndexToModel(column) == 3;
-			Object progressValue = table.getModel().getValueAt(table.convertRowIndexToModel(row), 3);
+			boolean progressColumn = table.convertColumnIndexToModel(column) == QueueTableModel.PROGRESS_COLUMN_INDEX;
+			Object progressValue = table.getModel().getValueAt(table.convertRowIndexToModel(row), QueueTableModel.PROGRESS_COLUMN_INDEX);
 			if (progressValue instanceof Pic && ((Pic)progressValue).isDeactivated() && (!progressColumn || !FAILED_PIC_STATES.contains(((Pic)progressValue).getStatus()))) {
 				comp.setForeground(Color.RED);
 			} else {
