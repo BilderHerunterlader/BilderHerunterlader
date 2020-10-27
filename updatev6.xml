@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="4.16.0">
+	<setuprelease version="4.17.0">
 		<description>
-			<mainDE>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainDE>
-			<mainEN>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainEN>
+			<mainDE>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainDE>
+			<mainEN>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.16.0" src="https://www.dropbox.com/s/h8b33ux2e3w5asv/BH-4.16.0.zip?dl=1" filename="BH-4.16.0.zip" name="BilderHerunterlader" />
+	<main version="4.17.0" src="https://www.dropbox.com/s/85ubyykexyb11m0/BH-4.17.0.zip?dl=1" filename="BH-4.17.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainDE>
-		<mainEN>- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</mainEN>
+		<mainDE>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainDE>
+		<mainEN>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -144,6 +144,8 @@
 		<changes version="4.9.0" lng="de"></changes>
 		<changes version="4.9.0" lng="en"></changes>
 		-->
+		<changes version="4.17.0" lng="de">- Bug Fixed: Coloring of disabled queue entries was not working anymore</changes>
+		<changes version="4.17.0" lng="en">- Bug Fixed: Coloring of disabled queue entries was not working anymore</changes>
 		<changes version="4.16.0" lng="de">- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</changes>
 		<changes version="4.16.0" lng="en">- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</changes>
 		<changes version="4.15.0" lng="de">- Bug Fixed: Filename Pipeline was not working correctly in some modes\n- Display rule trace information in the RuleTest-Dialog\n- Upgraded to ehcache Version 3\n- Updated dependencies</changes>
