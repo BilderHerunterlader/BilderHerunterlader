@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagebanana" version="0.4" redirect="false" resend="false">
-    <urlPattern>https?://img[0-9]+\.imagebanana\.com\/view\/[0-9a-zA-Z]+\/.*</urlPattern>
+<ruleDefinition name="imagebanana" version="0.5" redirect="false" resend="false">
+    <urlPattern>https?://(?:img[0-9]+|www)\.imagebanana\.com/(?:view|s)/[0-9a-zA-Z]+(?:/.*|\.html)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -10,10 +10,14 @@
     <downloadCustomReferrer></downloadCustomReferrer>
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
-    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="(https?://img[0-9]+\.imagebanana\.com\/)view(\/[0-9a-zA-Z]+\/.*)" replacement="$1img$2"/>
+    <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
+        <regexp pattern="&lt;figure class=&quot;image-large&quot;&gt;" replacement=""/>
+        <regexp pattern="&lt;a href=&quot;.+?&quot;[^&lt;]+&lt;img src=&quot;(.+?)&quot;" replacement="$1"/>
     </pipes>
-    <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="&lt;figure class=&quot;image-large&quot;&gt;" replacement=""/>
+        <regexp pattern="&lt;a href=&quot;.+?&quot;[^&lt;]+&lt;img src=&quot;.+?&quot; alt=&quot;(.+?)&quot;" replacement="$1"/>
+    </filenamePipeline>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <restriction maxConnections="0"/>
 </ruleDefinition>
