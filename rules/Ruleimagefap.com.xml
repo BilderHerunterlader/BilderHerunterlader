@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="imagefap.com" version="1.4" redirect="false" resend="false">
+<ruleDefinition name="imagefap.com" version="1.5" redirect="false" resend="false">
     <urlPattern>https?://(?:www\.)?imagefap\.com/(?:image\.php\?id=.+|photo/[0-9]+/.*)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
@@ -13,7 +13,10 @@
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="1334" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="&lt;img id=&quot;mainPhoto&quot;.+?src=&quot;(.+?)&quot;" replacement="$1"/>
     </pipes>
-    <filenamePipeline mode="DOWNLOAD_URL_FILENAME_PART"/>
+    <filenamePipeline mode="CONTAINER_PAGE_SOURCECODE">
+        <regexp pattern="&lt;title&gt;(.+.\w{1,4}) Porn Pic From " replacement="$1"/>
+        <regexp pattern="&lt;img id=&quot;mainPhoto&quot;.+?title=&quot;.+ - (.+?)&quot;" replacement="$1"/>
+    </filenamePipeline>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL">
         <regexp pattern="https?://(?:www\.)?imagefap\.com/(?:image\.php\?id=(.+)|photo/([0-9]+)/.*)" replacement="$1$2"/>
     </filenameDownloadSelectionPipeline>
