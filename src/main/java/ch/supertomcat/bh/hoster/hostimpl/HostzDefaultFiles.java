@@ -78,7 +78,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 */
 	public HostzDefaultFiles() {
 		super(NAME, VERSION);
-		String strImages = "(?:bmp|gif|jpe|jpg|jpeg|png|tif|tiff)";
+		String strImages = "(?:bmp|gif|jpe|jpg|jpeg|png|tif|tiff|webp)";
 		String strVideo = "(?:3g2|3gp|3gp2|3gpp|amr|asf|divx|evo|flv|hdmov|m2t|m2ts|m2v|m4v|mkv|m1v|mov|mp2v|mp4|mpe|mpeg|mpg|mts|ogm|ogv|pva|pss|qt|rm|ram|rpm|rmm|ts|tp|tpr|vob|wmv|wmp)";
 		String strAudio = "(?:aac|ac3|au|dts|flac|m1a|m2a|m4a|m4b|mid|midi|mka|mp2|mp3|mpa|oga|ogg|ra|rmi|snd|wav|wma)";
 		String strArchive = "(?:7z|arj|bz2|bzip2|cab|cpio|deb|dmg|gz|gzip|hfs|iso|lha|lzh|lzma|rar|rpm|split|swm|tar|taz|tbz|tbz2|tgz|tpz|wim|xar|z|zip)";

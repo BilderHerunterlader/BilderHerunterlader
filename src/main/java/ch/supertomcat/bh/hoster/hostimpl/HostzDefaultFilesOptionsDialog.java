@@ -61,7 +61,7 @@ public class HostzDefaultFilesOptionsDialog extends JDialog {
 		pnlButtons.add(btnCancel);
 
 		cbContentType = new JCheckBox(Localization.getString("CheckCTDefaultImages"), checkContentType);
-		String strImages = Localization.getString("Images") + " (bmp, gif, jpe, jpg, jpeg, png, tif, tiff)";
+		String strImages = Localization.getString("Images") + " (bmp, gif, jpe, jpg, jpeg, png, tif, tiff, webp)";
 		String strVideo = Localization.getString("Videos") + " (3g2, 3gp, 3gp2, 3gpp, amr, asf, divx, evo, flv, hdmov, m2t, m2ts, m2v";
 		String strAudio = Localization.getString("Audio") + " (aac, ac3, au, dts, flac, m1a, m2a, m4a, m4b, mid, midi, mka, mp2, mp3";
 		String strArchive = Localization.getString("Archives") + " (7z, arj, bz2, bzip2, cab, cpio, deb, dmg, gz, gzip, hfs, iso, lha, lzh, lzma";

@@ -44,7 +44,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	/**
 	 * Pattern for image files
 	 */
-	protected static final Pattern IMAGE_FILE_PATTERN = Pattern.compile(".*?(\\.(bmp|gif|jpe|jpg|jpeg|png|pcx|iff|ras|pbm|pgm|psd|tif|tiff))$", Pattern.CASE_INSENSITIVE);
+	protected static final Pattern IMAGE_FILE_PATTERN = Pattern.compile(".*?(\\.(bmp|gif|jpe|jpg|jpeg|png|pcx|iff|ras|pbm|pgm|psd|tif|tiff|webp))$", Pattern.CASE_INSENSITIVE);
 
 	static {
 		StringJoiner sjEncodings = new StringJoiner("|");

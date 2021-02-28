@@ -51,7 +51,7 @@ public class HostSortImages extends Host implements IHoster {
 	public HostSortImages() {
 		super(NAME, VERSION, false);
 		// This is the default pattern, allows just images to be sort
-		urlPattern = Pattern.compile("^.*\\.(gif|jpg|jpeg|jpe|png|tif|tiff)$", Pattern.CASE_INSENSITIVE);
+		urlPattern = Pattern.compile("^.*\\.(gif|jpg|jpeg|jpe|png|tif|tiff|webp)$", Pattern.CASE_INSENSITIVE);
 
 		File file = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts/HostxSortImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
