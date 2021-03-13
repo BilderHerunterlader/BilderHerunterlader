@@ -47,6 +47,7 @@ public class ImportQueue extends ImportExportBase {
 	 * @param mainWindowAccess Main Window Access
 	 * @param queueManager Queue Manager
 	 * @param settingsManager Settings Manager
+	 * @param hostManager Host Manager
 	 */
 	public ImportQueue(Component parentComponent, MainWindowAccess mainWindowAccess, QueueManager queueManager, SettingsManager settingsManager, HostManager hostManager) {
 		super(parentComponent, mainWindowAccess, settingsManager);
