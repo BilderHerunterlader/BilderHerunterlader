@@ -6,8 +6,6 @@ import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -171,20 +169,16 @@ public class ClipboardObserver implements ClipboardOwner {
 
 				// Check if data is text
 				if (content.isDataFlavorSupported(DataFlavor.stringFlavor)) {
-					try {
-						String data = (String)content.getTransferData(DataFlavor.stringFlavor);
-						if (hasContentChanged(previousContent, data)) {
-							try {
-								List<String> links = getLinksFromContent(data);
-								for (ClipboardObserverListener listener : listeners) {
-									listener.linksDetected(links);
-								}
-							} finally {
-								previousContent = data;
+					String data = (String)content.getTransferData(DataFlavor.stringFlavor);
+					if (hasContentChanged(previousContent, data)) {
+						try {
+							List<String> links = getLinksFromContent(data);
+							for (ClipboardObserverListener listener : listeners) {
+								listener.linksDetected(links);
 							}
+						} finally {
+							previousContent = data;
 						}
-					} catch (UnsupportedFlavorException | IOException e) {
-						logger.error("Could not get clipboard content", e);
 					}
 				}
 			} catch (Exception e) {
@@ -195,11 +189,9 @@ public class ClipboardObserver implements ClipboardOwner {
 		private boolean hasContentChanged(String previousContent, String currentContent) {
 			if (previousContent != null && currentContent != null) {
 				return !previousContent.equals(currentContent);
-			} else if ((previousContent == null && currentContent != null) || (previousContent != null && currentContent == null)) {
-				return true;
-			} else {
-				return false;
 			}
+
+			return previousContent != null || currentContent != null;
 		}
 
 		private List<String> getLinksFromContent(String data) {

@@ -3,6 +3,7 @@ package ch.supertomcat.bh.manualtest;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -53,21 +54,23 @@ public class UpdateUpdatesXMLTest {
 
 	@BeforeAll
 	public static void beforeAll() throws IOException {
-		ApplicationProperties.initProperties(BH.class.getResourceAsStream("/Application_Config.properties"));
+		try (InputStream in = BH.class.getResourceAsStream("/Application_Config.properties")) {
+			ApplicationProperties.initProperties(in);
 
-		String jarFilename = ApplicationUtil.getThisApplicationsJarFilename(BH.class);
-		ApplicationProperties.setProperty("JarFilename", jarFilename);
+			String jarFilename = ApplicationUtil.getThisApplicationsJarFilename(BH.class);
+			ApplicationProperties.setProperty("JarFilename", jarFilename);
 
-		// Geth the program directory
-		String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
-		ApplicationProperties.setProperty("ApplicationPath", appPath);
+			// Geth the program directory
+			String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
+			ApplicationProperties.setProperty("ApplicationPath", appPath);
 
-		String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileUtil.FILE_SEPERATOR;
-		ApplicationProperties.setProperty("ProfilePath", programUserDir);
-		ApplicationProperties.setProperty("DatabasePath", programUserDir);
-		ApplicationProperties.setProperty("SettingsPath", programUserDir);
-		ApplicationProperties.setProperty("DownloadLogPath", programUserDir);
-		ApplicationProperties.setProperty("LogsPath", programUserDir);
+			String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileUtil.FILE_SEPERATOR;
+			ApplicationProperties.setProperty("ProfilePath", programUserDir);
+			ApplicationProperties.setProperty("DatabasePath", programUserDir);
+			ApplicationProperties.setProperty("SettingsPath", programUserDir);
+			ApplicationProperties.setProperty("DownloadLogPath", programUserDir);
+			ApplicationProperties.setProperty("LogsPath", programUserDir);
+		}
 	}
 
 	@BeforeEach

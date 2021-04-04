@@ -378,7 +378,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		Matcher matcher = CONTENT_DISPOSITION_FILENAME_PATTERN.matcher(value);
 		if (matcher.find()) {
 			String cdResult = matcher.replaceAll("$3");
-			logger.debug("Content Disposition Filename: {}" + cdResult);
+			logger.debug("Content Disposition Filename: {}", cdResult);
 			if (cdResult.isEmpty()) {
 				return null;
 			}

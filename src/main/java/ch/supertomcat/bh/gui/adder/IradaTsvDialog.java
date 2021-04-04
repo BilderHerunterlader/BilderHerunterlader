@@ -352,10 +352,7 @@ public class IradaTsvDialog extends JDialog {
 	private static class TsvFileFilter extends FileFilter {
 		@Override
 		public boolean accept(File f) {
-			if (f.isDirectory() || f.getName().endsWith(".tsv")) {
-				return true;
-			}
-			return false;
+			return f.isDirectory() || f.getName().endsWith(".tsv");
 		}
 
 		@Override
