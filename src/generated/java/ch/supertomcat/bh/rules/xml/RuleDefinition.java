@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2020.07.06 um 11:08:45 PM CEST 
+// Generiert: 2021.04.19 um 01:18:26 PM CEST 
 //
 
 
@@ -25,33 +25,33 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType>
- *   &lt;complexContent>
- *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       &lt;sequence>
- *         &lt;element name="urlPattern" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="useContentDisposition" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="reducePathLength" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="reduceFilenameLength" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="referrerMode" type="{}ReferrerMode"/>
- *         &lt;element name="customReferrer" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="downloadReferrerMode" type="{}ReferrerMode"/>
- *         &lt;element name="downloadCustomReferrer" type="{http://www.w3.org/2001/XMLSchema}string"/>
- *         &lt;element name="duplicateRemoveMode" type="{}DuplicateRemoveMode"/>
- *         &lt;element name="sendCookies" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
- *         &lt;element name="pipes" type="{}URLPipeline" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="failuresPipes" type="{}FailuresPipeline" maxOccurs="unbounded" minOccurs="0"/>
- *         &lt;element name="filenamePipeline" type="{}FilenamePipeline"/>
- *         &lt;element name="filenameDownloadSelectionPipeline" type="{}FilenameDownloadSelectionPipeline"/>
- *         &lt;element name="restriction" type="{}Restriction"/>
- *       &lt;/sequence>
- *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       &lt;attribute name="redirect" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *       &lt;attribute name="resend" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" />
- *     &lt;/restriction>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
+ *       &lt;sequence&gt;
+ *         &lt;element name="urlPattern" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="useContentDisposition" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="reducePathLength" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="reduceFilenameLength" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="referrerMode" type="{}ReferrerMode"/&gt;
+ *         &lt;element name="customReferrer" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="downloadReferrerMode" type="{}ReferrerMode"/&gt;
+ *         &lt;element name="downloadCustomReferrer" type="{http://www.w3.org/2001/XMLSchema}string"/&gt;
+ *         &lt;element name="duplicateRemoveMode" type="{}DuplicateRemoveMode"/&gt;
+ *         &lt;element name="sendCookies" type="{http://www.w3.org/2001/XMLSchema}boolean"/&gt;
+ *         &lt;element name="pipes" type="{}URLPipeline" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="failuresPipes" type="{}FailuresPipeline" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="filenamePipeline" type="{}FilenamePipeline"/&gt;
+ *         &lt;element name="filenameDownloadSelectionPipeline" type="{}FilenameDownloadSelectionPipeline"/&gt;
+ *         &lt;element name="restriction" type="{}Restriction"/&gt;
+ *       &lt;/sequence&gt;
+ *       &lt;attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
+ *       &lt;attribute name="redirect" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *       &lt;attribute name="resend" use="required" type="{http://www.w3.org/2001/XMLSchema}boolean" /&gt;
+ *     &lt;/restriction&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 

@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2020.07.06 um 11:08:45 PM CEST 
+// Generiert: 2021.04.19 um 01:18:26 PM CEST 
 //
 
 
@@ -18,17 +18,17 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * <p>
  * <pre>
- * &lt;simpleType name="DuplicateRemoveMode">
- *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string">
- *     &lt;enumeration value="DEFAULT"/>
- *     &lt;enumeration value="CONTAINER_URL_ONLY"/>
- *     &lt;enumeration value="CONTAINER_URL_AND_THUMBNAIL_URL"/>
- *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST"/>
- *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST"/>
- *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST"/>
- *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST"/>
- *   &lt;/restriction>
- * &lt;/simpleType>
+ * &lt;simpleType name="DuplicateRemoveMode"&gt;
+ *   &lt;restriction base="{http://www.w3.org/2001/XMLSchema}string"&gt;
+ *     &lt;enumeration value="DEFAULT"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_ONLY"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_AND_THUMBNAIL_URL"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_FIRST"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITH_THUMB_THUMBS_ALWAYS_LAST"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_FIRST"/&gt;
+ *     &lt;enumeration value="CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST"/&gt;
+ *   &lt;/restriction&gt;
+ * &lt;/simpleType&gt;
  * </pre>
  * 
  */

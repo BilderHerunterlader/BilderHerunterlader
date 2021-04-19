@@ -52,6 +52,8 @@ public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URL
 
 	private JCheckBox chkURLDecodeResult = new JCheckBox(Localization.getString("RulePipelineURLDecodeResult"), false);
 
+	private JCheckBox chkJavcascriptDecodeResult = new JCheckBox(Localization.getString("RulePipelineJavascriptDecodeResult"), false);
+
 	private JCheckBox chkSendCookies = new JCheckBox(Localization.getString("RulePipelineSendCookies"), true);
 
 	/**
@@ -105,6 +107,8 @@ public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URL
 		chkURLDecodeResult.setToolTipText(Localization.getString("RulePipelineURLDecodeResultToolTip"));
 		chkURLDecodeResult.setSelected(pipe.isUrlDecodeResult());
 
+		chkJavcascriptDecodeResult.setSelected(pipe.isJavascriptDecodeResult() != null && pipe.isJavascriptDecodeResult());
+
 		chkSendCookies.setSelected(pipe.isSendCookies());
 
 		txtNote.setText(Localization.getString("RuleJavascript"));
@@ -122,8 +126,8 @@ public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URL
 		pnlRB.add(txtWaitBeforeExecute);
 		pnlRB.add(btnHelp);
 		pnlRB.add(chkURLDecodeResult);
+		pnlRB.add(chkJavcascriptDecodeResult);
 		pnlRB.add(chkSendCookies);
-		pnlRB.add(new JLabel());
 
 		btnHelp.addItemListener(new ItemListener() {
 			@Override
@@ -153,6 +157,11 @@ public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URL
 		}
 		pipe.setWaitBeforeExecute(waitBeforeExecute);
 		pipe.setUrlDecodeResult(chkURLDecodeResult.isSelected());
+		if (chkJavcascriptDecodeResult.isSelected()) {
+			pipe.setJavascriptDecodeResult(true);
+		} else {
+			pipe.setJavascriptDecodeResult(null);
+		}
 		pipe.setSendCookies(chkSendCookies.isSelected());
 		return true;
 	}

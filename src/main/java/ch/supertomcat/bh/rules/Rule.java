@@ -9,6 +9,7 @@ import java.util.regex.PatternSyntaxException;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -270,6 +271,10 @@ public class Rule extends Hoster {
 				} catch (DecoderException e) {
 					logger.error("Could not URL decode (application/x-www-form-urlencoded) pipeline result: {}", pipelineResult);
 				}
+			}
+
+			if (pipelineDefinition.isJavascriptDecodeResult() != null && pipelineDefinition.isJavascriptDecodeResult()) {
+				pipelineResult = StringEscapeUtils.unescapeEcmaScript(pipelineResult);
 			}
 
 			pipelineResult = HTTPUtil.decodeURL(pipelineResult);

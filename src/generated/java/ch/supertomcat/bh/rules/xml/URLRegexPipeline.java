@@ -1,8 +1,8 @@
 //
-// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.2.8-b130911.1802 generiert 
-// Siehe <a href="http://java.sun.com/xml/jaxb">http://java.sun.com/xml/jaxb</a> 
+// Diese Datei wurde mit der JavaTM Architecture for XML Binding(JAXB) Reference Implementation, v2.3.1 generiert 
+// Siehe <a href="https://javaee.github.io/jaxb-v2/">https://javaee.github.io/jaxb-v2/</a> 
 // Änderungen an dieser Datei gehen bei einer Neukompilierung des Quellschemas verloren. 
-// Generiert: 2020.07.06 um 11:08:45 PM CEST 
+// Generiert: 2021.04.19 um 01:18:26 PM CEST 
 //
 
 
@@ -20,14 +20,14 @@ import javax.xml.bind.annotation.XmlType;
  * <p>Das folgende Schemafragment gibt den erwarteten Content an, der in dieser Klasse enthalten ist.
  * 
  * <pre>
- * &lt;complexType name="URLRegexPipeline">
- *   &lt;complexContent>
- *     &lt;extension base="{}URLPipeline">
- *       &lt;attribute name="mode" use="required" type="{}URLRegexPipelineMode" />
- *       &lt;attribute name="urlMode" type="{}URLMode" default="CONTAINER_URL" />
- *     &lt;/extension>
- *   &lt;/complexContent>
- * &lt;/complexType>
+ * &lt;complexType name="URLRegexPipeline"&gt;
+ *   &lt;complexContent&gt;
+ *     &lt;extension base="{}URLPipeline"&gt;
+ *       &lt;attribute name="mode" use="required" type="{}URLRegexPipelineMode" /&gt;
+ *       &lt;attribute name="urlMode" type="{}URLMode" default="CONTAINER_URL" /&gt;
+ *     &lt;/extension&gt;
+ *   &lt;/complexContent&gt;
+ * &lt;/complexType&gt;
  * </pre>
  * 
  * 
