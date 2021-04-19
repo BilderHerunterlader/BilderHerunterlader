@@ -155,10 +155,7 @@ public class Rule extends Hoster {
 			return false;
 		}
 		Matcher urlMatcher = compiledUrlPattern.matcher(url);
-		if (urlMatcher.matches()) {
-			return true;
-		}
-		return false;
+		return urlMatcher.matches();
 	}
 
 	/**
@@ -231,7 +228,7 @@ public class Rule extends Hoster {
 			String htmlcode = "";
 			if (rulePipeline instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)rulePipeline).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
 				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
-				logger.debug(definition.getName() + " -> " + url + " -> Download Container-Page done -> Result: " + htmlcode);
+				logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", definition.getName(), url, htmlcode);
 				if (ruleTraceInfoURL != null) {
 					ruleTraceInfoURL.addStep(new RuleTraceInfoURLDownloadContainerPage(i, pipelineURL, htmlcode));
 				}
@@ -276,7 +273,7 @@ public class Rule extends Hoster {
 			}
 
 			pipelineResult = HTTPUtil.decodeURL(pipelineResult);
-			logger.debug(definition.getName() + " -> " + url + " -> pipe[" + i + "] -> Result: " + pipelineResult);
+			logger.debug("{} -> {} -> pipe[{}] -> Result: {}", definition.getName(), url, i, pipelineResult);
 			if (ruleTraceInfoURL != null) {
 				ruleTraceInfoURL.addStep(new RuleTraceInfoURLReplace(i, pipelineResult));
 			}
@@ -305,7 +302,7 @@ public class Rule extends Hoster {
 			pipelineResult = url;
 		}
 
-		logger.debug(definition.getName() + " -> " + url + " -> Final URL Result: " + pipelineResult);
+		logger.debug("{} -> {} -> Final URL Result: {}", definition.getName(), url, pipelineResult);
 		retval[0] = pipelineResult;
 		retval[1] = upo.getCorrectedFilename(); // Corrected Filename
 		if (pic != null && pic.getTargetFilename().isEmpty()) {
@@ -509,7 +506,7 @@ public class Rule extends Hoster {
 	 * 
 	 * @return Pipelines
 	 */
-	public List<RuleURLPipeline<?>> getPipelines() {
+	public List<RuleURLPipeline<? extends URLPipeline>> getPipelines() {
 		return pipelines;
 	}
 
@@ -622,16 +619,13 @@ public class Rule extends Hoster {
 	 * @return True if this rule can parse the URL
 	 */
 	public boolean isFromThisRedirect(String url, Rule sourceRule) {
-		if (definition.isRedirect() == false || sourceRule == this) {
+		if (!definition.isRedirect() || sourceRule == this) {
 			return false;
 		}
 		if (deactivateOption.isDeactivated()) {
 			return false;
 		}
 		Matcher urlMatcher = compiledUrlPattern.matcher(url);
-		if (urlMatcher.matches()) {
-			return true;
-		}
-		return false;
+		return urlMatcher.matches();
 	}
 }
