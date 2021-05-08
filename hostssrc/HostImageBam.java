@@ -19,13 +19,13 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Host class for ImageBam
  * 
- * @version 4.1
+ * @version 4.2
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.1";
+	public static final String VERSION = "4.2";
 
 	/**
 	 * Name dieser Klasse
@@ -50,16 +50,20 @@ public class HostImageBam extends Host implements IHoster {
 
 	private RuleRegExp regexImage2;
 
+	private RuleRegExp regexImage3;
+
+	private RuleRegExp regexFilename2;
+
 	private RuleRegExp regexFilename;
 
-	private Pattern fileExtensionPattern = Pattern.compile(".+\\.(bmp|gif|jpe|jpg|jpeg|png|tif|tiff)$");
+	private Pattern fileExtensionPattern = Pattern.compile("(?i).+\\.(bmp|gif|jpe|jpg|jpeg|png|tif|tiff|webp)$");
 
 	/**
 	 * Konstruktor
 	 */
 	public HostImageBam() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^https?://(www\\.)?imagebam\\.com/image/[a-z0-9]+(/)?");
+		urlPattern = Pattern.compile("^https?://(www\\.)?imagebam\\.com/(?:image|view)/[a-zA-Z0-9]+(/)?");
 
 		regexServerMaintenance = new RuleRegExp();
 		regexServerMaintenance.setSearch("<b>(ImageBam is currently offline.)</b><br><br>(.+?)<br><br>(.+?)<br><br>");
@@ -77,6 +81,14 @@ public class HostImageBam extends Host implements IHoster {
 		regexFilename.setSearch(".+?filename=(.+)");
 		regexFilename.setReplace("$1");
 
+		regexImage3 = new RuleRegExp();
+		regexImage3.setSearch("(?i)<img src=\"(.+?)\".+?alt=\"(.+?)\".+?class=\"main-image");
+		regexImage3.setReplace("$1");
+
+		regexFilename2 = new RuleRegExp();
+		regexFilename2.setSearch("(?i)<img src=\"(.+?)\".+?alt=\"(.+?)\".+?class=\"main-image");
+		regexFilename2.setReplace("$2");
+
 		addRestriction(new DownloadRestriction("imagebam.com", 6));
 	}
 
@@ -87,39 +99,6 @@ public class HostImageBam extends Host implements IHoster {
 			return true;
 		}
 		return false;
-	}
-
-	/**
-	 * URL parsen
-	 * 
-	 * @param url Container-URL
-	 * @return URL
-	 * @throws HostException
-	 */
-	private String parseURL(String url) throws HostException {
-		String page = downloadContainerPage(url, url);
-
-		String downloadURL = regexImage.doPageSourcecodeReplace(page, 0, url, null);
-
-		if (downloadURL.isEmpty()) {
-			for (String errorMessage : errorMessages) {
-				if (page.indexOf(errorMessage) > -1) {
-					throw new HostFileTemporaryOfflineException(errorMessage);
-				}
-			}
-
-			String errorMessage = regexServerMaintenance.doPageSourcecodeReplace(page, 0, url, null);
-			if (!errorMessage.isEmpty()) {
-				throw new HostFileTemporaryOfflineException(errorMessage);
-			}
-
-			downloadURL = regexImage2.doPageSourcecodeReplace(page, 0, url, null);
-			if (!downloadURL.isEmpty()) {
-				logger.info("Download-URL found with alternative pattern: {}", downloadURL);
-			}
-		}
-
-		return downloadURL;
 	}
 
 	@Override
@@ -133,18 +112,49 @@ public class HostImageBam extends Host implements IHoster {
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
 		if (isFromThisHoster(upo.getContainerURL())) {
-			String downloadURL = parseURL(upo.getContainerURL());
-			downloadURL = downloadURL.replaceAll("&amp;", "&");
+			String page = downloadContainerPage(upo.getContainerURL(), upo.getContainerURL());
+
+			String correctedFilename = "";
+
+			String downloadURL = regexImage.doPageSourcecodeReplace(page, 0, upo.getContainerURL(), null);
+
+			if (downloadURL.isEmpty()) {
+				for (String errorMessage : errorMessages) {
+					if (page.indexOf(errorMessage) > -1) {
+						throw new HostFileTemporaryOfflineException(errorMessage);
+					}
+				}
+
+				String errorMessage = regexServerMaintenance.doPageSourcecodeReplace(page, 0, upo.getContainerURL(), null);
+				if (!errorMessage.isEmpty()) {
+					throw new HostFileTemporaryOfflineException(errorMessage);
+				}
+
+				downloadURL = regexImage2.doPageSourcecodeReplace(page, 0, upo.getContainerURL(), null);
+				if (!downloadURL.isEmpty()) {
+					logger.info("Download-URL found with alternative pattern: {}", downloadURL);
+				} else {
+					downloadURL = regexImage3.doPageSourcecodeReplace(page, 0, upo.getContainerURL(), null);
+					if (!downloadURL.isEmpty()) {
+						logger.info("Download-URL found with alternative 3 pattern: {}", downloadURL);
+
+						correctedFilename = regexFilename2.doPageSourcecodeReplace(page, 0, upo.getContainerURL(), null);
+					}
+				}
+			}
+
+			downloadURL = downloadURL.replace("&amp;", "&");
 
 			if (!downloadURL.isEmpty()) {
 				upo.setDirectLink(downloadURL);
 
-				String correctedFilename = "";
-				// Read out filename from url
-				if (downloadURL.contains("filename")) {
-					correctedFilename = decodeFilename(regexFilename.doURLReplace(downloadURL, null));
-				} else {
-					correctedFilename = decodeFilename(getFilenamePart(downloadURL));
+				if (correctedFilename.isEmpty()) {
+					// Read out filename from url
+					if (downloadURL.contains("filename")) {
+						correctedFilename = decodeFilename(regexFilename.doURLReplace(downloadURL, null));
+					} else {
+						correctedFilename = decodeFilename(getFilenamePart(downloadURL));
+					}
 				}
 
 				if (correctedFilename.isEmpty()) {
