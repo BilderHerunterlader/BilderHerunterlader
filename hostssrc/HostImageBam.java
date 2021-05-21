@@ -3,11 +3,14 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
+import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
@@ -19,13 +22,13 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Host class for ImageBam
  * 
- * @version 4.2
+ * @version 4.3
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.2";
+	public static final String VERSION = "4.3";
 
 	/**
 	 * Name dieser Klasse
@@ -109,10 +112,17 @@ public class HostImageBam extends Host implements IHoster {
 		return "";
 	}
 
-	@Override
-	public void parseURLAndFilename(URLParseObject upo) throws HostException {
-		if (isFromThisHoster(upo.getContainerURL())) {
-			String page = downloadContainerPage(upo.getContainerURL(), upo.getContainerURL());
+	/**
+	 * URL parsen
+	 * 
+	 * @param upo URL Parse Object
+	 * @param cookieStore Cookie Store
+	 * @return URL or empty String if not found or null if continue
+	 * @throws HostException
+	 */
+	private String parseURL(URLParseObject upo, BasicCookieStore cookieStore) throws HostException {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClientBuilder().setDefaultCookieStore(cookieStore).build()) {
+			String page = downloadContainerPage(getName(), upo.getContainerURL(), upo.getContainerURL(), null, client);
 
 			String correctedFilename = "";
 
@@ -144,9 +154,35 @@ public class HostImageBam extends Host implements IHoster {
 			}
 
 			downloadURL = downloadURL.replace("&amp;", "&");
-
 			if (!downloadURL.isEmpty()) {
 				upo.setDirectLink(downloadURL);
+				upo.setCorrectedFilename(correctedFilename);
+			} else {
+				if (page.contains("Continue to your image")) {
+					return null;
+				}
+			}
+
+			return downloadURL;
+		} catch (Exception e) {
+			throw new HostIOException(getName() + ": Container-Page: " + e.getMessage(), e);
+		}
+	}
+
+	@Override
+	public void parseURLAndFilename(URLParseObject upo) throws HostException {
+		if (isFromThisHoster(upo.getContainerURL())) {
+			BasicCookieStore cookieStore = new BasicCookieStore();
+
+			String downloadURL = parseURL(upo, cookieStore);
+			if (downloadURL == null) {
+				downloadURL = parseURL(upo, cookieStore);
+			}
+
+			if (downloadURL != null && !downloadURL.isEmpty()) {
+				upo.setDirectLink(downloadURL);
+
+				String correctedFilename = upo.getCorrectedFilename();
 
 				if (correctedFilename.isEmpty()) {
 					// Read out filename from url
@@ -176,7 +212,11 @@ public class HostImageBam extends Host implements IHoster {
 					upo.setCorrectedFilename(correctedFilename);
 				}
 			} else {
-				throw new HostImageUrlNotFoundException(Localization.getString("ErrorImageURL"));
+				if (downloadURL == null) {
+					throw new HostImageUrlNotFoundException("Failed to bypass \"Continue to your image\"");
+				} else {
+					throw new HostImageUrlNotFoundException(Localization.getString("ErrorImageURL"));
+				}
 			}
 		}
 	}

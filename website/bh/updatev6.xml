@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="4.17.0">
+	<setuprelease version="4.18.0">
 		<description>
-			<mainDE>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainDE>
-			<mainEN>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainEN>
+			<mainDE>- Added WebP to image file detection patterns</mainDE>
+			<mainEN>- Added WebP to image file detection patterns</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.17.0" src="https://www.dropbox.com/s/85ubyykexyb11m0/BH-4.17.0.zip?dl=1" filename="BH-4.17.0.zip" name="BilderHerunterlader" />
+	<main version="4.18.0" src="https://www.dropbox.com/s/fy43is5n35iw2c5/BH-4.18.0.zip?dl=1" filename="BH-4.18.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainDE>
-		<mainEN>- Bug Fixed: Coloring of disabled queue entries was not working anymore</mainEN>
+		<mainDE>- Added WebP to image file detection patterns</mainDE>
+		<mainEN>- Added WebP to image file detection patterns</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -25,7 +25,7 @@
 		<host version="3.1" src="https://www.dropbox.com/s/yeitauhlql6khg5/HostGenericMultiPageLinkGrabber.class?dl=1" filename="HostGenericMultiPageLinkGrabber.class" name="HostGenericMultiPageLinkGrabber">
 			<source src="https://www.dropbox.com/s/t3mza3zbri22oph/HostGenericMultiPageLinkGrabber%241.class?dl=1" filename="HostGenericMultiPageLinkGrabber$1.class" />
 		</host>
-		<host version="4.1" src="https://www.dropbox.com/s/q75gty3q4unex8x/HostImageBam.class?dl=1" filename="HostImageBam.class" name="HostImageBam" />
+		<host version="4.3" src="https://www.dropbox.com/s/q75gty3q4unex8x/HostImageBam.class?dl=1" filename="HostImageBam.class" name="HostImageBam" />
 		<host version="4.0" src="https://www.dropbox.com/s/wem0x3qhtxvgswf/HostImageShack.class?dl=1" filename="HostImageShack.class" name="HostImageShack" />
 		<host version="4.4" src="https://www.dropbox.com/s/chek2838fsgt3ma/HostImageVenue.class?dl=1" filename="HostImageVenue.class" name="HostImageVenue" />
 		<host version="0.1" src="https://www.dropbox.com/s/ibqx1qb9xjmu8cc/HostImxTo.class?dl=1" filename="HostImxTo.class" name="HostImxTo" />
@@ -141,9 +141,11 @@
 	</hoster>
 	<changelog>
 		<!--
-		<changes version="4.9.0" lng="de"></changes>
-		<changes version="4.9.0" lng="en"></changes>
+		<changes version="4.19.0" lng="de"></changes>
+		<changes version="4.19.0" lng="en"></changes>
 		-->
+		<changes version="4.18.0" lng="de">- Added WebP to image file detection patterns</changes>
+		<changes version="4.18.0" lng="en">- Added WebP to image file detection patterns</changes>
 		<changes version="4.17.0" lng="de">- Bug Fixed: Coloring of disabled queue entries was not working anymore</changes>
 		<changes version="4.17.0" lng="en">- Bug Fixed: Coloring of disabled queue entries was not working anymore</changes>
 		<changes version="4.16.0" lng="de">- Bug Fixed: Download-Selection Table could not be sorted anymore\n- Added SQLite Database Defragmentation\n- Fixed position of PopupMenu for Import/Export-Button for Queue (PopupMenu is displayed at mouse position if mouse is on the button, otherwise in the middle of the button)\n- Moved Sort Files button from Import/Export-PopupMenu to the buttons in Queue, so it can be access directly\n- Bug Fixed: Download-Complete Notification was displayed when exiting BH</changes>
