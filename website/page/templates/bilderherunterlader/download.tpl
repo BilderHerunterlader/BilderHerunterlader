@@ -1,7 +1,7 @@
 ﻿{bh_release_version file=$bhUpdatesXMLFile}
-{assign var="ffversion" value="4.5"}
+{assign var="ffversion" value="4.8"}
 {assign var="ff57version" value="4.7"}
-{assign var="smversion" value="4.5"}
+{assign var="smversion" value="4.8"}
 {assign var="operaversion" value="6"}
 {assign var="ieversion" value="9.0"}
 <script type="text/javascript" src="installext.js"></script>
@@ -37,8 +37,8 @@ Windows, Linux, MacOS, BSD und any other operating system for which the JRE (Jav
 <b>Pale Moon / Firefox (until Version 56) - Extension:</b>
 <b><i>Version {$ffversion}:
 Only for Firefox 1.5 - 56.*
-Only for Pale Moon 25.0 - 27.*</i></b>
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-{$ffversion}-fx%2Bsm.xpi/download">Install Pale Moon / Firefox (until Version 56) - Extension</a>
+Only for Pale Moon 25.0 - 29.*</i></b>
+<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$ffversion}.xpi?dl=1">Install Pale Moon / Firefox (until Version 56) - Extension</a>
 
 Usage:
 On a page with images: Rightclick -> Download files with BH
@@ -63,8 +63,7 @@ On a page with images: Rightclick -> BilderHerunterlader -> Download files with 
 <img src="bilderherunterlader/seamonkey.png" alt="Seamonkey" />
 <b>Seamonkey-Extension:</b>
 <b><i>Version {$smversion}: Only for Seamonkey 2.0 - *.*.* (Means the extension is marked as compatible with every future Seamonkey version, even if the extension is not actually working with that version)</i></b>
-<!-- <a href="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-v{$smversion}.xpi/download" onclick="return install('http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-v{$smversion}.xpi/download', '');">Install Seamonkey-Extension</a> -->
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-{$smversion}-fx%2Bsm.xpi/download">Install Seamonkey-Extension</a>
+<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$smversion}.xpi?dl=1">Install Seamonkey-Extension</a>
 
 Usage:
 On a page with images: Rightclick -> Download files with BH

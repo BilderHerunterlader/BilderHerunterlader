@@ -309,6 +309,31 @@ function getImagesArray(images) {
 	return urlssend;
 }
 
+function getVideosArray(videos) {
+	var urlssend = [];
+	var index = 0;
+	for(var i = 0; i < videos.length; i++) {
+		var li = videos[i];
+		if (li.hasAttribute('src')) {
+			var videoURL = li.src;
+			videoURL += "\t\n";
+			urlssend[index] = videoURL;
+			index++;
+		}
+		var videoSources = li.getElementsByTagName('source');
+		for(var x = 0; x < videoSources.length; x++) {
+			var lx = videoSources[x];
+			if (lx.hasAttribute('src')) {
+				var videoURL = lx.src;
+				videoURL += "\t\n";
+				urlssend[index] = videoURL;
+				index++;
+			}
+		}
+	}
+	return urlssend;
+}
+
 function fireDownloadImages() {
 	if (isBHTransmitMode() === true) {
 		launchBHTransmit(true);
@@ -323,8 +348,10 @@ function fireDownloadImages() {
 	}
 	
 	var images = window.content.document.images;
-	
 	urlssend = getImagesArray(images);
+	
+	var videos = window.content.document.getElementsByTagName('video');
+	urlssend = urlssend.concat(getVideosArray(videos));
 	
 	if (isBHFrames() === true) {
 		//Get Images from Frames if available
@@ -332,9 +359,14 @@ function fireDownloadImages() {
 		if (frames.length > 0) {
 			for(var i = 0; i < frames.length; i++) {
 				var frameDoc = frames[i].contentDocument;
+				
 				var frameImages = frameDoc.images;
-				var urlssendFrame = getImagesArray(frameImages);
-				urlssend = urlssend.concat(urlssendFrame);
+				var urlssendFrameImages = getImagesArray(frameImages);
+				urlssend = urlssend.concat(urlssendFrameImages);
+				
+				var frameVideos = frameDoc.getElementsByTagName('video');
+				var urlssendFrameVideos = getVideosArray(frameVideos);
+				urlssend = urlssend.concat(urlssendFrameVideos);
 			}
 		}
 	}
@@ -345,9 +377,14 @@ function fireDownloadImages() {
 		if (iframes.length > 0) {
 			for(var i = 0; i < iframes.length; i++) {
 				var iframeDoc = iframes[i].contentDocument;
+				
 				var frameImages = iframeDoc.images;
-				var urlssendiFrame = getImagesArray(frameImages);
-				urlssend = urlssend.concat(urlssendiFrame);
+				var urlssendiFrameImages = getImagesArray(frameImages);
+				urlssend = urlssend.concat(urlssendiFrameImages);
+				
+				var frameVideos = iframeDoc.getElementsByTagName('video');
+				var urlssendiFrameVideos = getVideosArray(frameVideos);
+				urlssend = urlssend.concat(urlssendiFrameVideos);
 			}
 		}
 	}

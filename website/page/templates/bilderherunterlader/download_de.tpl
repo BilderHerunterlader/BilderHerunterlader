@@ -1,7 +1,7 @@
 ﻿{bh_release_version file=$bhUpdatesXMLFile}
-{assign var="ffversion" value="4.5"}
+{assign var="ffversion" value="4.8"}
 {assign var="ff57version" value="4.7"}
-{assign var="smversion" value="4.5"}
+{assign var="smversion" value="4.8"}
 {assign var="operaversion" value="6"}
 {assign var="ieversion" value="9.0"}
 <script type="text/javascript" src="installext.js"></script>
@@ -37,8 +37,8 @@ Windows, Linux, MacOS, BSD und alle anderen Betriebssysteme wofür die JRE (Java
 <b>Pale Moon / Firefox (Bis Version 56) - Extension:</b>
 <b><i>Version {$ffversion}:
 Nur für Firefox 1.5 - 56.*
-Nur für Pale Moon 25.0 - 27.*</i></b>
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-{$ffversion}-fx%2Bsm.xpi/download">Pale Moon / Firefox (Bis Version 56) - Extension installieren</a>
+Nur für Pale Moon 25.0 - 29.*</i></b>
+<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$ffversion}.xpi?dl=1">Pale Moon / Firefox (Bis Version 56) - Extension installieren</a>
 
 Verwendung:
 Auf einer Webseite mit Bildern: Rechtsklick -> Dateien mit BH herunterladen
@@ -63,8 +63,7 @@ Auf einer Webseite mit Bildern: Rechtsklick -> BilderHerunterlader -> Dateien mi
 <img src="bilderherunterlader/seamonkey.png" alt="Seamonkey" />
 <b>Seamonkey-Extension:</b>
 <b><i>Version {$smversion}: Nur für Seamonkey 2.0 - *.*.* (Bedeuted, dass die Extension als kompatibel mit jeder neueren Firefox Version markiert ist, auch wenn die Extension mit der neuen Version nicht funktioniert)</i></b>
-<!-- <a href="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-v{$smversion}.xpi/download" onclick="return install('http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-v{$smversion}.xpi/download', '');">Seamonkey-Erweiterung installieren</a> -->
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterlader-{$smversion}-fx%2Bsm.xpi/download">Seamonkey-Erweiterung installieren</a>
+<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$smversion}.xpi?dl=1">Seamonkey-Erweiterung installieren</a>
 
 Verwendung:
 Auf einer Webseite mit Bildern: Rechtsklick -> Dateien mit BH herunterladen
