@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="4.18.0">
+	<setuprelease version="4.19.0">
 		<description>
-			<mainDE>- Added WebP to image file detection patterns</mainDE>
-			<mainEN>- Added WebP to image file detection patterns</mainEN>
+			<mainDE>- Updated Log4j (Security Fix)</mainDE>
+			<mainEN>- Updated Log4j (Security Fix)</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.18.0" src="https://www.dropbox.com/s/fy43is5n35iw2c5/BH-4.18.0.zip?dl=1" filename="BH-4.18.0.zip" name="BilderHerunterlader" />
+	<main version="4.19.0" src="https://www.dropbox.com/s/iozbnlrh62qe88y/BH-4.19.0.zip?dl=1" filename="BH-4.19.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Added WebP to image file detection patterns</mainDE>
-		<mainEN>- Added WebP to image file detection patterns</mainEN>
+		<mainDE>- Updated Log4j (Security Fix)</mainDE>
+		<mainEN>- Updated Log4j (Security Fix)</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -142,9 +142,11 @@
 	</hoster>
 	<changelog>
 		<!--
-		<changes version="4.19.0" lng="de"></changes>
-		<changes version="4.19.0" lng="en"></changes>
+		<changes version="4.20.0" lng="de"></changes>
+		<changes version="4.20.0" lng="en"></changes>
 		-->
+		<changes version="4.19.0" lng="de">- Updated Log4j (Security Fix)</changes>
+		<changes version="4.19.0" lng="en">- Updated Log4j (Security Fix)</changes>
 		<changes version="4.18.0" lng="de">- Added WebP to image file detection patterns</changes>
 		<changes version="4.18.0" lng="en">- Added WebP to image file detection patterns</changes>
 		<changes version="4.17.0" lng="de">- Bug Fixed: Coloring of disabled queue entries was not working anymore</changes>
