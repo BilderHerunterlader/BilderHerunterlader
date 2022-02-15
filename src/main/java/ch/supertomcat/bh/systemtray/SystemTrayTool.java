@@ -36,6 +36,7 @@ import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
@@ -444,7 +445,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	}
 
 	@Override
-	public void lookAndFeelChanged(int lookAndFeel) {
+	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 		// Nothing to do
 	}
 

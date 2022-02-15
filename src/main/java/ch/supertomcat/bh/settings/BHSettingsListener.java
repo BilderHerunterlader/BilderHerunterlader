@@ -11,5 +11,5 @@ public interface BHSettingsListener extends SettingsListener {
 	 * 
 	 * @param lookAndFeel Look And Feel
 	 */
-	public void lookAndFeelChanged(int lookAndFeel);
+	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel);
 }

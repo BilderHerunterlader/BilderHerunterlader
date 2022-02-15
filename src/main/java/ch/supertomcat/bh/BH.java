@@ -48,6 +48,7 @@ import ch.supertomcat.bh.queue.DownloadQueueManagerRestrictions;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
@@ -213,11 +214,9 @@ public abstract class BH {
 		/*
 		 * No try to change the look and feel if needed
 		 */
-		int laf = settingsManager.getLookAndFeel();
-		if (laf > 0) {
+		if (settingsManager.getLookAndFeel().isAvailable()) {
 			try {
-				String strLAF = SettingsManager.LAF_CLASSPATHES[settingsManager.getLookAndFeel()];
-				UIManager.setLookAndFeel(strLAF);
+				UIManager.setLookAndFeel(settingsManager.getLookAndFeel().getClassName());
 			} catch (Exception e) {
 				logger.error(e.getMessage(), e);
 			}
@@ -370,7 +369,7 @@ public abstract class BH {
 			}
 
 			@Override
-			public void lookAndFeelChanged(int lookAndFeel) {
+			public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 				// Nothing to do
 			}
 		});

@@ -34,6 +34,7 @@ import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -591,7 +592,7 @@ public class LogManager implements BHSettingsListener {
 	}
 
 	@Override
-	public void lookAndFeelChanged(int lookAndFeel) {
+	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 		// Nothing to do
 	}
 }

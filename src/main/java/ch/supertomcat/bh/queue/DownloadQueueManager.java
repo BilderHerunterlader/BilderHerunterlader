@@ -10,6 +10,7 @@ import ch.supertomcat.bh.pic.PicDownloadListener;
 import ch.supertomcat.bh.pic.PicDownloadResult;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.queue.QueueManagerBase;
 import ch.supertomcat.supertomcatutils.queue.QueueTask;
@@ -92,7 +93,7 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 			}
 
 			@Override
-			public void lookAndFeelChanged(int lookAndFeel) {
+			public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 				// Nothing to do
 			}
 		});

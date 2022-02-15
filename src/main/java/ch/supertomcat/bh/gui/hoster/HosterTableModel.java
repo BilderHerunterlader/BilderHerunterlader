@@ -21,7 +21,7 @@ import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -180,18 +180,15 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	}
 
 	@Override
-	public void lookAndFeelChanged(int lookAndFeel) {
+	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 		EventQueue.invokeLater(new Runnable() {
 			@Override
 			public void run() {
 				Iterator<JPanel> it = panels.iterator();
-				String strLAF = SettingsManager.LAF_CLASSPATHES[lookAndFeel];
-				if (strLAF.length() > 0) {
-					while (it.hasNext()) {
-						JPanel currentPanel = it.next();
-						if (currentPanel != null) {
-							SwingUtilities.updateComponentTreeUI(currentPanel);
-						}
+				while (it.hasNext()) {
+					JPanel currentPanel = it.next();
+					if (currentPanel != null) {
+						SwingUtilities.updateComponentTreeUI(currentPanel);
 					}
 				}
 			}

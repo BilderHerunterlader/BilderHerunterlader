@@ -14,8 +14,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-import javax.swing.UIManager;
-
 import org.apache.logging.log4j.Level;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -131,62 +129,6 @@ public class SettingsManager {
 	 * Filter only not allowed chars from paths and filenames
 	 */
 	public static final int FILENAME_ALL = 2;
-
-	/**
-	 * Use java-default-theme
-	 */
-	public static final int LAF_DEFAULT = 0;
-
-	/**
-	 * Use operating-system-theme
-	 */
-	public static final int LAF_OS = 1;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_METAL = 2;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_WINDOWS = 3;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_WINDOWS_CLASSIC = 4;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_MOTIF = 5;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_GTK = 6;
-
-	/**
-	 * NOT IMPLEMENTED YET
-	 */
-	public static final int LAF_MACOS = 7;
-
-	/**
-	 * Nimbus (since jre6 update 10)
-	 */
-	public static final int LAF_NIMBUS = 8;
-
-	/**
-	 * Classpaths of the LAFs
-	 */
-	public static final String LAF_CLASSPATHES[] = { UIManager.getCrossPlatformLookAndFeelClassName(), UIManager
-			.getSystemLookAndFeelClassName(), "javax.swing.plaf.metal.MetalLookAndFeel", "com.sun.java.swing.plaf.windows.WindowsLookAndFeel", "com.sun.java.swing.plaf.windows.WindowsClassicLookAndFeel", "com.sun.java.swing.plaf.motif.MotifLookAndFeel", "com.sun.java.swing.plaf.gtk.GTKLookAndFeel", "javax.swing.plaf.mac.MacLookAndFeel", "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel" };
-
-	/**
-	 * Names of the LAFs
-	 */
-	public static final String LAF_NAMES[] = { "Default", "OperatingSystem", "Metal", "Windows", "Windows Classic", "Motif", "GTK", "Mac OS", "Nimbus" };
 
 	/**
 	 * Restricted Settingspaths
@@ -328,7 +270,7 @@ public class SettingsManager {
 	/**
 	 * LAF
 	 */
-	private int lookAndFeel = LAF_OS;
+	private LookAndFeelSetting lookAndFeel = LookAndFeelSetting.LAF_OS;
 
 	/**
 	 * Flag if the Application is started at first time
@@ -957,9 +899,12 @@ public class SettingsManager {
 			this.downloadRate = readBooleanValue("GUI.DownloadRate", root, this.downloadRate);
 
 			// LookAndFeel
-			int laf = readIntValue("GUI.LAF", root, this.lookAndFeel);
+			int laf = readIntValue("GUI.LAF", root, this.lookAndFeel.getXmlValue());
 			if ((laf < 9) && (laf > -1)) {
-				this.lookAndFeel = laf;
+				LookAndFeelSetting mappedLookAndFeel = LookAndFeelSetting.getByXMLValue(laf);
+				if (mappedLookAndFeel.isAvailable()) {
+					this.lookAndFeel = mappedLookAndFeel;
+				}
 			}
 
 			// Targetdirectory and title
@@ -1307,7 +1252,7 @@ public class SettingsManager {
 		addBooleanValue("GUI.DownloadRate", this.downloadRate, root);
 
 		// LookAndFeel
-		addIntValue("GUI.LAF", this.lookAndFeel, root);
+		addIntValue("GUI.LAF", this.lookAndFeel.getXmlValue(), root);
 
 		// Targetdirectory and title
 		addBooleanValue("GUI.AlwaysAddTitle", this.alwaysAddTitle, root);
@@ -2512,19 +2457,17 @@ public class SettingsManager {
 	/**
 	 * @return the lookAndFeel
 	 */
-	public int getLookAndFeel() {
+	public LookAndFeelSetting getLookAndFeel() {
 		return lookAndFeel;
 	}
 
 	/**
 	 * @param lookAndFeel the lookAndFeel to set
 	 */
-	public void setLookAndFeel(int lookAndFeel) {
-		if (checkIntValue(0, 9, lookAndFeel)) {
-			this.lookAndFeel = lookAndFeel;
-			for (BHSettingsListener listener : listeners) {
-				listener.lookAndFeelChanged(lookAndFeel);
-			}
+	public void setLookAndFeel(LookAndFeelSetting lookAndFeel) {
+		this.lookAndFeel = lookAndFeel;
+		for (BHSettingsListener listener : listeners) {
+			listener.lookAndFeelChanged(lookAndFeel);
 		}
 	}
 

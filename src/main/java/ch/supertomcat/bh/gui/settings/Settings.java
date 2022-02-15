@@ -56,9 +56,11 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.gui.renderer.LookAndFeelComboBoxRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
+import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
@@ -505,7 +507,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbLAF = new JComboBox<>();
+	private JComboBox<LookAndFeelSetting> cmbLAF = new JComboBox<>();
 
 	/**
 	 * Label
@@ -942,6 +944,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * @param cookieManager Cookie Manager
 	 * @param hostManager Host Manager
 	 */
+	@SuppressWarnings("unchecked")
 	public Settings(Window owner, MainWindowAccess mainWindowAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
 		this.owner = owner;
 		this.mainWindowAccess = mainWindowAccess;
@@ -1062,11 +1065,14 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		cmbLanguage.addItem(Localization.getString("German"));
 		cmbLanguage.addItem(Localization.getString("English"));
 		cmbLanguage.setToolTipText(Localization.getString("LanguageTooltip"));
-		cmbLAF.addItem(Localization.getString("LAFDefault"));
-		cmbLAF.addItem(Localization.getString("LAFSystem"));
-		for (int i = 2; i < SettingsManager.LAF_NAMES.length; i++) {
-			cmbLAF.addItem(SettingsManager.LAF_NAMES[i]);
+
+		for (LookAndFeelSetting lookAndFeel : LookAndFeelSetting.values()) {
+			if (lookAndFeel.isAvailable()) {
+				cmbLAF.addItem(lookAndFeel);
+			}
 		}
+		cmbLAF.setRenderer(new LookAndFeelComboBoxRenderer());
+
 		cmbCookies.addItem(Localization.getString("CookiesNo"));
 		cmbCookies.addItem(Localization.getString("CookiesIE"));
 		cmbCookies.addItem(Localization.getString("CookiesFF"));
@@ -1556,7 +1562,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 
 		cmbKeywordMatchMode.setSelectedIndex(settingsManager.getKeywordMatchMode());
 
-		cmbLAF.setSelectedIndex(settingsManager.getLookAndFeel());
+		cmbLAF.setSelectedItem(settingsManager.getLookAndFeel());
 
 		cmbCookies.setSelectedIndex(settingsManager.getCookiesFromBrowser());
 
@@ -1875,8 +1881,8 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		settingsManager.setSizeView(cmbSizeView.getSelectedIndex());
 		settingsManager.setProgessView(cmbProgressView.getSelectedIndex());
 		settingsManager.setKeywordMatchMode(cmbKeywordMatchMode.getSelectedIndex());
-		int previousLookAndFeel = settingsManager.getLookAndFeel();
-		settingsManager.setLookAndFeel(cmbLAF.getSelectedIndex());
+		LookAndFeelSetting previousLookAndFeel = settingsManager.getLookAndFeel();
+		settingsManager.setLookAndFeel((LookAndFeelSetting)cmbLAF.getSelectedItem());
 		settingsManager.setCookiesFromBrowser(cmbCookies.getSelectedIndex());
 		settingsManager.setCookieFileOperaFixed(cbCookiesOperaFixed.isSelected());
 		settingsManager.setCookieFileOpera(txtCookiesOpera.getText());
@@ -1962,21 +1968,19 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		proxyManager.setProxypassword(String.valueOf(txtProxyPassword.getPassword()));
 		proxyManager.writeToSettings();
 		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
-		if (cmbLAF.getSelectedIndex() != previousLookAndFeel) {
-			String strLAF = SettingsManager.LAF_CLASSPATHES[cmbLAF.getSelectedIndex()];
-			if (strLAF.length() > 0) {
-				try {
-					UIManager.setLookAndFeel(strLAF);
-					SwingUtilities.updateComponentTreeUI(owner);
-				} catch (ClassNotFoundException e1) {
-					logger.error(e1.getMessage(), e1);
-				} catch (InstantiationException e1) {
-					logger.error(e1.getMessage(), e1);
-				} catch (IllegalAccessException e1) {
-					logger.error(e1.getMessage(), e1);
-				} catch (UnsupportedLookAndFeelException e1) {
-					logger.error(e1.getMessage(), e1);
-				}
+		LookAndFeelSetting selectedLookAndFeel = (LookAndFeelSetting)cmbLAF.getSelectedItem();
+		if (selectedLookAndFeel != previousLookAndFeel && selectedLookAndFeel.isAvailable()) {
+			try {
+				UIManager.setLookAndFeel(selectedLookAndFeel.getClassName());
+				SwingUtilities.updateComponentTreeUI(owner);
+			} catch (ClassNotFoundException e1) {
+				logger.error(e1.getMessage(), e1);
+			} catch (InstantiationException e1) {
+				logger.error(e1.getMessage(), e1);
+			} catch (IllegalAccessException e1) {
+				logger.error(e1.getMessage(), e1);
+			} catch (UnsupportedLookAndFeelException e1) {
+				logger.error(e1.getMessage(), e1);
 			}
 		}
 		settingsManager.addSettingsListener(this);
@@ -2025,7 +2029,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	}
 
 	@Override
-	public void lookAndFeelChanged(int lookAndFeel) {
+	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
 		// Nothing to do
 	}
 
