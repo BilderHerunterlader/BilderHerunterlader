@@ -343,7 +343,12 @@ public abstract class Hoster {
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
-			method.setHeader("User-Agent", settingsManager.getUserAgent());
+			String userAgentConfig = options != null ? options.getRequestConfig("User-Agent") : null;
+			if (userAgentConfig != null) {
+				method.setHeader("User-Agent", userAgentConfig);
+			} else {
+				method.setHeader("User-Agent", settingsManager.getUserAgent());
+			}
 			if (cookies != null && !cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
@@ -355,7 +360,7 @@ public abstract class Hoster {
 			try (CloseableHttpResponse response = client.execute(method, context)) {
 				int statusCode = response.getStatusLine().getStatusCode();
 
-				if ((options == null || options.isCheckStatusCode()) && statusCode < 200 || statusCode >= 300) {
+				if ((options == null || options.isCheckStatusCode()) && (statusCode < 200 || statusCode >= 300)) {
 					method.abort();
 					throw new HostIOException(hosterName + ": Container-Page: HTTP-Error: " + statusCode + " URL: " + url);
 				}

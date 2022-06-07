@@ -1,7 +1,9 @@
 package ch.supertomcat.bh.hoster.containerpage;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.http.NameValuePair;
 
@@ -28,6 +30,11 @@ public class DownloadContainerPageOptions {
 	 * Data for HTTP Post or empty List
 	 */
 	private final List<NameValuePair> postData;
+
+	/**
+	 * Request Config
+	 */
+	private final Map<String, String> requestConfig = new HashMap<>();
 
 	/**
 	 * Constructor
@@ -84,5 +91,34 @@ public class DownloadContainerPageOptions {
 	 */
 	public List<NameValuePair> getPostData() {
 		return postData;
+	}
+
+	/**
+	 * Get Request Config
+	 * 
+	 * @param key Key
+	 * @return Value or null
+	 */
+	public String getRequestConfig(String key) {
+		return requestConfig.get(key);
+	}
+
+	/**
+	 * Put Request Config
+	 * 
+	 * @param key Key
+	 * @param value Value
+	 */
+	public void putRequestConfig(String key, String value) {
+		requestConfig.put(key, value);
+	}
+
+	/**
+	 * Returns the requestConfig
+	 * 
+	 * @return requestConfig
+	 */
+	public Map<String, String> getRequestConfig() {
+		return requestConfig;
 	}
 }
