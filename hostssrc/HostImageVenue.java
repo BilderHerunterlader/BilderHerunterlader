@@ -1,3 +1,4 @@
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -17,13 +18,13 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.4
+ * @version 4.5
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.4";
+	public static final String VERSION = "4.5";
 
 	/**
 	 * Name dieser Klasse
@@ -44,6 +45,11 @@ public class HostImageVenue extends Host implements IHoster {
 	 * Alternative Pattern
 	 */
 	private Pattern urlAlternativePattern;
+
+	/**
+	 * Alternative2 Pattern
+	 */
+	private Pattern urlAlternative2Pattern;
 
 	private RuleRegExp regexImage = new RuleRegExp();
 
@@ -71,6 +77,8 @@ public class HostImageVenue extends Host implements IHoster {
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
 		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
 
+		urlAlternative2Pattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/view/[a-z]\\?i=(.+?)&h=img[0-9]+&l=loc[0-9]+$");
+
 		regexAlternativeFilename = new RuleRegExp("<img src=\".+?\" alt=\"(.+?)\"", "$1");
 		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
 		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
@@ -80,7 +88,7 @@ public class HostImageVenue extends Host implements IHoster {
 
 	@Override
 	public boolean isFromThisHoster(String url) {
-		if (urlPattern.matcher(url).matches() || urlAlternativePattern.matcher(url).matches()) {
+		if (urlPattern.matcher(url).matches() || urlAlternativePattern.matcher(url).matches() || urlAlternative2Pattern.matcher(url).matches()) {
 			return true;
 		}
 		return false;
@@ -200,6 +208,11 @@ public class HostImageVenue extends Host implements IHoster {
 				return url.substring(start + 1);
 			}
 			return "";
+		}
+
+		Matcher urlAlternative2Matcher = urlAlternative2Pattern.matcher(url);
+		if (urlAlternative2Matcher.matches()) {
+			return urlAlternative2Matcher.group(1);
 		} else {
 			return "";
 		}
@@ -210,6 +223,8 @@ public class HostImageVenue extends Host implements IHoster {
 		if (urlPattern.matcher(upo.getContainerURL()).matches()) {
 			parseURL(upo, false);
 		} else if (urlAlternativePattern.matcher(upo.getContainerURL()).matches()) {
+			parseURL(upo, true);
+		} else if (urlAlternative2Pattern.matcher(upo.getContainerURL()).matches()) {
 			parseURL(upo, true);
 		}
 	}
