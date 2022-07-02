@@ -118,8 +118,8 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	}
 
 	@Override
-	protected void updateOpenSlots() {
-		super.updateOpenSlots();
+	protected void updateOpenSlots(boolean taskFinished) {
+		super.updateOpenSlots(taskFinished);
 
 		int localQueueSize;
 		int localOpenSlots;
@@ -164,7 +164,7 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 		if (logEmpty) {
 			logger.info("Queue is empty after queueEmpty Listener: {}", localQueueEmpty);
 		}
-		if (localQueueEmpty && !stop) {
+		if (localQueueEmpty && taskFinished && !stop) {
 			for (IDownloadQueueManagerListener listener : listeners) {
 				listener.downloadsComplete(localQueueSize, localOpenSlots, localMaxConnectionCount);
 			}
