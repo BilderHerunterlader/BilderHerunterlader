@@ -1,8 +1,5 @@
 package ch.supertomcat.bh.rules;
 
-import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
-
 import org.jdom2.Element;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -14,7 +11,6 @@ import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameReplace;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameSearch;
 import ch.supertomcat.bh.rules.xml.FilenameMode;
 import ch.supertomcat.bh.rules.xml.FilenamePipeline;
-import ch.supertomcat.supertomcatutils.html.HTMLUtil;
 
 /**
  * RulePipeline
@@ -170,30 +166,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 					}
 				}
 			}
-
-			/*
-			 * TODO When the content is provided as String by the httpclient library it already determines the encoding. So the conversion here is then not
-			 * always working correctly, because the bytes are used with default platform encoding and with the encoding that they were read. So we would have
-			 * to know here which encoding was used to read the content.
-			 * TODO This conversion should probably an option of the pipeline
-			 */
-			String encoding = HTMLUtil.getEncodingFromSourceCode(htmlCode);
-			if (!encoding.isEmpty() && isEncodingAvailable(encoding)) {
-				try {
-					result = new String(result.getBytes(), encoding);
-				} catch (UnsupportedEncodingException e) {
-					logger.error("Encoding is not supported: {}", encoding, e);
-				}
-			}
 		}
 		return result;
-	}
-
-	/**
-	 * @param encoding Encoding
-	 * @return Available
-	 */
-	private boolean isEncodingAvailable(String encoding) {
-		return Charset.availableCharsets().containsKey(encoding);
 	}
 }
