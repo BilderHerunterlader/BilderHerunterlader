@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="4.19.0">
+	<setuprelease version="4.20.0">
 		<description>
-			<mainDE>- Updated Log4j (Security Fix)</mainDE>
-			<mainEN>- Updated Log4j (Security Fix)</mainEN>
+			<mainDE>- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</mainDE>
+			<mainEN>- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</mainEN>
 		</description>
 	</setuprelease>
-	<main version="4.19.0" src="https://www.dropbox.com/s/iozbnlrh62qe88y/BH-4.19.0.zip?dl=1" filename="BH-4.19.0.zip" name="BilderHerunterlader" />
+	<main version="4.20.0" src="https://www.dropbox.com/s/2neig0buulyz9ur/BH-4.20.0.zip?dl=1" filename="BH-4.20.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Updated Log4j (Security Fix)</mainDE>
-		<mainEN>- Updated Log4j (Security Fix)</mainEN>
+		<mainDE>- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</mainDE>
+		<mainEN>- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -146,6 +146,8 @@
 		<changes version="4.20.0" lng="de"></changes>
 		<changes version="4.20.0" lng="en"></changes>
 		-->
+		<changes version="4.20.0" lng="de">- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</changes>
+		<changes version="4.20.0" lng="en">- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</changes>
 		<changes version="4.19.0" lng="de">- Updated Log4j (Security Fix)</changes>
 		<changes version="4.19.0" lng="en">- Updated Log4j (Security Fix)</changes>
 		<changes version="4.18.0" lng="de">- Added WebP to image file detection patterns</changes>
