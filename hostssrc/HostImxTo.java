@@ -12,17 +12,18 @@ import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RuleRegExp;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host class for IMX.to
  * 
- * @version 0.1
+ * @version 0.2
  */
 public class HostImxTo extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "0.1";
+	public static final String VERSION = "0.2";
 
 	/**
 	 * Name dieser Klasse
@@ -43,12 +44,12 @@ public class HostImxTo extends Host implements IHoster {
 	public HostImxTo() {
 		super(NAME, VERSION);
 
-		urlContainerPattern = Pattern.compile("https?://imx\\.to/i/[0-9a-zA-Z]+");
+		urlContainerPattern = Pattern.compile("https?://imx\\.to/(?:i/|img-)[0-9a-zA-Z]+(\\.html)?");
 
 		regexContinue = Pattern
 				.compile("(?s)<form action=['\"]['\"] method=['\"]POST['\"]>.+?<input .+?type=['\"]submit['\"] name=['\"](imgContinue)['\"] value=['\"](Continue to( your)? image *... *)['\"]");
 
-		String imagePattern = "<a href=\"([^\"]+)\" title=\"([^\"]+)\"[^>]*><img class=\"centred\"";
+		String imagePattern = "<a href=\"([^\"]+)\" title=\"([^\"]*)\"[^>]*><img class=\"centred\"";
 
 		regexImage.setSearch(imagePattern);
 		regexImage.setReplace("$1");
@@ -67,8 +68,7 @@ public class HostImxTo extends Host implements IHoster {
 		if (!isFromThisHoster(url)) {
 			return "";
 		}
-		String retval = url.substring(url.lastIndexOf("/") + 1);
-		return retval;
+		return url.substring(url.lastIndexOf("/") + 1);
 	}
 
 	@Override
@@ -94,6 +94,10 @@ public class HostImxTo extends Host implements IHoster {
 			upo.setDirectLink(downloadURL);
 
 			String downloadFilename = regexImageFilename.doPageSourcecodeReplace(pageSoureCode, 0, containerURL, null);
+			if (downloadFilename.isEmpty()) {
+				downloadFilename = HTTPUtil.getFilenameFromURL(downloadURL, "");
+			}
+
 			if (!downloadFilename.isEmpty()) {
 				upo.setCorrectedFilename(downloadFilename);
 			}
