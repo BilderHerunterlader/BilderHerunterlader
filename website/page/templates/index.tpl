@@ -23,6 +23,9 @@
 				<li><a href="?loc=irada&amp;lng={$pageLanguage}">{gettext}irada{/gettext}</a></li>
 				<li><a href="?loc=contact&amp;lng={$pageLanguage}">{gettext}contact{/gettext}</a></li>
 			</ul>
+			<ul id="menumainkofi" class="menumain">
+				<li><script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support Me on Ko-fi', '#29abe0', 'V7V5HEVRH');kofiwidget2.draw();</script></li>
+			</ul>
 			<ul id="menumainlanguage" class="menumain">
 				<li><a href="?loc={$pageLocation}&amp;lng=de">DE</a></li>
 				<li><a href="?loc={$pageLocation}&amp;lng=en">EN</a></li>

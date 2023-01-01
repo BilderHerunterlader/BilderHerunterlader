@@ -20,6 +20,11 @@ ul#menumainindex {
 	float: left;
 }
 
+ul#menumainkofi {
+	padding-left: 3em;
+	float: left;
+}
+
 ul#menumainlanguage {
 	padding-right: 0em;
 	float: right;
