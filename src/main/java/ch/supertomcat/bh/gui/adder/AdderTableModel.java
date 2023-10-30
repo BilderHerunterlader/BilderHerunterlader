@@ -90,7 +90,7 @@ public class AdderTableModel extends DefaultTableModel {
 		 * Be aware that this model is not Thread-Safe!
 		 */
 		@SuppressWarnings("rawtypes")
-		Vector rowVector = (Vector)dataVector.elementAt(row);
+		Vector rowVector = dataVector.elementAt(row);
 		rowVector.setElementAt(aValue, column);
 		if (fireTableCellUpdatedEnabled) {
 			fireTableCellUpdated(row, column);

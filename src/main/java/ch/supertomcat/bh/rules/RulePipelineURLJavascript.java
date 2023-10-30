@@ -80,6 +80,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 	 * @return URL
 	 * @throws HostException
 	 */
+	@SuppressWarnings("resource")
 	public String getURLByJavascript(String url, String thumbURL, String htmlcode, URLParseObject upo) throws HostException {
 		Context context = Context.enter();
 

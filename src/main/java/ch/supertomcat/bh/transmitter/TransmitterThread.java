@@ -41,6 +41,7 @@ public class TransmitterThread extends Thread {
 		this.transmitterHelper = transmitterHelper;
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void run() {
 		super.run();

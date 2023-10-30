@@ -126,7 +126,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 			int preferredTableWidth = 120 * charWidth;
 			table.setPreferredScrollableViewportSize(new Dimension(preferredTableWidth, table.getPreferredScrollableViewportSize().height));
 		}
-		table.setRowHeight(TableUtil.calculateRowHeight(table, true, new JComboBox<String>()));
+		table.setRowHeight(TableUtil.calculateRowHeight(table, true, new JComboBox<>()));
 
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override

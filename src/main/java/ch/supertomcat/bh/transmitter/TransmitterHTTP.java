@@ -87,6 +87,7 @@ public class TransmitterHTTP extends NanoHTTPD {
 			}
 		}
 
+		@SuppressWarnings("resource")
 		boolean result = transmitterHelper.parseTransmitterInput(session.getInputStream(), encoding);
 		if (result) {
 			return newFixedLengthResponse(NanoHTTPD.Response.Status.OK, "text/plain", "URLs received");

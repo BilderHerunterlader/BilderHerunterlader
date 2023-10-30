@@ -28,7 +28,6 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 	 * @param owner Owner
 	 * @param settingsManager Settings Manager
 	 */
-	@SuppressWarnings("unchecked")
 	public RulePipelineFilenameDownloadSelectionPanel(RuleDefinition rule, FilenameDownloadSelectionPipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 

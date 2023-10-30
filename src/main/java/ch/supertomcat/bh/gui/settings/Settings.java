@@ -944,7 +944,6 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * @param cookieManager Cookie Manager
 	 * @param hostManager Host Manager
 	 */
-	@SuppressWarnings("unchecked")
 	public Settings(Window owner, MainWindowAccess mainWindowAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
 		this.owner = owner;
 		this.mainWindowAccess = mainWindowAccess;

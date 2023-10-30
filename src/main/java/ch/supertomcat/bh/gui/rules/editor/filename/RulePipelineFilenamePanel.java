@@ -45,7 +45,6 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Fil
 	 * @param owner Owner
 	 * @param settingsManager Settings Manager
 	 */
-	@SuppressWarnings("unchecked")
 	public RulePipelineFilenamePanel(RuleDefinition rule, FilenamePipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 

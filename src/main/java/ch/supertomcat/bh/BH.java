@@ -258,7 +258,7 @@ public abstract class BH {
 					System.exit(1);
 					return;
 				}
-				QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<PicDownloadListener, PicDownloadResult>() {
+				QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<>() {
 					@Override
 					public QueueTask<PicDownloadListener, PicDownloadResult> createTaskCallable(PicDownloadListener task) {
 						return new PicQueueTask(task);

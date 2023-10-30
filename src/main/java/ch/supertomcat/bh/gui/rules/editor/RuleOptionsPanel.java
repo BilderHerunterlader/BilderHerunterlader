@@ -100,7 +100,6 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 	 * 
 	 * @param rule Rule
 	 */
-	@SuppressWarnings("unchecked")
 	public RuleOptionsPanel(RuleDefinition rule) {
 		this.rule = rule;
 
