@@ -17,18 +17,16 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
@@ -45,23 +43,18 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.3
+ * @version 4.4
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.3";
+	public static final String VERSION = "4.4";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostCoppermineGalleries";
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster
@@ -151,23 +144,22 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		List<URL> urls = new ArrayList<>();
 		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
-		HttpGet method = null;
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
-			method = new HttpGet(encodedURL);
+			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
 
-			Document node;
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			Document node = client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
-					return urls;
+					return null;
 				}
 
 				// Inputstream oeffnen
@@ -177,9 +169,11 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 					tidy.setShowErrors(0);
 					tidy.setQuiet(true);
 					tidy.setInputEncoding("UTF-8");
-					node = tidy.parseDOM(in, null);
-					EntityUtils.consume(response.getEntity());
+					return tidy.parseDOM(in, null);
 				}
+			});
+			if (node == null) {
+				return urls;
 			}
 
 			/*
@@ -212,10 +206,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 			return urls;
 		} catch (Exception e) {
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
+			logger.error("Could not get direct linked archive", e);
 		}
 		return urls;
 	}
@@ -231,23 +222,22 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		List<URL> urls = new ArrayList<>();
 		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
-		HttpGet method = null;
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
-			method = new HttpGet(encodedURL);
+			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
 
-			Document node;
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			Document node = client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
-					throw new HostIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
+					throw new HostHttpIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
 				}
 
 				// Inputstream oeffnen
@@ -257,10 +247,9 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 					tidy.setShowErrors(0);
 					tidy.setQuiet(true);
 					tidy.setInputEncoding("UTF-8");
-					node = tidy.parseDOM(in, null);
-					EntityUtils.consume(response.getEntity());
+					return tidy.parseDOM(in, null);
 				}
-			}
+			});
 
 			/*
 			 * Get the target path
@@ -392,10 +381,6 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 			return urls;
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + url + " :" + e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

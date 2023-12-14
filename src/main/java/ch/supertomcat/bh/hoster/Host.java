@@ -1,6 +1,6 @@
 package ch.supertomcat.bh.hoster;
 
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;

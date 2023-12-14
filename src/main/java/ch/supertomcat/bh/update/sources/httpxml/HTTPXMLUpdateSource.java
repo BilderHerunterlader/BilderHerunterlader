@@ -5,16 +5,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.jdom2.Document;
 import org.jdom2.Element;
+import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.update.UpdateException;
+import ch.supertomcat.bh.update.UpdateIOException;
 import ch.supertomcat.bh.update.UpdateSource;
 import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
@@ -54,24 +56,27 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 		List<UpdateObject> updateRedirectPlugins = new ArrayList<>();
 
 		url = HTTPUtil.encodeURL(url);
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
-			method = new HttpGet(url);
-			Document doc;
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			HttpGet method = new HttpGet(url);
+			Document doc = client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
-					throw new UpdateException("HTTP-Error: " + statusCode + " " + response.getStatusLine().getReasonPhrase());
+					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 				}
 
 				try (InputStream in = response.getEntity().getContent()) {
 					SAXBuilder b = new SAXBuilder();
-					doc = b.build(in);
-					EntityUtils.consume(response.getEntity());
+					try {
+						return b.build(in);
+					} catch (JDOMException e) {
+						throw new HostHttpIOException("Could not parse XML", e);
+					}
 				}
-			}
+			});
+
 			Element root = doc.getRootElement();
 
 			// Main
@@ -146,10 +151,6 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 			return new UpdateList(updateBH, updateRules, updateHostPlugins, updateRedirectPlugins);
 		} catch (Exception e) {
 			throw new UpdateException("Could not retrieve update list", e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

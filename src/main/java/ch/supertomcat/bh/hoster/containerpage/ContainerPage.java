@@ -1,6 +1,6 @@
 package ch.supertomcat.bh.hoster.containerpage;
 
-import org.apache.http.StatusLine;
+import org.apache.hc.core5.http.message.StatusLine;
 
 /**
  * Container Page

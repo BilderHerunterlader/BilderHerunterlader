@@ -6,15 +6,15 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.update.UpdateException;
+import ch.supertomcat.bh.update.UpdateIOException;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
 import ch.supertomcat.bh.update.containers.UpdateSourceFile;
@@ -72,9 +72,8 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 		logger.info("Download Update: Source: '" + sourceURL + "', Filename: '" + target + "'");
 
 		String encodedURL = HTTPUtil.encodeURL(sourceURL);
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
-			method = new HttpGet(encodedURL);
+			HttpGet method = new HttpGet(encodedURL);
 			File tempTargetFile = new File(target);
 
 			File tempTargetFolder = tempTargetFile.getAbsoluteFile().getParentFile();
@@ -82,15 +81,17 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 				Files.createDirectories(tempTargetFolder.toPath());
 			}
 
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			return client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
-					throw new IOException("HTTP-Error: " + statusCode + " " + response.getStatusLine().getReasonPhrase());
+					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 				}
 
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					try (FileOutputStream out = new FileOutputStream(target)) {
 						int read;
 						byte[] buf = new byte[8192];
@@ -99,16 +100,11 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 							out.flush();
 						}
 					}
-					EntityUtils.consume(response.getEntity());
 				}
 				return true;
-			}
+			});
 		} catch (IOException e) {
 			throw new UpdateException("Download Update failed: " + sourceURL, e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 }

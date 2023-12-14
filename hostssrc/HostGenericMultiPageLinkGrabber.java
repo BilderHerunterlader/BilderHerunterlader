@@ -17,12 +17,9 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -30,6 +27,7 @@ import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
@@ -48,13 +46,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 3.1
+ * @version 3.2
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.1";
+	public static final String VERSION = "3.2";
 
 	/**
 	 * Name dieser Klasse
@@ -70,11 +68,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	 * PHPBB
 	 */
 	private static final int SOFTWARE_PHPBB = 1;
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster
@@ -159,11 +152,10 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		List<URL> normalURLs = new ArrayList<>();
 		List<URL> multiPageURLs = new ArrayList<>();
 
-		HttpGet method = null;
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			String encodedURL = HTTPUtil.encodeURL(url);
-			method = new HttpGet(encodedURL);
+			HttpGet method = new HttpGet(encodedURL);
 
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			String cookies = getCookieManager().getCookies(url);
@@ -171,14 +163,14 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 				method.setHeader("Cookie", cookies);
 			}
 
-			Document node;
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			Document node = client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
-					throw new HostIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
+					throw new HostHttpIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
 				}
 
 				// Inputstream oeffnen
@@ -188,11 +180,9 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 					tidy.setShowErrors(0);
 					tidy.setQuiet(true);
 					tidy.setInputEncoding("UTF-8");
-					node = tidy.parseDOM(in, null);
-					in.close();
-					EntityUtils.consume(response.getEntity());
+					return tidy.parseDOM(in, null);
 				}
-			}
+			});
 
 			/*
 			 * Get the links
@@ -265,10 +255,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 			return new List[] { normalURLs, multiPageURLs };
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + url + " :" + e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

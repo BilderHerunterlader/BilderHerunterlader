@@ -29,8 +29,6 @@ import javax.swing.SpringLayout;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
@@ -65,13 +63,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Youtube
  * 
- * @version 8.3
+ * @version 8.4
  */
 public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHosterOptions, IHosterOverrideDirectoryOption {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "8.3";
+	public static final String VERSION = "8.4";
 
 	/**
 	 * Name dieser Klasse
@@ -87,11 +85,6 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 	private static final int QUALITY_HD = 6;
 	private static final int QUALITY_FULL_HD = 7;
 	private static final int QUALITY_4K_HD = 8;
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

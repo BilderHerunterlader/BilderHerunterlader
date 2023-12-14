@@ -8,9 +8,9 @@ import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -97,7 +97,7 @@ public class ImportURL {
 	 */
 	public void importURL(String url, String referrer, boolean embeddedImages) {
 		String cookies = cookieManager.getCookies(url);
-		url = HTTPUtil.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 
 		/*
 		 * A user reported to me, that when BH is running for a while and then
@@ -109,40 +109,39 @@ public class ImportURL {
 		 * I was able to fix this problem by not using the MultiThreadedHttpConnectionManager.
 		 * So, maybe there is a bug in Jakarta-HttpClient...
 		 */
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
-			method = new HttpGet(url);
+			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
 			}
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+
+			client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode < 200 && statusCode >= 400) {
 					method.abort();
 					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
-					return;
+					return null;
 				}
 
 				// Get the InputStream
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					if ("text/plain".equals(response.getFirstHeader("Content-Type").getValue())) {
 						logger.debug("PlainText detected: Using ImportLinkList");
 						linkListImporter.read(new BufferedReader(new InputStreamReader(in)));
 					} else {
 						logger.debug("HTML detected: Using ImportHTML");
-						htmlImporter.importHTML(url, referrer, embeddedImages, in, response, method);
+						htmlImporter.importHTML(encodedURL, referrer, embeddedImages, in, response, method);
 					}
 				}
-			}
+				return null;
+			});
 		} catch (IOException e) {
 			logger.error("Could not import links from URL: {}", url, e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 }

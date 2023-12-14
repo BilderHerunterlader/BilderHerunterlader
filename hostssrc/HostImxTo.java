@@ -3,8 +3,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.NameValuePair;
-import org.apache.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Host;
@@ -17,13 +17,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 /**
  * Host class for IMX.to
  * 
- * @version 0.2
+ * @version 0.3
  */
 public class HostImxTo extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "0.2";
+	public static final String VERSION = "0.3";
 
 	/**
 	 * Name dieser Klasse

@@ -6,19 +6,18 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.gui.queue.DownloadAddDialog;
 import ch.supertomcat.bh.hoster.Host;
@@ -34,23 +33,18 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for BabesBoard
  * 
- * @version 3.2
+ * @version 3.3
  */
 public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.2";
+	public static final String VERSION = "3.3";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostBabesBoard";
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompilierte Muster (Aus Text-Datei geladen)
@@ -204,14 +198,14 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 		return null;
 	}
 
+	@SuppressWarnings("resource")
 	private ArrayList<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, AtomicInteger iwMax, boolean firstLoad) throws HostException {
 		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpClientBuilder clientBuilder = getProxyManager().getHTTPClientBuilder();
 		clientBuilder.disableRedirectHandling();
-		HttpPost method = null;
 		try (CloseableHttpClient client = clientBuilder.build()) {
-			method = new HttpPost(encodedURL);
+			HttpPost method = new HttpPost(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (cookies.length() > 0) {
 				method.setHeader("Cookie", cookies);
@@ -227,21 +221,21 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			data.add(new BasicNameValuePair("xajaxargs[]", "")); // qualitystorage
 			method.setEntity(new UrlEncodedFormEntity(data, StandardCharsets.UTF_8));
 
-			String pageCode = "";
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			String pageCode = client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode < 200 || statusCode >= 300) {
 					method.abort();
-					throw new HostIOException("HTTP-Error: " + statusCode);
+					throw new HostHttpIOException("HTTP-Error: " + statusCode);
 				}
 
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
-					pageCode = EntityUtils.toString(entity);
-					EntityUtils.consume(response.getEntity());
+					return EntityUtils.toString(entity);
 				}
-			}
+				return "";
+			});
 
 			if (firstLoad) {
 				String max = regexAjaxFirstReturn.doPageSourcecodeReplace(pageCode, 0, url, null);
@@ -285,10 +279,6 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			return downloadURLs;
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 }

@@ -8,14 +8,14 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JOptionPane;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.HttpResponse;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -134,7 +134,7 @@ public class ImportHTML extends AdderImportBase {
 	 */
 	public void importHTML(String url, String referrer, boolean embeddedImages) {
 		String cookies = cookieManager.getCookies(url);
-		url = HTTPUtil.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 
 		/*
 		 * A user reported to me, that when BH is running for a while and then
@@ -146,34 +146,33 @@ public class ImportHTML extends AdderImportBase {
 		 * I was able to fix this problem by not using the MultiThreadedHttpConnectionManager.
 		 * So, maybe there is a bug in Jakarta-HttpClient...
 		 */
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
-			method = new HttpGet(url);
+			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
 			if (!cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+
+			client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
 					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
-					return;
+					return null;
 				}
 
 				// Get the InputStream
-				try (InputStream in = response.getEntity().getContent()) {
-					importHTML(url, referrer, embeddedImages, in, response, method);
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
+					importHTML(encodedURL, referrer, embeddedImages, in, response, method);
 				}
-			}
+				return null;
+			});
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 
@@ -186,43 +185,33 @@ public class ImportHTML extends AdderImportBase {
 	 * @param method Method
 	 */
 	public void importHTML(String url, String referrer, boolean embeddedImages, InputStream in, HttpResponse response, HttpGet method) {
-		ArrayList<URL> urls = new ArrayList<>();
+		// Parse the stream by tidy
+		Tidy tidy = new Tidy();
+		tidy.setShowWarnings(false);
+		tidy.setShowErrors(0);
+		tidy.setQuiet(true);
+		tidy.setInputEncoding("UTF-8");
+		Document node = tidy.parseDOM(in, null);
 
-		try {
-			// Parse the stream by tidy
-			Tidy tidy = new Tidy();
-			tidy.setShowWarnings(false);
-			tidy.setShowErrors(0);
-			tidy.setQuiet(true);
-			tidy.setInputEncoding("UTF-8");
-			Document node = tidy.parseDOM(in, null);
+		// Get the page-title
+		String title = getPageTitle(node);
 
-			EntityUtils.consume(response.getEntity());
+		List<URL> urls = new ArrayList<>();
 
-			// Get the page-title
-			String title = getPageTitle(node);
-
-			// Add the urls
-			if (embeddedImages) {
-				ImageExtract.addLinks(url, null, urls, node);
-			} else {
-				LinkExtract.addLinks(url, null, urls, node);
-			}
-
-			if (urls.size() < 1) {
-				return;
-			}
-
-			// Open the Dialog
-			AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
-			adderpnl.init(); // We need to do this!
-			adderpnl = null;
-		} catch (MalformedURLException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
-			method.abort();
+		// Add the urls
+		if (embeddedImages) {
+			ImageExtract.addLinks(url, null, urls, node);
+		} else {
+			LinkExtract.addLinks(url, null, urls, node);
 		}
+
+		if (urls.isEmpty()) {
+			return;
+		}
+
+		// Open the Dialog
+		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+		adderpnl.init(); // We need to do this!
 	}
 
 	/**
@@ -231,7 +220,7 @@ public class ImportHTML extends AdderImportBase {
 	 * @param title Title
 	 */
 	public void importHTML(InputStream in, String referrer, String title) {
-		ArrayList<URL> urls = new ArrayList<>();
+		List<URL> urls = new ArrayList<>();
 
 		// Add the urls
 		LinkExtract.addLinks("", null, urls, in);

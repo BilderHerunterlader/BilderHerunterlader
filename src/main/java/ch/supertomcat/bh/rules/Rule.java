@@ -11,8 +11,6 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.Element;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Hoster;
@@ -50,11 +48,6 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * A rule is stored as an XML-File.
  */
 public class Rule extends Hoster {
-	/**
-	 * Logger for this class
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
-
 	/**
 	 * Rule Definition
 	 */

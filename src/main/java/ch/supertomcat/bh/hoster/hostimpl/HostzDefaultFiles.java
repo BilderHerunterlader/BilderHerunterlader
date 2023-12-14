@@ -6,14 +6,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostWrongContentTypeException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
@@ -39,11 +37,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostDefaultFiles";
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster
@@ -241,32 +234,26 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	private String requestContentType(String url) throws HostException {
 		String cookies = getCookieManager().getCookies(url);
 		url = HTTPUtil.encodeURL(url);
-		HttpHead method = null;
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
-			method = new HttpHead(url);
+			HttpHead method = new HttpHead(url);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
 			if (!cookies.isEmpty()) {
 				method.setHeader("Cookie", cookies);
 			}
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			return client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode < 200 && statusCode >= 400) {
 					method.abort();
-					throw new HostException("HTTP-Error: " + statusCode);
+					throw new HostHttpIOException("HTTP-Error: " + statusCode);
 				}
 
 				// Abfrage des MIME Types
-				String contentType = response.getFirstHeader("Content-Type").getValue();
-				EntityUtils.consume(response.getEntity());
-				return contentType;
-			}
+				return response.getFirstHeader("Content-Type").getValue();
+			});
 		} catch (Exception e) {
 			throw new HostException("Could not request header for URL: " + url, e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

@@ -8,17 +8,17 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.w3c.tidy.Tidy;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.CookieManager;
@@ -132,13 +132,10 @@ public final class LinkExtract {
 	 */
 	public static List<URL> getLinks(String url, String referrer, ILinkExtractFilter filter, ProxyManager proxyManager, SettingsManager settingsManager,
 			CookieManager cookieManager) throws HostException {
-		List<URL> extractedURLs = new ArrayList<>();
-
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			String cookies = cookieManager.getCookies(url);
-			url = HTTPUtil.encodeURL(url);
-			method = new HttpGet(url);
+			String encodedURL = HTTPUtil.encodeURL(url);
+			HttpGet method = new HttpGet(encodedURL);
 			// Verbindung oeffnen
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
@@ -150,30 +147,30 @@ public final class LinkExtract {
 			if (referrer.length() > 0) {
 				method.setHeader("Referer", referrer);
 			}
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+
+			return client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
 					method.abort();
-					throw new HostIOException("LinkExtract: Container-Page: HTTP-Error: " + statusCode);
+					throw new HostHttpIOException("LinkExtract: Container-Page: HTTP-Error: " + statusCode);
 				}
 
+				List<URL> extractedURLs = new ArrayList<>();
+
 				// Inputstream oeffnen
-				try (InputStream in = response.getEntity().getContent()) {
-					addLinks(url, filter, extractedURLs, in);
-					EntityUtils.consume(response.getEntity());
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
+					addLinks(encodedURL, filter, extractedURLs, in);
 				}
 
 				return extractedURLs;
-			}
+			});
 		} catch (MalformedURLException e) {
 			throw new HostIOException("LinkExtract: Container-Page: " + url + " :" + e.getMessage(), e);
 		} catch (IOException e) {
 			throw new HostIOException("LinkExtract: Container-Page: " + url + " :" + e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

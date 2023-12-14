@@ -1,9 +1,7 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
@@ -18,23 +16,18 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.5
+ * @version 4.6
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.5";
+	public static final String VERSION = "4.6";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostImageVenue";
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster

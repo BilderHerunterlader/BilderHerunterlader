@@ -33,10 +33,9 @@ import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.filechooser.FileFilter;
 
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -293,34 +292,31 @@ public class IradaTsvDialog extends JDialog {
 	}
 
 	private boolean loadTsvURL() {
-		HttpGet method = null;
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(txtURL.getText());
-			method = new HttpGet(encodedURL);
+			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
 
-			try (CloseableHttpResponse response = client.execute(method)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+			client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 				if (statusCode != 200) {
 					method.abort();
-					displayErrorMessage("HTTP-Error: " + statusCode + " " + response.getStatusLine().getReasonPhrase());
+					displayErrorMessage("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 					return false;
 				} else {
-					try (InputStream in = response.getEntity().getContent()) {
+					try (@SuppressWarnings("resource")
+					InputStream in = response.getEntity().getContent()) {
 						result = ImportIradaTsv.importTsv(in);
-						EntityUtils.consume(response.getEntity());
 					}
 				}
-			}
+				return null;
+			});
 			return true;
 		} catch (Exception ex) {
 			logger.error("Could not load Tsv from URL: {}", txtURL.getText(), ex);
 			displayErrorMessage(ex);
 			return false;
-		} finally {
-			if (method != null) {
-				method.abort();
-			}
 		}
 	}
 

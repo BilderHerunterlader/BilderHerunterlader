@@ -15,8 +15,6 @@ import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
@@ -39,23 +37,18 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 3.1
+ * @version 3.2
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.1";
+	public static final String VERSION = "3.2";
 
 	/**
 	 * Name dieser Klasse
 	 */
 	public static final String NAME = "HostPhotoSharingGallery";
-
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Kompiliertes Muster
@@ -147,7 +140,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 						String val = firstChild.getFirstChild().getNodeValue();
 						if (val != null && val.equals("Home")) {
 							Node secondChild = lChilds.item(1);
-							if (secondChild.getNodeValue().equals(" » ")) {
+							if (secondChild.getNodeValue().equals(" ï¿½ ")) {
 								StringBuilder sb = new StringBuilder();
 								for (int x = 1; x < lChilds.getLength(); x++) {
 									Node nx = lChilds.item(x);

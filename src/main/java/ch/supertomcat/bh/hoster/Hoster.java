@@ -1,29 +1,32 @@
 package ch.supertomcat.bh.hoster;
 
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import javax.swing.JFrame;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpHost;
-import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.protocol.BasicHttpContext;
-import org.apache.http.protocol.HttpContext;
-import org.apache.http.protocol.HttpCoreContext;
-import org.apache.http.util.EntityUtils;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.client5.http.protocol.RedirectLocations;
+import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.message.StatusLine;
+import org.apache.hc.core5.http.protocol.BasicHttpContext;
+import org.apache.hc.core5.http.protocol.HttpContext;
+import org.apache.hc.core5.http.protocol.HttpCoreContext;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
@@ -42,6 +45,11 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * @see ch.supertomcat.bh.hoster.parser.URLParseObject
  */
 public abstract class Hoster {
+	/**
+	 * Logger
+	 */
+	protected Logger logger = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * Developer Flag
 	 */
@@ -321,23 +329,24 @@ public abstract class Hoster {
 	 * @return Sourcecode
 	 * @throws HostException
 	 */
+	@SuppressWarnings("resource")
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client) throws HostException {
-		HttpRequestBase method = null;
 		try {
 			String cookies = null;
 			if (options == null || options.isSendCookies()) {
 				cookies = cookieManager.getCookies(url);
 			}
 
-			url = HTTPUtil.encodeURL(url);
+			HttpUriRequestBase method;
+			String encodedURL = HTTPUtil.encodeURL(url);
 			if (options != null && "POST".equals(options.getHttpMethod())) {
-				HttpPost postMethod = new HttpPost(url);
+				HttpPost postMethod = new HttpPost(encodedURL);
 				if (!options.getPostData().isEmpty()) {
 					postMethod.setEntity(new UrlEncodedFormEntity(options.getPostData(), StandardCharsets.UTF_8));
 				}
 				method = postMethod;
 			} else {
-				method = new HttpGet(url);
+				method = new HttpGet(encodedURL);
 			}
 
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
@@ -357,50 +366,65 @@ public abstract class Hoster {
 			}
 
 			HttpContext context = new BasicHttpContext();
-			try (CloseableHttpResponse response = client.execute(method, context)) {
-				int statusCode = response.getStatusLine().getStatusCode();
+
+			return client.execute(method, context, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
 				if ((options == null || options.isCheckStatusCode()) && (statusCode < 200 || statusCode >= 300)) {
 					method.abort();
-					throw new HostIOException(hosterName + ": Container-Page: HTTP-Error: " + statusCode + " URL: " + url);
+					throw new HostHttpIOException(hosterName + ": Container-Page: HTTP-Error: " + statusCode + " URL: " + encodedURL);
 				}
 
-				String redirectedURL = null;
-
-				HttpClientContext clientContext = HttpClientContext.adapt(context);
-				List<URI> redirectedLocations = clientContext.getRedirectLocations();
-				if (redirectedLocations != null && !redirectedLocations.isEmpty()) {
-					Object redirectedRequest = context.getAttribute(HttpCoreContext.HTTP_REQUEST);
-					Object redirectedHost = context.getAttribute(HttpCoreContext.HTTP_TARGET_HOST);
-					if (redirectedRequest instanceof HttpUriRequest && redirectedHost instanceof HttpHost) {
-						URI redirectedURI = ((HttpUriRequest)redirectedRequest).getURI();
-						HttpHost redirectedHttpHost = (HttpHost)redirectedHost;
-						if (redirectedURI.isAbsolute()) {
-							redirectedURL = redirectedURI.toString();
-						} else {
-							redirectedURL = redirectedHttpHost.toURI() + redirectedURI;
-						}
-					}
-				}
+				String redirectedURL = getRedirectedURL(context);
 
 				String page;
 
 				HttpEntity entity = response.getEntity();
 				if (entity != null) {
 					page = EntityUtils.toString(entity);
-					EntityUtils.consume(response.getEntity());
 				} else {
 					page = "";
 				}
-				return new ContainerPage(page, redirectedURL, response.getStatusLine());
-			}
+				return new ContainerPage(page, redirectedURL, statusLine);
+			});
 		} catch (Exception e) {
 			throw new HostIOException(hosterName + ": Container-Page: " + e.getMessage(), e);
-		} finally {
-			if (method != null) {
-				method.abort();
+		}
+	}
+
+	/**
+	 * Get Redirected URL
+	 * 
+	 * @param context Context
+	 * @return Redirected URL or null
+	 */
+	protected String getRedirectedURL(HttpContext context) {
+		String redirectedURL = null;
+		HttpClientContext clientContext = HttpClientContext.adapt(context);
+		RedirectLocations redirectedLocations = clientContext.getRedirectLocations();
+		if (redirectedLocations != null) {
+			List<URI> redirectedLocationsURIList = redirectedLocations.getAll();
+			if (!redirectedLocationsURIList.isEmpty()) {
+				Object redirectedRequest = context.getAttribute(HttpCoreContext.HTTP_REQUEST);
+				if (redirectedRequest instanceof HttpUriRequest) {
+					try {
+						URI redirectedURI = ((HttpUriRequest)redirectedRequest).getUri();
+						if (redirectedURI.isAbsolute()) {
+							redirectedURL = redirectedURI.toString();
+						} else {
+							/*
+							 * TODO Implement with httpclient5. Same code as for Version 4 does not work anymore.
+							 */
+							logger.error("Could not determine redirect URI, because it is not absolute: {}", redirectedURI);
+						}
+					} catch (URISyntaxException e) {
+						logger.error("Could not determine redirection", e);
+					}
+				}
 			}
 		}
+		return redirectedURL;
 	}
 
 	/**

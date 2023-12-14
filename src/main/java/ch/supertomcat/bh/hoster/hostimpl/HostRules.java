@@ -10,8 +10,6 @@ import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -33,11 +31,6 @@ import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
  * @version 0.5
  */
 public class HostRules extends Host implements IHoster, IRedirect {
-	/**
-	 * Logger
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
-
 	/**
 	 * Version
 	 */
