@@ -79,7 +79,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		String referrer = result.getContainerURL();
 		Hoster lastHoster = result.getLastHoster();
-		if ((lastHoster != null) && (lastHoster instanceof Rule)) {
+		if (lastHoster instanceof Rule) {
 			Rule lastRule = (Rule)lastHoster;
 			switch (lastRule.getDefinition().getDownloadReferrerMode()) {
 				case NO_REFERRER:
