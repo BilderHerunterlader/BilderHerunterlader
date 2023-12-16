@@ -5,6 +5,7 @@ import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
 import org.apache.hc.client5.http.config.ConnectionConfig;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.StandardCookieSpec;
 import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -124,6 +125,7 @@ public class ProxyManager {
 	public RequestConfig.Builder getDefaultRequestConfigBuilder() {
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
 		requestConfigBuilder.setConnectionRequestTimeout(Timeout.ofMilliseconds(settingsManager.getTimeout()));
+		requestConfigBuilder.setCookieSpec(StandardCookieSpec.RELAXED);
 		return requestConfigBuilder;
 	}
 
