@@ -6,10 +6,13 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -187,7 +190,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			AtomicInteger iwMax1 = new AtomicInteger(0);
 
 			try {
-				ArrayList<URL> urlsFromPage = getLinksFromPage(requestURL, babeID, pageNumber, imagesPerPage, iwMax1, false);
+				List<URL> urlsFromPage = getLinksFromPage(requestURL, babeID, pageNumber, imagesPerPage, iwMax1, false);
 				downloadURLs.addAll(urlsFromPage);
 			} catch (HostIOException hioe) {
 				logger.error(hioe.getMessage(), hioe);
@@ -199,17 +202,17 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 	}
 
 	@SuppressWarnings("resource")
-	private ArrayList<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, AtomicInteger iwMax, boolean firstLoad) throws HostException {
-		String cookies = getCookieManager().getCookies(url);
+	private List<URL> getLinksFromPage(String url, String babeID, String page, String imagesPerPage, AtomicInteger iwMax, boolean firstLoad) throws HostException {
+		BasicCookieStore cookieStore = new BasicCookieStore();
+		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+		getCookieManager().fillCookies(url, cookieStore);
+
 		String encodedURL = HTTPUtil.encodeURL(url);
 		HttpClientBuilder clientBuilder = getProxyManager().getHTTPClientBuilder();
 		clientBuilder.disableRedirectHandling();
 		try (CloseableHttpClient client = clientBuilder.build()) {
 			HttpPost method = new HttpPost(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 
 			List<NameValuePair> data = new ArrayList<>();
 			data.add(new BasicNameValuePair("xajax", "loadImages"));
@@ -221,7 +224,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 			data.add(new BasicNameValuePair("xajaxargs[]", "")); // qualitystorage
 			method.setEntity(new UrlEncodedFormEntity(data, StandardCharsets.UTF_8));
 
-			String pageCode = client.execute(method, response -> {
+			String pageCode = client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 
@@ -259,7 +262,7 @@ public class HostBabesBoard extends Host implements IHoster, IHosterURLAdder {
 
 			String strDirectory = strRootDir + "BabesBoard" + FileUtil.FILE_SEPERATOR + strDate + FileUtil.FILE_SEPERATOR;
 
-			ArrayList<URL> downloadURLs = new ArrayList<>();
+			List<URL> downloadURLs = new ArrayList<>();
 
 			String imageURL = "";
 			int start = 0;

@@ -233,13 +233,24 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	}
 
 	/**
-	 * Parses the URL and returns the URLParseObject
+	 * Create URLParseObject
 	 * 
 	 * @param pic Pic
 	 * @return URLParseObject
+	 */
+	protected URLParseObject createURLParseObject(Pic pic) {
+		return new URLParseObject(pic.getContainerURL(), pic.getThumb(), pic);
+	}
+
+	/**
+	 * Parses the URL and returns the URLParseObject
+	 * 
+	 * @param pic Pic
+	 * @param customUPO URLParseObject or null
+	 * @return URLParseObject
 	 * @throws HostException
 	 */
-	protected URLParseObject parseURL(Pic pic) throws HostException {
+	protected URLParseObject parseURL(Pic pic, URLParseObject customUPO) throws HostException {
 		if (pic.isStop()) {
 			stopDownload(pic);
 			throw new HostAbortedException("Download was aborted");
@@ -250,7 +261,12 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		pic.progressUpdated();
 
 		// Create a new URLParseObject
-		URLParseObject upo = new URLParseObject(pic.getContainerURL(), pic.getThumb(), pic);
+		URLParseObject upo;
+		if (customUPO != null) {
+			upo = customUPO;
+		} else {
+			upo = createURLParseObject(pic);
+		}
 
 		// Now we try to get the direct link
 		try {

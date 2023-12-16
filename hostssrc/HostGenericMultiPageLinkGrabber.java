@@ -17,8 +17,12 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
@@ -144,11 +148,13 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	 * @param url URL
 	 * @param threadID Thread-ID
 	 * @param software Software
+	 * @param context Context
+	 * @param cookieStore Cookie Store
 	 * @return Array with links
 	 * @throws HostException
 	 */
 	@SuppressWarnings("unchecked")
-	private List<URL>[] getLinks(String url, String threadID, int software) throws HostException {
+	private List<URL>[] getLinks(String url, String threadID, int software, HttpClientContext context, CookieStore cookieStore) throws HostException {
 		List<URL> normalURLs = new ArrayList<>();
 		List<URL> multiPageURLs = new ArrayList<>();
 
@@ -158,12 +164,10 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 			HttpGet method = new HttpGet(encodedURL);
 
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
-			String cookies = getCookieManager().getCookies(url);
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 
-			Document node = client.execute(method, response -> {
+			getCookieManager().fillCookies(url, cookieStore);
+
+			Document node = client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 
@@ -484,6 +488,9 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 
 		List<URL> newURLs = new ArrayList<>();
 
+		CookieStore cookieStore = new BasicCookieStore();
+		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+
 		if (isVBulletin(url.getURL())) {
 			String threadID = getVBulletinThreadID(url.getURL());
 			String threadURL = getVBulletinThreadURL(url.getURL());
@@ -497,7 +504,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 			// Get links from page and find out start- and endpage
 			int firstPage = 1;
 			int lastPage = 1;
-			List<URL>[] urlVectorsFirstTime = getLinks(url.getURL(), threadID, SOFTWARE_VBULLETIN);
+			List<URL>[] urlVectorsFirstTime = getLinks(url.getURL(), threadID, SOFTWARE_VBULLETIN, context, cookieStore);
 			for (int x = 0; x < urlVectorsFirstTime[1].size(); x++) {
 				int page = getVBulletinThreadPage(urlVectorsFirstTime[1].get(x).getURL());
 				if (page > lastPage) {
@@ -508,7 +515,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 			for (int i = firstPage; i <= lastPage; i++) {
 				// Get links from page
 				String urlToScan = threadURL + "&page=" + i;
-				List<URL>[] urlVectors = getLinks(urlToScan, threadID, SOFTWARE_VBULLETIN);
+				List<URL>[] urlVectors = getLinks(urlToScan, threadID, SOFTWARE_VBULLETIN, context, cookieStore);
 				newURLs.addAll(urlVectors[0]);
 
 				progress.progressChanged(firstPage, lastPage, i);
@@ -533,7 +540,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 			int firstPageStart = 0;
 			int lastPageStart = 1;
 			int step = 0;
-			List<URL>[] urlVectorsFirstTime = getLinks(url.getURL(), threadID, SOFTWARE_PHPBB);
+			List<URL>[] urlVectorsFirstTime = getLinks(url.getURL(), threadID, SOFTWARE_PHPBB, context, cookieStore);
 			int secondStart = Integer.MAX_VALUE;
 			for (int x = 0; x < urlVectorsFirstTime[1].size(); x++) {
 				int start = getPhpBBThreadStart(urlVectorsFirstTime[1].get(x).getURL());
@@ -555,7 +562,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 					// Get links from page
 					String urlToScan = threadURL + "&start=" + i;
 					System.out.println("urltoscan: " + urlToScan);
-					List<URL>[] urlVectors = getLinks(urlToScan, threadID, SOFTWARE_PHPBB);
+					List<URL>[] urlVectors = getLinks(urlToScan, threadID, SOFTWARE_PHPBB, context, cookieStore);
 					newURLs.addAll(urlVectors[0]);
 
 					progress.progressChanged(1, endIndex, ((i / step) + 1));

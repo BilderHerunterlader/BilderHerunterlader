@@ -15,6 +15,66 @@ import ch.supertomcat.bh.rules.Rule;
  */
 public class URLParseObject {
 	/**
+	 * Flag if filename length should be reduced
+	 */
+	public static final String REDUCE_FILENAME_LENGTH = "ReduceFilenameLength";
+
+	/**
+	 * Flag if path length should be reduced
+	 */
+	public static final String REDUCE_PATH_LENGTH = "ReducePathLength";
+
+	/**
+	 * Flag if non multithreaded httpclient should be used
+	 */
+	public static final String USE_NON_MULTITHREADED_HTTPCLIENT = "useNonMultithreadedHttpClient";
+
+	/**
+	 * Determine which http method to use. Supported values: "POST"
+	 */
+	public static final String USE_METHOD = "useMethod";
+
+	/**
+	 * For storing rule trace info
+	 */
+	public static final String RULE_TRACE_INFO = "RuleTraceInfo";
+
+	/**
+	 * For storing page source code for determining filename for rule trace
+	 */
+	public static final String PAGE_SOURCE_CODE_FILENAME = "PageSourceCodeFilename";
+
+	/**
+	 * Determine to send a specific user agent
+	 */
+	public static final String USE_USER_AGENT = "useUserAgent";
+
+	/**
+	 * Determine to send a specific referrer
+	 */
+	public static final String USE_REFERRER = "useReferrer";
+
+	/**
+	 * Flag if cookies should be sent
+	 */
+	public static final String SEND_COOKIES = "sendCookies";
+
+	/**
+	 * Determine to send specific cookies
+	 */
+	public static final String USE_COOKIES = "useCookies";
+
+	/**
+	 * Cookie Store of the downloader, if URLParseObject was created by HttpFileDownloader
+	 */
+	public static final String DOWNLOADER_HTTP_COOKIE_STORE = "DownloaderHttpCookieStore";
+
+	/**
+	 * HttpContext of the downloader, if URLParseObject was created by HttpFileDownloader
+	 */
+	public static final String DOWNLOADER_HTTP_CONTEXT = "DownloaderHttpContext";
+
+	/**
 	 * This array is for the future, if there would be additional information
 	 * required on parsing urls. So they can be stored in this array.
 	 * So in the future there are no changes of the class needed.
@@ -84,6 +144,16 @@ public class URLParseObject {
 	}
 
 	/**
+	 * Remove an Object from the info-array
+	 * 
+	 * @param name Key
+	 * @return Removed Object or null
+	 */
+	public Object removeInfo(String name) {
+		return info.remove(name);
+	}
+
+	/**
 	 * Check if an object exists for a key
 	 * 
 	 * @param name Key
@@ -94,13 +164,36 @@ public class URLParseObject {
 	}
 
 	/**
+	 * Check if an object exists for a key and is an instanceof given type
+	 * 
+	 * @param name Key
+	 * @param type Type
+	 * @return TRUE/FALSE
+	 */
+	public boolean checkExistInfo(String name, Class<?> type) {
+		return info.containsKey(name) && type.isInstance(info.get(name));
+	}
+
+	/**
 	 * Get the object for a key
 	 * 
 	 * @param name Key
-	 * @return Object
+	 * @return Object or null
 	 */
 	public Object getInfo(String name) {
 		return info.get(name);
+	}
+
+	/**
+	 * Get the object for a key
+	 * 
+	 * @param <T> Type
+	 * @param name Name
+	 * @param type Type
+	 * @return Object or null
+	 */
+	public <T> T getInfo(String name, Class<T> type) {
+		return type.cast(info.get(name));
 	}
 
 	/**

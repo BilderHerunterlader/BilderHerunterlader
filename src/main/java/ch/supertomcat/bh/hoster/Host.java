@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.hoster;
 
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.protocol.HttpContext;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
@@ -108,12 +109,39 @@ public abstract class Host extends Hoster implements IHoster {
 	 * 
 	 * @param url Container-URL
 	 * @param referrer Referrer
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final String downloadContainerPage(String url, String referrer, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPage(getName(), url, referrer, httpContext);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
 	 * @param options Options
 	 * @return Sourcecode
 	 * @throws HostException
 	 */
 	protected final String downloadContainerPage(String url, String referrer, DownloadContainerPageOptions options) throws HostException {
 		return super.downloadContainerPage(getName(), url, referrer, options);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final String downloadContainerPage(String url, String referrer, DownloadContainerPageOptions options, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPage(getName(), url, referrer, options, httpContext);
 	}
 
 	/**
@@ -135,11 +163,39 @@ public abstract class Host extends Hoster implements IHoster {
 	 * 
 	 * @param url Container-URL
 	 * @param referrer Referrer
+	 * @param options Options
+	 * @param client HttpClient
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final String downloadContainerPage(String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPage(getName(), url, referrer, options, client, httpContext);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
 	 * @return Sourcecode
 	 * @throws HostException
 	 */
 	protected final ContainerPage downloadContainerPageEx(String url, String referrer) throws HostException {
 		return super.downloadContainerPageEx(getName(), url, referrer);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final ContainerPage downloadContainerPageEx(String url, String referrer, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPageEx(getName(), url, referrer, httpContext);
 	}
 
 	/**
@@ -161,11 +217,40 @@ public abstract class Host extends Hoster implements IHoster {
 	 * @param url Container-URL
 	 * @param referrer Referrer
 	 * @param options Options
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final ContainerPage downloadContainerPageEx(String url, String referrer, DownloadContainerPageOptions options, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPageEx(getName(), url, referrer, options, httpContext);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
 	 * @param client HttpClient
 	 * @return Sourcecode
 	 * @throws HostException
 	 */
 	protected final ContainerPage downloadContainerPageEx(String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client) throws HostException {
 		return super.downloadContainerPageEx(getName(), url, referrer, options, client);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param client HttpClient
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	protected final ContainerPage downloadContainerPageEx(String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client, HttpContext httpContext) throws HostException {
+		return super.downloadContainerPageEx(getName(), url, referrer, options, client, httpContext);
 	}
 }

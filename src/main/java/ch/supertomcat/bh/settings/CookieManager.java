@@ -1,8 +1,17 @@
 package ch.supertomcat.bh.settings;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
+import org.apache.hc.client5.http.cookie.Cookie;
+import org.apache.hc.client5.http.cookie.CookieIdentityComparator;
+import org.apache.hc.client5.http.cookie.CookieStore;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
+
+import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookie;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
 import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookieStrategy;
 import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookies;
@@ -33,12 +42,60 @@ public class CookieManager {
 	}
 
 	/**
+	 * Fill cookies to cookie store. Already existing cookies in the store will not be overwritten.
+	 * 
+	 * @param url URL
+	 * @param cookieStore Cookie Store
+	 */
+	public void fillCookies(String url, CookieStore cookieStore) {
+		List<Cookie> cookiesInStore = cookieStore.getCookies();
+		List<BasicClientCookie> cookiesToFill = getBrowserCookies(url);
+		Predicate<Cookie> cookieAlreadyExistsPredicate = cookieToFill -> cookiesInStore.stream().anyMatch(cookieInStore -> CookieIdentityComparator.INSTANCE.compare(cookieToFill, cookieInStore) == 0);
+		cookiesToFill.removeIf(cookieAlreadyExistsPredicate);
+	}
+
+	/**
+	 * Returns the Cookies for a domain
+	 * 
+	 * @param url URL
+	 * @return Cookies
+	 */
+	public List<BasicClientCookie> getBrowserCookies(String url) {
+		List<BrowserCookie> browserCookies = getCookies(url, BrowserCookies::getBrowserCookies);
+
+		List<BasicClientCookie> cookies = new ArrayList<>();
+		for (BrowserCookie cookie : browserCookies) {
+			BasicClientCookie basicClientCookie = new BasicClientCookie(cookie.getName(), cookie.getValue());
+			basicClientCookie.setDomain(cookie.getDomain());
+			basicClientCookie.setPath(cookie.getPath());
+			basicClientCookie.setCreationDate(cookie.getCreationDate());
+			basicClientCookie.setExpiryDate(cookie.getExpiryDate());
+			basicClientCookie.setSecure(cookie.isSecure());
+			basicClientCookie.setHttpOnly(cookie.isHttpOnly());
+			cookies.add(basicClientCookie);
+		}
+		return cookies;
+	}
+
+	/**
 	 * Returns the Cookies for a domain
 	 * 
 	 * @param url URL
 	 * @return Cookies
 	 */
 	public String getCookies(String url) {
+		return getCookies(url, BrowserCookies::getCookies);
+	}
+
+	/**
+	 * Returns the Cookies for a domain
+	 * 
+	 * @param <T> Supplier
+	 * @param url URL
+	 * @param cookiesFunction Function to get Cookies
+	 * @return Cookies
+	 */
+	private <T> T getCookies(String url, CookiesFunction<T> cookiesFunction) {
 		Map<String, String> cookieStrategyOptions = new HashMap<>();
 
 		int browser = settingsManager.getCookiesFromBrowser();
@@ -76,7 +133,7 @@ public class CookieManager {
 				break;
 		}
 
-		return BrowserCookies.getCookies(url, browser, cookieStrategyOptions);
+		return cookiesFunction.getCookies(url, browser, cookieStrategyOptions);
 	}
 
 	/**
@@ -143,5 +200,19 @@ public class CookieManager {
 		}
 
 		return OperaNewCookies.getCookieFileForOpera();
+	}
+
+	/**
+	 * @param <T> Result Type
+	 */
+	@FunctionalInterface
+	public interface CookiesFunction<T> {
+		/**
+		 * @param url URL
+		 * @param browser Browser
+		 * @param cookieStrategyOptions Cookie Strategy Options
+		 * @return Cookies
+		 */
+		public T getCookies(String url, int browser, Map<String, String> cookieStrategyOptions);
 	}
 }

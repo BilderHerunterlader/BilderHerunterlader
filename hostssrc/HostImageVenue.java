@@ -1,7 +1,11 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileNotExistException;
@@ -110,14 +114,22 @@ public class HostImageVenue extends Host implements IHoster {
 	private void parseURL(URLParseObject upo, boolean alternative) throws HostException {
 		String url = upo.getContainerURL();
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
-			String page = downloadContainerPage(url, url, null, client);
+			HttpClientContext context;
+			if (upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class) && upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, CookieStore.class)) {
+				context = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class);
+			} else {
+				BasicCookieStore cookieStore = new BasicCookieStore();
+				context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			}
+
+			String page = downloadContainerPage(url, url, null, client, context);
 
 			if (page.contains("This image does not exist on this server")) {
 				throw new HostFileNotExistException("This image does not exist on this server");
 			}
 
 			if (regexContinue.doPageSourcecodeSearch(page, 0) >= 0) {
-				page = downloadContainerPage(url, url, null, client);
+				page = downloadContainerPage(url, url, null, client, context);
 			}
 
 			if (!alternative) {

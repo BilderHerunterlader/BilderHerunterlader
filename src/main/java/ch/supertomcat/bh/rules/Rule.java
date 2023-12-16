@@ -10,6 +10,7 @@ import java.util.regex.PatternSyntaxException;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.text.StringEscapeUtils;
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.jdom2.Element;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -61,7 +62,7 @@ public class Rule extends Hoster {
 	/**
 	 * Pipelines
 	 */
-	private final List<RuleURLPipeline<?>> pipelines = new ArrayList<>();
+	private final List<RuleURLPipeline<? extends URLPipeline>> pipelines = new ArrayList<>();
 
 	/**
 	 * Pipeline
@@ -175,12 +176,14 @@ public class Rule extends Hoster {
 		Pic pic = upo.getPic();
 		String url = upo.getContainerURL();
 		String thumbURL = upo.getThumbURL();
-		String retval[] = new String[2];
+		String[] retval = new String[2];
+
+		HttpContext httpContext = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpContext.class);
 
 		RuleTraceInfo ruleTraceInfo = null;
 		if (trace) {
 			ruleTraceInfo = new RuleTraceInfo();
-			upo.addInfo("RuleTraceInfo", ruleTraceInfo);
+			upo.addInfo(URLParseObject.RULE_TRACE_INFO, ruleTraceInfo);
 		}
 
 		if (pipelines.isEmpty()) {
@@ -221,7 +224,7 @@ public class Rule extends Hoster {
 			boolean sendCookies = pipelineDefinition.isSendCookies();
 			String htmlcode = "";
 			if (rulePipeline instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)rulePipeline).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
-				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true));
+				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true), httpContext);
 				logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", definition.getName(), url, htmlcode);
 				if (ruleTraceInfoURL != null) {
 					ruleTraceInfoURL.addStep(new RuleTraceInfoURLDownloadContainerPage(i, pipelineURL, htmlcode));
@@ -310,7 +313,7 @@ public class Rule extends Hoster {
 		if (pipelineFilename != null && !retval[0].isEmpty() && !pipelineFilename.getRegexps().isEmpty()) {
 			RuleDownloadContainerPageSupplier<RuleHtmlCode> htmlCodeDownloadSupplier = () -> {
 				String referrer = getReferrer(upo);
-				String downloadedHtmlCode = downloadContainerPage(definition.getName(), url, referrer);
+				String downloadedHtmlCode = downloadContainerPage(definition.getName(), url, referrer, httpContext);
 				return new RuleHtmlCode(downloadedHtmlCode, url, referrer);
 			};
 			String filenamePipelineResult = pipelineFilename
@@ -331,9 +334,9 @@ public class Rule extends Hoster {
 			pic.setRenameWithContentDisposition(definition.isUseContentDisposition());
 		}
 
-		upo.addInfo("sendCookies", definition.isSendCookies());
-		upo.addInfo("ReducePathLength", definition.isReducePathLength());
-		upo.addInfo("ReduceFilenameLength", definition.isReduceFilenameLength());
+		upo.addInfo(URLParseObject.SEND_COOKIES, definition.isSendCookies());
+		upo.addInfo(URLParseObject.REDUCE_PATH_LENGTH, definition.isReducePathLength());
+		upo.addInfo(URLParseObject.REDUCE_FILENAME_LENGTH, definition.isReduceFilenameLength());
 
 		return retval;
 	}

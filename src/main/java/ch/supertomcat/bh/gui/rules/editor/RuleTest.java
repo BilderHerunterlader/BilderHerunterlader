@@ -279,7 +279,7 @@ public class RuleTest extends JDialog implements ActionListener {
 						txtResultFilename.setText("");
 					}
 
-					RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo("RuleTraceInfo");
+					RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo(URLParseObject.RULE_TRACE_INFO);
 					String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL(), ruleTraceInfo);
 					txtResultFilenameDownloadSelection.setText(resultFilenameDownloadSelection);
 				}
@@ -308,7 +308,7 @@ public class RuleTest extends JDialog implements ActionListener {
 	}
 
 	private void setRuleTraceInfo(URLParseObject upo, JTextArea txt) {
-		RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo("RuleTraceInfo");
+		RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo(URLParseObject.RULE_TRACE_INFO);
 		if (ruleTraceInfo != null) {
 			txt.setText(ruleTraceInfo.toString());
 		} else {

@@ -29,7 +29,7 @@ public class LocalFileDownloader extends FileDownloaderBase {
 
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
-		URLParseObject result = parseURL(pic);
+		URLParseObject result = parseURL(pic, null);
 
 		File sourceFile = new File(result.getDirectLink());
 		File targetFolder = new File(pic.getTargetPath());

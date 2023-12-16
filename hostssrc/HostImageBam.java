@@ -3,8 +3,11 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostFileTemporaryOfflineException;
@@ -109,13 +112,13 @@ public class HostImageBam extends Host implements IHoster {
 	 * URL parsen
 	 * 
 	 * @param upo URL Parse Object
-	 * @param cookieStore Cookie Store
+	 * @param context HTTP Context
 	 * @return URL or empty String if not found or null if continue
 	 * @throws HostException
 	 */
-	private String parseURL(URLParseObject upo, BasicCookieStore cookieStore) throws HostException {
-		try (CloseableHttpClient client = getProxyManager().getHTTPClientBuilder().setDefaultCookieStore(cookieStore).build()) {
-			String page = downloadContainerPage(getName(), upo.getContainerURL(), upo.getContainerURL(), null, client);
+	private String parseURL(URLParseObject upo, HttpClientContext context) throws HostException {
+		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
+			String page = downloadContainerPage(upo.getContainerURL(), upo.getContainerURL(), null, client, context);
 
 			String correctedFilename = "";
 
@@ -165,11 +168,17 @@ public class HostImageBam extends Host implements IHoster {
 	@Override
 	public void parseURLAndFilename(URLParseObject upo) throws HostException {
 		if (isFromThisHoster(upo.getContainerURL())) {
-			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context;
+			if (upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class) && upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, CookieStore.class)) {
+				context = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class);
+			} else {
+				BasicCookieStore cookieStore = new BasicCookieStore();
+				context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			}
 
-			String downloadURL = parseURL(upo, cookieStore);
+			String downloadURL = parseURL(upo, context);
 			if (downloadURL == null) {
-				downloadURL = parseURL(upo, cookieStore);
+				downloadURL = parseURL(upo, context);
 			}
 
 			if (downloadURL != null && !downloadURL.isEmpty()) {

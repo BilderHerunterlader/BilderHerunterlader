@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.message.StatusLine;
 
@@ -75,7 +78,14 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
-		URLParseObject result = parseURL(pic);
+		BasicCookieStore cookieStore = new BasicCookieStore();
+		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+
+		URLParseObject upo = createURLParseObject(pic);
+		upo.addInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, cookieStore);
+		upo.addInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, context);
+
+		URLParseObject result = parseURL(pic, upo);
 
 		String referrer = result.getContainerURL();
 		Hoster lastHoster = result.getLastHoster();
@@ -101,8 +111,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		boolean bReduceFilenameLength = true;
-		if (result.checkExistInfo("ReduceFilenameLength") && result.getInfo("ReduceFilenameLength") instanceof Boolean) {
-			bReduceFilenameLength = (Boolean)result.getInfo("ReduceFilenameLength");
+		if (result.checkExistInfo(URLParseObject.REDUCE_FILENAME_LENGTH, Boolean.class)) {
+			bReduceFilenameLength = (Boolean)result.getInfo(URLParseObject.REDUCE_FILENAME_LENGTH);
 		}
 
 		// And replace the %20 in the filename, if there are any
@@ -133,7 +143,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			}
 
 			boolean lastURL = count == directLinksSize;
-			if (!executeFileDownload(pic, directLink.getDirectLink(), currentTargetFilename, result, referrer, firstURL, lastURL, count, directLinksSize)) {
+			if (!executeFileDownload(pic, directLink.getDirectLink(), currentTargetFilename, result, referrer, firstURL, lastURL, count, directLinksSize, context, cookieStore)) {
 				break;
 			}
 			firstURL = false;
@@ -153,13 +163,13 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @param lastURL Last URL
 	 * @param currentURL Current URL Index
 	 * @param urlCount Count of URLs
+	 * @param context Context
+	 * @param cookieStore Cookie Store
 	 * @return True if download was successful, false otherwise
 	 */
-	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL, int currentURL, int urlCount) {
+	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL, int currentURL, int urlCount,
+			HttpClientContext context, BasicCookieStore cookieStore) {
 		TargetContainer targetContainer = new TargetContainer(pic, firstURL, correctedFilename);
-
-		// Get the cookies for the url
-		String cookies = cookieManager.getCookies(url);
 
 		/*
 		 * Get a HttpClient
@@ -169,8 +179,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * a proxy if needed and set user and password of the proxy.
 		 */
 		boolean nonMultiThreadedHttpClient = false;
-		if (result.checkExistInfo("useNonMultithreadedHttpClient") && result.getInfo("useNonMultithreadedHttpClient") instanceof Boolean
-				&& (Boolean)result.getInfo("useNonMultithreadedHttpClient") == true) {
+		if (result.checkExistInfo(URLParseObject.USE_NON_MULTITHREADED_HTTPCLIENT, Boolean.class) && Boolean.TRUE.equals(result.getInfo(URLParseObject.USE_NON_MULTITHREADED_HTTPCLIENT))) {
 			nonMultiThreadedHttpClient = true;
 		}
 
@@ -179,34 +188,38 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 			HttpUriRequest method;
 			// Create a new GetMethod or PostMethod and set timeouts, cookies, user-agent and so on
-			if (result.checkExistInfo("useMethod") && result.getInfo("useMethod") instanceof String && "POST".equals(result.getInfo("useMethod"))) {
+			if (result.checkExistInfo(URLParseObject.USE_METHOD, String.class) && "POST".equals(result.getInfo(URLParseObject.USE_METHOD))) {
 				method = new HttpPost(encodedURL);
 			} else {
 				method = new HttpGet(encodedURL);
 			}
 			String userAgent = settingsManager.getUserAgent();
-			if (result.checkExistInfo("useUserAgent") && result.getInfo("useUserAgent") instanceof String) {
-				userAgent = (String)result.getInfo("useUserAgent");
+			if (result.checkExistInfo(URLParseObject.USE_USER_AGENT, String.class)) {
+				userAgent = (String)result.getInfo(URLParseObject.USE_USER_AGENT);
 			}
 			method.setHeader("User-Agent", userAgent);
-			if (result.checkExistInfo("useReferrer") && result.getInfo("useReferrer") instanceof String) {
-				referrer = (String)result.getInfo("useReferrer");
+			if (result.checkExistInfo(URLParseObject.USE_REFERRER, String.class)) {
+				referrer = (String)result.getInfo(URLParseObject.USE_REFERRER);
 			}
 			if (referrer.length() > 0) {
 				method.setHeader("Referer", referrer);
 			}
 			boolean sendCookies = true;
-			if (result.checkExistInfo("sendCookies") && result.getInfo("useCookies") instanceof Boolean) {
-				sendCookies = (Boolean)result.getInfo("useCookies");
+			if (result.checkExistInfo(URLParseObject.SEND_COOKIES, Boolean.class)) {
+				sendCookies = (Boolean)result.getInfo(URLParseObject.SEND_COOKIES);
 			}
-			if (result.checkExistInfo("useCookies") && result.getInfo("useCookies") instanceof String) {
-				cookies = (String)result.getInfo("useCookies");
+			boolean specificCookies = false;
+			if (result.checkExistInfo(URLParseObject.USE_COOKIES, String.class)) {
+				String cookiesToUse = (String)result.getInfo(URLParseObject.USE_COOKIES);
+				method.setHeader("Cookie", cookiesToUse);
+				specificCookies = true;
 			}
-			if (sendCookies && !cookies.isEmpty()) {
-				method.setHeader("Cookie", cookies);
+			if (sendCookies && !specificCookies) {
+				// Fill cookies to cookie store
+				cookieManager.fillCookies(url, cookieStore);
 			}
 
-			return client.execute(method, response -> handleResponse(method, response, targetContainer, pic, result, firstURL, lastURL, currentURL, urlCount));
+			return client.execute(method, context, response -> handleResponse(method, response, targetContainer, pic, result, firstURL, lastURL, currentURL, urlCount));
 		} catch (MalformedURLException e) {
 			failDownload(pic, result, false, e);
 			return false;
@@ -594,8 +607,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		targetPath = FileUtil.pathRTrim(targetPath);
 
 		boolean bReducePathLength = true;
-		if (result.checkExistInfo("ReducePathLength") && result.getInfo("ReducePathLength") instanceof Boolean) {
-			bReducePathLength = (Boolean)result.getInfo("ReducePathLength");
+		if (result.checkExistInfo(URLParseObject.REDUCE_PATH_LENGTH, Boolean.class)) {
+			bReducePathLength = (Boolean)result.getInfo(URLParseObject.REDUCE_PATH_LENGTH);
 		}
 		if (bReducePathLength) {
 			targetPath = FileUtil.reducePathLength(targetPath);

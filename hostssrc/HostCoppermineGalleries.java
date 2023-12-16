@@ -17,8 +17,12 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -138,21 +142,22 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	 * Method to get all direct linked archives
 	 * 
 	 * @param url URL
+	 * @param context Context
+	 * @param cookieStore Cookie Store
 	 * @return Array with links
 	 */
-	private List<URL> getDirectLinkedArchives(String url) {
+	private List<URL> getDirectLinkedArchives(String url, HttpClientContext context, CookieStore cookieStore) {
 		List<URL> urls = new ArrayList<>();
-		String cookies = getCookieManager().getCookies(url);
+
 		String encodedURL = HTTPUtil.encodeURL(url);
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 
-			Document node = client.execute(method, response -> {
+			getCookieManager().fillCookies(url, cookieStore);
+
+			Document node = client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 
@@ -215,22 +220,22 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	 * Method to get all links from a page
 	 * 
 	 * @param url URL
+	 * @param context Context
+	 * @param cookieStore Cookie Store
 	 * @return Array with links
 	 * @throws HostException
 	 */
-	private List<URL> getLinks(String url) throws HostException {
+	private List<URL> getLinks(String url, HttpClientContext context, CookieStore cookieStore) throws HostException {
 		List<URL> urls = new ArrayList<>();
-		String cookies = getCookieManager().getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 
-			Document node = client.execute(method, response -> {
+			getCookieManager().fillCookies(url, cookieStore);
+
+			Document node = client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 
@@ -483,9 +488,18 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 			Matcher matcherDisplayThumbSearch = patternDisplayThumbSearch.matcher(thumbURL);
 			s = matcherDisplayThumbSearch.replaceAll("$1$3");
 			if (s.length() > 0) {
+				CookieStore cookieStore;
+				HttpClientContext context;
+				if (upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class) && upo.checkExistInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, CookieStore.class)) {
+					cookieStore = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, BasicCookieStore.class);
+					context = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpClientContext.class);
+				} else {
+					cookieStore = new BasicCookieStore();
+					context = ContextBuilder.create().useCookieStore(cookieStore).build();
+				}
 
 				// Get direct linked archives from page
-				List<URL> newURLs = getDirectLinkedArchives(url);
+				List<URL> newURLs = getDirectLinkedArchives(url, context, cookieStore);
 
 				String directLinkedArchive = "";
 
@@ -513,8 +527,8 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				upo.setDirectLink(s);
 				upo.setCorrectedFilename(correctFilename(s));
 
-				upo.addInfo("ReducePathLength", false);
-				upo.addInfo("ReduceFilenameLength", false);
+				upo.addInfo(URLParseObject.REDUCE_PATH_LENGTH, false);
+				upo.addInfo(URLParseObject.REDUCE_FILENAME_LENGTH, false);
 			}
 			return;
 		}
@@ -603,8 +617,11 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 		}
 
+		CookieStore cookieStore = new BasicCookieStore();
+		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+
 		// Get links from page
-		List<URL> newURLs = getLinks(url.getURL());
+		List<URL> newURLs = getLinks(url.getURL(), context, cookieStore);
 
 		for (int i = newURLs.size() - 1; i > -1; i--) {
 			URL currentURL = newURLs.get(i);

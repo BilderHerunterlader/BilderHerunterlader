@@ -7,11 +7,14 @@ import java.util.List;
 
 import javax.swing.JFrame;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
@@ -19,7 +22,6 @@ import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.StatusLine;
-import org.apache.hc.core5.http.protocol.BasicHttpContext;
 import org.apache.hc.core5.http.protocol.HttpContext;
 import org.apache.hc.core5.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
@@ -255,7 +257,21 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final String downloadContainerPage(String hosterName, String url, String referrer) throws HostException {
-		return downloadContainerPageEx(hosterName, url, referrer).getPage();
+		return downloadContainerPage(hosterName, url, referrer, (HttpContext)null);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	public final String downloadContainerPage(String hosterName, String url, String referrer, HttpContext httpContext) throws HostException {
+		return downloadContainerPageEx(hosterName, url, referrer, httpContext).getPage();
 	}
 
 	/**
@@ -269,7 +285,22 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final String downloadContainerPage(String hosterName, String url, String referrer, DownloadContainerPageOptions options) throws HostException {
-		return downloadContainerPageEx(hosterName, url, referrer, options).getPage();
+		return downloadContainerPage(hosterName, url, referrer, options, (HttpContext)null);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	public final String downloadContainerPage(String hosterName, String url, String referrer, DownloadContainerPageOptions options, HttpContext httpContext) throws HostException {
+		return downloadContainerPageEx(hosterName, url, referrer, options, httpContext).getPage();
 	}
 
 	/**
@@ -284,7 +315,24 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final String downloadContainerPage(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client) throws HostException {
-		return downloadContainerPageEx(hosterName, url, referrer, options, client).getPage();
+		return downloadContainerPage(hosterName, url, referrer, options, client, null);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param client HttpClient
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	public final String downloadContainerPage(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client,
+			HttpContext httpContext) throws HostException {
+		return downloadContainerPageEx(hosterName, url, referrer, options, client, httpContext).getPage();
 	}
 
 	/**
@@ -297,7 +345,21 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer) throws HostException {
-		return downloadContainerPageEx(hosterName, url, referrer, null);
+		return downloadContainerPageEx(hosterName, url, referrer, (HttpContext)null);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, HttpContext httpContext) throws HostException {
+		return downloadContainerPageEx(hosterName, url, referrer, httpContext);
 	}
 
 	/**
@@ -311,8 +373,23 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options) throws HostException {
+		return downloadContainerPageEx(hosterName, url, referrer, options, (HttpContext)null);
+	}
+
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options, HttpContext httpContext) throws HostException {
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
-			return downloadContainerPageEx(hosterName, url, referrer, options, client);
+			return downloadContainerPageEx(hosterName, url, referrer, options, client, httpContext);
 		} catch (Exception e) {
 			throw new HostIOException(hosterName + ": Container-Page: " + e.getMessage(), e);
 		}
@@ -329,14 +406,26 @@ public abstract class Hoster {
 	 * @return Sourcecode
 	 * @throws HostException
 	 */
-	@SuppressWarnings("resource")
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client) throws HostException {
-		try {
-			String cookies = null;
-			if (options == null || options.isSendCookies()) {
-				cookies = cookieManager.getCookies(url);
-			}
+		return downloadContainerPageEx(hosterName, url, referrer, options, client, null);
+	}
 
+	/**
+	 * Downloads and Returns the sourcecode of a Container-Page
+	 * 
+	 * @param hosterName Hoster Name for logging
+	 * @param url Container-URL
+	 * @param referrer Referrer
+	 * @param options Options
+	 * @param client HttpClient
+	 * @param httpContext HTTP Context or null
+	 * @return Sourcecode
+	 * @throws HostException
+	 */
+	@SuppressWarnings("resource")
+	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, DownloadContainerPageOptions options, CloseableHttpClient client,
+			HttpContext httpContext) throws HostException {
+		try {
 			HttpUriRequestBase method;
 			String encodedURL = HTTPUtil.encodeURL(url);
 			if (options != null && "POST".equals(options.getHttpMethod())) {
@@ -358,14 +447,39 @@ public abstract class Hoster {
 			} else {
 				method.setHeader("User-Agent", settingsManager.getUserAgent());
 			}
-			if (cookies != null && !cookies.isEmpty()) {
-				method.setHeader("Cookie", cookies);
-			}
 			if (referrer != null && !referrer.isEmpty()) {
 				method.setHeader("Referer", referrer);
 			}
 
-			HttpContext context = new BasicHttpContext();
+			CookieStore cookieStore;
+			HttpContext context;
+			if (httpContext == null) {
+				cookieStore = new BasicCookieStore();
+				context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			} else {
+				if (httpContext instanceof HttpClientContext) {
+					HttpClientContext httpClientContext = (HttpClientContext)httpContext;
+					CookieStore contextCookieStore = httpClientContext.getCookieStore();
+					if (contextCookieStore != null) {
+						cookieStore = contextCookieStore;
+						context = httpContext;
+					} else {
+						cookieStore = new BasicCookieStore();
+						HttpClientContext wrapperContext = new HttpClientContext(httpClientContext);
+						wrapperContext.setCookieStore(cookieStore);
+						context = wrapperContext;
+					}
+				} else {
+					cookieStore = new BasicCookieStore();
+					HttpClientContext wrapperContext = new HttpClientContext(httpContext);
+					wrapperContext.setCookieStore(cookieStore);
+					context = wrapperContext;
+				}
+			}
+
+			if (options == null || options.isSendCookies()) {
+				cookieManager.fillCookies(url, cookieStore);
+			}
 
 			return client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
