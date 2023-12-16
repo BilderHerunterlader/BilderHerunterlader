@@ -52,6 +52,9 @@ public class CookieManager {
 		List<BasicClientCookie> cookiesToFill = getBrowserCookies(url);
 		Predicate<Cookie> cookieAlreadyExistsPredicate = cookieToFill -> cookiesInStore.stream().anyMatch(cookieInStore -> CookieIdentityComparator.INSTANCE.compare(cookieToFill, cookieInStore) == 0);
 		cookiesToFill.removeIf(cookieAlreadyExistsPredicate);
+		for (BasicClientCookie cookie : cookiesToFill) {
+			cookieStore.addCookie(cookie);
+		}
 	}
 
 	/**
