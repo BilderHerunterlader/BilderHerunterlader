@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.rules;
 
-import org.jdom2.Element;
-
 import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilename;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameReplace;
@@ -27,14 +25,6 @@ public class RulePipelineFilenameDownloadSelection extends RulePipeline<Filename
 	 */
 	public RulePipelineFilenameDownloadSelection(FilenameDownloadSelectionPipeline definition) {
 		super(definition);
-	}
-
-	@Override
-	public Element getXmlElement() {
-		Element e = super.getXmlElement();
-		e.setAttribute("mode", "3");
-		e.setAttribute("filenameDownloadSelectionMode", String.valueOf(definition.getMode().ordinal()));
-		return e;
 	}
 
 	/**

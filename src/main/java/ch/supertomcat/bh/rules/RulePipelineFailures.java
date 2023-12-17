@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.rules;
 
-import org.jdom2.Element;
-
 import ch.supertomcat.bh.exceptions.HostAbortedException;
 import ch.supertomcat.bh.exceptions.HostCompletedException;
 import ch.supertomcat.bh.exceptions.HostException;
@@ -36,36 +34,6 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 	 */
 	public RulePipelineFailures(FailuresPipeline definition) {
 		super(definition);
-	}
-
-	@Override
-	public Element getXmlElement() {
-		Element e = super.getXmlElement();
-		e.setAttribute("mode", "4");
-		e.setAttribute("checkURL", String.valueOf(definition.isCheckURL()));
-		e.setAttribute("checkThumbURL", String.valueOf(definition.isCheckThumbURL()));
-		e.setAttribute("checkPageSourceCode", String.valueOf(definition.isCheckPageSourceCode()));
-		int mappedFailureType;
-		switch (definition.getFailureType()) {
-			case COMPLETE:
-				mappedFailureType = 3;
-				break;
-			case SLEEPING:
-				mappedFailureType = 0;
-				break;
-			case FAILED_FILE_TEMPORARY_OFFLINE:
-				mappedFailureType = 7;
-				break;
-			case FAILED_FILE_NOT_EXIST:
-				mappedFailureType = 6;
-				break;
-			case FAILED:
-			default:
-				mappedFailureType = 4;
-				break;
-		}
-		e.setAttribute("failureType", String.valueOf(mappedFailureType));
-		return e;
 	}
 
 	private String check(String input, RuleTraceInfoFailures traceInfo) {

@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.rules;
 
-import org.jdom2.Element;
-
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
@@ -31,14 +29,6 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 	 */
 	public RulePipelineFilename(FilenamePipeline definition) {
 		super(definition);
-	}
-
-	@Override
-	public Element getXmlElement() {
-		Element e = super.getXmlElement();
-		e.setAttribute("mode", "2");
-		e.setAttribute("filenamemode", String.valueOf(definition.getMode().ordinal()));
-		return e;
 	}
 
 	/**

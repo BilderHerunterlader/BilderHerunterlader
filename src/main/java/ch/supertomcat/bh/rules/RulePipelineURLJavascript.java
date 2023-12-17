@@ -8,7 +8,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.jdom2.Element;
 import org.mozilla.javascript.ClassShutter;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.FunctionObject;
@@ -63,15 +62,6 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 	 */
 	public RulePipelineURLJavascript(URLJavascriptPipeline definition) {
 		super(definition);
-	}
-
-	@Override
-	public void fillXmlElement(Element e) {
-		e.setAttribute("mode", "5");
-		super.fillXmlElement(e);
-		Element elJavascript = new Element("javascript");
-		elJavascript.setText(definition.getJavascriptCode());
-		e.addContent(elJavascript);
 	}
 
 	/**

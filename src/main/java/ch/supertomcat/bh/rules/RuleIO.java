@@ -28,8 +28,6 @@ import javax.xml.validation.SchemaFactory;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.input.SAXBuilder;
-import org.jdom2.output.Format;
-import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -485,36 +483,6 @@ public class RuleIO {
 			synchronized (marshaller) {
 				marshaller.marshal(ruleDefinition, out);
 			}
-		}
-	}
-
-	/**
-	 * TODO Remove this method some time in the future, but keep it for now, just in case...
-	 * Saves the rule to the XML-File
-	 * 
-	 * @param rule Rule
-	 * @throws IOException
-	 */
-	@SuppressWarnings("unused")
-	private void writeRuleOldFormat(Rule rule) throws IOException {
-		File folder = rule.getFile().getParentFile();
-		if (folder != null) {
-			Files.createDirectories(folder.toPath());
-		}
-
-		// Get the the Element
-		Element root = rule.getXmlElement();
-		// Create new document
-		Document doc = new Document(root);
-		try (FileOutputStream fos = new FileOutputStream(rule.getFile())) {
-			// Create new outputter
-			XMLOutputter serializer = new XMLOutputter();
-			// This will create nice formated xml-file
-			serializer.setFormat(Format.getPrettyFormat());
-			// Write the data to the file
-			serializer.output(doc, fos);
-			// Close the file
-			fos.flush();
 		}
 	}
 

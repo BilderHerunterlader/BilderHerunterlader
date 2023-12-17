@@ -11,7 +11,6 @@ import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.net.URLCodec;
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.jdom2.Element;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Hoster;
@@ -421,57 +420,6 @@ public class Rule extends Hoster {
 		} else {
 			restriction = null;
 		}
-	}
-
-	/**
-	 * Returns the Element for creating the XML-File
-	 * 
-	 * @return Element
-	 */
-	public Element getXmlElement() {
-		Element e = new Element("rule");
-		e.setAttribute("name", definition.getName());
-		e.setAttribute("version", definition.getVersion());
-		e.setAttribute("redirect", String.valueOf(definition.isRedirect()));
-		e.setAttribute("resend", String.valueOf(definition.isResend()));
-		e.setAttribute("usecontentdisposition", String.valueOf(definition.isUseContentDisposition()));
-		e.setAttribute("reducePathLength", String.valueOf(definition.isReducePathLength()));
-		e.setAttribute("reduceFilenameLength", String.valueOf(definition.isReduceFilenameLength()));
-		e.setAttribute("referrermode", String.valueOf(definition.getReferrerMode().ordinal()));
-		e.setAttribute("referrermodedownload", String.valueOf(definition.getDownloadReferrerMode().ordinal()));
-		e.setAttribute("customreferrer", definition.getCustomReferrer());
-		e.setAttribute("customreferrerdownload", definition.getDownloadCustomReferrer());
-		e.setAttribute("duplicateRemoveMode", String.valueOf(definition.getDuplicateRemoveMode().ordinal()));
-		e.setAttribute("sendCookies", String.valueOf(definition.isSendCookies()));
-		Element eup = new Element("urlpattern");
-		eup.setText(definition.getUrlPattern());
-		e.addContent(eup);
-
-		Element ePipes = new Element("pipes");
-		for (int i = 0; i < pipelines.size(); i++) {
-			ePipes.addContent(pipelines.get(i).getXmlElement());
-		}
-		e.addContent(ePipes);
-		Element ePipesFailures = new Element("pipesFailures");
-		for (int i = 0; i < pipelinesFailures.size(); i++) {
-			ePipesFailures.addContent(pipelinesFailures.get(i).getXmlElement());
-		}
-		e.addContent(ePipesFailures);
-		if (this.pipelineFilename != null) {
-			e.addContent(this.pipelineFilename.getXmlElement());
-		}
-		if (this.pipelineFilenameDownloadSelection != null) {
-			e.addContent(this.pipelineFilenameDownloadSelection.getXmlElement());
-		}
-		Element eMaxConnections = new Element("maxConnections");
-		eMaxConnections.setAttribute("value", String.valueOf(definition.getRestriction().getMaxConnections()));
-		for (int i = 0; i < definition.getRestriction().getDomain().size(); i++) {
-			Element eMaxConnectionDomain = new Element("domain");
-			eMaxConnectionDomain.setAttribute("name", definition.getRestriction().getDomain().get(i));
-			eMaxConnections.addContent(eMaxConnectionDomain);
-		}
-		e.addContent(eMaxConnections);
-		return e;
 	}
 
 	/**

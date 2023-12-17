@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import org.jdom2.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,31 +59,6 @@ public abstract class RulePipeline<T extends Pipeline> {
 	 */
 	public T getDefinition() {
 		return definition;
-	}
-
-	/**
-	 * Returns the Element for creating the XML-File
-	 * 
-	 * @return Element
-	 */
-	public Element getXmlElement() {
-		Element e = new Element("pipeline");
-		fillXmlElement(e);
-		return e;
-	}
-
-	/**
-	 * Returns the Element for creating the XML-File
-	 * 
-	 * @param e Element
-	 */
-	public void fillXmlElement(Element e) {
-		for (RuleRegExp regexp : regexps) {
-			Element elRegex = new Element("regexp");
-			elRegex.setAttribute("search", regexp.getSearch());
-			elRegex.setAttribute("replace", regexp.getReplace());
-			e.addContent(elRegex);
-		}
 	}
 
 	/**

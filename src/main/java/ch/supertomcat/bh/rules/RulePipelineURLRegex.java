@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.rules;
 
-import org.jdom2.Element;
-
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
@@ -46,21 +44,6 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 */
 	public RulePipelineURLRegex(URLRegexPipeline definition) {
 		super(definition);
-	}
-
-	@Override
-	public void fillXmlElement(Element e) {
-		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
-			e.setAttribute("mode", "0");
-			e.setAttribute("urlmode", String.valueOf(definition.getUrlMode().ordinal()));
-		} else if (definition.getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
-			e.setAttribute("mode", "1");
-		}
-		super.fillXmlElement(e);
-		/*
-		 * sendCookies was not saved previously for URLPipelines, which was probably a bug. So we remove the attribute here.
-		 */
-		e.removeAttribute("sendCookies");
 	}
 
 	/**
