@@ -4,7 +4,6 @@ import static ch.supertomcat.bh.hoster.linkextract.ExtractTools.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,7 +67,7 @@ public final class LinkExtract {
 	 */
 	public static void addLinks(String url, ILinkExtractFilter filter, List<URL> extractedURLs, Document node) {
 		// button is used for youtube-search
-		String tagNames[] = { "a", "button" };
+		String[] tagNames = { "a", "button" };
 
 		/*
 		 * Get the links
@@ -170,8 +169,6 @@ public final class LinkExtract {
 
 				return extractedURLs;
 			});
-		} catch (MalformedURLException e) {
-			throw new HostIOException("LinkExtract: Container-Page: " + url + " :" + e.getMessage(), e);
 		} catch (IOException e) {
 			throw new HostIOException("LinkExtract: Container-Page: " + url + " :" + e.getMessage(), e);
 		}
@@ -204,12 +201,12 @@ public final class LinkExtract {
 		for (int i = 0; i < links.size(); i++) {
 			filter = getFilterForContainerURL(links.get(i).getURL(), whitelists);
 			if (filter != null) {
-				if (downloadedLinks.contains(links.get(i)) == false) {
+				if (!downloadedLinks.contains(links.get(i))) {
 					progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
 
 					List<URL> foundLinks = getLinks(links.get(i).getURL(), referrer, filter, proxyManager, settingsManager, cookieManager);
 					for (int x = 0; x < foundLinks.size(); x++) {
-						if (links.contains(foundLinks.get(x)) == false) {
+						if (!links.contains(foundLinks.get(x))) {
 							links.add(foundLinks.get(x));
 						}
 					}

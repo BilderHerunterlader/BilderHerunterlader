@@ -29,17 +29,20 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 	/**
 	 * Make Package for logging accessable in javascript
 	 */
-	private static String javascriptProvidedFunctions = "var jsContext = JavaImporter(Packages.ch.supertomcat.bh.rules);\n\n";
+	private static final String JAVASCRIPT_PROVIDED_FUNCTIONS;
 
 	static {
+		StringBuilder sb = new StringBuilder();
+		sb.append("var jsContext = JavaImporter(Packages.ch.supertomcat.bh.rules);\n\n");
 		/*
 		 * Define javascript functions for logging
 		 * The functions will call Java Functions which will log the errors
 		 */
-		String[] javascriptPrintFunctionArr = { "function logDebug (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logDebug(message.toString(), '$SOURCE'); } }\n\n", "function logWarn (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logWarn(message.toString(), '$SOURCE'); } }\n\n", "function logError (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logError(message.toString(), '$SOURCE'); } }\n\n" };
-		for (String function : javascriptPrintFunctionArr) {
-			javascriptProvidedFunctions += function;
-		}
+		sb.append("function logDebug (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logDebug(message.toString(), '$SOURCE'); } }\n\n");
+		sb.append("function logWarn (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logWarn(message.toString(), '$SOURCE'); } }\n\n");
+		sb.append("function logError (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logError(message.toString(), '$SOURCE'); } }\n\n");
+
+		JAVASCRIPT_PROVIDED_FUNCTIONS = sb.toString();
 	}
 
 	/**
@@ -94,7 +97,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		});
 		try {
 			// Prepare log functions
-			String javascriptContextProvidedFunctions = javascriptProvidedFunctions.replace("$SOURCE", "{" + this.getClass().getName() + ";Thread:" + Thread.currentThread().getId() + "}");
+			String javascriptContextProvidedFunctions = JAVASCRIPT_PROVIDED_FUNCTIONS.replace("$SOURCE", "{" + this.getClass().getName() + ";Thread:" + Thread.currentThread().getId() + "}");
 
 			// Initialize standard objects
 			ScriptableObject scope = context.initStandardObjects();
@@ -125,7 +128,6 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 			ScriptableObject.putProperty(scope, "thumbURL", Context.javaToJS(thumbURL, scope));
 			ScriptableObject.putProperty(scope, "htmlCode", Context.javaToJS(htmlcode, scope));
 			ScriptableObject.putProperty(scope, "firstContainerURL", Context.javaToJS(upo.getFirstContainerURL(), scope));
-			// ScriptableObject.putProperty(scope, "containerURLs", Context.javaToJS(upo.getContainerURLs(), scope));
 
 			// Provide output variables to javascript
 			ScriptableObject.putProperty(scope, "directLink", Context.javaToJS(upo.getDirectLink(), scope));

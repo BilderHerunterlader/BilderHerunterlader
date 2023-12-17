@@ -238,9 +238,6 @@ public class RuleIO {
 			// Check if there are all required elements
 			Element root = doc.getRootElement();
 			if (!(root.getName().equals("rule"))) {
-				doc = null;
-				root = null;
-				b = null;
 				throw new IOException("Could not load rule, because root tag is wrong: " + file);
 			}
 

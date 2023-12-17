@@ -226,7 +226,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		for (Rule rule : rules) {
 			if (rule.isFromThisHoster(upo.getContainerURL(), upo.getLastRule())) {
 				upo.addHoster(rule);
-				String result[] = rule.getURLAndFilename(upo);
+				String[] result = rule.getURLAndFilename(upo);
 				upo.setDirectLink(result[0]);
 				upo.setCorrectedFilename(result[1]);
 				if (rule.getDefinition().isResend()) {
@@ -265,7 +265,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 			if (rule.isFromThisRedirect(upo.getContainerURL(), upo.getLastRule())) {
 				try {
 					upo.addHoster(rule);
-					String result[] = rule.getURLAndFilename(upo);
+					String[] result = rule.getURLAndFilename(upo);
 					upo.setDirectLink(result[0]);
 					upo.setCorrectedFilename(result[1]);
 					/*
@@ -306,14 +306,13 @@ public class HostRules extends Host implements IHoster, IRedirect {
 
 		String developerRuleLogText = developerRules ? "Developer" : "";
 
-		File subfiles[] = folder.listFiles(new RuleFileFilter());
+		File[] subfiles = folder.listFiles(new RuleFileFilter());
 		if (subfiles != null) {
 			Arrays.sort(subfiles);
 			for (File subFile : subfiles) {
 				logger.debug("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
 
 				try {
-					RuleIO ruleIO = new RuleIO();
 					RuleDefinition ruleDefinition = ruleIO.readRule(subFile.getAbsolutePath());
 					Rule r = new Rule(subFile.getAbsolutePath(), ruleDefinition, developerRules);
 					rules.add(r);

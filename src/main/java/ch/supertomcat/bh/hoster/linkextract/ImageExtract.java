@@ -4,7 +4,6 @@ import static ch.supertomcat.bh.hoster.linkextract.ExtractTools.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -138,8 +137,6 @@ public final class ImageExtract {
 
 				return extractedURLs;
 			});
-		} catch (MalformedURLException e) {
-			throw new HostIOException("ImageExtract: Container-Page: " + url + " :" + e.getMessage(), e);
 		} catch (IOException e) {
 			throw new HostIOException("ImageExtract: Container-Page: " + url + " :" + e.getMessage(), e);
 		}
@@ -172,19 +169,19 @@ public final class ImageExtract {
 		for (int i = 0; i < links.size(); i++) {
 			filter = getFilterForContainerURL(links.get(i).getURL(), whitelists);
 			if (filter != null) {
-				if (downloadedLinks.contains(links.get(i)) == false) {
+				if (!downloadedLinks.contains(links.get(i))) {
 					progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + (downloadedLinks.size() + i) + "/" + (downloadedLinks.size() + links.size()) + ")");
 
 					List<URL> foundContainerLinks = LinkExtract.getLinks(links.get(i).getURL(), referrer, filter, proxyManager, settingsManager, cookieManager);
 					for (int x = 0; x < foundContainerLinks.size(); x++) {
-						if (links.contains(foundContainerLinks.get(x)) == false) {
+						if (!links.contains(foundContainerLinks.get(x))) {
 							links.add(foundContainerLinks.get(x));
 						}
 					}
 
 					List<URL> foundLinks = getLinks(links.get(i).getURL(), referrer, filter, proxyManager, settingsManager, cookieManager);
 					for (int x = 0; x < foundLinks.size(); x++) {
-						if (links.contains(foundLinks.get(x)) == false) {
+						if (!links.contains(foundLinks.get(x))) {
 							links.add(foundLinks.get(x));
 						}
 					}

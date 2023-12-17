@@ -3,10 +3,8 @@ package ch.supertomcat.bh.importexport;
 import java.awt.Component;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -94,8 +92,6 @@ public class ImportHTML extends AdderImportBase {
 				tidy.setInputEncoding("UTF-8");
 				Document node = tidy.parseDOM(in, null);
 
-				in.close();
-
 				// Get the page-title
 				String title = getPageTitle(node);
 
@@ -105,7 +101,7 @@ public class ImportHTML extends AdderImportBase {
 
 				file = null;
 
-				if (urls.size() < 1) {
+				if (urls.isEmpty()) {
 					return;
 				}
 
@@ -115,12 +111,6 @@ public class ImportHTML extends AdderImportBase {
 				adderpnl = null;
 
 				mainWindowAccess.setMessage(Localization.getString("HTMLFileImported"));
-			} catch (FileNotFoundException e) {
-				logger.error(e.getMessage(), e);
-				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
-			} catch (MalformedURLException e) {
-				logger.error(e.getMessage(), e);
-				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
 			} catch (IOException e) {
 				logger.error(e.getMessage(), e);
 				mainWindowAccess.setMessage(Localization.getString("HTMLFileImportFailed"));
@@ -228,14 +218,13 @@ public class ImportHTML extends AdderImportBase {
 		// Add the urls
 		LinkExtract.addLinks("", null, urls, in);
 
-		if (urls.size() < 1) {
+		if (urls.isEmpty()) {
 			return;
 		}
 
 		// Open the Dialog
 		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
-		adderpnl = null;
 	}
 
 	/**

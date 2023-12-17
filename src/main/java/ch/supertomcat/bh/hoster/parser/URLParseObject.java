@@ -439,9 +439,6 @@ public class URLParseObject {
 	 * @return True if object is parsed in a loop
 	 */
 	public boolean isLoop() {
-		if (hosterStackTrace.size() > 50) {
-			return true;
-		}
-		return false;
+		return hosterStackTrace.size() > 50;
 	}
 }
