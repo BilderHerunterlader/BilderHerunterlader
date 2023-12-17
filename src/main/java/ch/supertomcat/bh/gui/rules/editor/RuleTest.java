@@ -15,6 +15,10 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
+import org.apache.hc.client5.http.ContextBuilder;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
+
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
@@ -250,28 +254,33 @@ public class RuleTest extends JDialog implements ActionListener {
 			this.dispose();
 		} else if (e.getSource() == btnTest) {
 			txtMessage.setText("");
-			if (!rule.getPipelines().isEmpty()) {
-				if (rule.getPipelines().get(0) instanceof RulePipelineURLRegex) {
-					RulePipelineURLRegex urlRegexPipeline = (RulePipelineURLRegex)rule.getPipelines().get(0);
-					if (urlRegexPipeline.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL && urlRegexPipeline.getDefinition().getUrlMode() == URLMode.THUMBNAIL_URL
-							&& txtThumbnail.getText().isEmpty()) {
-						txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
-						return;
-					}
+			if (!rule.getPipelines().isEmpty() && rule.getPipelines().get(0) instanceof RulePipelineURLRegex) {
+				RulePipelineURLRegex urlRegexPipeline = (RulePipelineURLRegex)rule.getPipelines().get(0);
+				if (urlRegexPipeline.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL && urlRegexPipeline.getDefinition().getUrlMode() == URLMode.THUMBNAIL_URL
+						&& txtThumbnail.getText().isEmpty()) {
+					txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
+					return;
 				}
 			}
-			if (txtContainer.getText().matches(rule.getDefinition().getUrlPattern()) == false) {
+			if (!txtContainer.getText().matches(rule.getDefinition().getUrlPattern())) {
 				txtMessage.setText(Localization.getString("ContainerURLNotMatch"));
 				return;
 			}
 			Pic p = new Pic(txtContainer.getText(), "", "");
 			p.setThumb(txtThumbnail.getText());
 			final URLParseObject upo = new URLParseObject(txtContainer.getText(), txtThumbnail.getText(), p);
+
+			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+
+			upo.addInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, cookieStore);
+			upo.addInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, context);
+
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
 					try {
-						String result[] = rule.getURLAndFilename(upo, true);
+						String[] result = rule.getURLAndFilename(upo, true);
 						txtResultURL.setText(result[0]);
 						txtResultFilename.setText(result[1]);
 					} catch (HostException he) {
@@ -287,7 +296,8 @@ public class RuleTest extends JDialog implements ActionListener {
 			t.start();
 			try {
 				t.join();
-			} catch (InterruptedException e1) {
+			} catch (InterruptedException ex) {
+				// Nothing to do
 			}
 
 			setHtmlSourceCode(upo, "PageSourceCodeLast", txtResultPageSourceCodeLast);
