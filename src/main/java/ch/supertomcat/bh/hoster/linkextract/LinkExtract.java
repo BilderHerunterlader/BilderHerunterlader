@@ -8,9 +8,12 @@ import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -133,7 +136,6 @@ public final class LinkExtract {
 	public static List<URL> getLinks(String url, String referrer, ILinkExtractFilter filter, ProxyManager proxyManager, SettingsManager settingsManager,
 			CookieManager cookieManager) throws HostException {
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
-			String cookies = cookieManager.getCookies(url);
 			String encodedURL = HTTPUtil.encodeURL(url);
 			HttpGet method = new HttpGet(encodedURL);
 			// Verbindung oeffnen
@@ -141,14 +143,15 @@ public final class LinkExtract {
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 			if (referrer.length() > 0) {
 				method.setHeader("Referer", referrer);
 			}
 
-			return client.execute(method, response -> {
+			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			cookieManager.fillCookies(url, cookieStore);
+
+			return client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 

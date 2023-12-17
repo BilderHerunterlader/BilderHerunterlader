@@ -6,8 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -232,15 +235,16 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	 * @throws HostException
 	 */
 	private String requestContentType(String url) throws HostException {
-		String cookies = getCookieManager().getCookies(url);
-		url = HTTPUtil.encodeURL(url);
+		String encodedURL = HTTPUtil.encodeURL(url);
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
-			HttpHead method = new HttpHead(url);
+			HttpHead method = new HttpHead(encodedURL);
 			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
-			if (!cookies.isEmpty()) {
-				method.setHeader("Cookie", cookies);
-			}
-			return client.execute(method, response -> {
+
+			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			getCookieManager().fillCookies(url, cookieStore);
+
+			return client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 

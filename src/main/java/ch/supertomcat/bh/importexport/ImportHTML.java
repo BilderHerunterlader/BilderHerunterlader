@@ -12,8 +12,11 @@ import java.util.List;
 
 import javax.swing.JOptionPane;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
@@ -133,7 +136,6 @@ public class ImportHTML extends AdderImportBase {
 	 * @param embeddedImages Embedded Images
 	 */
 	public void importHTML(String url, String referrer, boolean embeddedImages) {
-		String cookies = cookieManager.getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 
 		/*
@@ -150,11 +152,12 @@ public class ImportHTML extends AdderImportBase {
 			// Open connection
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
-			if (!cookies.isEmpty()) {
-				method.setHeader("Cookie", cookies);
-			}
 
-			client.execute(method, response -> {
+			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			cookieManager.fillCookies(url, cookieStore);
+
+			client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 

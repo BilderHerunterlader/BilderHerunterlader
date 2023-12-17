@@ -8,8 +8,11 @@ import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
 
+import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -96,7 +99,6 @@ public class ImportURL {
 	 * @param embeddedImages Embedded Images
 	 */
 	public void importURL(String url, String referrer, boolean embeddedImages) {
-		String cookies = cookieManager.getCookies(url);
 		String encodedURL = HTTPUtil.encodeURL(url);
 
 		/*
@@ -113,11 +115,12 @@ public class ImportURL {
 			// Open connection
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader("User-Agent", settingsManager.getUserAgent());
-			if (cookies.length() > 0) {
-				method.setHeader("Cookie", cookies);
-			}
 
-			client.execute(method, response -> {
+			BasicCookieStore cookieStore = new BasicCookieStore();
+			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+			cookieManager.fillCookies(url, cookieStore);
+
+			client.execute(method, context, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 

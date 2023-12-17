@@ -12,6 +12,11 @@ import org.apache.hc.core5.http.NameValuePair;
  */
 public class DownloadContainerPageOptions {
 	/**
+	 * User Agent
+	 */
+	public static final String USER_AGENT = "User-Agent";
+
+	/**
 	 * Send Cookies
 	 */
 	private final boolean sendCookies;

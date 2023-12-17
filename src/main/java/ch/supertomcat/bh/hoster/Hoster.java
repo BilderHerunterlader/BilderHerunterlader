@@ -441,7 +441,7 @@ public abstract class Hoster {
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
-			String userAgentConfig = options != null ? options.getRequestConfig("User-Agent") : null;
+			String userAgentConfig = options != null ? options.getRequestConfig(DownloadContainerPageOptions.USER_AGENT) : null;
 			if (userAgentConfig != null) {
 				method.setHeader("User-Agent", userAgentConfig);
 			} else {
