@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import org.apache.hc.core5.http.protocol.HttpContext;
 import org.jdom2.Element;
 import org.mozilla.javascript.ClassShutter;
 import org.mozilla.javascript.Context;
@@ -35,7 +36,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		 * Define javascript functions for logging
 		 * The functions will call Java Functions which will log the errors
 		 */
-		String javascriptPrintFunctionArr[] = { "function logDebug (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logDebug(message.toString(), '$SOURCE'); } }\n\n", "function logWarn (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logWarn(message.toString(), '$SOURCE'); } }\n\n", "function logError (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logError(message.toString(), '$SOURCE'); } }\n\n" };
+		String[] javascriptPrintFunctionArr = { "function logDebug (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logDebug(message.toString(), '$SOURCE'); } }\n\n", "function logWarn (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logWarn(message.toString(), '$SOURCE'); } }\n\n", "function logError (message) { with(jsContext) { if (typeof message === 'undefined') { return; } JavascriptMethodProvider.logError(message.toString(), '$SOURCE'); } }\n\n" };
 		for (String function : javascriptPrintFunctionArr) {
 			javascriptProvidedFunctions += function;
 		}
@@ -107,8 +108,15 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 			Method methodSetInfo = infoMap.getClass().getMethod("setInfo", String.class, Object.class);
 			FunctionObject functionObjSetInfo = new MyFunctionObject("setInfo", methodSetInfo, infoMap);
 
+			HttpContext httpContext = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpContext.class);
+			JavascriptDummyHoster dummyHoster = new JavascriptDummyHoster("JavascriptDummyHoster-" + upo.getLastHoster(), httpContext);
+			DummyHosterWrapper dummyHostWrapper = new DummyHosterWrapper(dummyHoster);
+			dummyHostWrapper.setParentScope(scope);
+			Method methodDownloadContainerPage = DummyHosterWrapper.class.getMethod("downloadContainerPage", String.class, String.class);
+			FunctionObject functionObjDownloadContainerPage = new MyFunctionObject("downloadContainerPage", methodDownloadContainerPage, dummyHostWrapper);
+
 			// Provide functions to javascript
-			scope.put("downloadContainerPage", scope, JavascriptMethodProvider.getJavascriptFunction("downloadContainerPage", scope));
+			scope.put("downloadContainerPage", scope, functionObjDownloadContainerPage);
 			scope.put("getInfo", scope, functionObjGetInfo);
 			scope.put("setInfo", scope, functionObjSetInfo);
 
@@ -182,6 +190,46 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		public String getClassName() {
 			return getClass().getName();
 		}
+	}
+
+	/**
+	 * Dummy Hoster Wrapper
+	 */
+	private static class DummyHosterWrapper extends ScriptableObject {
+		private static final long serialVersionUID = 1L;
+
+		/**
+		 * Dummy Hoster
+		 */
+		private final JavascriptDummyHoster dummyHoster;
+
+		/**
+		 * Constructor
+		 * 
+		 * @param dummyHoster Dummy Hoster
+		 */
+		public DummyHosterWrapper(JavascriptDummyHoster dummyHoster) {
+			this.dummyHoster = dummyHoster;
+		}
+
+		/**
+		 * Method invoked from javascript to download container page
+		 * 
+		 * @param url URL
+		 * @param referrer Referrer
+		 * @return Container Page
+		 * @throws HostException
+		 */
+		@SuppressWarnings("unused")
+		public String downloadContainerPage(String url, String referrer) throws HostException {
+			return dummyHoster.downloadContainerPage(url, referrer);
+		}
+
+		@Override
+		public String getClassName() {
+			return getClass().getName();
+		}
+
 	}
 
 	private static class MyFunctionObject extends FunctionObject {
