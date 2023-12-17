@@ -359,7 +359,7 @@ public abstract class Hoster {
 	 * @throws HostException
 	 */
 	public final ContainerPage downloadContainerPageEx(String hosterName, String url, String referrer, HttpContext httpContext) throws HostException {
-		return downloadContainerPageEx(hosterName, url, referrer, httpContext);
+		return downloadContainerPageEx(hosterName, url, referrer, null, httpContext);
 	}
 
 	/**
