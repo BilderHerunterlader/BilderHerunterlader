@@ -14,27 +14,27 @@
 	<redirects />
 	<hoster>
 		<!-- Start of Host-Classes -->
-		<host version="3.2" src="https://www.dropbox.com/s/ltbzfmpwo4gie3d/HostBabesBoard.class?dl=1" filename="HostBabesBoard.class" name="HostBabesBoard" />
+		<host version="3.3" src="https://www.dropbox.com/s/ltbzfmpwo4gie3d/HostBabesBoard.class?dl=1" filename="HostBabesBoard.class" name="HostBabesBoard" />
 		<host version="1.8" src="https://www.dropbox.com/s/g9j3lxmjruag22a/HostCocoimage.class?dl=1" filename="HostCocoimage.class" name="HostCocoimage" />
-		<host version="4.3" src="https://www.dropbox.com/s/b867m84mcgn29m2/HostCoppermineGalleries.class?dl=1" filename="HostCoppermineGalleries.class" name="HostCoppermineGalleries">
+		<host version="4.4" src="https://www.dropbox.com/s/b867m84mcgn29m2/HostCoppermineGalleries.class?dl=1" filename="HostCoppermineGalleries.class" name="HostCoppermineGalleries">
 			<source src="https://www.dropbox.com/s/osdbbsysus8kbcg/HostCoppermineGalleries%241.class?dl=1" filename="HostCoppermineGalleries$1.class" />
 		</host>
-		<host version="3.3" src="https://www.dropbox.com/s/aje35wlq7lvgcvz/HostFlickr.class?dl=1" filename="HostFlickr.class" name="HostFlickr">
+		<host version="3.4" src="https://www.dropbox.com/s/aje35wlq7lvgcvz/HostFlickr.class?dl=1" filename="HostFlickr.class" name="HostFlickr">
 			<source src="https://www.dropbox.com/s/pbrz5vueh488i8f/HostFlickr%24PhotoSizeID.class?dl=1" filename="HostFlickr$PhotoSizeID.class" />
 		</host>
-		<host version="3.1" src="https://www.dropbox.com/s/yeitauhlql6khg5/HostGenericMultiPageLinkGrabber.class?dl=1" filename="HostGenericMultiPageLinkGrabber.class" name="HostGenericMultiPageLinkGrabber">
+		<host version="3.2" src="https://www.dropbox.com/s/yeitauhlql6khg5/HostGenericMultiPageLinkGrabber.class?dl=1" filename="HostGenericMultiPageLinkGrabber.class" name="HostGenericMultiPageLinkGrabber">
 			<source src="https://www.dropbox.com/s/t3mza3zbri22oph/HostGenericMultiPageLinkGrabber%241.class?dl=1" filename="HostGenericMultiPageLinkGrabber$1.class" />
 		</host>
-		<host version="4.3" src="https://www.dropbox.com/s/q75gty3q4unex8x/HostImageBam.class?dl=1" filename="HostImageBam.class" name="HostImageBam" />
+		<host version="4.4" src="https://www.dropbox.com/s/q75gty3q4unex8x/HostImageBam.class?dl=1" filename="HostImageBam.class" name="HostImageBam" />
 		<host version="4.0" src="https://www.dropbox.com/s/wem0x3qhtxvgswf/HostImageShack.class?dl=1" filename="HostImageShack.class" name="HostImageShack" />
-		<host version="4.5" src="https://www.dropbox.com/s/chek2838fsgt3ma/HostImageVenue.class?dl=1" filename="HostImageVenue.class" name="HostImageVenue" />
-		<host version="0.2" src="https://www.dropbox.com/s/ibqx1qb9xjmu8cc/HostImxTo.class?dl=1" filename="HostImxTo.class" name="HostImxTo" />
-		<host version="3.1" src="https://www.dropbox.com/s/l9l50m2p1t7an34/HostPhotoSharingGallery.class?dl=1" filename="HostPhotoSharingGallery.class" name="HostPhotoSharingGallery" bhminversion="3.2.0">
+		<host version="4.6" src="https://www.dropbox.com/s/chek2838fsgt3ma/HostImageVenue.class?dl=1" filename="HostImageVenue.class" name="HostImageVenue" />
+		<host version="0.3" src="https://www.dropbox.com/s/ibqx1qb9xjmu8cc/HostImxTo.class?dl=1" filename="HostImxTo.class" name="HostImxTo" />
+		<host version="3.2" src="https://www.dropbox.com/s/l9l50m2p1t7an34/HostPhotoSharingGallery.class?dl=1" filename="HostPhotoSharingGallery.class" name="HostPhotoSharingGallery" bhminversion="3.2.0">
 			<source src="https://www.dropbox.com/s/cuc595dxoka0cn7/HostPhotoSharingGallery%241.class?dl=1" filename="HostPhotoSharingGallery$1.class" />
 			<source src="https://www.dropbox.com/s/jkw1ubnq4lf1p2u/HostPhotoSharingGallery%242.class?dl=1" filename="HostPhotoSharingGallery$2.class" />
 		</host>
 		<host version="1.5" src="https://www.dropbox.com/s/eaz6zedh1qaba7m/HostPicfoco.class?dl=1" filename="HostPicfoco.class" name="HostPicfoco" />
-		<host version="8.3" src="https://www.dropbox.com/s/jo7cavib8kr3x85/HostYoutube.class?dl=1" filename="HostYoutube.class" name="HostYoutube" bhminversion="3.1.8">
+		<host version="8.4" src="https://www.dropbox.com/s/jo7cavib8kr3x85/HostYoutube.class?dl=1" filename="HostYoutube.class" name="HostYoutube" bhminversion="3.1.8">
 			<source src="https://www.dropbox.com/s/ge2fr4ly2ltioek/HostYoutube%241.class?dl=1" filename="HostYoutube$1.class" />
 			<source src="https://www.dropbox.com/s/xg9h32vtmf63eac/HostYoutube%242.class?dl=1" filename="HostYoutube$2.class" />
 			<source src="https://www.dropbox.com/s/2uoarc4r1kmksvk/HostYoutube%243.class?dl=1" filename="HostYoutube$3.class" />
