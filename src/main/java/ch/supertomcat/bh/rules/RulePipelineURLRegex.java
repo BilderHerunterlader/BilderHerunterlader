@@ -2,6 +2,7 @@ package ch.supertomcat.bh.rules;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoURL;
@@ -44,6 +45,34 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 */
 	public RulePipelineURLRegex(URLRegexPipeline definition) {
 		super(definition);
+	}
+
+	@Override
+	public String downloadContainerPage(RuleContext ruleContext, int step) throws HostException {
+		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
+			boolean sendCookies = definition.isSendCookies();
+			String pipelineURL = ruleContext.getPipelineURL();
+			String htmlCode = ruleContext.downloadContainerPage(pipelineURL, ruleContext.getPipelineReferrer(), new DownloadContainerPageOptions(sendCookies, true));
+			logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
+
+			if (step == 0) {
+				ruleContext.setHtmlCodeFromFirstURLData(htmlCode);
+			}
+			ruleContext.setHtmlCodeFirstData(htmlCode);
+			ruleContext.setHtmlCodeLastData(htmlCode);
+
+			ruleContext.addRuleTraceInfoURLContainerPageStep(step);
+			return htmlCode;
+		}
+		return null;
+	}
+
+	@Override
+	public String getURL(RuleContext ruleContext) throws HostException {
+		String result = getURL(ruleContext.getPipelineURL(), ruleContext.getPipelineThumbURL(), ruleContext.getHtmlCodeLast().getHtmlCode(), ruleContext.getPic(), ruleContext
+				.getCurrentRuleTraceInfoURL());
+		ruleContext.setPipelineResult(result);
+		return result;
 	}
 
 	/**

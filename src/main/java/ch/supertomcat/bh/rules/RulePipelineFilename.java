@@ -34,6 +34,25 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 	/**
 	 * Returns the filename after replacement
 	 * 
+	 * @param ruleContext Rule Context
+	 * @return Filename or null if correction could not be done
+	 * @throws HostException
+	 */
+	public String getCorrectedFilename(RuleContext ruleContext) throws HostException {
+		RuleDownloadContainerPageSupplier<RuleHtmlCode> htmlCodeDownloadSupplier = () -> {
+			String url = ruleContext.getContainerURL();
+			String referrer = ruleContext.getReferrer();
+			String downloadedHtmlCode = ruleContext.downloadContainerPage(url, referrer, null);
+			return new RuleHtmlCode(downloadedHtmlCode, url, referrer);
+		};
+		return getCorrectedFilename(ruleContext.getContainerURL(), ruleContext.getPipelineURL(), ruleContext.getThumbURL(), ruleContext.getPipelineResult(), ruleContext
+				.getHtmlCodeFromFirstURL(), ruleContext
+						.getHtmlCodeFirst(), ruleContext.getHtmlCodeLast(), htmlCodeDownloadSupplier, ruleContext.getPic(), ruleContext.getUpo(), ruleContext.getRuleTraceInfo());
+	}
+
+	/**
+	 * Returns the filename after replacement
+	 * 
 	 * @param containerURL Container URL
 	 * @param lastContainerURL Last Container URL
 	 * @param downloadURL Download URL

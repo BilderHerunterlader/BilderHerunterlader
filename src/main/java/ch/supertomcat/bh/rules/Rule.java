@@ -7,31 +7,22 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.net.URLCodec;
-import org.apache.commons.text.StringEscapeUtils;
 import org.apache.hc.core5.http.protocol.HttpContext;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.Hoster;
-import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hosteroptions.DeactivateOption;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
-import ch.supertomcat.bh.rules.trace.RuleTraceInfoURL;
-import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLDownloadContainerPage;
-import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLReplace;
 import ch.supertomcat.bh.rules.xml.FailuresPipeline;
 import ch.supertomcat.bh.rules.xml.FilenameDownloadSelectionMode;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
-import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
-import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
@@ -174,20 +165,17 @@ public class Rule extends Hoster {
 	public String[] getURLAndFilename(URLParseObject upo, boolean trace) throws HostException {
 		Pic pic = upo.getPic();
 		String url = upo.getContainerURL();
-		String thumbURL = upo.getThumbURL();
-		String[] retval = new String[2];
 
 		HttpContext httpContext = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpContext.class);
 
-		RuleTraceInfo ruleTraceInfo = null;
-		if (trace) {
-			ruleTraceInfo = new RuleTraceInfo();
-			upo.addInfo(URLParseObject.RULE_TRACE_INFO, ruleTraceInfo);
-		}
+		RuleDownloadContainerPageFunction<String> downloadContainerPageFunction = (containerURL, referrer,
+				options) -> downloadContainerPage(definition.getName(), containerURL, referrer, options, httpContext);
+
+		RuleContext ruleContext = new RuleContext(definition, upo, trace, downloadContainerPageFunction);
 
 		if (pipelines.isEmpty()) {
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(url, thumbURL, "", ruleTraceInfo);
+				failurePipe.checkForFailure(ruleContext);
 			}
 		}
 
@@ -200,98 +188,55 @@ public class Rule extends Hoster {
 		 * So now the search and replace is done for the first pipeline, which results in a new URL.
 		 * That URL is now used for the second pipeline by downloading it's source-code.
 		 */
-		RuleHtmlCode htmlCodeFromFirstURL = new RuleHtmlCode();
-		RuleHtmlCode htmlCodeFirst = new RuleHtmlCode();
-		RuleHtmlCode htmlCodeLast = new RuleHtmlCode();
-
-		String pipelineURL = url;
-		String pipelineThumbURL = thumbURL;
-		String pipelineReferrer = getReferrer(upo);
-		String pipelineResult = "";
 		for (int i = 0; i < pipelines.size(); i++) {
 			RuleURLPipeline<?> rulePipeline = pipelines.get(i);
 			URLPipeline pipelineDefinition = rulePipeline.getDefinition();
 
-			RuleTraceInfoURL ruleTraceInfoURL = null;
-			if (ruleTraceInfo != null) {
-				ruleTraceInfoURL = new RuleTraceInfoURL(pipelineURL);
-				ruleTraceInfo.addURLTraceInfo(ruleTraceInfoURL);
-			}
+			ruleContext.addRuleTraceInfoURL();
 
-			sleepIfRequired(pipelineDefinition);
+			rulePipeline.sleepIfRequired();
 
-			boolean sendCookies = pipelineDefinition.isSendCookies();
-			String htmlcode = "";
-			if (rulePipeline instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)rulePipeline).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
-				htmlcode = downloadContainerPage(definition.getName(), pipelineURL, pipelineReferrer, new DownloadContainerPageOptions(sendCookies, true), httpContext);
-				logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", definition.getName(), url, htmlcode);
-				if (ruleTraceInfoURL != null) {
-					ruleTraceInfoURL.addStep(new RuleTraceInfoURLDownloadContainerPage(i, pipelineURL, htmlcode));
-				}
-				if (i == 0) {
-					htmlCodeFromFirstURL.setData(htmlcode, pipelineURL, pipelineReferrer);
-					if (trace) {
-						upo.addInfo("PageSourceCodeFromFirstURL", htmlCodeFromFirstURL);
-					}
-				}
-				if (!htmlCodeFirst.isAvailable()) {
-					htmlCodeFirst.setData(htmlcode, pipelineURL, pipelineReferrer);
-					if (trace) {
-						upo.addInfo("PageSourceCodeFirst", htmlCodeFirst);
-					}
-				}
-				htmlCodeLast.setData(htmlcode, pipelineURL, pipelineReferrer);
-				if (trace) {
-					upo.addInfo("PageSourceCodeLast", htmlCodeLast);
-				}
-			}
+			/*
+			 * Download container page if necessary
+			 */
+			rulePipeline.downloadContainerPage(ruleContext, i);
 
 			/*
 			 * Check for failures before replace
 			 */
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(pipelineURL, pipelineThumbURL, htmlcode, ruleTraceInfo);
+				failurePipe.checkForFailure(ruleContext);
 			}
 
-			if (rulePipeline instanceof RulePipelineURLRegex) {
-				pipelineResult = ((RulePipelineURLRegex)rulePipeline).getURL(pipelineURL, pipelineThumbURL, htmlcode, pic, ruleTraceInfoURL);
-			} else if (rulePipeline instanceof RulePipelineURLJavascript) {
-				pipelineResult = ((RulePipelineURLJavascript)rulePipeline).getURLByJavascript(pipelineURL, pipelineThumbURL, htmlcode, upo);
-			}
+			/*
+			 * Get parsed URL from Pipeline
+			 */
+			rulePipeline.getURL(ruleContext);
 
 			if (pipelineDefinition.isUrlDecodeResult()) {
-				URLCodec urlCodec = new URLCodec("UTF-8");
-				try {
-					pipelineResult = urlCodec.decode(pipelineResult);
-				} catch (DecoderException e) {
-					logger.error("Could not URL decode (application/x-www-form-urlencoded) pipeline result: {}", pipelineResult);
-				}
+				ruleContext.urlDecodePipelineResult();
 			}
 
 			if (pipelineDefinition.isJavascriptDecodeResult() != null && pipelineDefinition.isJavascriptDecodeResult()) {
-				pipelineResult = StringEscapeUtils.unescapeEcmaScript(pipelineResult);
+				ruleContext.javascriptDecodePipelineResult();
 			}
 
-			pipelineResult = HTTPUtil.decodeURL(pipelineResult);
-			logger.debug("{} -> {} -> pipe[{}] -> Result: {}", definition.getName(), url, i, pipelineResult);
-			if (ruleTraceInfoURL != null) {
-				ruleTraceInfoURL.addStep(new RuleTraceInfoURLReplace(i, pipelineResult));
-			}
+			ruleContext.decodePipelineResult();
+			logger.debug("{} -> {} -> pipe[{}] -> Result: {}", definition.getName(), url, i, ruleContext.getPipelineResult());
+			ruleContext.addRuleTraceInfoURLReplaceStep(i);
 
 			/*
 			 * Check for failures after replace
 			 */
 			for (RulePipelineFailures failurePipe : pipelinesFailures) {
-				failurePipe.checkForFailure(pipelineResult, ruleTraceInfo);
+				failurePipe.checkForFailureURLOnly(ruleContext);
 			}
 
 			if (i > 0 && i < (pipelines.size() - 1)) {
-				upo.setContainerURL(pipelineURL);
+				ruleContext.applyPipelineURLToUPO();
 			}
 			if (i < (pipelines.size() - 1)) {
-				pipelineReferrer = pipelineURL;
-				pipelineURL = pipelineResult;
-				pipelineThumbURL = pipelineResult;
+				ruleContext.applyURLsForNextPipeline();
 			}
 		}
 
@@ -299,34 +244,29 @@ public class Rule extends Hoster {
 		 * If there are no pipelines, then just use the container url as result
 		 */
 		if (pipelines.isEmpty()) {
-			pipelineResult = url;
+			ruleContext.setPipelineResult(url);
 		}
 
+		String pipelineResult = ruleContext.getPipelineResult();
 		logger.debug("{} -> {} -> Final URL Result: {}", definition.getName(), url, pipelineResult);
-		retval[0] = pipelineResult;
-		retval[1] = upo.getCorrectedFilename(); // Corrected Filename
+		String correctedFilename = upo.getCorrectedFilename();
+
 		if (pic != null && pic.getTargetFilename().isEmpty()) {
-			pic.setTargetFilename(RuleUtil.getFilenamePart(retval[0]));
+			pic.setTargetFilename(RuleUtil.getFilenamePart(pipelineResult));
 		}
 
-		if (pipelineFilename != null && !retval[0].isEmpty() && !pipelineFilename.getRegexps().isEmpty()) {
-			RuleDownloadContainerPageSupplier<RuleHtmlCode> htmlCodeDownloadSupplier = () -> {
-				String referrer = getReferrer(upo);
-				String downloadedHtmlCode = downloadContainerPage(definition.getName(), url, referrer, httpContext);
-				return new RuleHtmlCode(downloadedHtmlCode, url, referrer);
-			};
-			String filenamePipelineResult = pipelineFilename
-					.getCorrectedFilename(url, pipelineURL, thumbURL, retval[0], htmlCodeFromFirstURL, htmlCodeFirst, htmlCodeLast, htmlCodeDownloadSupplier, pic, upo, ruleTraceInfo);
+		if (pipelineFilename != null && !pipelineResult.isEmpty() && !pipelineFilename.getRegexps().isEmpty()) {
+			String filenamePipelineResult = pipelineFilename.getCorrectedFilename(ruleContext);
 			if (filenamePipelineResult != null) {
-				retval[1] = filenamePipelineResult;
+				correctedFilename = filenamePipelineResult;
 			}
 		}
 
 		/*
 		 * If filename is still empty, then use filename part of download URL
 		 */
-		if (retval[1].isEmpty()) {
-			retval[1] = RuleUtil.getFilenamePart(retval[0]);
+		if (correctedFilename.isEmpty()) {
+			correctedFilename = RuleUtil.getFilenamePart(pipelineResult);
 		}
 
 		if (pic != null) {
@@ -337,49 +277,7 @@ public class Rule extends Hoster {
 		upo.addInfo(URLParseObject.REDUCE_PATH_LENGTH, definition.isReducePathLength());
 		upo.addInfo(URLParseObject.REDUCE_FILENAME_LENGTH, definition.isReduceFilenameLength());
 
-		return retval;
-	}
-
-	private void sleepIfRequired(URLPipeline pipelineDefinition) {
-		int waitBeforeExecute = pipelineDefinition.getWaitBeforeExecute();
-		if (waitBeforeExecute > 0) {
-			try {
-				Thread.sleep(waitBeforeExecute);
-			} catch (InterruptedException e) {
-				logger.error("Sleep was interrupted", e);
-			}
-		}
-	}
-
-	/**
-	 * Returns the referrer to use in downloadContainerPage-Method
-	 * 
-	 * @param upo URLParseObject
-	 * @return Referrer
-	 */
-	private String getReferrer(final URLParseObject upo) {
-		String referrer = "";
-		switch (definition.getReferrerMode()) {
-			case NO_REFERRER:
-				referrer = "";
-				break;
-			case LAST_CONTAINER_URL:
-				referrer = upo.getContainerURL();
-				break;
-			case FIRST_CONTAINER_URL:
-				referrer = upo.getFirstContainerURL();
-				break;
-			case ORIGIN_PAGE:
-				referrer = upo.getPic().getThreadURL();
-				break;
-			case CUSTOM:
-				referrer = definition.getCustomReferrer();
-				break;
-			default:
-				referrer = "";
-				break;
-		}
-		return referrer;
+		return new String[] { pipelineResult, correctedFilename };
 	}
 
 	/**

@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import javax.xml.bind.JAXBException;
 
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -36,10 +35,10 @@ import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 class RulesTest {
-	private HostManager hostManager;
+	private static HostManager hostManager;
 
 	@BeforeAll
-	public static void beforeAll() throws IOException {
+	public static void beforeAll() throws IOException, SAXException, JAXBException {
 		try (InputStream in = BH.class.getResourceAsStream("/Application_Config.properties")) {
 			ApplicationProperties.initProperties(in);
 
@@ -57,10 +56,7 @@ class RulesTest {
 			ApplicationProperties.setProperty("DownloadLogPath", programUserDir);
 			ApplicationProperties.setProperty("LogsPath", programUserDir);
 		}
-	}
 
-	@BeforeEach
-	public void beforeTest() throws IOException, SAXException, JAXBException {
 		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);

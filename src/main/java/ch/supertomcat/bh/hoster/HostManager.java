@@ -38,7 +38,6 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
  * Class which holds the host-classes and provides methods to
  * check and parse the URLs
  * There is also a method which removes duplicates from an URL-Array
- * TODO Optimize synchronization
  */
 public class HostManager {
 	/**
@@ -170,9 +169,9 @@ public class HostManager {
 						}
 					}
 
-					if (o2.isDeveloper() && o1.isDeveloper() == false) {
+					if (o2.isDeveloper() && !o1.isDeveloper()) {
 						return 1;
-					} else if (o1.isDeveloper() && o2.isDeveloper() == false) {
+					} else if (o1.isDeveloper() && !o2.isDeveloper()) {
 						return -1;
 					}
 
@@ -360,7 +359,7 @@ public class HostManager {
 				 */
 				if (host.isEnabled() && host.isFromThisHoster(url)) {
 					if (upo.isLoop()) {
-						logger.error("Parsing terminated for URL '" + upo.getContainerURL() + "' because upo seems to be parsed in a endless loop!: {}", upo.getHosterStackTrace());
+						logger.error("Parsing terminated for URL '{}' because upo seems to be parsed in a endless loop!: {}", upo.getContainerURL(), upo.getHosterStackTrace());
 						return null;
 					}
 
@@ -400,7 +399,7 @@ public class HostManager {
 
 		AtomicBoolean bContains = new AtomicBoolean(false);
 
-		RemoveDuplicatesRunnable rdt[] = new RemoveDuplicatesRunnable[threadCount];
+		RemoveDuplicatesRunnable[] rdt = new RemoveDuplicatesRunnable[threadCount];
 		for (int t = 0; t < threadCount; t++) {
 			rdt[t] = new RemoveDuplicatesRunnable(originalUrls, t, threadCount, bContains, 0, barrier);
 		}
@@ -435,7 +434,7 @@ public class HostManager {
 				logger.error(e.getMessage(), e);
 			}
 
-			if (bContains.get() == false) {
+			if (!bContains.get()) {
 				// Add the current URL to the result-Array
 				urls.add(originalUrls.get(i));
 			} else {

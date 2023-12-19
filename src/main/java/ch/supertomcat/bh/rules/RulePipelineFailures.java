@@ -43,9 +43,9 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 			if (i < (regexps.size() - 1)) {
 				int pos = regexps.get(i).doFailureSearch(input, start);
 				if (pos >= 0) {
-					logger.debug("FailureCheck -> Search done -> Step " + i + " -> Pattern found at: " + pos);
+					logger.debug("FailureCheck -> Search done -> Step {} -> Pattern found at: {}", i, pos);
 				} else {
-					logger.debug("FailureCheck -> Search done -> Step " + i + " -> Pattern not found!");
+					logger.debug("FailureCheck -> Search done -> Step {} -> Pattern not found!", i);
 				}
 				if (traceInfo != null) {
 					traceInfo.addStep(new RuleTraceInfoFailuresSearch(i, start, pos));
@@ -53,13 +53,23 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 				start = pos;
 			} else {
 				result = regexps.get(i).doFailureLastSearch(input, start);
-				logger.debug("FailureCheck -> Failure found -> Step " + i + " -> Result: " + result);
+				logger.debug("FailureCheck -> Failure found -> Step {} -> Result: {}", i, result);
 				if (traceInfo != null) {
 					traceInfo.addStep(new RuleTraceInfoFailuresFinal(i, start, result));
 				}
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * Check for failure
+	 * 
+	 * @param ruleContext Rule Context
+	 * @throws HostException
+	 */
+	public void checkForFailureURLOnly(RuleContext ruleContext) throws HostException {
+		checkForFailure(ruleContext.getPipelineResult(), ruleContext.getRuleTraceInfo());
 	}
 
 	/**
@@ -99,6 +109,16 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 					break;
 			}
 		}
+	}
+
+	/**
+	 * Check for failure
+	 * 
+	 * @param ruleContext Rule Context
+	 * @throws HostException
+	 */
+	public void checkForFailure(RuleContext ruleContext) throws HostException {
+		checkForFailure(ruleContext.getPipelineURL(), ruleContext.getPipelineThumbURL(), ruleContext.getHtmlCodeLast().getHtmlCode(), ruleContext.getRuleTraceInfo());
 	}
 
 	/**

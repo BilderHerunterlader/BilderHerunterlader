@@ -7,7 +7,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import org.apache.hc.core5.http.protocol.HttpContext;
 import org.mozilla.javascript.ClassShutter;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.FunctionObject;
@@ -64,18 +63,19 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		super(definition);
 	}
 
-	/**
-	 * Get URL by Javascript
-	 * 
-	 * @param url Container-URL
-	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
-	 * @param upo URLParseObject
-	 * @return URL
-	 * @throws HostException
-	 */
+	@Override
+	public String downloadContainerPage(RuleContext ruleContext, int step) throws HostException {
+		return null;
+	}
+
 	@SuppressWarnings("resource")
-	public String getURLByJavascript(String url, String thumbURL, String htmlcode, URLParseObject upo) throws HostException {
+	@Override
+	public String getURL(RuleContext ruleContext) throws HostImageUrlNotFoundException {
+		String url = ruleContext.getPipelineURL();
+		String thumbURL = ruleContext.getPipelineThumbURL();
+		String htmlcode = ruleContext.getHtmlCodeLast().getHtmlCode();
+		URLParseObject upo = ruleContext.getUpo();
+
 		Context context = Context.enter();
 
 		// Restrict access to all java classes except a few
@@ -101,12 +101,10 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 			Method methodSetInfo = infoMap.getClass().getMethod("setInfo", String.class, Object.class);
 			FunctionObject functionObjSetInfo = new MyFunctionObject("setInfo", methodSetInfo, infoMap);
 
-			HttpContext httpContext = upo.getInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, HttpContext.class);
-			JavascriptDummyHoster dummyHoster = new JavascriptDummyHoster("JavascriptDummyHoster-" + upo.getLastHoster(), httpContext);
-			DummyHosterWrapper dummyHostWrapper = new DummyHosterWrapper(dummyHoster);
-			dummyHostWrapper.setParentScope(scope);
-			Method methodDownloadContainerPage = DummyHosterWrapper.class.getMethod("downloadContainerPage", String.class, String.class);
-			FunctionObject functionObjDownloadContainerPage = new MyFunctionObject("downloadContainerPage", methodDownloadContainerPage, dummyHostWrapper);
+			RuleContextScriptWrapper ruleContextScriptWrapper = new RuleContextScriptWrapper(ruleContext);
+			ruleContextScriptWrapper.setParentScope(scope);
+			Method methodDownloadContainerPage = RuleContextScriptWrapper.class.getMethod("downloadContainerPage", String.class, String.class);
+			FunctionObject functionObjDownloadContainerPage = new MyFunctionObject("downloadContainerPage", methodDownloadContainerPage, ruleContextScriptWrapper);
 
 			// Provide functions to javascript
 			scope.put("downloadContainerPage", scope, functionObjDownloadContainerPage);
@@ -140,6 +138,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 			if (retval == null || retval.isEmpty()) {
 				throw new HostImageUrlNotFoundException(HostRules.NAME + ": " + Localization.getString("ErrorImageURL"));
 			}
+			ruleContext.setPipelineResult(retval);
 			return retval;
 		} catch (Exception e) {
 			logger.error("Could not execute javascript pipeline", e);
@@ -185,23 +184,23 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 	}
 
 	/**
-	 * Dummy Hoster Wrapper
+	 * Rule Context Script Wrapper
 	 */
-	private static class DummyHosterWrapper extends ScriptableObject {
+	private static class RuleContextScriptWrapper extends ScriptableObject {
 		private static final long serialVersionUID = 1L;
 
 		/**
-		 * Dummy Hoster
+		 * Rule Context
 		 */
-		private final JavascriptDummyHoster dummyHoster;
+		private final RuleContext ruleContext;
 
 		/**
 		 * Constructor
 		 * 
-		 * @param dummyHoster Dummy Hoster
+		 * @param ruleContext Rule Context
 		 */
-		public DummyHosterWrapper(JavascriptDummyHoster dummyHoster) {
-			this.dummyHoster = dummyHoster;
+		public RuleContextScriptWrapper(RuleContext ruleContext) {
+			this.ruleContext = ruleContext;
 		}
 
 		/**
@@ -214,14 +213,13 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		 */
 		@SuppressWarnings("unused")
 		public String downloadContainerPage(String url, String referrer) throws HostException {
-			return dummyHoster.downloadContainerPage(url, referrer);
+			return ruleContext.downloadContainerPage(url, referrer, null);
 		}
 
 		@Override
 		public String getClassName() {
 			return getClass().getName();
 		}
-
 	}
 
 	private static class MyFunctionObject extends FunctionObject {
