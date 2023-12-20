@@ -99,11 +99,12 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 
 		for (int i = 0; i < varRegexps.size(); i++) {
 			RuleVarRegExp ruleVarRegex = varRegexps.get(i);
+			List<RuleRegExp> regexList = ruleVarRegex.getRegexps();
 			String value;
 			if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
-				value = getURLFromContainerOrThumbURL(regexps, url, thumbURL, pic, ruleTraceInfoURL);
+				value = getURLFromContainerOrThumbURL(regexList, url, thumbURL, pic, ruleTraceInfoURL);
 			} else {
-				value = getURLFromContainerPage(regexps, url, htmlCode, pic, ruleTraceInfoURL);
+				value = getURLFromContainerPage(regexList, url, htmlCode, pic, ruleTraceInfoURL);
 			}
 			String variableName = ruleVarRegex.getVariableName();
 			ruleContext.putVar(variableName, value);
@@ -203,7 +204,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 		int start = 0;
 		for (int i = 0; i < regexList.size(); i++) {
 			if (i < (regexList.size() - 1)) {
-				int pos = regexps.get(i).doPageSourcecodeSearch(htmlCode, start);
+				int pos = regexList.get(i).doPageSourcecodeSearch(htmlCode, start);
 				if (pos >= 0) {
 					logger.debug("{} -> Search done -> Step {} -> Pattern found at: {}", url, i, pos);
 				} else {

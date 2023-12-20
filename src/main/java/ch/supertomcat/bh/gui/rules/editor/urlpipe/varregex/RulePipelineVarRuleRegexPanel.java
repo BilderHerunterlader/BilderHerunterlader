@@ -98,7 +98,7 @@ public class RulePipelineVarRuleRegexPanel extends JPanel {
 	 * @param varRuleRegex Var Rule Regex
 	 */
 	public void apply(VarRuleRegex varRuleRegex) {
-		varRuleRegex.setVariableName(txtVariableName.getName());
+		varRuleRegex.setVariableName(txtVariableName.getText());
 		pnlTable.apply(varRuleRegex.getRegexp());
 	}
 }
