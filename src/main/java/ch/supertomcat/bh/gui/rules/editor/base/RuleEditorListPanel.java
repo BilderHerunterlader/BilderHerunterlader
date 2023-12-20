@@ -4,6 +4,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ListCellRenderer;
 
 /**
  * Panel with buttons to edit a list
@@ -25,9 +26,10 @@ public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleE
 	 * @param model Table Model
 	 * @param actionNewSupplier Supplier for action new
 	 * @param actionEditFunction Function for action edit
+	 * @param renderer Renderer or null
 	 */
-	public RuleEditorListPanel(T model, Supplier<E> actionNewSupplier, Function<E, E> actionEditFunction) {
-		super(model, actionNewSupplier, new RuleEditorDefaultButtonPanel(true));
+	public RuleEditorListPanel(T model, Supplier<E> actionNewSupplier, Function<E, E> actionEditFunction, ListCellRenderer<? super E> renderer) {
+		super(model, actionNewSupplier, new RuleEditorDefaultButtonPanel(true), renderer);
 		this.actionEditFunction = actionEditFunction;
 
 		buttonPanel.addNewActionListener(e -> actionNew());

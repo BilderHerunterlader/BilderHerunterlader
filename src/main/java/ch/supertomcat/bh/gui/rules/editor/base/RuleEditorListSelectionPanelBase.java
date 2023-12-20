@@ -34,7 +34,7 @@ public abstract class RuleEditorListSelectionPanelBase<E extends JComponent, T e
 	 * @param renderer Renderer or null
 	 */
 	public RuleEditorListSelectionPanelBase(T model, Supplier<E> actionNewSupplier, B buttonPanel, ListCellRenderer<? super E> renderer) {
-		super(model, actionNewSupplier, buttonPanel);
+		super(model, actionNewSupplier, buttonPanel, renderer);
 
 		list.addListSelectionListener(new ListSelectionListener() {
 			@Override
@@ -53,10 +53,6 @@ public abstract class RuleEditorListSelectionPanelBase<E extends JComponent, T e
 				repaint();
 			}
 		});
-
-		if (renderer != null) {
-			list.setCellRenderer(renderer);
-		}
 
 		if (model.getSize() > 0) {
 			list.setSelectedIndex(0);

@@ -41,7 +41,7 @@ public class RuleGeneralPanel extends JPanel implements RuleEditorPart {
 	/**
 	 * TextField
 	 */
-	private JTextField txtName = new JTextField(20);
+	private JTextField txtName = new JTextField(50);
 
 	/**
 	 * Label
@@ -71,7 +71,7 @@ public class RuleGeneralPanel extends JPanel implements RuleEditorPart {
 	/**
 	 * TextField
 	 */
-	private JTextField txtVersion = new JTextField(40);
+	private JTextField txtVersion = new JTextField(20);
 
 	private JCheckBox chkDeveloper = new JCheckBox(Localization.getString("Developer"), false);
 

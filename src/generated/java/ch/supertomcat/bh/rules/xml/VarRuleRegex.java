@@ -17,18 +17,18 @@ import javax.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Restriction complex type.
+ * <p>Java class for VarRuleRegex complex type.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
- * &lt;complexType name="Restriction"&gt;
+ * &lt;complexType name="VarRuleRegex"&gt;
  *   &lt;complexContent&gt;
  *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType"&gt;
  *       &lt;sequence&gt;
- *         &lt;element name="domain" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/&gt;
+ *         &lt;element name="regexp" type="{}RuleRegex" maxOccurs="unbounded" minOccurs="0"/&gt;
  *       &lt;/sequence&gt;
- *       &lt;attribute name="maxConnections" use="required" type="{http://www.w3.org/2001/XMLSchema}int" /&gt;
+ *       &lt;attribute name="variableName" use="required" type="{http://www.w3.org/2001/XMLSchema}string" /&gt;
  *     &lt;/restriction&gt;
  *   &lt;/complexContent&gt;
  * &lt;/complexType&gt;
@@ -37,58 +37,66 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Restriction", propOrder = {
-    "domain"
+@XmlType(name = "VarRuleRegex", propOrder = {
+    "regexp"
 })
-public class Restriction {
+public class VarRuleRegex {
 
-    protected List<String> domain;
-    @XmlAttribute(name = "maxConnections", required = true)
-    protected int maxConnections;
+    protected List<RuleRegex> regexp;
+    @XmlAttribute(name = "variableName", required = true)
+    protected String variableName;
 
     /**
-     * Gets the value of the domain property.
+     * Gets the value of the regexp property.
      * 
      * <p>
      * This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the domain property.
+     * This is why there is not a <CODE>set</CODE> method for the regexp property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * <pre>
-     *    getDomain().add(newItem);
+     *    getRegexp().add(newItem);
      * </pre>
      * 
      * 
      * <p>
      * Objects of the following type(s) are allowed in the list
-     * {@link String }
+     * {@link RuleRegex }
      * 
      * 
      */
-    public List<String> getDomain() {
-        if (domain == null) {
-            domain = new ArrayList<String>();
+    public List<RuleRegex> getRegexp() {
+        if (regexp == null) {
+            regexp = new ArrayList<RuleRegex>();
         }
-        return this.domain;
+        return this.regexp;
     }
 
     /**
-     * Gets the value of the maxConnections property.
+     * Gets the value of the variableName property.
      * 
+     * @return
+     *     possible object is
+     *     {@link String }
+     *     
      */
-    public int getMaxConnections() {
-        return maxConnections;
+    public String getVariableName() {
+        return variableName;
     }
 
     /**
-     * Sets the value of the maxConnections property.
+     * Sets the value of the variableName property.
      * 
+     * @param value
+     *     allowed object is
+     *     {@link String }
+     *     
      */
-    public void setMaxConnections(int value) {
-        this.maxConnections = value;
+    public void setVariableName(String value) {
+        this.variableName = value;
     }
 
 }

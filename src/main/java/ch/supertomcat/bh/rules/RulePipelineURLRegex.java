@@ -1,5 +1,8 @@
 package ch.supertomcat.bh.rules;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
@@ -8,15 +11,22 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoURL;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLRegexReplace;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLRegexSearch;
+import ch.supertomcat.bh.rules.trace.RuleTraceInfoURLRegexVariable;
 import ch.supertomcat.bh.rules.xml.URLMode;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
+import ch.supertomcat.bh.rules.xml.VarRuleRegex;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * RulePipeline
  */
 public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
+	/**
+	 * Regex Search / Replaces for storing into variable
+	 */
+	protected List<RuleVarRegExp> varRegexps = new ArrayList<>();
+
 	/**
 	 * Constructor
 	 */
@@ -45,6 +55,18 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 */
 	public RulePipelineURLRegex(URLRegexPipeline definition) {
 		super(definition);
+		updateFromDefinition();
+	}
+
+	/**
+	 * Update internal variables from definition
+	 */
+	private void updateFromDefinition() {
+		varRegexps.clear();
+		for (VarRuleRegex varRegexDefinition : definition.getVarRegexp()) {
+			RuleVarRegExp ruleVarRegExp = new RuleVarRegExp(varRegexDefinition);
+			varRegexps.add(ruleVarRegExp);
+		}
 	}
 
 	@Override
@@ -69,8 +91,29 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 
 	@Override
 	public String getURL(RuleContext ruleContext) throws HostException {
-		String result = getURL(ruleContext.getPipelineURL(), ruleContext.getPipelineThumbURL(), ruleContext.getHtmlCodeLast().getHtmlCode(), ruleContext.getPic(), ruleContext
-				.getCurrentRuleTraceInfoURL());
+		String url = ruleContext.getPipelineURL();
+		String thumbURL = ruleContext.getPipelineThumbURL();
+		Pic pic = ruleContext.getPic();
+		String htmlCode = ruleContext.getHtmlCodeLast().getHtmlCode();
+		RuleTraceInfoURL ruleTraceInfoURL = ruleContext.getCurrentRuleTraceInfoURL();
+
+		for (int i = 0; i < varRegexps.size(); i++) {
+			RuleVarRegExp ruleVarRegex = varRegexps.get(i);
+			String value;
+			if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
+				value = getURLFromContainerOrThumbURL(regexps, url, thumbURL, pic, ruleTraceInfoURL);
+			} else {
+				value = getURLFromContainerPage(regexps, url, htmlCode, pic, ruleTraceInfoURL);
+			}
+			String variableName = ruleVarRegex.getVariableName();
+			ruleContext.putVar(variableName, value);
+			logger.debug("{} -> Step {} -> Variable assigned: {}={}", url, i, variableName, value);
+			if (ruleTraceInfoURL != null) {
+				ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexVariable(i, variableName, value));
+			}
+		}
+
+		String result = getURL(url, thumbURL, htmlCode, pic, ruleTraceInfoURL);
 		ruleContext.setPipelineResult(result);
 		return result;
 	}
@@ -80,13 +123,13 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * 
 	 * @param url Container-URL
 	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
+	 * @param htmlCode Sourcecode
 	 * @param pic Pic
 	 * @return URL
 	 * @throws HostException
 	 */
-	public String getURL(String url, String thumbURL, String htmlcode, Pic pic) throws HostException {
-		return getURL(url, thumbURL, htmlcode, pic, null);
+	public String getURL(String url, String thumbURL, String htmlCode, Pic pic) throws HostException {
+		return getURL(url, thumbURL, htmlCode, pic, null);
 	}
 
 	/**
@@ -94,51 +137,18 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * 
 	 * @param url Container-URL
 	 * @param thumbURL Thumbnail-URL
-	 * @param htmlcode Sourcecode
+	 * @param htmlCode Sourcecode
 	 * @param pic Pic
 	 * @param ruleTraceInfoURL Rule Trace Info URL or null
 	 * @return URL
 	 * @throws HostException
 	 */
-	public String getURL(String url, String thumbURL, String htmlcode, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) throws HostException {
+	public String getURL(String url, String thumbURL, String htmlCode, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) throws HostException {
 		String retval = "";
 		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
-			String result = url;
-			if (definition.getUrlMode() == URLMode.THUMBNAIL_URL) {
-				result = thumbURL;
-			}
-			for (int i = 0; i < regexps.size(); i++) {
-				result = regexps.get(i).doURLReplace(result, pic);
-				logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
-				if (ruleTraceInfoURL != null) {
-					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, 0, result));
-				}
-			}
-			retval = result;
+			retval = getURLFromContainerOrThumbURL(regexps, url, thumbURL, pic, ruleTraceInfoURL);
 		} else {
-			String result = "";
-			int start = 0;
-			for (int i = 0; i < regexps.size(); i++) {
-				if (i < (regexps.size() - 1)) {
-					int pos = regexps.get(i).doPageSourcecodeSearch(htmlcode, start);
-					if (pos >= 0) {
-						logger.debug("{} -> Search done -> Step {} -> Pattern found at: {}", url, i, pos);
-					} else {
-						logger.debug("{} -> Search done -> Step {} -> Pattern not found!", url, i);
-					}
-					if (ruleTraceInfoURL != null) {
-						ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexSearch(i, start, pos));
-					}
-					start = pos;
-				} else {
-					result = regexps.get(i).doPageSourcecodeReplace(htmlcode, start, url, pic);
-					logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
-					if (ruleTraceInfoURL != null) {
-						ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, start, result));
-					}
-				}
-			}
-			retval = result;
+			retval = getURLFromContainerPage(regexps, url, htmlCode, pic, ruleTraceInfoURL);
 		}
 		if (retval.isEmpty()) {
 			if (definition.getUrlMode() == URLMode.THUMBNAIL_URL && thumbURL.isEmpty()) {
@@ -148,5 +158,69 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * Returns parsed URL
+	 * 
+	 * @param regexList Regex List
+	 * @param url Container-URL
+	 * @param thumbURL Thumbnail-URL
+	 * @param pic Pic
+	 * @param ruleTraceInfoURL Rule Trace Info URL or null
+	 * @return URL
+	 */
+	private String getURLFromContainerOrThumbURL(List<RuleRegExp> regexList, String url, String thumbURL, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) {
+		String result;
+		if (definition.getUrlMode() == URLMode.THUMBNAIL_URL) {
+			result = thumbURL;
+		} else {
+			result = url;
+		}
+
+		for (int i = 0; i < regexList.size(); i++) {
+			result = regexList.get(i).doURLReplace(result, pic);
+			logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
+			if (ruleTraceInfoURL != null) {
+				ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, 0, result));
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Returns parsed URL
+	 * 
+	 * @param regexList Regex List
+	 * @param url Container-URL
+	 * @param htmlCode Sourcecode
+	 * @param pic Pic
+	 * @param ruleTraceInfoURL Rule Trace Info URL or null
+	 * @return URL
+	 */
+	private String getURLFromContainerPage(List<RuleRegExp> regexList, String url, String htmlCode, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) {
+		String result = "";
+		int start = 0;
+		for (int i = 0; i < regexList.size(); i++) {
+			if (i < (regexList.size() - 1)) {
+				int pos = regexps.get(i).doPageSourcecodeSearch(htmlCode, start);
+				if (pos >= 0) {
+					logger.debug("{} -> Search done -> Step {} -> Pattern found at: {}", url, i, pos);
+				} else {
+					logger.debug("{} -> Search done -> Step {} -> Pattern not found!", url, i);
+				}
+				if (ruleTraceInfoURL != null) {
+					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexSearch(i, start, pos));
+				}
+				start = pos;
+			} else {
+				result = regexList.get(i).doPageSourcecodeReplace(htmlCode, start, url, pic);
+				logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
+				if (ruleTraceInfoURL != null) {
+					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, start, result));
+				}
+			}
+		}
+		return result;
 	}
 }

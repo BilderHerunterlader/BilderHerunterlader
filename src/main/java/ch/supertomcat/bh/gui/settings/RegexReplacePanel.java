@@ -19,7 +19,7 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipelineURLRegexTableModel;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.regex.RulePipelineURLRegexTableModel;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;

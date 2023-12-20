@@ -1,9 +1,7 @@
-package ch.supertomcat.bh.gui.rules.editor.urlpipe;
+package ch.supertomcat.bh.gui.rules.editor.urlpipe.regex;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -12,22 +10,17 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.border.TitledBorder;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.TableColumnModelListener;
 
-import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorTablePanel;
-import ch.supertomcat.bh.gui.rules.editor.base.RuleRegexpEditor;
-import ch.supertomcat.bh.rules.xml.RuleRegex;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipelineURLPanelBase;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.varregex.RulePipelineVarRuleRegexListPanel;
 import ch.supertomcat.bh.rules.xml.URLMode;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 
 /**
  * Rule-Pipeline-Panel
@@ -36,24 +29,14 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 	private static final long serialVersionUID = 1L;
 
 	/**
-	 * TableModel
-	 */
-	private RulePipelineURLRegexTableModel model = new RulePipelineURLRegexTableModel();
-
-	/**
-	 * Action New Supplier
-	 */
-	private Supplier<Object[]> actionNewSupplier = () -> createRegexp();
-
-	/**
-	 * Action Edit Function
-	 */
-	private Function<Object[], Object[]> actionEditFunction = x -> editRegexp(x);
-
-	/**
 	 * Table Panel
 	 */
-	private RuleEditorTablePanel<RulePipelineURLRegexTableModel> pnlTable = new RuleEditorTablePanel<>(model, actionNewSupplier, actionEditFunction);
+	private RulePipelineURLRegexTablePanel pnlTable;
+
+	/**
+	 * Var Rule Regex List
+	 */
+	private RulePipelineVarRuleRegexListPanel pnlVarRuleRegexList;
 
 	/**
 	 * Mode
@@ -117,11 +100,6 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 	private JPanel pnlRB = new JPanel();
 
 	/**
-	 * Owner
-	 */
-	private JDialog owner = null;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param pipe Pipeline
@@ -130,41 +108,15 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 	 */
 	public RulePipelineURLRegexPanel(URLRegexPipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(pipe);
-		this.owner = owner;
 		this.mode = pipe.getMode();
 		this.urlMode = pipe.getUrlMode();
 		setLayout(new BorderLayout());
 
-		TitledBorder brd = BorderFactory.createTitledBorder(Localization.getString("Pipeline"));
-		this.setBorder(brd);
+		pnlTable = new RulePipelineURLRegexTablePanel(owner, settingsManager, pipe.getRegexp());
 
-		updateColWidthsFromSettingsManager(settingsManager);
-		pnlTable.getTable().getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-			@Override
-			public void columnAdded(TableColumnModelEvent e) {
-			}
-
-			@Override
-			public void columnMarginChanged(ChangeEvent e) {
-				updateColWidthsToSettingsManager(settingsManager);
-			}
-
-			@Override
-			public void columnMoved(TableColumnModelEvent e) {
-			}
-
-			@Override
-			public void columnRemoved(TableColumnModelEvent e) {
-			}
-
-			@Override
-			public void columnSelectionChanged(ListSelectionEvent e) {
-			}
-		});
-
-		for (RuleRegex regexp : pipe.getRegexp()) {
-			model.addRow(regexp.getPattern(), regexp.getReplacement());
-		}
+		pnlVarRuleRegexList = new RulePipelineVarRuleRegexListPanel(pipe, owner, settingsManager);
+		TitledBorder brdVarRuleRegexList = BorderFactory.createTitledBorder(Localization.getString("VariableAssignmentRegex"));
+		pnlVarRuleRegexList.setBorder(brdVarRuleRegexList);
 
 		boolean bMode = (mode == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL);
 		rbModeZero.setSelected(bMode);
@@ -209,28 +161,23 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 		pnlRB.add(new JLabel());
 		pnlRB.add(new JLabel());
 		pnlRB.add(chkSendCookies);
-		add(pnlRB, BorderLayout.NORTH);
 
 		rbModeOne.addActionListener(e -> updateURLModeComponents());
 		rbModeZero.addActionListener(e -> updateURLModeComponents());
 
-		add(pnlTable, BorderLayout.CENTER);
-	}
+		JPanel pnlPipeline = new JPanel(new BorderLayout());
+		TitledBorder brd = BorderFactory.createTitledBorder(Localization.getString("Pipeline"));
+		pnlPipeline.setBorder(brd);
+		pnlPipeline.add(pnlRB, BorderLayout.NORTH);
+		pnlPipeline.add(pnlTable, BorderLayout.CENTER);
 
-	private Object[] createRegexp() {
-		RuleRegexpEditor rme = new RuleRegexpEditor(owner, false);
-		if (rme.isCanceled()) {
-			return null;
-		}
-		return new Object[] { rme.getSearch(), rme.getReplacement() };
-	}
+		JPanel pnlMain = new JPanel(new BorderLayout());
+		pnlMain.add(pnlPipeline, BorderLayout.NORTH);
+		pnlMain.add(pnlVarRuleRegexList, BorderLayout.SOUTH);
 
-	private Object[] editRegexp(Object[] originalData) {
-		RuleRegexpEditor rme = new RuleRegexpEditor(owner, (String)originalData[0], (String)originalData[1]);
-		if (rme.isCanceled()) {
-			return null;
-		}
-		return new Object[] { rme.getSearch(), rme.getReplacement() };
+		JScrollPane scrollPane = new JScrollPane(pnlMain);
+		scrollPane.getVerticalScrollBar().setUnitIncrement(16);
+		add(scrollPane, BorderLayout.CENTER);
 	}
 
 	private void updateURLModeComponents() {
@@ -264,13 +211,9 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 		}
 		pipe.setSendCookies(chkSendCookies.isSelected());
 
-		pipe.getRegexp().clear();
-		for (int i = 0; i < model.getRowCount(); i++) {
-			RuleRegex ruleRegex = new RuleRegex();
-			ruleRegex.setPattern((String)model.getValueAt(i, 0));
-			ruleRegex.setReplacement((String)model.getValueAt(i, 1));
-			pipe.getRegexp().add(ruleRegex);
-		}
+		pnlTable.apply(pipe.getRegexp());
+
+		pnlVarRuleRegexList.apply();
 
 		return true;
 	}
@@ -278,30 +221,5 @@ public class RulePipelineURLRegexPanel extends RulePipelineURLPanelBase<URLRegex
 	@Override
 	public void redirectEnabled(boolean enabled) {
 		// Nothing to do
-	}
-
-	/**
-	 * updateColWidthsToSettingsManager
-	 * 
-	 * @param settingsManager SettingsManager
-	 */
-	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (!settingsManager.isSaveTableColumnSizes()) {
-			return;
-		}
-		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(pnlTable.getTable()));
-		settingsManager.writeSettings(true);
-	}
-
-	/**
-	 * updateColWidthsFromSettingsManager
-	 * 
-	 * @param settingsManager SettingsManager
-	 */
-	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (!settingsManager.isSaveTableColumnSizes()) {
-			return;
-		}
-		TableUtil.applyColWidths(pnlTable.getTable(), settingsManager.getColWidthsRulesEditor());
 	}
 }

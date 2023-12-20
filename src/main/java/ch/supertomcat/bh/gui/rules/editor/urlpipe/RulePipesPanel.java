@@ -8,6 +8,8 @@ import javax.swing.JDialog;
 import ch.supertomcat.bh.gui.rules.editor.base.PipeListCellRenderer;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorListSelectionPanelBase;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.javascript.RulePipelineURLJavascriptPanel;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.regex.RulePipelineURLRegexPanel;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLMode;

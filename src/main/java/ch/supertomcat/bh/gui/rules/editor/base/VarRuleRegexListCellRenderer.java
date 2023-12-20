@@ -6,14 +6,13 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
 
-import ch.supertomcat.bh.gui.rules.editor.failures.RulePipelineFailuresPanel;
-import ch.supertomcat.bh.gui.rules.editor.urlpipe.javascript.RulePipelineURLJavascriptPanel;
-import ch.supertomcat.bh.gui.rules.editor.urlpipe.regex.RulePipelineURLRegexPanel;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.varregex.RulePipelineVarRuleRegexPanel;
+import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * List Cell Renderer for Pipes
  */
-public class PipeListCellRenderer extends DefaultListCellRenderer {
+public class VarRuleRegexListCellRenderer extends DefaultListCellRenderer {
 	private static final long serialVersionUID = 1L;
 
 	@Override
@@ -21,14 +20,10 @@ public class PipeListCellRenderer extends DefaultListCellRenderer {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 		if (comp instanceof JLabel) {
 			String text;
-			if (value instanceof RulePipelineFailuresPanel) {
-				text = "Failure Pipeline";
-			} else if (value instanceof RulePipelineURLJavascriptPanel) {
-				text = "Javascript Pipeline";
-			} else if (value instanceof RulePipelineURLRegexPanel) {
-				text = "Regex Pipeline";
+			if (value instanceof RulePipelineVarRuleRegexPanel) {
+				text = Localization.getString("VariableAssignment") + ": " + ((RulePipelineVarRuleRegexPanel)value).getVariableName();
 			} else {
-				text = "Pipeline";
+				text = Localization.getString("VariableAssignment");
 			}
 			((JLabel)comp).setText(text);
 		}

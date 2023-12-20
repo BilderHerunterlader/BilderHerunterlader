@@ -300,6 +300,16 @@ public class RuleContext {
 	}
 
 	/**
+	 * Put Variable
+	 * 
+	 * @param name Name
+	 * @param value Value
+	 */
+	public void putVar(String name, String value) {
+		vars.put(name, value);
+	}
+
+	/**
 	 * Returns the htmlCodeFromFirstURL
 	 * 
 	 * @return htmlCodeFromFirstURL

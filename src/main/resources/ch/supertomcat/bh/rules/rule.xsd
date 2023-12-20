@@ -107,11 +107,26 @@
 	<xs:complexType name="URLRegexPipeline">
 		<xs:complexContent>
 			<xs:extension base="URLPipeline">
+				<xs:sequence>
+					<!-- Additional Regex List only used to store results to variable, but does not change pipelineResult -->
+					<xs:element name="varRegexp" type="VarRuleRegex" minOccurs="0" maxOccurs="unbounded" />
+				</xs:sequence>
+				
 				<xs:attribute name="mode" type="URLRegexPipelineMode" use="required" />
 				<!-- Only used when urlRegexMode is CONTAINER_OR_THUMBNAIL_URL -->
 				<xs:attribute name="urlMode" type="URLMode" default="CONTAINER_URL" />
 			</xs:extension>
 		</xs:complexContent>
+	</xs:complexType>
+	
+	<!-- Variable Regex -->
+	<xs:complexType name="VarRuleRegex">
+		<xs:sequence>
+			<!-- Additional Regex List only used to store results to variable, but does not change pipelineResult -->
+			<xs:element name="regexp" type="RuleRegex" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<!-- Variable Name to store result to -->
+		<xs:attribute name="variableName" type="xs:string" use="required" />
 	</xs:complexType>
 	
 	<!-- URL Regex Mode -->

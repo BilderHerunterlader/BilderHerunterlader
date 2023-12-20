@@ -16,7 +16,7 @@ import javax.swing.event.TableColumnModelListener;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorTablePanel;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleRegexpEditor;
-import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipelineURLRegexTableModel;
+import ch.supertomcat.bh.gui.rules.editor.urlpipe.regex.RulePipelineURLRegexTableModel;
 import ch.supertomcat.bh.rules.xml.Pipeline;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.RuleRegex;

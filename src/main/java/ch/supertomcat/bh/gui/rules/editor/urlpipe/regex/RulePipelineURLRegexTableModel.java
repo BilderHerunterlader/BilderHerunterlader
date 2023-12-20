@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.gui.rules.editor.urlpipe;
+package ch.supertomcat.bh.gui.rules.editor.urlpipe.regex;
 
 import javax.swing.table.DefaultTableModel;
 
@@ -28,7 +28,7 @@ public class RulePipelineURLRegexTableModel extends DefaultTableModel {
 	 * @param replace Replace
 	 */
 	public void addRow(String search, String replace) {
-		Object data[] = new Object[2];
+		Object[] data = new Object[2];
 		data[0] = search;
 		data[1] = replace;
 		this.addRow(data);

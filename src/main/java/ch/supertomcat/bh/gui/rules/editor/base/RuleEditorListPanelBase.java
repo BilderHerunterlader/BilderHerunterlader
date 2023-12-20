@@ -7,6 +7,7 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
 import javax.swing.ListSelectionModel;
 
 /**
@@ -50,8 +51,9 @@ public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>, B extends
 	 * @param model Table Model
 	 * @param actionNewSupplier Supplier for action new
 	 * @param buttonPanel Button Panel
+	 * @param renderer Renderer or null
 	 */
-	public RuleEditorListPanelBase(T model, Supplier<E> actionNewSupplier, B buttonPanel) {
+	public RuleEditorListPanelBase(T model, Supplier<E> actionNewSupplier, B buttonPanel, ListCellRenderer<? super E> renderer) {
 		this.model = model;
 		this.actionNewSupplier = actionNewSupplier;
 		this.list = new JList<>(model);
@@ -60,6 +62,10 @@ public class RuleEditorListPanelBase<E, T extends DefaultListModel<E>, B extends
 
 		this.list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		this.list.setVisibleRowCount(10);
+
+		if (renderer != null) {
+			list.setCellRenderer(renderer);
+		}
 
 		initLayout();
 	}

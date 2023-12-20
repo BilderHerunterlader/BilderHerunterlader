@@ -3,28 +3,19 @@ package ch.supertomcat.bh.rules;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.regex.PatternSyntaxException;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import ch.supertomcat.bh.rules.xml.Pipeline;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
+import ch.supertomcat.bh.rules.xml.VarRuleRegex;
 
 /**
- * RulePipeline
- * 
- * @param <T> Pipeline Type
+ * Search and Replace by Regexp and store to variable
  */
-public abstract class RulePipeline<T extends Pipeline> {
-	/**
-	 * Logger
-	 */
-	protected Logger logger = LoggerFactory.getLogger(getClass());
-
+public class RuleVarRegExp {
 	/**
 	 * Definition
 	 */
-	protected final T definition;
+	private final VarRuleRegex definition;
 
 	/**
 	 * RuleRegExps
@@ -33,10 +24,18 @@ public abstract class RulePipeline<T extends Pipeline> {
 
 	/**
 	 * Constructor
+	 */
+	public RuleVarRegExp() {
+		this.definition = new VarRuleRegex();
+	}
+
+	/**
+	 * Constructor
 	 * 
 	 * @param definition Definition
+	 * @throws PatternSyntaxException
 	 */
-	public RulePipeline(T definition) {
+	public RuleVarRegExp(VarRuleRegex definition) throws PatternSyntaxException {
 		this.definition = definition;
 		updateFromDefinition();
 	}
@@ -44,7 +43,7 @@ public abstract class RulePipeline<T extends Pipeline> {
 	/**
 	 * Update internal variables from definition
 	 */
-	private void updateFromDefinition() {
+	public void updateFromDefinition() {
 		regexps.clear();
 		for (RuleRegex regexDefinition : definition.getRegexp()) {
 			RuleRegExp ruleRegExp = new RuleRegExp(regexDefinition);
@@ -57,8 +56,15 @@ public abstract class RulePipeline<T extends Pipeline> {
 	 * 
 	 * @return definition
 	 */
-	public T getDefinition() {
+	public VarRuleRegex getDefinition() {
 		return definition;
+	}
+
+	/**
+	 * @return Variable Name
+	 */
+	public String getVariableName() {
+		return definition.getVariableName();
 	}
 
 	/**
