@@ -23,6 +23,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
+import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
@@ -280,16 +281,18 @@ public class RuleRegexpEditor extends JDialog {
 	}
 
 	private void actionOK() {
-		try {
-			/*
-			 * Compile pattern to make sure it's a valid regex
-			 */
-			Pattern.compile(txtSearch.getText());
-		} catch (PatternSyntaxException pse) {
-			txtError.setText(pse.getLocalizedMessage());
-			txtError.setVisible(true);
-			lblError.setVisible(true);
-			return;
+		if (!RuleRegExp.checkVariablesInString(txtSearch.getText())) {
+			try {
+				/*
+				 * Compile pattern to make sure it's a valid regex
+				 */
+				Pattern.compile(txtSearch.getText());
+			} catch (PatternSyntaxException pse) {
+				txtError.setText(pse.getLocalizedMessage());
+				txtError.setVisible(true);
+				lblError.setVisible(true);
+				return;
+			}
 		}
 
 		canceled = false;

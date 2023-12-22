@@ -1,7 +1,14 @@
 package ch.supertomcat.bh.rules;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+
+import org.apache.commons.text.StringSubstitutor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
@@ -12,9 +19,19 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplace;
  */
 public class RuleRegExp extends RegexReplace {
 	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
 	 * Definition
 	 */
 	private final RuleRegex definition;
+
+	/**
+	 * Flag if variables are defined in Search
+	 */
+	private boolean variablesInSearch;
 
 	/**
 	 * Constructor
@@ -23,6 +40,7 @@ public class RuleRegExp extends RegexReplace {
 		this.definition = new RuleRegex();
 		this.definition.setPattern("");
 		this.definition.setReplacement("");
+		variablesInSearch = false;
 	}
 
 	/**
@@ -32,8 +50,9 @@ public class RuleRegExp extends RegexReplace {
 	 * @throws PatternSyntaxException
 	 */
 	public RuleRegExp(RuleRegex definition) throws PatternSyntaxException {
-		super(definition.getPattern(), definition.getReplacement());
+		super(definition.getPattern(), definition.getReplacement(), !checkVariablesInString(definition.getPattern()));
 		this.definition = definition;
+		variablesInSearch = checkVariablesInString(search);
 	}
 
 	/**
@@ -44,10 +63,11 @@ public class RuleRegExp extends RegexReplace {
 	 * @throws PatternSyntaxException
 	 */
 	public RuleRegExp(String search, String replace) throws PatternSyntaxException {
-		super(search, replace);
+		super(search, replace, !checkVariablesInString(search));
 		this.definition = new RuleRegex();
 		this.definition.setPattern(search);
 		this.definition.setReplacement(replace);
+		variablesInSearch = checkVariablesInString(search);
 	}
 
 	/**
@@ -61,7 +81,8 @@ public class RuleRegExp extends RegexReplace {
 
 	@Override
 	public void setSearch(String search) throws PatternSyntaxException {
-		super.setSearch(search);
+		variablesInSearch = checkVariablesInString(search);
+		super.setSearch(search, !variablesInSearch);
 		/*
 		 * defintion is null when the super constructor with parameters is called, but the constructors in this class will set the pattern anyway, so we can
 		 * just do nothing here
@@ -133,16 +154,34 @@ public class RuleRegExp extends RegexReplace {
 	 * @return URL
 	 */
 	public String doURLReplace(String url, Pic pic) {
+		return doURLReplace(url, pic, null);
+	}
+
+	/**
+	 * Replace-Method for URLs
+	 * 
+	 * @param url URL
+	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
+	 * @return URL
+	 */
+	public String doURLReplace(String url, Pic pic, RuleContext ruleContext) {
 		// If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null || search.isEmpty() || url.isEmpty()) {
+		if ((pattern == null && !variablesInSearch) || search.isEmpty() || url.isEmpty()) {
 			return "";
 		}
 
+		Pattern patternToUse = pattern;
+		if (variablesInSearch) {
+			String resolvedSearch = replaceVariablesInString(search, url, pic, ruleContext, true);
+			patternToUse = Pattern.compile(resolvedSearch);
+		}
+
 		// Now we replace the variables if the user defined some in the Replace-String
-		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
+		String dReplace = replaceVariablesInString(replace, url, pic, ruleContext, false);
 
 		// Now we replace
-		return pattern.matcher(url).replaceAll(dReplace);
+		return patternToUse.matcher(url).replaceAll(dReplace);
 	}
 
 	/**
@@ -169,22 +208,45 @@ public class RuleRegExp extends RegexReplace {
 	 * @return URL
 	 */
 	public String doPageSourcecodeReplace(String htmlcode, int start, String url, Pic pic) {
+		return doPageSourcecodeReplace(htmlcode, start, url, pic, null);
+	}
+
+	/**
+	 * Replace-Method for Pagesourcecodes
+	 * Returns an empty String if the pattern was not found
+	 * 
+	 * @param htmlcode Sourcecode
+	 * @param start Startposition
+	 * @param url Container-URL
+	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
+	 * @return URL
+	 */
+	public String doPageSourcecodeReplace(String htmlcode, int start, String url, Pic pic, RuleContext ruleContext) {
 		// If pattern is not compiled or url is empty we return an empty String
-		if (pattern == null || search.isEmpty() || url.isEmpty() || start < 0 || start > htmlcode.length()) {
+		if ((pattern == null && !variablesInSearch) || search.isEmpty() || url.isEmpty() || start < 0 || start > htmlcode.length()) {
 			return "";
 		}
 
+		Pattern patternToUse = pattern;
+		if (variablesInSearch) {
+			logger.debug("Unresolved search pattern: {}", search);
+			String resolvedSearch = replaceVariablesInString(search, url, pic, ruleContext, true);
+			logger.debug("Resolved search pattern: {}", resolvedSearch);
+			patternToUse = Pattern.compile(resolvedSearch);
+		}
+
 		// Now we replace the variables if the user defined some in the Replace-String
-		String dReplace = replaceVariablesInReplaceString(replace, url, pic);
+		String dReplace = replaceVariablesInString(replace, url, pic, ruleContext, false);
 
 		// Now we replace
-		Matcher matcher = pattern.matcher(htmlcode);
+		Matcher matcher = patternToUse.matcher(htmlcode);
 		if (matcher.find(start)) {
 			/*
 			 * Here we replace only the region that was matched and also return only the matched region. Instead of returning the whole input with parts
 			 * replaced.
 			 */
-			Matcher matchRegionMatcher = pattern.matcher(matcher.group());
+			Matcher matchRegionMatcher = patternToUse.matcher(matcher.group());
 			return matchRegionMatcher.replaceAll(dReplace);
 		}
 		return "";
@@ -192,14 +254,17 @@ public class RuleRegExp extends RegexReplace {
 
 	/**
 	 * The user can use variables in the replace-String of a rule,
-	 * so here we replace the variables
+	 * so here we replace the variables. If searchStringReplacement is true, then old style variables are not replaced. Old style variables are only used for
+	 * replacement of replace String, because of compatibility.
 	 * 
 	 * @param replace Replace-String
 	 * @param url Container-URL
 	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
+	 * @param searchStringReplacement True if a search string is replaced, false otherwise
 	 * @return Replace-String
 	 */
-	private String replaceVariablesInReplaceString(final String replace, String url, Pic pic) {
+	private String replaceVariablesInString(final String replace, String url, Pic pic, RuleContext ruleContext, boolean searchStringReplacement) {
 		/*
 		 * We initialise the variables, which the user can use in a rule.
 		 * $SRV -> Domain only with / at the end
@@ -241,28 +306,52 @@ public class RuleRegExp extends RegexReplace {
 			dURLT = dURL.substring(0, dURL.length() - 1);
 		}
 
+		Map<String, String> vars;
+		if (ruleContext != null) {
+			vars = new HashMap<>(ruleContext.getVars());
+		} else {
+			vars = null;
+		}
+
 		// Now we replace the variables if the user defined some in the Replace-String
-		if (!dSRV.isEmpty()) {
-			retval = retval.replace("$SRV", dSRV);
+		replaceIfNecessary(retval, "$SRV", dSRV, "${SRV}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$SRVT", dSRVT, "${SRVT}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$URL", dURL, "${URL}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$URLT", dURLT, "${URLT}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$FURL", dFURL, "${FURL}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$DIR", dDIR, "${DIR}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$FILE", dFILE, "${FILE}", vars, searchStringReplacement);
+
+		if (ruleContext != null && !ruleContext.getVars().isEmpty()) {
+			StringSubstitutor substitutor = new StringSubstitutor(ruleContext.getVars());
+			retval = substitutor.replace(retval);
 		}
-		if (!dSRVT.isEmpty()) {
-			retval = retval.replace("$SRVT", dSRVT);
-		}
-		if (!dURL.isEmpty()) {
-			retval = retval.replace("$URL", dURL);
-		}
-		if (!dURLT.isEmpty()) {
-			retval = retval.replace("$URLT", dURLT);
-		}
-		if (!dFURL.isEmpty()) {
-			retval = retval.replace("$FURL", dFURL);
-		}
-		if (!dFURL.isEmpty()) {
-			retval = retval.replace("$DIR", dDIR);
-		}
-		if (!dFURL.isEmpty()) {
-			retval = retval.replace("$FILE", dFILE);
-		}
+
 		return retval;
+	}
+
+	private String replaceIfNecessary(String input, String variableKey, String variableValue, String mapVariableKey, Map<String, String> vars, boolean searchStringReplacement) {
+		String result = input;
+		if (!variableValue.isEmpty()) {
+			if (!searchStringReplacement) {
+				result = result.replace(variableKey, variableValue);
+			}
+			if (vars != null) {
+				vars.put(mapVariableKey, variableValue);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Check if variables are in String
+	 * 
+	 * @param input Input
+	 * @return True if variables are in input, false otherwise
+	 */
+	public static boolean checkVariablesInString(String input) {
+		StringSubstitutor substitutor = new StringSubstitutor(key -> "RULE_REG_EXP_UNDEFINED_VARIABLE");
+		String result = substitutor.replace(input);
+		return !result.equals(input);
 	}
 }

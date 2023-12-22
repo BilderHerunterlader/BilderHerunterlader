@@ -51,6 +51,10 @@
 			<artifactId>commons-codec</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.jdom</groupId>
 			<artifactId>jdom2</artifactId>
 		</dependency>
@@ -77,7 +81,7 @@
 		<dependency>
 			<groupId>com.github.bilderherunterlader</groupId>
 			<artifactId>supertomcatutils</artifactId>
-			<version>1.0.25</version>
+			<version>1.0.26</version>
 		</dependency>
 		<dependency>
 			<groupId>org.freedesktop.tango</groupId>

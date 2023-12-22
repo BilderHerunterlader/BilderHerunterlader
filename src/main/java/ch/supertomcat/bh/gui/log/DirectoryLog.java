@@ -57,6 +57,11 @@ public class DirectoryLog extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Dir Count Replace Pattern
+	 */
+	private static final Pattern DIR_COUNT_REPLACE_PATTERN = Pattern.compile("\\$DIRCOUNT");
+
+	/**
 	 * Date Format
 	 */
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
@@ -362,7 +367,7 @@ public class DirectoryLog extends JPanel {
 						model.addRow(dateTime.format(DATE_FORMAT), dirs.get(i).getDirectory(), dirs.get(i).isExists());
 					}
 					String status = Localization.getString("OnlyTheLastFilesAreShownDirectoryLog");
-					status = status.replaceAll("\\$DIRCOUNT", String.valueOf(maxDirs));
+					status = DIR_COUNT_REPLACE_PATTERN.matcher(status).replaceAll(String.valueOf(maxDirs));
 					lblStatus.setText(status);
 				} else {
 					lblStatus.setText(Localization.getString("DirectoryLogLoadingFailed"));

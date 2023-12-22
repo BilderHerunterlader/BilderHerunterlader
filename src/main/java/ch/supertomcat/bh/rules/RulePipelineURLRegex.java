@@ -102,9 +102,9 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			List<RuleRegExp> regexList = ruleVarRegex.getRegexps();
 			String value;
 			if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
-				value = getURLFromContainerOrThumbURL(regexList, url, thumbURL, pic, ruleTraceInfoURL);
+				value = getURLFromContainerOrThumbURL(regexList, url, thumbURL, pic, ruleContext, ruleTraceInfoURL);
 			} else {
-				value = getURLFromContainerPage(regexList, url, htmlCode, pic, ruleTraceInfoURL);
+				value = getURLFromContainerPage(regexList, url, htmlCode, pic, ruleContext, ruleTraceInfoURL);
 			}
 			String variableName = ruleVarRegex.getVariableName();
 			ruleContext.putVar(variableName, value);
@@ -114,7 +114,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			}
 		}
 
-		String result = getURL(url, thumbURL, htmlCode, pic, ruleTraceInfoURL);
+		String result = getURL(url, thumbURL, htmlCode, pic, ruleContext, ruleTraceInfoURL);
 		ruleContext.setPipelineResult(result);
 		return result;
 	}
@@ -130,7 +130,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * @throws HostException
 	 */
 	public String getURL(String url, String thumbURL, String htmlCode, Pic pic) throws HostException {
-		return getURL(url, thumbURL, htmlCode, pic, null);
+		return getURL(url, thumbURL, htmlCode, pic, null, null);
 	}
 
 	/**
@@ -140,16 +140,17 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * @param thumbURL Thumbnail-URL
 	 * @param htmlCode Sourcecode
 	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
 	 * @param ruleTraceInfoURL Rule Trace Info URL or null
 	 * @return URL
 	 * @throws HostException
 	 */
-	public String getURL(String url, String thumbURL, String htmlCode, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) throws HostException {
+	public String getURL(String url, String thumbURL, String htmlCode, Pic pic, RuleContext ruleContext, RuleTraceInfoURL ruleTraceInfoURL) throws HostException {
 		String retval = "";
 		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
-			retval = getURLFromContainerOrThumbURL(regexps, url, thumbURL, pic, ruleTraceInfoURL);
+			retval = getURLFromContainerOrThumbURL(regexps, url, thumbURL, pic, ruleContext, ruleTraceInfoURL);
 		} else {
-			retval = getURLFromContainerPage(regexps, url, htmlCode, pic, ruleTraceInfoURL);
+			retval = getURLFromContainerPage(regexps, url, htmlCode, pic, ruleContext, ruleTraceInfoURL);
 		}
 		if (retval.isEmpty()) {
 			if (definition.getUrlMode() == URLMode.THUMBNAIL_URL && thumbURL.isEmpty()) {
@@ -168,10 +169,11 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * @param url Container-URL
 	 * @param thumbURL Thumbnail-URL
 	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
 	 * @param ruleTraceInfoURL Rule Trace Info URL or null
 	 * @return URL
 	 */
-	private String getURLFromContainerOrThumbURL(List<RuleRegExp> regexList, String url, String thumbURL, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) {
+	private String getURLFromContainerOrThumbURL(List<RuleRegExp> regexList, String url, String thumbURL, Pic pic, RuleContext ruleContext, RuleTraceInfoURL ruleTraceInfoURL) {
 		String result;
 		if (definition.getUrlMode() == URLMode.THUMBNAIL_URL) {
 			result = thumbURL;
@@ -180,7 +182,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 		}
 
 		for (int i = 0; i < regexList.size(); i++) {
-			result = regexList.get(i).doURLReplace(result, pic);
+			result = regexList.get(i).doURLReplace(result, pic, ruleContext);
 			logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
 			if (ruleTraceInfoURL != null) {
 				ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, 0, result));
@@ -196,10 +198,11 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	 * @param url Container-URL
 	 * @param htmlCode Sourcecode
 	 * @param pic Pic
+	 * @param ruleContext Rule Context or null
 	 * @param ruleTraceInfoURL Rule Trace Info URL or null
 	 * @return URL
 	 */
-	private String getURLFromContainerPage(List<RuleRegExp> regexList, String url, String htmlCode, Pic pic, RuleTraceInfoURL ruleTraceInfoURL) {
+	private String getURLFromContainerPage(List<RuleRegExp> regexList, String url, String htmlCode, Pic pic, RuleContext ruleContext, RuleTraceInfoURL ruleTraceInfoURL) {
 		String result = "";
 		int start = 0;
 		for (int i = 0; i < regexList.size(); i++) {
@@ -215,7 +218,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 				}
 				start = pos;
 			} else {
-				result = regexList.get(i).doPageSourcecodeReplace(htmlCode, start, url, pic);
+				result = regexList.get(i).doPageSourcecodeReplace(htmlCode, start, url, pic, ruleContext);
 				logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
 				if (ruleTraceInfoURL != null) {
 					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, start, result));
