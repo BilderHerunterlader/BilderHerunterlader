@@ -94,6 +94,11 @@ public class MainMenuBar {
 	/**
 	 * MenuItem
 	 */
+	private JMenuItem itemReportIssue = new JMenuItem(Localization.getString("ReportIssue"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+
+	/**
+	 * MenuItem
+	 */
 	private JMenuItem itemAbout = new JMenuItem(Localization.getString("About"), Icons.getTangoIcon("apps/help-browser.png", 16));
 
 	/**
@@ -130,6 +135,7 @@ public class MainMenuBar {
 		menuHelp.add(itemUpdate);
 		menuHelp.add(itemLogFolder);
 		menuHelp.add(itemTutorial);
+		menuHelp.add(itemReportIssue);
 		menuHelp.add(itemAbout);
 
 		itemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
@@ -151,29 +157,25 @@ public class MainMenuBar {
 				update.toFront();
 			}
 		});
+
 		itemLogFolder.addActionListener(e -> {
 			File logDir = new File(ApplicationProperties.getProperty("LogsPath"));
-			try {
-				Desktop.getDesktop().open(logDir);
-			} catch (IOException e1) {
-				logger.error("Could not open Directory: {}", logDir.getAbsolutePath(), e1);
-			}
+			openFolder(logDir);
 		});
+
 		itemTutorial.addActionListener(e -> {
 			String url = ApplicationProperties.getProperty("TutorialURL");
-			if (Desktop.isDesktopSupported()) {
-				try {
-					Desktop.getDesktop().browse(new URI(url));
-				} catch (IOException | URISyntaxException ex) {
-					logger.error("Could not open URL: {}", url, ex);
-				}
-			} else {
-				logger.error("Could not open URL, because Desktop is not supported: {}", url);
-			}
+			openURL(url);
 		});
+
+		itemReportIssue.addActionListener(e -> {
+			String url = ApplicationProperties.getProperty("ReportIssueURL");
+			openURL(url);
+		});
+
 		itemAbout.addActionListener(e -> new BHAboutDialog(parentWindow, settingsManager));
 
-		String logFiles[] = logManager.getAvailableLogFileNames();
+		String[] logFiles = logManager.getAvailableLogFileNames();
 		for (int i = 0; i < logFiles.length; i++) {
 			cmbLogFile.addItem(logFiles[i]);
 		}
@@ -204,5 +206,39 @@ public class MainMenuBar {
 	 */
 	public JMenuBar getJMenuBar() {
 		return mb;
+	}
+
+	/**
+	 * Open Folder
+	 * 
+	 * @param dir Directory
+	 */
+	private void openFolder(File dir) {
+		if (Desktop.isDesktopSupported()) {
+			try {
+				Desktop.getDesktop().open(dir);
+			} catch (IOException e1) {
+				logger.error("Could not open Directory: {}", dir.getAbsolutePath(), e1);
+			}
+		} else {
+			logger.error("Could not open folder, because Desktop is not supported: {}", dir);
+		}
+	}
+
+	/**
+	 * Open URL
+	 * 
+	 * @param url URL
+	 */
+	private void openURL(String url) {
+		if (Desktop.isDesktopSupported()) {
+			try {
+				Desktop.getDesktop().browse(new URI(url));
+			} catch (IOException | URISyntaxException ex) {
+				logger.error("Could not open URL: {}", url, ex);
+			}
+		} else {
+			logger.error("Could not open URL, because Desktop is not supported: {}", url);
+		}
 	}
 }
