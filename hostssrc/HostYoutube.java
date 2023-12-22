@@ -422,7 +422,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 			 * Get title and error messages from the page-source-code
 			 */
 			String title = regexTitle.doPageSourcecodeReplace(htmlCode, 0, url, null);
-			title = title.replaceAll("\\\\'", "'");
+			title = title.replace("\\'", "'");
 
 			/*
 			 * First Method of getting the download link, which should always work,
@@ -972,7 +972,7 @@ public class HostYoutube extends Host implements IHoster, IHosterURLAdder, IHost
 
 						String filename = videoID;
 						if (title != null && title.length() > 0) {
-							title = title.replaceAll("\\\\'", "'");
+							title = title.replace("\\'", "'");
 							title = HTMLUtil.unescapeHTML(title);
 							filename = title;
 							if (filenameIncludeVideoID) {

@@ -175,7 +175,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 			if (lastSlash > 0) {
 				rootFolder = rootFolder.substring(0, lastSlash);
 			}
-			rootFolder = rootFolder.replaceAll("[/]", "_");
+			rootFolder = rootFolder.replace("/", "_");
 			rootFolder = filterFilename(rootFolder);
 		} catch (MalformedURLException mue) {
 		}

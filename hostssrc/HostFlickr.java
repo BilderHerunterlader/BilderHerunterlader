@@ -116,6 +116,11 @@ public class HostFlickr extends Host implements IHoster {
 		SIZE_EXTRA_LARGE_5K("5k", "X-Large 5K"),
 
 		/**
+		 * extra large (6k)
+		 */
+		SIZE_EXTRA_LARGE_6K("5k", "X-Large 6K"),
+
+		/**
 		 * original (o)
 		 */
 		SIZE_ORIGINAL("o", "Original");
