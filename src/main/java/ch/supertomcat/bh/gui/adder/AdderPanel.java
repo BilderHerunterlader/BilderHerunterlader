@@ -1072,7 +1072,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			data[0] = Boolean.valueOf(!url.isAlreadyDownloaded());
 			data[1] = url.getURL();
 			String filename = BHUtil.filterFilename(url.getFilenameCorrected(), settingsManager);
-			filename = filename.replaceAll("%20", " ");
+			filename = filename.replace("%20", " ");
 			data[2] = filename;
 			if (url.getTargetPath() != null && !url.getTargetPath().isEmpty()) {
 				data[3] = url.getTargetPath();

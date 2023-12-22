@@ -135,7 +135,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 
 			for (int i = 0; i < regexps.size(); i++) {
 				result = regexps.get(i).doURLReplace(result, pic);
-				logger.debug("{} -> Filename Replace done -> Step {} -> Result: {}", containerURL, i, result);
+				logger.info("{} -> Filename Replace done -> Step {} -> Result: {}", containerURL, i, result);
 				if (traceInfo != null) {
 					traceInfo.addStep(new RuleTraceInfoFilenameReplace(i, 0, result));
 				}
@@ -159,9 +159,9 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 				if (i < (regexps.size() - 1)) {
 					int pos = regexps.get(i).doPageSourcecodeSearch(htmlCode, start);
 					if (pos >= 0) {
-						logger.debug("{} -> Filename Search done -> Step {} -> Pattern found at: {}", htmlCodeSourceURL, i, pos);
+						logger.info("{} -> Filename Search done -> Step {} -> Pattern found at: {}", htmlCodeSourceURL, i, pos);
 					} else {
-						logger.debug("{} -> Filename Search done -> Step {} -> Pattern not found!", htmlCodeSourceURL, i);
+						logger.info("{} -> Filename Search done -> Step {} -> Pattern not found!", htmlCodeSourceURL, i);
 					}
 					if (traceInfo != null) {
 						traceInfo.addStep(new RuleTraceInfoFilenameSearch(i, start, pos));
@@ -169,7 +169,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 					start = pos;
 				} else {
 					result = regexps.get(i).doPageSourcecodeReplace(htmlCode, start, htmlCodeSourceURL, pic);
-					logger.debug("{} -> Filename Replace done -> Step {} -> Result: {}", htmlCodeSourceURL, i, result);
+					logger.info("{} -> Filename Replace done -> Step {} -> Result: {}", htmlCodeSourceURL, i, result);
 					if (traceInfo != null) {
 						traceInfo.addStep(new RuleTraceInfoFilenameReplace(i, start, result));
 					}

@@ -1,5 +1,7 @@
 package ch.supertomcat.bh.hoster.hosteroptions;
 
+import java.util.regex.Pattern;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +11,8 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * OverrideDirectoryOption
  */
 public class OverrideDirectoryOption {
+	private static final Pattern PREFIX_REPLACE_PATTERN = Pattern.compile("[.]+$");
+
 	/**
 	 * Logger for this class
 	 */
@@ -34,7 +38,7 @@ public class OverrideDirectoryOption {
 	 * @param settingsManager Settings Manager
 	 */
 	public OverrideDirectoryOption(String optionPrefix, SettingsManager settingsManager) {
-		optionPrefix = optionPrefix.replaceAll("[.]+$", "");
+		optionPrefix = PREFIX_REPLACE_PATTERN.matcher(optionPrefix).replaceAll("");
 		this.optionPrefix = optionPrefix;
 		this.settingsManager = settingsManager;
 		this.pathOverrideVal = settingsManager.getSavePath();

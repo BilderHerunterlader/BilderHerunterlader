@@ -310,7 +310,7 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		if (subfiles != null) {
 			Arrays.sort(subfiles);
 			for (File subFile : subfiles) {
-				logger.debug("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
+				logger.info("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
 
 				try {
 					RuleDefinition ruleDefinition = ruleIO.readRule(subFile.getAbsolutePath());

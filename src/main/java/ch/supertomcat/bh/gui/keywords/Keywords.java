@@ -689,7 +689,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 				if (pos == 0) {
 					val = val.substring(dlFolder.length());
 				}
-				val = val.replaceAll("[:]", "");
+				val = val.replace(":", "");
 				jtKeywords.setValueAt(val, s[i], 3);
 			}
 			enableComponents(true);

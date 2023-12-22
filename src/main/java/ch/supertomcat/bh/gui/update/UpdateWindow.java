@@ -571,7 +571,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			}
 		} else if (e.getSource() == btnChanges) {
 			String message = changelogDE;
-			if (settingsManager.getLanguage() == "EN") {
+			if ("EN".equals(settingsManager.getLanguage())) {
 				message = changelogEN;
 			}
 			message = message.replaceAll("\\\\n", "\n");

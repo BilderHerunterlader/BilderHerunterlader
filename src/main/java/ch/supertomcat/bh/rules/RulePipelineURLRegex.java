@@ -75,7 +75,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			boolean sendCookies = definition.isSendCookies();
 			String pipelineURL = ruleContext.getPipelineURL();
 			String htmlCode = ruleContext.downloadContainerPage(pipelineURL, ruleContext.getPipelineReferrer(), new DownloadContainerPageOptions(sendCookies, true));
-			logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
+			logger.info("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
 
 			if (step == 0) {
 				ruleContext.setHtmlCodeFromFirstURLData(htmlCode);
@@ -108,7 +108,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			}
 			String variableName = ruleVarRegex.getVariableName();
 			ruleContext.putVar(variableName, value);
-			logger.debug("{} -> Step {} -> Variable assigned: {}={}", url, i, variableName, value);
+			logger.info("{} -> Step {} -> Variable assigned: {}={}", url, i, variableName, value);
 			if (ruleTraceInfoURL != null) {
 				ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexVariable(i, variableName, value));
 			}
@@ -183,7 +183,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 
 		for (int i = 0; i < regexList.size(); i++) {
 			result = regexList.get(i).doURLReplace(result, pic, ruleContext);
-			logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
+			logger.info("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
 			if (ruleTraceInfoURL != null) {
 				ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, 0, result));
 			}
@@ -209,9 +209,9 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			if (i < (regexList.size() - 1)) {
 				int pos = regexList.get(i).doPageSourcecodeSearch(htmlCode, start);
 				if (pos >= 0) {
-					logger.debug("{} -> Search done -> Step {} -> Pattern found at: {}", url, i, pos);
+					logger.info("{} -> Search done -> Step {} -> Pattern found at: {}", url, i, pos);
 				} else {
-					logger.debug("{} -> Search done -> Step {} -> Pattern not found!", url, i);
+					logger.info("{} -> Search done -> Step {} -> Pattern not found!", url, i);
 				}
 				if (ruleTraceInfoURL != null) {
 					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexSearch(i, start, pos));
@@ -219,7 +219,7 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 				start = pos;
 			} else {
 				result = regexList.get(i).doPageSourcecodeReplace(htmlCode, start, url, pic, ruleContext);
-				logger.debug("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
+				logger.info("{} -> Replace done -> Step {} -> Result: {}", url, i, result);
 				if (ruleTraceInfoURL != null) {
 					ruleTraceInfoURL.addStep(new RuleTraceInfoURLRegexReplace(i, start, result));
 				}

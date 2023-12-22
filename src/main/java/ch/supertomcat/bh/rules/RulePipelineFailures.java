@@ -43,9 +43,9 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 			if (i < (regexps.size() - 1)) {
 				int pos = regexps.get(i).doFailureSearch(input, start);
 				if (pos >= 0) {
-					logger.debug("FailureCheck -> Search done -> Step {} -> Pattern found at: {}", i, pos);
+					logger.info("FailureCheck -> Search done -> Step {} -> Pattern found at: {}", i, pos);
 				} else {
-					logger.debug("FailureCheck -> Search done -> Step {} -> Pattern not found!", i);
+					logger.info("FailureCheck -> Search done -> Step {} -> Pattern not found!", i);
 				}
 				if (traceInfo != null) {
 					traceInfo.addStep(new RuleTraceInfoFailuresSearch(i, start, pos));
@@ -53,7 +53,7 @@ public class RulePipelineFailures extends RulePipeline<FailuresPipeline> {
 				start = pos;
 			} else {
 				result = regexps.get(i).doFailureLastSearch(input, start);
-				logger.debug("FailureCheck -> Failure found -> Step {} -> Result: {}", i, result);
+				logger.info("FailureCheck -> Failure found -> Step {} -> Result: {}", i, result);
 				if (traceInfo != null) {
 					traceInfo.addStep(new RuleTraceInfoFailuresFinal(i, start, result));
 				}

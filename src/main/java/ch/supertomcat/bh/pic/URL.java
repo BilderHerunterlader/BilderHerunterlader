@@ -75,7 +75,7 @@ public class URL {
 	 * @param thumb Thumbnail-URL
 	 */
 	public URL(String url, String thumb) {
-		url = url.replaceAll("\"", "");
+		url = url.replace("\"", "");
 		url = HTTPUtil.trimURL(url);
 		this.url = url;
 		this.thumb = thumb;
