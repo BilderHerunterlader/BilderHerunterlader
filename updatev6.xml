@@ -41,13 +41,13 @@
 		</host>
 		<!-- End of Host-Classes -->
 		<!-- Start of Rules -->
-		<host version="0.3" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" />
+		<host version="0.3" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" delete="Does not seem to be an image hosting site anymore"/>
 		<host version="0.4" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/vsnvc3sz3qh1gmv/Ruleabload.xml?dl=1" filename="Ruleabload.xml" name="Ruleabload.xml" />
-		<host version="0.5" src="https://www.dropbox.com/s/cb76wq8dkay5t0l/Ruleallmoviephoto.com.xml?dl=1" filename="Ruleallmoviephoto.com.xml" name="Ruleallmoviephoto.com.xml" />
-		<host version="0.6" src="https://www.dropbox.com/s/92tyryl0uqu22l9/RuleAppleTrailer.xml?dl=1" filename="RuleAppleTrailer.xml" name="RuleAppleTrailer.xml" />
-		<host version="0.3" src="https://www.dropbox.com/s/iquezlytx2xh264/Ruleartstation.com.xml?dl=1" filename="Ruleartstation.com.xml" name="Ruleartstation.com.xml" />
-		<host version="0.4" src="https://www.dropbox.com/s/shcg7ojx3xr5mfh/Rulebayimgcom.xml?dl=1" filename="Rulebayimgcom.xml" name="Rulebayimgcom.xml" />
+		<host version="0.5" src="https://www.dropbox.com/s/cb76wq8dkay5t0l/Ruleallmoviephoto.com.xml?dl=1" filename="Ruleallmoviephoto.com.xml" name="Ruleallmoviephoto.com.xml" delete="Does not seem to be the same site anymore, redirected to another" />
+		<host version="0.6" src="https://www.dropbox.com/s/92tyryl0uqu22l9/RuleAppleTrailer.xml?dl=1" filename="RuleAppleTrailer.xml" name="RuleAppleTrailer.xml" delete="Old links don't work anymore and seems to use HLS now, which BH does not support" />
+		<host version="0.4" src="https://www.dropbox.com/s/iquezlytx2xh264/Ruleartstation.com.xml?dl=1" filename="Ruleartstation.com.xml" name="Ruleartstation.com.xml" />
+		<host version="0.5" src="https://www.dropbox.com/s/shcg7ojx3xr5mfh/Rulebayimgcom.xml?dl=1" filename="Rulebayimgcom.xml" name="Rulebayimgcom.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/3jjsj6mekyi809x/Rulebellazon.com.xml?dl=1" filename="Rulebellazon.com.xml" name="Rulebellazon.com.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/l5v0b5vm1vqcqhh/Rulebilderhochladennet.xml?dl=1" filename="Rulebilderhochladennet.xml" name="Rulebilderhochladennet.xml" />
 		<host version="0.1" src="https://www.dropbox.com/s/icjo3o7fdppjlx4/Rulebilderupload.org.xml?dl=1" filename="Rulebilderupload.org.xml" name="Rulebilderupload.org.xml" />
