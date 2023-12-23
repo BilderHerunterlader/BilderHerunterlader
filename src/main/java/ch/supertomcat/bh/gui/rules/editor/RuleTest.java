@@ -18,6 +18,8 @@ import javax.swing.JTextField;
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.gui.Icons;
@@ -41,6 +43,11 @@ public class RuleTest extends JDialog implements ActionListener {
 	 * UID
 	 */
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * Label
@@ -286,6 +293,7 @@ public class RuleTest extends JDialog implements ActionListener {
 					} catch (HostException he) {
 						txtResultURL.setText(he.getMessage());
 						txtResultFilename.setText("");
+						logger.error("Could not get URL and filename", he);
 					}
 
 					RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo(URLParseObject.RULE_TRACE_INFO);

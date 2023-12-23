@@ -75,7 +75,11 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 			boolean sendCookies = definition.isSendCookies();
 			String pipelineURL = ruleContext.getPipelineURL();
 			String htmlCode = ruleContext.downloadContainerPage(pipelineURL, ruleContext.getPipelineReferrer(), new DownloadContainerPageOptions(sendCookies, true));
-			logger.info("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
+			if (logger.isDebugEnabled()) {
+				logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
+			} else {
+				logger.info("{} -> {} -> Download Container-Page done", ruleContext.getRuleName(), pipelineURL);
+			}
 
 			if (step == 0) {
 				ruleContext.setHtmlCodeFromFirstURLData(htmlCode);
