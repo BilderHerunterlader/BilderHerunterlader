@@ -49,17 +49,17 @@
 		<host version="0.4" src="https://www.dropbox.com/s/iquezlytx2xh264/Ruleartstation.com.xml?dl=1" filename="Ruleartstation.com.xml" name="Ruleartstation.com.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/shcg7ojx3xr5mfh/Rulebayimgcom.xml?dl=1" filename="Rulebayimgcom.xml" name="Rulebayimgcom.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/3jjsj6mekyi809x/Rulebellazon.com.xml?dl=1" filename="Rulebellazon.com.xml" name="Rulebellazon.com.xml" />
-		<host version="0.4" src="https://www.dropbox.com/s/l5v0b5vm1vqcqhh/Rulebilderhochladennet.xml?dl=1" filename="Rulebilderhochladennet.xml" name="Rulebilderhochladennet.xml" />
-		<host version="0.1" src="https://www.dropbox.com/s/icjo3o7fdppjlx4/Rulebilderupload.org.xml?dl=1" filename="Rulebilderupload.org.xml" name="Rulebilderupload.org.xml" />
+		<host version="0.4" src="https://www.dropbox.com/s/l5v0b5vm1vqcqhh/Rulebilderhochladennet.xml?dl=1" filename="Rulebilderhochladennet.xml" name="Rulebilderhochladennet.xml" delete="Website does not exist anymore" />
+		<host version="0.1" src="https://www.dropbox.com/s/icjo3o7fdppjlx4/Rulebilderupload.org.xml?dl=1" filename="Rulebilderupload.org.xml" name="Rulebilderupload.org.xml" delete="Website does not exist anymore" />
 		<host version="0.3" src="https://www.dropbox.com/s/l38mbz43pxmynrg/Rulebildhost.com.xml?dl=1" filename="Rulebildhost.com.xml" name="Rulebildhost.com.xml" />
-		<host version="0.4" src="https://www.dropbox.com/s/k4znn3phzg1ubwf/Rulecelebies.com.xml?dl=1" filename="Rulecelebies.com.xml" name="Rulecelebies.com.xml" />
-		<host version="0.3" src="https://www.dropbox.com/s/d3euyhjp4sl39so/Rulecelebritymarkt.org.xml?dl=1" filename="Rulecelebritymarkt.org.xml" name="Rulecelebritymarkt.org.xml" />
+		<host version="0.4" src="https://www.dropbox.com/s/k4znn3phzg1ubwf/Rulecelebies.com.xml?dl=1" filename="Rulecelebies.com.xml" name="Rulecelebies.com.xml" delete="Website does not exist anymore" />
+		<host version="0.3" src="https://www.dropbox.com/s/d3euyhjp4sl39so/Rulecelebritymarkt.org.xml?dl=1" filename="Rulecelebritymarkt.org.xml" name="Rulecelebritymarkt.org.xml" delete="Website does not exist anymore" />
 		<host version="2.0" src="https://www.dropbox.com/s/fgg2k5mutivlbvs/Ruledirectupload.net.xml?dl=1" filename="Ruledirectupload.net.xml" name="Ruledirectupload.net.xml" />
-		<host version="0.3" src="https://www.dropbox.com/s/vhc0sut43hvd3ov/Ruledivshare.com.xml?dl=1" filename="Ruledivshare.com.xml" name="Ruledivshare.com.xml" />
-		<host version="0.4" src="https://www.dropbox.com/s/c7z6ncjpq3slpfu/Ruledumparum.xml?dl=1" filename="Ruledumparum.xml" name="Ruledumparum.xml" />
-		<host version="2.0" src="https://www.dropbox.com/s/gt6c4qm5nysx09o/Rulefapomatic.com.xml?dl=1" filename="Rulefapomatic.com.xml" name="Rulefapomatic.com.xml" />
-		<host version="0.3" src="https://www.dropbox.com/s/lhby4tkkxf95w0k/Rulefapp.to.xml?dl=1" filename="Rulefapp.to.xml" name="Rulefapp.to.xml" />
-		<host version="0.4" src="https://www.dropbox.com/s/p1xnxkwvu2vib0g/Rulefiledencom.xml?dl=1" filename="Rulefiledencom.xml" name="Rulefiledencom.xml" />
+		<host version="0.3" src="https://www.dropbox.com/s/vhc0sut43hvd3ov/Ruledivshare.com.xml?dl=1" filename="Ruledivshare.com.xml" name="Ruledivshare.com.xml" delete="Website still does exist, but doesn't seem an image host anymore. More general file download, but nothing works on that site." />
+		<host version="0.4" src="https://www.dropbox.com/s/c7z6ncjpq3slpfu/Ruledumparum.xml?dl=1" filename="Ruledumparum.xml" name="Ruledumparum.xml" delete="Does not work anymore, site seems to use javascript to display images, which BH can't parse" />
+		<host version="2.0" src="https://www.dropbox.com/s/gt6c4qm5nysx09o/Rulefapomatic.com.xml?dl=1" filename="Rulefapomatic.com.xml" name="Rulefapomatic.com.xml" delete="Website does not exist anymore" />
+		<host version="0.3" src="https://www.dropbox.com/s/lhby4tkkxf95w0k/Rulefapp.to.xml?dl=1" filename="Rulefapp.to.xml" name="Rulefapp.to.xml" delete="Website does not exist anymore" />
+		<host version="0.4" src="https://www.dropbox.com/s/p1xnxkwvu2vib0g/Rulefiledencom.xml?dl=1" filename="Rulefiledencom.xml" name="Rulefiledencom.xml" delete="Site does not seem to work anymore" />
 		<host version="0.4" src="https://www.dropbox.com/s/uylyysjh2e5i27l/Rulefotop.net.xml?dl=1" filename="Rulefotop.net.xml" name="Rulefotop.net.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/xj5rjhlebck5o3v/Rulefreeimagehostingnet.xml?dl=1" filename="Rulefreeimagehostingnet.xml" name="Rulefreeimagehostingnet.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/0gdjdij81rqfdly/Rulefree-picload.com.xml?dl=1" filename="Rulefree-picload.com.xml" name="Rulefree-picload.com.xml" />
