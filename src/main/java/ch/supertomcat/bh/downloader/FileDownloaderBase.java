@@ -279,7 +279,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			pic.setHoster(result.getLastHoster());
 
 			// Check if the direct link is not null and not empty
-			if (result.getDirectLink() == null && result.getDirectLink().isEmpty()) {
+			if (result.getDirectLink() == null || result.getDirectLink().isEmpty()) {
 				throw new HostException(Localization.getString("ErrorImageURL"));
 			}
 
