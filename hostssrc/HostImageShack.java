@@ -9,17 +9,18 @@ import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host class for ImageShack
  * 
- * @version 4.0
+ * @version 4.1
  */
 public class HostImageShack extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.0";
+	public static final String VERSION = "4.1";
 
 	/**
 	 * Name dieser Klasse
@@ -45,12 +46,12 @@ public class HostImageShack extends Host implements IHoster {
 	 */
 	public HostImageShack() {
 		super(NAME, VERSION);
-		urlPattern = Pattern.compile("^https?://(img[0-9]+\\.)?(imageshack\\.us|exs\\.cx)/(my\\.php\\?(loc=img[0-9]+\\&)?image=|i/|photo/my-images/[0-9]+/).+?[/]?");
-		urlPatternDirectLinked = Pattern.compile("^https?://img[0-9]+\\.(imageshack\\.us|exs\\.cx)/img[0-9]+/[0-9]+/.*");
+		urlPattern = Pattern.compile("^https?://(?:img[0-9]+\\.)?(?:imageshack\\.(?:us|com)|exs\\.cx)/(?:my\\.php\\?(?:loc=img[0-9]+\\&)?image=|i/|photo/my-images/[0-9]+/).+?/?");
+		urlPatternDirectLinked = Pattern.compile("^https?://img[0-9]+\\.(?:imageshack\\.(?:us|com)|exs\\.cx)/img[0-9]+/[0-9]+/.*");
 
 		regexComplete = new RuleRegExp();
-		regexComplete.setSearch("<img[^>]+id=\"lp-image\"[^>]+src=\"([^\"]+)\"");
-		regexComplete.setReplace("http:$1");
+		regexComplete.setSearch("<img[^>]+?id=\"lp-image\"[^>]+?src=\"([^\"]+)\"");
+		regexComplete.setReplace("$1");
 
 		// some imageshack pages provide only a download anchor item
 		regexCompleteAlternate = new RuleRegExp();
@@ -62,10 +63,7 @@ public class HostImageShack extends Host implements IHoster {
 	public boolean isFromThisHoster(String url) {
 		Matcher urlMatcher = urlPattern.matcher(url);
 		Matcher urlDirectLinkedMatcher = urlPatternDirectLinked.matcher(url);
-		if (urlMatcher.matches() || urlDirectLinkedMatcher.matches()) {
-			return true;
-		}
-		return false;
+		return urlMatcher.matches() || urlDirectLinkedMatcher.matches();
 	}
 
 	/**
@@ -87,9 +85,9 @@ public class HostImageShack extends Host implements IHoster {
 			String redirectedURL = result.getRedirectedURL();
 			String homepageURL;
 			if (redirectedURL.startsWith("https://")) {
-				homepageURL = "https://www.imageshack.us/";
+				homepageURL = "https://www.imageshack.com/";
 			} else {
-				homepageURL = "http://www.imageshack.us/";
+				homepageURL = "http://www.imageshack.com/";
 			}
 			if (homepageURL.equals(redirectedURL)) {
 				throw new HostFileNotExistException(Localization.getString("FileNotExistsOnTheServer"));
@@ -97,9 +95,17 @@ public class HostImageShack extends Host implements IHoster {
 		}
 
 		String page = result.getPage();
+
 		String parsedURL = regexComplete.doPageSourcecodeReplace(page, 0, url, null);
 		if (parsedURL.isEmpty()) {
 			parsedURL = regexCompleteAlternate.doPageSourcecodeReplace(page, 0, url, null);
+		} else {
+			if (parsedURL.startsWith("/")) {
+				parsedURL = "http://" + HTTPUtil.getDomainFromURL(url) + parsedURL;
+			} else {
+				parsedURL = "http:" + parsedURL;
+			}
+
 		}
 		return parsedURL;
 	}
@@ -111,16 +117,7 @@ public class HostImageShack extends Host implements IHoster {
 	 * @return Korrigierter Dateiname
 	 */
 	private String correctFilename(String url) {
-		String filename = url.substring(url.lastIndexOf("/") + 1);
-		int lp = filename.lastIndexOf(".");
-		int fp = lp - 3;
-		if ((lp < 0) || (fp < 1)) {
-			return "";
-		}
-		String s1 = filename.substring(0, fp);
-		String s2 = filename.substring(lp);
-		String result = s1 + s2;
-		return result;
+		return url.substring(url.lastIndexOf("/") + 1);
 	}
 
 	@Override

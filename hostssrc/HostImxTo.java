@@ -47,7 +47,7 @@ public class HostImxTo extends Host implements IHoster {
 		urlContainerPattern = Pattern.compile("https?://imx\\.to/(?:i/|img-)[0-9a-zA-Z]+(\\.html)?");
 
 		regexContinue = Pattern
-				.compile("(?s)<form action=['\"]['\"] method=['\"]POST['\"]>.+?<input .+?type=['\"]submit['\"] name=['\"](imgContinue)['\"] value=['\"](Continue to( your)? image *... *)['\"]");
+				.compile("(?s)<form action(?:=['\"]['\"])? method=['\"]POST['\"]>.+?<input .+?type=['\"]submit['\"] name=['\"](imgContinue)['\"] value=['\"](Continue to( your)? image *... *)['\"]");
 
 		String imagePattern = "<a href=\"([^\"]+)\" title=\"([^\"]*)\"[^>]*><img class=\"centred\"";
 
@@ -94,7 +94,7 @@ public class HostImxTo extends Host implements IHoster {
 			upo.setDirectLink(downloadURL);
 
 			String downloadFilename = regexImageFilename.doPageSourcecodeReplace(pageSoureCode, 0, containerURL, null);
-			if (downloadFilename.isEmpty()) {
+			if (downloadFilename.isEmpty() || !downloadFilename.contains(".")) {
 				downloadFilename = HTTPUtil.getFilenameFromURL(downloadURL, "");
 			}
 
