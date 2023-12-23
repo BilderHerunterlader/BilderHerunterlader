@@ -258,11 +258,11 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		if (pic.isRenameWithContentDisposition() && !pic.isFixedTargetFilename()) {
-			determineFilenameByContentDisposition(response, targetContainer, pic, firstURL);
+			determineFilenameByContentDisposition(response, targetContainer);
 		}
 
 		// This uses the replacements defined in BH settings
-		determineFilenameByRegexReplacePipeline(targetContainer, pic, firstURL);
+		determineFilenameByRegexReplacePipeline(targetContainer);
 
 		/*
 		 * Now we create a new file.
@@ -300,11 +300,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * the filesize is maybe 0
 		 */
 		long size;
-		if (method instanceof HttpGet) {
-			@SuppressWarnings("resource")
-			long contentLength = response.getEntity().getContentLength();
-			size = contentLength >= 0 ? contentLength : 0;
-		} else if (method instanceof HttpPost) {
+		if (method instanceof HttpGet || method instanceof HttpPost) {
 			@SuppressWarnings("resource")
 			long contentLength = response.getEntity().getContentLength();
 			size = contentLength >= 0 ? contentLength : 0;
@@ -438,7 +434,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 * should have.
 				 */
 				failDownload(pic, result, false, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
-				logger.error("Download failed (Too many or to less bytes were downloaded): '" + pic.getContainerURL() + "'");
+				logger.error("Download failed (Too many or to less bytes were downloaded): '{}'", pic.getContainerURL());
 			} else if (iBW < settingsManager.getMinFilesize()) {
 				/*
 				 * The user can set in an options, which defines a minimum filesize.
@@ -448,7 +444,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 * So only here, we know the filesize really.
 				 */
 				failDownload(pic, result, true, Localization.getString("ErrorFilesizeToSmall"));
-				logger.error("Download failed (Filesize is too small): '" + pic.getContainerURL() + "'");
+				logger.error("Download failed (Filesize is too small): '{}'", pic.getContainerURL());
 			}
 			// Now we have to delete the file
 			deleteFile(targetContainer);
@@ -479,10 +475,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * 
 	 * @param response Response
 	 * @param targetContainer Target Container
-	 * @param pic Pic
-	 * @param firstURL True if first URL, false otherwise
 	 */
-	private void determineFilenameByContentDisposition(ClassicHttpResponse response, TargetContainer targetContainer, Pic pic, boolean firstURL) {
+	private void determineFilenameByContentDisposition(ClassicHttpResponse response, TargetContainer targetContainer) {
 		String contentDispositionFilename = getContentDispositionFilename(response);
 		if (contentDispositionFilename != null) {
 			targetContainer.setCorrectedFilename(contentDispositionFilename);
@@ -493,10 +487,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * Determine Filename by Regex Replace Pipeline
 	 * 
 	 * @param targetContainer Target Container
-	 * @param pic Pic
-	 * @param firstURL True if first URL, false otherwise
 	 */
-	private void determineFilenameByRegexReplacePipeline(TargetContainer targetContainer, Pic pic, boolean firstURL) {
+	private void determineFilenameByRegexReplacePipeline(TargetContainer targetContainer) {
 		RegexReplacePipeline regexPipe = settingsManager.getRegexReplacePipelineFilename();
 		String correctedFilename = regexPipe.getReplacedFilename(targetContainer.getCorrectedFilename());
 		correctedFilename = BHUtil.filterFilename(correctedFilename, settingsManager);
