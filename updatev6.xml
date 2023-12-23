@@ -41,7 +41,7 @@
 		</host>
 		<!-- End of Host-Classes -->
 		<!-- Start of Rules -->
-		<host version="0.3" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" delete="Does not seem to be an image hosting site anymore"/>
+		<host version="0.3" src="https://www.dropbox.com/s/qmobe0h2jdg0geq/Rule10pix.ru.xml?dl=1" filename="Rule10pix.ru.xml" name="Rule10pix.ru.xml" delete="Does not seem to be an image hosting site anymore" />
 		<host version="0.4" src="https://www.dropbox.com/s/abtrton13z8ootr/Rule500px.com.xml?dl=1" filename="Rule500px.com.xml" name="Rule500px.com.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/vsnvc3sz3qh1gmv/Ruleabload.xml?dl=1" filename="Ruleabload.xml" name="Ruleabload.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/cb76wq8dkay5t0l/Ruleallmoviephoto.com.xml?dl=1" filename="Ruleallmoviephoto.com.xml" name="Ruleallmoviephoto.com.xml" delete="Does not seem to be the same site anymore, redirected to another" />
@@ -76,7 +76,7 @@
 		<host version="0.5" src="https://www.dropbox.com/s/yg9p26zk61pm7za/Ruleimageban.net.xml?dl=1" filename="Ruleimageban.net.xml" name="Ruleimageban.net.xml" />
 		<host version="0.5" src="https://www.dropbox.com/s/vnk3xxiuxhh811m/Ruleimagebanana.xml?dl=1" filename="Ruleimagebanana.xml" name="Ruleimagebanana.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/cvyt1oyc3trapj1/Ruleimage-bugs.com.xml?dl=1" filename="Ruleimage-bugs.com.xml" name="Ruleimage-bugs.com.xml" />
-		<host version="1.5" src="https://www.dropbox.com/s/ubbyi1gub9luozf/Ruleimagefap.com.xml?dl=1" filename="Ruleimagefap.com.xml" name="Ruleimagefap.com.xml" />
+		<host version="1.6" src="https://www.dropbox.com/s/ubbyi1gub9luozf/Ruleimagefap.com.xml?dl=1" filename="Ruleimagefap.com.xml" name="Ruleimagefap.com.xml" />
 		<host version="2.0" src="https://www.dropbox.com/s/vvn4xx9tlqblnjm/Ruleimagehaven.net.xml?dl=1" filename="Ruleimagehaven.net.xml" name="Ruleimagehaven.net.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/qyv9mfcitqqo5nn/RuleImagehost.xml?dl=1" filename="RuleImagehost.xml" name="RuleImagehost.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/6tqv7i2g2h50bge/Ruleimagehosting.gr.xml?dl=1" filename="Ruleimagehosting.gr.xml" name="Ruleimagehosting.gr.xml" />
@@ -139,12 +139,13 @@
 		<host version="0.1" src="https://www.dropbox.com/s/nbqpgb8lw09e5fl/Rulevipr.im.xml?dl=1" filename="Rulevipr.im.xml" name="Rulevipr.im.xml" />
 		<host version="0.4" src="https://www.dropbox.com/s/brl3tbryg9q2drx/Rulewebshotscom.xml?dl=1" filename="Rulewebshotscom.xml" name="Rulewebshotscom.xml" />
 		<host version="0.3" src="https://www.dropbox.com/s/t86j73001386p5d/Rulex05.org.xml?dl=1" filename="Rulex05.org.xml" name="Rulex05.org.xml" />
+		<host version="0.1" src="TODO" filename="Rulebellazon.com_directlink.xml" name="Rulebellazon.com_directlink.xml" />
 		<!-- End of Rules -->
 	</hoster>
 	<changelog>
 		<!--
-		<changes version="4.20.0" lng="de"></changes>
-		<changes version="4.20.0" lng="en"></changes>
+		<changes version="4.9.0" lng="de"></changes>
+		<changes version="4.9.0" lng="en"></changes>
 		-->
 		<changes version="4.20.0" lng="de">- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</changes>
 		<changes version="4.20.0" lng="en">- Bug Fixed: Download Complete Notification was displayed in wrong cases\n- Bug Fixed: Wrong encoded filenames when they contain special characters\n- Added possiblity for HostPlugins to set user agent used when downloading container page\n- Bug Fixed: Condition for checking status code when downloading container page was wrong\n- Updated libraries</changes>
