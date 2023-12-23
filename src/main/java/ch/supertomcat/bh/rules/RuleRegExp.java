@@ -314,13 +314,13 @@ public class RuleRegExp extends RegexReplace {
 		}
 
 		// Now we replace the variables if the user defined some in the Replace-String
-		replaceIfNecessary(retval, "$SRV", dSRV, "${SRV}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$SRVT", dSRVT, "${SRVT}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$URL", dURL, "${URL}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$URLT", dURLT, "${URLT}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$FURL", dFURL, "${FURL}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$DIR", dDIR, "${DIR}", vars, searchStringReplacement);
-		replaceIfNecessary(retval, "$FILE", dFILE, "${FILE}", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$SRV", dSRV, "SRV", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$SRVT", dSRVT, "SRVT", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$URL", dURL, "URL", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$URLT", dURLT, "URLT", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$FURL", dFURL, "FURL", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$DIR", dDIR, "DIR", vars, searchStringReplacement);
+		replaceIfNecessary(retval, "$FILE", dFILE, "FILE", vars, searchStringReplacement);
 
 		if (ruleContext != null && !ruleContext.getVars().isEmpty()) {
 			StringSubstitutor substitutor = new StringSubstitutor(ruleContext.getVars());
