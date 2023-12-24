@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="postimageorg" version="1.3" redirect="false" resend="false">
-    <urlPattern>https?://(www\.)?post(?:image|img)\.(?:org|cc)/(?:image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)|[0-9a-zA-Z]+)</urlPattern>
+<ruleDefinition name="postimageorg" version="1.4" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?post(?:images?|img)\.(?:org|cc)/(?:image(\.php\?v=[0-9a-zA-Z]+|/[0-9a-zA-Z]+/)|[0-9a-zA-Z]+)</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>

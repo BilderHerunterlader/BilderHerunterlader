@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="fotop.net" version="0.4" redirect="false" resend="false">
-    <urlPattern>https?://(www\.)?fotop\.net/.*?/.*?/.*</urlPattern>
+<ruleDefinition name="fotop.net" version="0.5" redirect="false" resend="false">
+    <urlPattern>https?://(www\.)?fotop\.net/.+?/.+?/.+</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
     <reduceFilenameLength>true</reduceFilenameLength>
@@ -11,7 +11,7 @@
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
-        <regexp pattern="&lt;img src=&quot;(.*?)&quot;.*?onclick=&quot;window\.location='\?full=1'&quot;" replacement="$1"/>
+        <regexp pattern="\$\(&quot;#i1&quot;\).attr\('src', &quot;(.+?)&quot;\)" replacement="$1"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<ruleDefinition name="pimpandhost.com" version="0.6" redirect="false" resend="false">
+<ruleDefinition name="pimpandhost.com" version="0.7" redirect="false" resend="false">
     <urlPattern>https?://(?:image\.)?pimpandhost\.com/.*?/.*</urlPattern>
     <useContentDisposition>false</useContentDisposition>
     <reducePathLength>true</reducePathLength>
@@ -15,6 +15,7 @@
     </pipes>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="_[a-zA-Z0-9](\..*)$" replacement="$1"/>
+        <regexp pattern="^//" replacement="https://"/>
     </pipes>
     <filenamePipeline mode="CONTAINER_URL_FILENAME_PART"/>
     <filenameDownloadSelectionPipeline mode="CONTAINER_URL_FILENAME_PART"/>
