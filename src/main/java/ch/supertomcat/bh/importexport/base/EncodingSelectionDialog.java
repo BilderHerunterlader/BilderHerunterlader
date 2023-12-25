@@ -15,6 +15,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
 
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
@@ -70,7 +71,7 @@ public class EncodingSelectionDialog extends JDialog implements ActionListener {
 	}
 
 	private void init() {
-		setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setTitle(Localization.getString("ChooseFileEncoding"));
 		setLayout(new BorderLayout());
 

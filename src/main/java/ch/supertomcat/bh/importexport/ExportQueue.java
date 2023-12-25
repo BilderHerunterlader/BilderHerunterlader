@@ -52,7 +52,6 @@ public class ExportQueue extends ImportExportBase {
 			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportQueue(file.getAbsolutePath());
-			file = null;
 		}
 	}
 

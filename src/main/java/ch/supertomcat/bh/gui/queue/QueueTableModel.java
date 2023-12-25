@@ -81,7 +81,7 @@ public class QueueTableModel extends DefaultTableModel {
 	 * @param pic Pic
 	 */
 	public void addRow(Pic pic) {
-		Object data[] = new Object[9];
+		Object[] data = new Object[9];
 		data[URL_COLUMN_INDEX] = pic.getContainerURL();
 		data[THUMB_URL_COLUMN_INDEX] = pic.getThumb();
 		data[HOST_COLUMN_INDEX] = pic.getHoster();

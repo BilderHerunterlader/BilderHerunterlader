@@ -221,7 +221,7 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
@@ -234,7 +234,7 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(table, settingsManager.getColWidthsRulesEditor());

@@ -189,8 +189,8 @@ public class DownloadAddDialog extends JDialog {
 			Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String strArr[];
-					if (links.contains("\n") == false) {
+					String[] strArr;
+					if (!links.contains("\n")) {
 						strArr = new String[1];
 						strArr[0] = links;
 					} else {
@@ -206,7 +206,6 @@ public class DownloadAddDialog extends JDialog {
 					AdderPanel adderpnl = new AdderPanel(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
 							+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 					adderpnl.init();
-					adderpnl = null;
 				}
 			});
 			thread.setPriority(Thread.MIN_PRIORITY);

@@ -18,7 +18,6 @@ import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JProgressBar;
@@ -26,6 +25,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.UIManager;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -229,7 +229,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		this.settingsManager = settingsManager;
 		this.hostManager = hostManager;
 		this.guiEvent = guiEvent;
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setIconImage(Icons.getBHImage("BH.png"));
 		addWindowListener(this);
 
@@ -325,7 +325,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			lblMessages.setText(e.getMessage() + ": " + cause + "\n" + lblMessages.getText());
 			updateAvailable = false;
 		}
-		if (updateAvailable == false) {
+		if (!updateAvailable) {
 			btnCheck.setEnabled(true);
 			prgUpdate.setIndeterminate(false);
 			prgUpdate.setVisible(false);
@@ -444,7 +444,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		int sizer = hostManager.getHostRules().getRules().size();
 
 		// We create first an array with name and version of all rules
-		String ruleVersions[][] = new String[sizer][2];
+		String[][] ruleVersions = new String[sizer][2];
 		Iterator<Rule> it = hostManager.getHostRules().getRules().iterator();
 		int ir = 0;
 		Rule r;
@@ -584,7 +584,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsUpdate(TableUtil.serializeColWidthSetting(table));
@@ -595,170 +595,85 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(table, settingsManager.getColWidthsUpdate());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnAdded(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMarginChanged(javax.swing.event.ChangeEvent)
-	 */
 	@Override
 	public void columnMarginChanged(ChangeEvent e) {
 		updateColWidthsToSettingsManager();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnMoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnRemoved(javax.swing.event.TableColumnModelEvent)
-	 */
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see javax.swing.event.TableColumnModelListener#columnSelectionChanged(javax.swing.event.ListSelectionEvent)
-	 */
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowActivated(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowActivated(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowClosed(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowClosed(WindowEvent e) {
 		guiEvent.updateWindowClosed(updateRunned, updateSuccessfull);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowClosing(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowClosing(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowDeactivated(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowDeactivated(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowDeiconified(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowDeiconified(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowIconified(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowIconified(WindowEvent e) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.WindowListener#windowOpened(java.awt.event.WindowEvent)
-	 */
 	@Override
 	public void windowOpened(WindowEvent e) {
 		guiEvent.updateWindowOpened();
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updatesStarted()
-	 */
 	@Override
 	public void updatesStarted() {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updatesComplete()
-	 */
 	@Override
 	public void updatesComplete() {
 		updateSuccessfull = true;
 		updateManager.removeListener(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updatesFailed()
-	 */
 	@Override
 	public void updatesFailed() {
 		updateSuccessfull = false;
 		updateManager.removeListener(this);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updateInstallStarted(ch.supertomcat.bh.update.UpdateObject.UpdateType,
-	 * ch.supertomcat.bh.update.UpdateObject.UpdateActionType,
-	 * java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void updateInstallStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
 		String action = "Unknown Action";
 		String message = "Unknown Message";
 		switch (updateActionType) {
 			case ACTION_NEW:
-				action = Localization.getString("DownloadUpdate");
-				message = source;
-				break;
 			case ACTION_UPDATE:
 				action = Localization.getString("DownloadUpdate");
 				message = source;
@@ -773,22 +688,10 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		lblMessages.setText(action + " (" + message + ")\n" + lblMessages.getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updateInstallComplete(ch.supertomcat.bh.update.UpdateObject.UpdateType,
-	 * ch.supertomcat.bh.update.UpdateObject.UpdateActionType)
-	 */
 	@Override
 	public void updateInstallComplete(UpdateType updateType, UpdateActionType updateActionType) {
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updateInstallFailed(ch.supertomcat.bh.update.UpdateObject.UpdateType,
-	 * ch.supertomcat.bh.update.UpdateObject.UpdateActionType)
-	 */
 	@Override
 	public void updateInstallFailed(UpdateType updateType, UpdateActionType updateActionType) {
 		String message = "Unknown Message";
@@ -808,21 +711,11 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		lblMessages.setText(message + "\n" + lblMessages.getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#errorOccured(java.lang.String)
-	 */
 	@Override
 	public void errorOccured(String message) {
 		lblMessages.setText(message + "\n" + lblMessages.getText());
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#updatesInstalled(int)
-	 */
 	@Override
 	public void updatesInstalled(int updateCount) {
 		if (updateCount == 0) {
@@ -836,21 +729,11 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		prgUpdate.setVisible(false);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#newProgramVersionInstalled()
-	 */
 	@Override
 	public void newProgramVersionInstalled() {
 		lblMain.setText(Localization.getString("NewProgramVersionInstalled"));
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ch.supertomcat.bh.update.UpdateManagerListener#newProgramVersionInstallFailed()
-	 */
 	@Override
 	public void newProgramVersionInstallFailed() {
 		lblMain.setText(Localization.getString("NewProgramVersionInstallFailed"));

@@ -47,7 +47,7 @@ public class RulesTableModel extends DefaultTableModel {
 	 * @param rule Rule
 	 */
 	public void addRow(Rule rule) {
-		Object data[] = new Object[4];
+		Object[] data = new Object[4];
 		data[0] = rule;
 		data[1] = rule.getVersion();
 		data[2] = getModeString(rule);

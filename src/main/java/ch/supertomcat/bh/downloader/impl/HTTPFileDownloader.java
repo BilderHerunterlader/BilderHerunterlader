@@ -219,7 +219,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				cookieManager.fillCookies(url, cookieStore);
 			}
 
-			return client.execute(method, context, response -> handleResponse(method, response, targetContainer, pic, result, firstURL, lastURL, currentURL, urlCount));
+			return client.execute(method, context, response -> handleResponse(method, response, targetContainer, pic, result, lastURL, currentURL, urlCount));
 		} catch (MalformedURLException e) {
 			failDownload(pic, result, false, e);
 			return false;
@@ -239,15 +239,14 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @param targetContainer Target Container
 	 * @param pic Pic
 	 * @param result Result
-	 * @param firstURL First URL
 	 * @param lastURL Last URL
 	 * @param currentURL Current URL Index
 	 * @param urlCount Count of URLs
 	 * @return True if download was successful, false otherwise
 	 * @throws IOException
 	 */
-	private boolean handleResponse(HttpUriRequest method, ClassicHttpResponse response, TargetContainer targetContainer, Pic pic, URLParseObject result, boolean firstURL, boolean lastURL,
-			int currentURL, int urlCount) throws IOException {
+	private boolean handleResponse(HttpUriRequest method, ClassicHttpResponse response, TargetContainer targetContainer, Pic pic, URLParseObject result, boolean lastURL, int currentURL,
+			int urlCount) throws IOException {
 		StatusLine statusLine = new StatusLine(response);
 		int statusCode = statusLine.getStatusCode();
 
@@ -318,7 +317,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			 * So only here, we know the filesize really.
 			 */
 			failDownload(pic, result, true, Localization.getString("ErrorFilesizeToSmall"));
-			logger.error("Download failed (Filesize is too small): '" + pic.getContainerURL() + "'");
+			logger.error("Download failed (Filesize is too small): '{}'", pic.getContainerURL());
 			// Now we have to delete the file
 			deleteFile(targetContainer);
 			method.abort();

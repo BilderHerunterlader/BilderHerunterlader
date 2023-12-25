@@ -151,7 +151,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 
 		setLayout(new BorderLayout());
 
-		boolean includeMatchType = matches != null ? true : false;
+		boolean includeMatchType = matches != null;
 
 		model = new AdderKeywordSelectorTitleTableModel(includeMatchType);
 		table = new JTable(model);

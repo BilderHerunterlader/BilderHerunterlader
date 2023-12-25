@@ -229,7 +229,8 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	@Override
 	protected void addTaskToExecutingTasks(QueueTask<PicDownloadListener, PicDownloadResult> task) {
 		if (calculateRateTimerTask == null) {
-			timer.scheduleAtFixedRate(calculateRateTimerTask = new CalculateRateTimerTask(syncObject, calculateRateListeners), 1000, 1000);
+			calculateRateTimerTask = new CalculateRateTimerTask(syncObject, calculateRateListeners);
+			timer.scheduleAtFixedRate(calculateRateTimerTask, 1000, 1000);
 			calculateRateTimerTask.addCalculateRateListener(calculateRateTimerListener);
 		}
 		calculateRateListeners.add(task.getTask());

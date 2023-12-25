@@ -8,7 +8,7 @@ import org.jdom2.Element;
 /**
  * Class which provides methods needed by SettingsManager
  */
-public class SettingsToolkit {
+public final class SettingsToolkit {
 	private static final Set<String> SUPPORTED_TYPES = new HashSet<>();
 
 	static {
@@ -20,6 +20,12 @@ public class SettingsToolkit {
 		SUPPORTED_TYPES.add("short");
 		SUPPORTED_TYPES.add("float");
 		SUPPORTED_TYPES.add("double");
+	}
+
+	/**
+	 * Constructor
+	 */
+	private SettingsToolkit() {
 	}
 
 	/**

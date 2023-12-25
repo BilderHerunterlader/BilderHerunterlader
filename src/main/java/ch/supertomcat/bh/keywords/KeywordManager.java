@@ -148,7 +148,7 @@ public class KeywordManager {
 	 * 
 	 * @param indices Indices
 	 */
-	public void removeKeywords(int indices[]) {
+	public void removeKeywords(int[] indices) {
 		List<Keyword> keywordsToDelete = new ArrayList<>();
 		for (int i = indices.length - 1; i > -1; i--) {
 			if ((indices[i] < 0) || (indices[i] >= keywords.size())) {

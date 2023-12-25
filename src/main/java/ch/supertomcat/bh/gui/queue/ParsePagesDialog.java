@@ -148,8 +148,8 @@ public class ParsePagesDialog extends JDialog {
 			Thread thread = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					String strArr[];
-					if (links.contains("\n") == false) {
+					String[] strArr;
+					if (!links.contains("\n")) {
 						strArr = new String[1];
 						strArr[0] = links;
 					} else {

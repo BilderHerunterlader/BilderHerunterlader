@@ -45,7 +45,7 @@ public class RulePipelineFilenameDownloadSelection extends RulePipeline<Filename
 
 		for (int i = 0; i < regexps.size(); i++) {
 			result = regexps.get(i).doURLReplace(result, null);
-			logger.debug(url + " -> Filename on Download Selection Replace done -> Step " + i + " -> Result: " + result);
+			logger.debug("{} -> Filename on Download Selection Replace done -> Step {} -> Result: {}", url, i, result);
 			if (traceInfo != null) {
 				traceInfo.addStep(new RuleTraceInfoFilenameReplace(i, 0, result));
 			}

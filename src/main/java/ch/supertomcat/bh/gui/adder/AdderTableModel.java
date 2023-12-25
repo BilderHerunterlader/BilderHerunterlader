@@ -70,7 +70,6 @@ public class AdderTableModel extends DefaultTableModel {
 		}
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public void setValueAt(Object aValue, int row, int column) {
 		/*
@@ -89,8 +88,7 @@ public class AdderTableModel extends DefaultTableModel {
 		 * 
 		 * Be aware that this model is not Thread-Safe!
 		 */
-		@SuppressWarnings("rawtypes")
-		Vector rowVector = dataVector.elementAt(row);
+		Vector<Object> rowVector = dataVector.elementAt(row);
 		rowVector.setElementAt(aValue, column);
 		if (fireTableCellUpdatedEnabled) {
 			fireTableCellUpdated(row, column);

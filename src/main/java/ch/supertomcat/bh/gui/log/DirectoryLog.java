@@ -310,7 +310,6 @@ public class DirectoryLog extends JPanel {
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	private void reloadLogs() {

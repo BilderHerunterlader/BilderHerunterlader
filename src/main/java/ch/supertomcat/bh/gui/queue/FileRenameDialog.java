@@ -386,14 +386,14 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 				txtFilename.setSelectedIndex(0);
 			}
 			String f = "";
-			if (cbClear.isSelected() == false) {
+			if (!cbClear.isSelected()) {
 				f = (String)txtFilename.getSelectedItem();
 			}
 
 			if (f.length() > 0) {
 				boolean available = false;
 				for (int a = 0; a < txtFilename.getItemCount(); a++) {
-					if (txtFilename.getItemAt(a).toString().equals(f)) {
+					if (txtFilename.getItemAt(a).equals(f)) {
 						available = true;
 						txtFilename.setSelectedIndex(a);
 						break;
@@ -469,7 +469,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	 * @return Prefix
 	 */
 	private String getPrefix() {
-		return (cbPrefix.isSelected() && cbClear.isSelected() == false) ? txtPrefix.getText() : "";
+		return (cbPrefix.isSelected() && !cbClear.isSelected()) ? txtPrefix.getText() : "";
 	}
 
 	/**
@@ -478,7 +478,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	 * @return Suffix
 	 */
 	private String getSuffix() {
-		return (cbAppendix.isSelected() && cbClear.isSelected() == false) ? txtAppendix.getText() : "";
+		return (cbAppendix.isSelected() && !cbClear.isSelected()) ? txtAppendix.getText() : "";
 	}
 
 	/**
@@ -514,7 +514,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 		if (frd.isCanceled()) {
 			return null;
 		}
-		String retval[] = new String[7];
+		String[] retval = new String[7];
 		retval[0] = frd.getValue();
 		retval[1] = frd.getStart();
 		retval[2] = frd.getStep();

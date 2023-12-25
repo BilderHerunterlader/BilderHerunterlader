@@ -1474,7 +1474,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 					settingsManager.setSavePath(folder);
 					settingsManager.writeSettings(true);
 				}
-				file = null;
 			}
 		} else if (e.getSource() == itemTargetByInput) {
 			String input = PathRenameDialog.showPathRenameDialog(this, (String)txtTargetDir.getSelectedItem());
@@ -1529,7 +1528,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			boolean available = false;
 			String strAdd = cbAdd.getSelectedItem().toString();
 			for (int a = 0; a < cbAdd.getItemCount(); a++) {
-				if (cbAdd.getItemAt(a).toString().equals(strAdd)) {
+				if (cbAdd.getItemAt(a).equals(strAdd)) {
 					available = true;
 					break;
 				}
@@ -1550,7 +1549,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				}
 
 				model.setFireTableCellUpdatedEnabled(false);
-				int selectedRows[] = jtAdder.getSelectedRows();
+				int[] selectedRows = jtAdder.getSelectedRows();
 				int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 				for (int x = 0; x < selectedRows.length; x++) {
 					model.setValueAt(keyword, jtAdder.convertRowIndexToModel(selectedRows[x]), keywordColumnModelIndex);
@@ -1559,7 +1558,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 				model.setFireTableCellUpdatedEnabled(true);
 				model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 			}
-			aks = null;
 		} else if (e.getSource() == menuItemChangeTargetfilename) {
 			actionChangeTargetFilename();
 		} else if (e.getSource() == btnImportIrada) {
@@ -1620,7 +1618,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 			kst.start();
 		} else {
 			int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
-			String strSearchA[] = new String[jtAdder.getRowCount()];
+			String[] strSearchA = new String[jtAdder.getRowCount()];
 			for (int i = 0; i < jtAdder.getRowCount(); i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(i);
 				strSearchA[i] = (String)model.getValueAt(modelIndex, urlColumnModelIndex);
@@ -1646,7 +1644,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 				} else {
 					boolean deselectNoKeyword = settingsManager.isDeselectNoKeyword();
 					boolean deleteNoKeyword = settingsManager.isDeleteNoKeyword() && localFiles;
-					if (deselectNoKeyword && (deleteNoKeyword == false)) {
+					if (deselectNoKeyword && !deleteNoKeyword) {
 						model.setValueAt(false, modelIndex, selectionColumnModelIndex);
 					}
 					/*
@@ -1889,7 +1887,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		int filenameColumnModelIndex = jtAdder.getColumn("Filename").getModelIndex();
 		int filenameOverrideColumnModelIndex = jtAdder.getColumn("FilenameOverride").getModelIndex();
 
-		int selectedRows[] = jtAdder.getSelectedRows();
+		int[] selectedRows = jtAdder.getSelectedRows();
 		if (selectedRows.length > 0) {
 			String defaultvalue = (String)model.getValueAt(jtAdder.convertRowIndexToModel(selectedRows[0]), filenameColumnModelIndex);
 			defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
@@ -1936,7 +1934,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private synchronized void actionChangeTargetByInput() {
 		int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
 		int folderOverrideColumnModelIndex = jtAdder.getColumn("TargetFolderOverride").getModelIndex();
-		int selectedRows[] = jtAdder.getSelectedRows();
+		int[] selectedRows = jtAdder.getSelectedRows();
 
 		String defaultPath = (String)txtTargetDir.getSelectedItem();
 		if (selectedRows.length == 1) {
@@ -1967,7 +1965,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
 		if (file != null) {
 			String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-			int selectedRows[] = jtAdder.getSelectedRows();
+			int[] selectedRows = jtAdder.getSelectedRows();
 			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
@@ -1975,7 +1973,6 @@ public class AdderPanel extends JFrame implements ActionListener {
 			}
 			model.setFireTableCellUpdatedEnabled(true);
 			model.fireTableRowsUpdated(0, model.getRowCount() - 1);
-			file = null;
 		}
 	}
 
@@ -2011,7 +2008,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	private synchronized void actionOpenURLs() {
 		if (Desktop.isDesktopSupported()) {
 			int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
-			int selectedRows[] = jtAdder.getSelectedRows();
+			int[] selectedRows = jtAdder.getSelectedRows();
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
@@ -2069,7 +2066,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
@@ -2080,7 +2077,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(jtAdder, settingsManager.getColWidthsAdder());
@@ -2270,17 +2267,9 @@ public class AdderPanel extends JFrame implements ActionListener {
 					}
 					break;
 				case AdjustmentEvent.BLOCK_INCREMENT:
-					// Scrolled multiple rows
-					unitDecrementCounter = 0;
-					loadAndUnloadPreviews(false);
-					break;
 				case AdjustmentEvent.BLOCK_DECREMENT:
-					// Scrolled multiple rows
-					unitDecrementCounter = 0;
-					loadAndUnloadPreviews(false);
-					break;
 				case AdjustmentEvent.TRACK:
-					// Scrollbar dragged
+					// Scrolled multiple rows or Scrollbar dragged
 					unitDecrementCounter = 0;
 					loadAndUnloadPreviews(false);
 					break;

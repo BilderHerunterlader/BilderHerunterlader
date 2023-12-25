@@ -49,7 +49,7 @@ public class ImportLocalFiles extends AdderImportBase {
 	 * @param files Files
 	 * @param title Title or null
 	 */
-	public void importLocalFiles(File files[], String title) {
+	public void importLocalFiles(File[] files, String title) {
 		if (files == null) {
 			return;
 		}
@@ -59,7 +59,7 @@ public class ImportLocalFiles extends AdderImportBase {
 			if (files[i].exists()) {
 				urls.add(new URL(files[i].getAbsolutePath()));
 			} else {
-				logger.error("File '" + files[i].getAbsolutePath() + "' does not exist. So it can not be sorted.");
+				logger.error("File '{}' does not exist. So it can not be sorted.", files[i].getAbsolutePath());
 			}
 		}
 
@@ -68,11 +68,10 @@ public class ImportLocalFiles extends AdderImportBase {
 		}
 		String referrer = Localization.getString("Unkown") + ": " + Localization.getString("Referrer");
 
-		if (urls.size() > 0) {
+		if (!urls.isEmpty()) {
 			// Open Download-Selection-Dialog
 			AdderPanel adderpnl = new AdderPanel(parentComponent, true, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 			adderpnl.init();
-			adderpnl = null;
 		}
 	}
 }

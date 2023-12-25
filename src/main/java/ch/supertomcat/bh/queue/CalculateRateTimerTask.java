@@ -48,7 +48,7 @@ public class CalculateRateTimerTask extends TimerTask {
 					listener.recalcutateRate();
 				}
 			}
-			if (rateChanged == false) {
+			if (!rateChanged) {
 				downloadRate = -1;
 			}
 			for (ICalculateRateTimer listener : listenersCalculateRate) {
@@ -61,7 +61,7 @@ public class CalculateRateTimerTask extends TimerTask {
 	 * @param listener Listener
 	 */
 	public synchronized void addCalculateRateListener(ICalculateRateTimer listener) {
-		if (listenersCalculateRate.contains(listener) == false) {
+		if (!listenersCalculateRate.contains(listener)) {
 			listenersCalculateRate.add(listener);
 		}
 	}

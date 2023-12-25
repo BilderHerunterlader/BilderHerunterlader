@@ -29,7 +29,7 @@ public class RulePipelineFailuresTableModel extends DefaultTableModel {
 	 * @param search Search
 	 */
 	public void addRow(String search) {
-		Object data[] = new Object[1];
+		Object[] data = new Object[1];
 		data[0] = search;
 		this.addRow(data);
 	}

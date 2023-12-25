@@ -355,7 +355,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 									bSubCat = true;
 								}
 							}
-							if (bSubCat == false) {
+							if (!bSubCat) {
 								Node parentParentNode = parentNode.getParentNode();
 								if (parentParentNode != null && parentParentNode.getNodeName().equals("span")) {
 									String strClass = ExtractTools.getAttributeValueFromNode(parentParentNode, "class");
@@ -365,7 +365,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 								}
 							}
 						}
-						if (bSubCat == false) {
+						if (!bSubCat) {
 							continue;
 						}
 					}
@@ -471,7 +471,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		String retval = "";
 		try {
 			retval = filename.substring(filename.lastIndexOf("/") + 1);
-			retval = retval.replaceAll("%20", " ");
+			retval = retval.replace("%20", " ");
 		} catch (StringIndexOutOfBoundsException e) {
 			logger.error(e.getMessage(), e);
 		}
@@ -596,25 +596,20 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		boolean bThumbPage = isThumbnailsPage(url.getURL());
 		boolean bIndexPage = isIndexPage(url.getURL());
 
-		if (bThumbPage == false && bIndexPage == false) {
+		if (!bThumbPage && !bIndexPage) {
 			isFromThisHoster.set(false);
 			return null;
 		}
 
-		if (recursive == false) {
+		if (!recursive) {
 			isFromThisHoster.set(false);
 			return null;
 		}
 
 		String threadURL = url.getThreadURL();
-		if (threadURL != null) {
-			if (isThumbnailsPage(threadURL)) {
-				if (bIndexPage || (bThumbPage && isThumbnailsPageWithoutPageParam(url.getURL()))) {
-					isFromThisHoster.set(false);
-					return null;
-				}
-			}
-
+		if (threadURL != null && isThumbnailsPage(threadURL) && (bIndexPage || (bThumbPage && isThumbnailsPageWithoutPageParam(url.getURL())))) {
+			isFromThisHoster.set(false);
+			return null;
 		}
 
 		CookieStore cookieStore = new BasicCookieStore();
@@ -628,7 +623,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 			String strCurrentURL = currentURL.getURL();
 
 			if (isDisplayPage(strCurrentURL)) {
-				if (strCurrentURL.startsWith("http://") == false && strCurrentURL.startsWith("https://") == false) {
+				if (!strCurrentURL.startsWith("http://") && !strCurrentURL.startsWith("https://")) {
 					// If the link was relative we have to correct that
 					currentURL = convertURLFromRelativeToAbsolute(url.getURL(), currentURL);
 					strCurrentURL = currentURL.getURL();
@@ -637,26 +632,26 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				continue;
 			}
 
-			if (isThumbnailsPage(strCurrentURL) && recursive == true) {
-				if (strCurrentURL.startsWith("http://") == false && strCurrentURL.startsWith("https://") == false) {
+			if (isThumbnailsPage(strCurrentURL) && recursive) {
+				if (!strCurrentURL.startsWith("http://") && !strCurrentURL.startsWith("https://")) {
 					// If the link was relative we have to correct that
 					currentURL = convertURLFromRelativeToAbsolute(url.getURL(), currentURL);
 					strCurrentURL = currentURL.getURL();
 					newURLs.set(i, currentURL);
 				}
-				if (strCurrentURL.equals(url.getURL()) == false) {
+				if (!strCurrentURL.equals(url.getURL())) {
 					continue;
 				}
 			}
 
-			if (isIndexPage(strCurrentURL) && bIndexPage == true && recursive == true) {
-				if (strCurrentURL.startsWith("http://") == false && strCurrentURL.startsWith("https://") == false) {
+			if (isIndexPage(strCurrentURL) && bIndexPage && recursive) {
+				if (!strCurrentURL.startsWith("http://") && !strCurrentURL.startsWith("https://")) {
 					// If the link was relative we have to correct that
 					currentURL = convertURLFromRelativeToAbsolute(url.getURL(), currentURL);
 					strCurrentURL = currentURL.getURL();
 					newURLs.set(i, currentURL);
 				}
-				if (strCurrentURL.equals(url.getURL()) == false) {
+				if (!strCurrentURL.equals(url.getURL())) {
 					continue;
 				}
 			}

@@ -32,7 +32,7 @@ public class LogTableModel extends DefaultTableModel {
 	 * @param filesize Filesize
 	 */
 	public void addRow(final String containerURL, final String target, final String dateTime, final String filesize) {
-		Object data[] = new Object[4];
+		Object[] data = new Object[4];
 		data[0] = dateTime;
 		data[1] = containerURL;
 		data[2] = target;

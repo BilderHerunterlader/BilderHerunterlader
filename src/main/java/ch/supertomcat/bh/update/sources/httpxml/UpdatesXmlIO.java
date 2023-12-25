@@ -80,10 +80,9 @@ public class UpdatesXmlIO {
 	 * 
 	 * @param in Input Stream
 	 * @return Updates
-	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public Updates readUpdates(InputStream in) throws IOException, JAXBException {
+	public Updates readUpdates(InputStream in) throws JAXBException {
 		synchronized (unmarshaller) {
 			return unmarshaller.unmarshal(new StreamSource(in), Updates.class).getValue();
 		}

@@ -202,22 +202,22 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 								// don't add links to other threads
 								if (isVBulletin(s, threadID)) {
 									URL newURL = new URL(s);
-									if (s.startsWith("http://") == false && s.startsWith("https://") == false) {
+									if (!s.startsWith("http://") && !s.startsWith("https://")) {
 										// If the link was relative we have to correct that
 										newURL = convertURLFromRelativeToAbsolute(url, newURL);
 									}
-									if (newURL.getURL().equals(url) == false) {
+									if (!newURL.getURL().equals(url)) {
 										newURL.setThreadURL(url);
 										multiPageURLs.add(newURL);
 									}
 								}
 							} else {
 								URL newURL = new URL(s);
-								if (s.startsWith("http://") == false && s.startsWith("https://") == false) {
+								if (!s.startsWith("http://") && !s.startsWith("https://")) {
 									// If the link was relative we have to correct that
 									newURL = convertURLFromRelativeToAbsolute(url, newURL);
 								}
-								if (newURL.getURL().equals(url) == false) {
+								if (!newURL.getURL().equals(url)) {
 									newURL.setThreadURL(url);
 									normalURLs.add(newURL);
 								}
@@ -228,22 +228,22 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 								// don't add links to other threads
 								if (isPhpBB(s, threadID)) {
 									URL newURL = new URL(s);
-									if (s.startsWith("http://") == false && s.startsWith("https://") == false) {
+									if (!s.startsWith("http://") && !s.startsWith("https://")) {
 										// If the link was relative we have to correct that
 										newURL = convertURLFromRelativeToAbsolute(url, newURL);
 									}
-									if (newURL.getURL().equals(url) == false) {
+									if (!newURL.getURL().equals(url)) {
 										newURL.setThreadURL(url);
 										multiPageURLs.add(newURL);
 									}
 								}
 							} else {
 								URL newURL = new URL(s);
-								if (s.startsWith("http://") == false && s.startsWith("https://") == false) {
+								if (!s.startsWith("http://") && !s.startsWith("https://")) {
 									// If the link was relative we have to correct that
 									newURL = convertURLFromRelativeToAbsolute(url, newURL);
 								}
-								if (newURL.getURL().equals(url) == false) {
+								if (!newURL.getURL().equals(url)) {
 									newURL.setThreadURL(url);
 									normalURLs.add(newURL);
 								}
@@ -561,7 +561,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 				for (int i = firstPageStart; i <= lastPageStart; i += step) {
 					// Get links from page
 					String urlToScan = threadURL + "&start=" + i;
-					System.out.println("urltoscan: " + urlToScan);
+					logger.debug("urltoscan: {}", urlToScan);
 					List<URL>[] urlVectors = getLinks(urlToScan, threadID, SOFTWARE_PHPBB, context, cookieStore);
 					newURLs.addAll(urlVectors[0]);
 

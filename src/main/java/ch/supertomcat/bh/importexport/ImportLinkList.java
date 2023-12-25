@@ -54,7 +54,6 @@ public class ImportLinkList extends AdderImportBase {
 			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
 			read(file);
-			file = null;
 		}
 	}
 
@@ -69,7 +68,6 @@ public class ImportLinkList extends AdderImportBase {
 		if (ok && deleteFile) {
 			file.delete();
 		}
-		file = null;
 	}
 
 	/**
@@ -123,7 +121,7 @@ public class ImportLinkList extends AdderImportBase {
 					title = line;
 				} else if (raw && lineCount == 2) {
 					referrer = line;
-				} else if (!raw || (raw && lineCount > 2)) {
+				} else if (!raw || lineCount > 2) {
 					int last = line.length();
 					int seperator = line.indexOf("\t");
 					URL urlToAdd = null;
@@ -142,11 +140,9 @@ public class ImportLinkList extends AdderImportBase {
 				// Open Download-Selection-Dialog
 				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init();
-				adderpnl = null;
 			}
 
 			br.close();
-			br = null;
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			return false;

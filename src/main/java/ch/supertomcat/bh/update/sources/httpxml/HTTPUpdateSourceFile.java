@@ -69,7 +69,7 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 			return false;
 		}
 
-		logger.info("Download Update: Source: '" + sourceURL + "', Filename: '" + target + "'");
+		logger.info("Download Update: Source: '{}', Filename: '{}'", sourceURL, target);
 
 		String encodedURL = HTTPUtil.encodeURL(sourceURL);
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {

@@ -96,12 +96,10 @@ public class HostSortImages extends Host implements IHoster {
 			return "";
 		}
 		if (url.lastIndexOf("/") > -1) {
-			String retval = url.substring(url.lastIndexOf("/") + 1);
-			return retval;
+			return url.substring(url.lastIndexOf("/") + 1);
 		}
 		if (url.lastIndexOf("\\") > -1) {
-			String retval = url.substring(url.lastIndexOf("\\") + 1);
-			return retval;
+			return url.substring(url.lastIndexOf("\\") + 1);
 		}
 		return "";
 	}

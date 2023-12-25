@@ -15,11 +15,11 @@ import javax.swing.table.TableModel;
 public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
 
-	private final Color keywordFoundColor = new Color(0x006400);
+	private static final Color KEYWORD_FOUND_COLOR = new Color(0x006400);
 
-	private final Color notAlreadyDownloadedColor = Color.BLUE;
+	private static final Color NOT_ALREADY_DOWNLOADED_COLOR = Color.BLUE;
 
-	private final Color alreadyDownloadedColor = Color.RED;
+	private static final Color ALREADY_DOWNLOADED_COLOR = Color.RED;
 
 	/**
 	 * Constructor
@@ -34,20 +34,18 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 		if (isSelected) {
 			fc = table.getSelectionForeground();
 		} else {
-			fc = table.getForeground();
-
 			int modelRowIndex = table.convertRowIndexToModel(row);
 
-			if ((Boolean)model.getValueAt(modelRowIndex, table.getColumn("AlreadyDownloaded").getModelIndex())) {
-				fc = alreadyDownloadedColor;
+			if (Boolean.TRUE.equals(model.getValueAt(modelRowIndex, table.getColumn("AlreadyDownloaded").getModelIndex()))) {
+				fc = ALREADY_DOWNLOADED_COLOR;
 			} else {
-				fc = notAlreadyDownloadedColor;
+				fc = NOT_ALREADY_DOWNLOADED_COLOR;
 			}
 
 			if (table.convertColumnIndexToModel(column) == 3) {
 				boolean keywordFound = model.getValueAt(modelRowIndex, table.getColumn("Keyword").getModelIndex()) != null;
 				if (keywordFound) {
-					fc = keywordFoundColor;
+					fc = KEYWORD_FOUND_COLOR;
 				}
 			}
 		}

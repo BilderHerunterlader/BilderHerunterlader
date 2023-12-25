@@ -53,7 +53,6 @@ public class ExportKeywords extends ImportExportBase {
 			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
 			// export the keywords
 			exportKeywords(file.getAbsolutePath());
-			file = null;
 		}
 	}
 

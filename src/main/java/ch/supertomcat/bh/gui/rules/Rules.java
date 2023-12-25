@@ -306,7 +306,7 @@ public class Rules extends JPanel {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsRules(TableUtil.serializeColWidthSetting(jtRules));

@@ -82,7 +82,7 @@ public class LogManager implements BHSettingsListener {
 		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
 
 		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
-		if (folder.exists() == false) {
+		if (!folder.exists()) {
 			folder.mkdirs();
 		}
 
@@ -123,7 +123,7 @@ public class LogManager implements BHSettingsListener {
 			}
 		});
 		if (logFiles != null) {
-			String logFileNames[] = new String[logFiles.length + 1];
+			String[] logFileNames = new String[logFiles.length + 1];
 			logFileNames[0] = "BH-logs.txt";
 			for (int i = 0; i < logFiles.length; i++) {
 				logFileNames[i + 1] = logFiles[i].getName();
@@ -184,10 +184,8 @@ public class LogManager implements BHSettingsListener {
 			String row = null;
 			while ((row = br.readLine()) != null) {
 				for (URL url : urls) {
-					if (!url.isBlacklisted()) {
-						if (row.equals(url.getURL())) {
-							url.setBlacklisted(true);
-						}
+					if (!url.isBlacklisted() && row.equals(url.getURL())) {
+						url.setBlacklisted(true);
 					}
 				}
 
@@ -262,7 +260,7 @@ public class LogManager implements BHSettingsListener {
 
 			List<String> currentRows = new ArrayList<>();
 
-			SearchLogThread slt[] = new SearchLogThread[threadCount];
+			SearchLogThread[] slt = new SearchLogThread[threadCount];
 			for (int t = 0; t < threadCount; t++) {
 				slt[t] = new SearchLogThread(urls, t, threadCount, currentRows, barrier);
 			}
@@ -390,7 +388,7 @@ public class LogManager implements BHSettingsListener {
 			String line;
 			while ((line = br.readLine()) != null) {
 				if (lineCounter >= start && lineCounter <= end) {
-					String arr[] = line.split("\t");
+					String[] arr = line.split("\t");
 					if (arr.length >= 3) {
 						try {
 							long timestamp = Long.parseLong(arr[0]);
@@ -503,11 +501,12 @@ public class LogManager implements BHSettingsListener {
 			long bytesRead = 0;
 			while ((line = br.readLine()) != null) {
 				bytesRead += line.getBytes().length;
-				String arr[] = line.split("\t");
+				String[] arr = line.split("\t");
 				if (arr.length >= 3) {
 					try {
 						// Get the directory
-						String dir = (fDir = new File(arr[2]).getParentFile()).getAbsolutePath();
+						fDir = new File(arr[2]).getParentFile();
+						String dir = fDir.getAbsolutePath();
 
 						// Get the date
 						long dateTime = Long.parseLong(arr[0]);
@@ -583,7 +582,7 @@ public class LogManager implements BHSettingsListener {
 	@Override
 	public void settingsChanged() {
 		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
-		if (logFile.equals(currentLogFile) == false) {
+		if (!logFile.equals(currentLogFile)) {
 			logFile = currentLogFile;
 			for (ILogManagerListener listener : listeners) {
 				listener.currentLogFileChanged();

@@ -161,7 +161,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		title = filterPath(title);
 
 		String dlDir = getSettingsManager().getSavePath();
-		if (dlDir.length() > 0 && dlDir.endsWith("/") == false && dlDir.endsWith("\\") == false) {
+		if (dlDir.length() > 0 && !dlDir.endsWith("/") && !dlDir.endsWith("\\")) {
 			dlDir += FileUtil.FILE_SEPERATOR;
 		}
 
@@ -180,8 +180,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		} catch (MalformedURLException mue) {
 		}
 
-		String targetPath = dlDir + rootFolder + FileUtil.FILE_SEPERATOR + title;
-		return targetPath;
+		return dlDir + rootFolder + FileUtil.FILE_SEPERATOR + title;
 	}
 
 	@Override
@@ -278,7 +277,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 			return null;
 		}
 
-		if (recursive == false) {
+		if (!recursive) {
 			isFromThisHoster.set(false);
 			return null;
 		}
@@ -335,11 +334,11 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 			if (matcherCat.matches()) {
 				if (links.get(i).getURL().endsWith("page/1") || links.get(i).getURL().endsWith("page=1")) {
 					downloadedCategoryLinks.add(links.get(i));
-				} else if (downloadedCategoryLinks.contains(links.get(i)) == false) {
+				} else if (!downloadedCategoryLinks.contains(links.get(i))) {
 					progress.progressChanged("Extracting Links from " + links.get(i).getURL() + " (" + i + "/" + links.size() + ")");
 					List<URL> foundLinks = LinkExtract.getLinks(links.get(i).getURL(), "", filter, getProxyManager(), getSettingsManager(), getCookieManager());
 					for (int x = 0; x < foundLinks.size(); x++) {
-						if (links.contains(foundLinks.get(x)) == false) {
+						if (!links.contains(foundLinks.get(x))) {
 							links.add(foundLinks.get(x));
 						}
 					}

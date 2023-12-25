@@ -79,13 +79,12 @@ public class ExtractConfigWhitelist {
 	 * @return ILinkExtractFilter
 	 */
 	public ILinkExtractFilter getExtractFilter() {
-		ILinkExtractFilter filterCategory = new ILinkExtractFilter() {
+		return new ILinkExtractFilter() {
 			@Override
 			public boolean isLinkAccepted(Node nodeURL, Document nodeRoot, URL url, String containerURL) {
 				return isAllowedURL(url.getURL());
 			}
 		};
-		return filterCategory;
 	}
 
 	/**

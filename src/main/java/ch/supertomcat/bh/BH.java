@@ -179,10 +179,10 @@ public abstract class BH {
 
 			@Override
 			public void updateWindowClosed(boolean updateRunned, boolean updateSuccessfull) {
-				if (transmitterSocket != null && (updateRunned == false || (updateRunned == true && updateSuccessfull == false))) {
+				if (transmitterSocket != null && (!updateRunned || !updateSuccessfull)) {
 					transmitterSocket.setAcceptConnections(true);
 				}
-				if (transmitterHTTP != null && (updateRunned == false || (updateRunned == true && updateSuccessfull == false))) {
+				if (transmitterHTTP != null && (!updateRunned || !updateSuccessfull)) {
 					transmitterHTTP.setAcceptConnections(true);
 				}
 			}
@@ -193,7 +193,7 @@ public abstract class BH {
 		settingsManager.readSettings();
 		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
-			String options[] = { "English", "Deutsch" };
+			String[] options = { "English", "Deutsch" };
 			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
 			JFrame frame = null;
 			try {
@@ -524,7 +524,7 @@ public abstract class BH {
 					} else {
 						try {
 							Files.deleteIfExists(fDelete.toPath());
-							logger.info("Delete success: " + line);
+							logger.info("Delete success: {}", line);
 						} catch (IOException e) {
 							logger.error("Could not delete: {}", fDelete.getAbsolutePath(), e);
 						}

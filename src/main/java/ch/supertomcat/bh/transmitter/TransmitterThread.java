@@ -46,7 +46,7 @@ public class TransmitterThread extends Thread {
 	public void run() {
 		super.run();
 
-		logger.info("Handling Socket Connection at " + socket.getLocalAddress() + ":" + socket.getLocalPort() + " from " + socket.getInetAddress() + ":" + socket.getPort());
+		logger.info("Handling Socket Connection at {}:{} from {}:{}", socket.getLocalAddress(), socket.getLocalPort(), socket.getInetAddress(), socket.getPort());
 
 		/*
 		 * There are 3 ways, how URLs could be transferred to BH.

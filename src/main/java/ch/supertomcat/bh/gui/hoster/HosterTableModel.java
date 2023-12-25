@@ -75,11 +75,7 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 		}
 
 		Host host = (Host)this.getValueAt(row, 0);
-		if (column == 4 && host.canBeDisabled()) {
-			return true;
-		}
-
-		return false;
+		return column == 4 && host.canBeDisabled();
 	}
 
 	@Override
@@ -96,7 +92,7 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	 * @param host Host
 	 */
 	public void addRow(final Host host) {
-		Object data[] = new Object[5];
+		Object[] data = new Object[5];
 		data[0] = host;
 		data[1] = host.getVersion();
 		StringBuilder sbType = new StringBuilder();
@@ -154,7 +150,7 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 			return;
 		}
 
-		Object data[] = new Object[5];
+		Object[] data = new Object[5];
 		data[0] = redirect;
 		data[1] = redirect.getVersion();
 		data[2] = "Redirect";

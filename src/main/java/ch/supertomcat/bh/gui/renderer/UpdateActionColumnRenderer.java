@@ -5,6 +5,7 @@ import java.awt.Component;
 
 import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
@@ -33,7 +34,7 @@ public class UpdateActionColumnRenderer extends DefaultTableCellRenderer impleme
 			JLabel label = (JLabel)comp;
 			label.setText("");
 			label.setOpaque(true);
-			label.setHorizontalAlignment(JLabel.CENTER);
+			label.setHorizontalAlignment(SwingConstants.CENTER);
 			switch (action) {
 				case ACTION_NONE:
 					label.setIcon(Icons.getBHIcon("Dummy16.png"));

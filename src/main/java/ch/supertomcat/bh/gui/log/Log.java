@@ -20,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
@@ -228,7 +229,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		pnlButtons.add(btnNext);
 		pnlButtons.add(btnLast);
 
-		lblStatus.setHorizontalAlignment(JLabel.LEFT);
+		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
 		JPanel pnlStatus = new JPanel();
 		pnlStatus.setLayout(new BoxLayout(pnlStatus, BoxLayout.LINE_AXIS));
 		pnlStatus.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
@@ -277,7 +278,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int s[] = jtLog.getSelectedRows();
+				int[] s = jtLog.getSelectedRows();
 				StringBuilder content = new StringBuilder("");
 				for (int i = 0; i < s.length; i++) {
 					content.append((String)model.getValueAt(s[i], 1));
@@ -302,7 +303,7 @@ public class Log extends JPanel implements ILogManagerListener {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				int s[] = jtLog.getSelectedRows();
+				int[] s = jtLog.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
 					String url = (String)model.getValueAt(s[i], 1);
 					if (Desktop.isDesktopSupported()) {
@@ -330,7 +331,7 @@ public class Log extends JPanel implements ILogManagerListener {
 			@Override
 			public void run() {
 				HashSet<String> dirs = new HashSet<>();
-				int s[] = jtLog.getSelectedRows();
+				int[] s = jtLog.getSelectedRows();
 				String file = "";
 				for (int i = 0; i < s.length; i++) {
 					file = (String)model.getValueAt(s[i], 2);
@@ -354,14 +355,14 @@ public class Log extends JPanel implements ILogManagerListener {
 		if (vals.length != 3) {
 			return;
 		}
-		long currentStart = vals[0];
+		long localCurrentStart = vals[0];
 		long end = vals[1];
 		long lineCount = vals[2];
-		this.currentStart = currentStart;
+		this.currentStart = localCurrentStart;
 		if (lineCount == 0) {
 			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowNothing"));
 		} else {
-			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowingFrom") + " " + currentStart + " " + Localization.getString("To") + " " + end);
+			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowingFrom") + " " + localCurrentStart + " " + Localization.getString("To") + " " + end);
 		}
 	}
 
@@ -381,7 +382,7 @@ public class Log extends JPanel implements ILogManagerListener {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsLog(TableUtil.serializeColWidthSetting(jtLog));
@@ -394,7 +395,7 @@ public class Log extends JPanel implements ILogManagerListener {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(jtLog, settingsManager.getColWidthsLog());

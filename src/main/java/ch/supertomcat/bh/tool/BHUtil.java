@@ -33,11 +33,17 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * This class provides methods, which are often used.
  */
-public class BHUtil {
+public final class BHUtil {
 	/**
 	 * Logger for this class
 	 */
 	private static Logger logger = LoggerFactory.getLogger(BHUtil.class);
+
+	/**
+	 * Constructor
+	 */
+	private BHUtil() {
+	}
 
 	/**
 	 * This method filters not allowed chars in filenames
@@ -165,10 +171,10 @@ public class BHUtil {
 		cal.add(Calendar.DATE, -daysToKeepBackup);
 		final Date backupDeleteDate = cal.getTime();
 		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss-SSS");
-		final long backupDeleteTime = daysToKeepBackup * 24 * 60 * 60 * 1000;
+		final long backupDeleteTime = daysToKeepBackup * 24 * 60 * 60 * 1000L;
 
 		// Delete old backup-Files
-		File backupFiles[] = folder.listFiles(new FileFilter() {
+		File[] backupFiles = folder.listFiles(new FileFilter() {
 			private final Pattern oldBackupPattern = Pattern.compile("^" + filename + ".bak-([0-9]+)$");
 			private final Pattern backupPattern = Pattern.compile("^" + filename + "-([0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3})$");
 

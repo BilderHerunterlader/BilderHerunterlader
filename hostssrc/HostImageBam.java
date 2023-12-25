@@ -94,10 +94,7 @@ public class HostImageBam extends Host implements IHoster {
 	@Override
 	public boolean isFromThisHoster(String url) {
 		Matcher urlMatcher = urlPattern.matcher(url);
-		if (urlMatcher.matches()) {
-			return true;
-		}
-		return false;
+		return urlMatcher.matches();
 	}
 
 	@Override

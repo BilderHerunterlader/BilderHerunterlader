@@ -33,7 +33,7 @@ public class UpdateObject {
 	/**
 	 * Update Action Type enum
 	 */
-	public static enum UpdateActionType {
+	public enum UpdateActionType {
 		/**
 		 * ACTION_NONE
 		 */
@@ -58,7 +58,7 @@ public class UpdateObject {
 	/**
 	 * Update Type enum
 	 */
-	public static enum UpdateType {
+	public enum UpdateType {
 		/**
 		 * TYPE_BH
 		 */
@@ -355,7 +355,7 @@ public class UpdateObject {
 				continue;
 			}
 			b = sourceFile.downloadUpdate(this.type, this.action, this.targets.get(i));
-			if (b == false) {
+			if (!b) {
 				return b;
 			}
 		}

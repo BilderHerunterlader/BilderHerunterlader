@@ -590,7 +590,7 @@ public class Queue extends JPanel {
 	 * Start
 	 */
 	private void actionStart() {
-		Thread t = new Thread(() -> queueManager.startDownload());
+		Thread t = new Thread(queueManager::startDownload);
 		t.start();
 	}
 
@@ -598,7 +598,7 @@ public class Queue extends JPanel {
 	 * Stop
 	 */
 	private void actionStop() {
-		Thread t = new Thread(() -> queueManager.stopDownload());
+		Thread t = new Thread(queueManager::stopDownload);
 		t.start();
 	}
 
@@ -683,7 +683,6 @@ public class Queue extends JPanel {
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	/**
@@ -843,7 +842,7 @@ public class Queue extends JPanel {
 			if ((input != null) && (input.length() > 2)) {
 				boolean b1 = input.endsWith("/");
 				boolean b2 = input.endsWith("\\");
-				if ((b1 == false) && (b2 == false)) {
+				if (!b1 && !b2) {
 					input += FileUtil.FILE_SEPERATOR;
 				}
 				for (int i = 0; i < s.length; i++) {
@@ -870,7 +869,7 @@ public class Queue extends JPanel {
 			File file = FileDialogUtil.showFolderSaveDialog(this, settingsManager.getSavePath(), null);
 			if (file != null) {
 				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-				int s[] = jtQueue.getSelectedRows();
+				int[] s = jtQueue.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
 					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
 					if (pic != null) {
@@ -878,7 +877,6 @@ public class Queue extends JPanel {
 						queueManager.updatePic(pic);
 					}
 				}
-				file = null;
 				queueManager.asyncSaveDatabase();
 			}
 		}
@@ -894,7 +892,7 @@ public class Queue extends JPanel {
 			if (s.length > 0) {
 				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), QueueTableModel.TARGET_COLUMN_INDEX);
 				defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-				String input[] = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length, settingsManager);
+				String[] input = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length, settingsManager);
 				if ((input != null)) {
 					int index = Integer.parseInt(input[1]);
 					int step = Integer.parseInt(input[2]);
@@ -903,7 +901,7 @@ public class Queue extends JPanel {
 					for (int i = 0; i < s.length; i++) {
 						int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
 						String out = "";
-						if (clearFilename == false) {
+						if (!clearFilename) {
 							String fname = input[0];
 							if (keepOriginal) {
 								fname = (String)model.getValueAt(modelIndex, QueueTableModel.TARGET_COLUMN_INDEX);
@@ -937,7 +935,10 @@ public class Queue extends JPanel {
 			Thread t = new Thread(new Runnable() {
 				@Override
 				public void run() {
-					File files[] = folder.listFiles();
+					File[] files = folder.listFiles();
+					if (files == null) {
+						return;
+					}
 					new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
 							.importLocalFiles(files, folder.getName());
 				}
@@ -952,7 +953,7 @@ public class Queue extends JPanel {
 	 */
 	private void actionActivate() {
 		synchronized (queueManager.getSyncObject()) {
-			int s[] = jtQueue.getSelectedRows();
+			int[] s = jtQueue.getSelectedRows();
 			List<Pic> picsToUpdate = new ArrayList<>();
 			for (int i = 0; i < s.length; i++) {
 				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
@@ -970,7 +971,7 @@ public class Queue extends JPanel {
 	 */
 	private void actionDeactivate() {
 		synchronized (queueManager.getSyncObject()) {
-			int s[] = jtQueue.getSelectedRows();
+			int[] s = jtQueue.getSelectedRows();
 			List<Pic> picsToUpdate = new ArrayList<>();
 			for (int i = 0; i < s.length; i++) {
 				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
@@ -1064,7 +1065,7 @@ public class Queue extends JPanel {
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsQueue(TableUtil.serializeColWidthSetting(jtQueue));
@@ -1075,7 +1076,7 @@ public class Queue extends JPanel {
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(jtQueue, settingsManager.getColWidthsQueue());

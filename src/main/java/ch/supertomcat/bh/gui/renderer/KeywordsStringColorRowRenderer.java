@@ -22,9 +22,7 @@ public class KeywordsStringColorRowRenderer extends DefaultStringColorRowRendere
 		int modelColumnIndex = table.convertColumnIndexToModel(column);
 		if (modelColumnIndex == 2 || modelColumnIndex == 3) {
 			boolean rpath = (Boolean)table.getModel().getValueAt(table.convertRowIndexToModel(row), 4);
-			if (rpath == true && modelColumnIndex == 2) {
-				comp.setForeground(Color.decode("#C0C0C0"));
-			} else if (rpath == false && modelColumnIndex == 3) {
+			if (rpath && modelColumnIndex == 2 || !rpath && modelColumnIndex == 3) {
 				comp.setForeground(Color.decode("#C0C0C0"));
 			}
 		}

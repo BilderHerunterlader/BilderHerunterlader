@@ -20,7 +20,6 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
  * Rule-Var-Regexp-Editor-Dialog
- * TODO Probably not needed
  */
 public class RuleVarRegexpEditor extends JDialog {
 	private static final long serialVersionUID = 1L;

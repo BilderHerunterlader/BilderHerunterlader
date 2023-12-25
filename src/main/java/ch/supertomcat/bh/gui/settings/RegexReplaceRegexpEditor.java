@@ -25,9 +25,9 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 
-import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
+import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 
 /**
@@ -140,7 +140,7 @@ public class RegexReplaceRegexpEditor extends JDialog implements ActionListener 
 
 		pnlMain.setLayout(gbl);
 
-		GridBagConstraints gbc = new GridBagConstraints();
+		GridBagConstraints gbc;
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);

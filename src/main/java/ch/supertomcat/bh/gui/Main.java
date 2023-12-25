@@ -24,6 +24,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -162,7 +163,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		this.hosts = new HosterPanel(hostManager, downloadQueueManager, settingsManager);
 		this.rules = new Rules(this, this, downloadQueueManager, settingsManager, hostManager);
 		setIconImage(Icons.getBHImage("BH.png"));
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		tab.setFocusable(false);
 		tab.addTab(Localization.getString("Queue"), Icons.getTangoIcon("actions/go-down.png", 22), queue);

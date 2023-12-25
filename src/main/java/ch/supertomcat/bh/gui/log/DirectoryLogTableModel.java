@@ -30,7 +30,7 @@ public class DirectoryLogTableModel extends DefaultTableModel {
 	 * @param exists Directory exists
 	 */
 	public void addRow(final String dateTime, final String directory, final boolean exists) {
-		Object data[] = new Object[3];
+		Object[] data = new Object[3];
 		data[0] = dateTime;
 		data[1] = directory;
 		data[2] = exists;

@@ -326,7 +326,7 @@ public class QueueManager implements IPicListener {
 	 * 
 	 * @param indices Indices
 	 */
-	public void removePics(int indices[]) {
+	public void removePics(int[] indices) {
 		if (downloadQueueManager.isDownloading()) {
 			return;
 		}
@@ -671,9 +671,7 @@ public class QueueManager implements IPicListener {
 		} else {
 			try {
 				EventQueue.invokeAndWait(r);
-			} catch (InvocationTargetException e) {
-				logger.error(e.getMessage(), e);
-			} catch (InterruptedException e) {
+			} catch (InvocationTargetException | InterruptedException e) {
 				logger.error(e.getMessage(), e);
 			}
 		}

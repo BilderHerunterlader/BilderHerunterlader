@@ -652,7 +652,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			t.start();
 		} else if (e.getSource() == menuItemTitleToKeyword) {
 			enableComponents(false);
-			int s[] = jtKeywords.getSelectedRows();
+			int[] s = jtKeywords.getSelectedRows();
 			String val = "";
 			for (int i = 0; i < s.length; i++) {
 				val = (String)jtKeywords.getValueAt(s[i], 0);
@@ -661,7 +661,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			enableComponents(true);
 		} else if (e.getSource() == menuItemTitleToDirectory) {
 			enableComponents(false);
-			int s[] = jtKeywords.getSelectedRows();
+			int[] s = jtKeywords.getSelectedRows();
 			String val = "";
 			String path = settingsManager.getSavePath();
 			for (int i = 0; i < s.length; i++) {
@@ -671,7 +671,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			enableComponents(true);
 		} else if (e.getSource() == menuItemTitleToRelativeDirectory) {
 			enableComponents(false);
-			int s[] = jtKeywords.getSelectedRows();
+			int[] s = jtKeywords.getSelectedRows();
 			String val = "";
 			for (int i = 0; i < s.length; i++) {
 				val = (String)jtKeywords.getValueAt(s[i], 0);
@@ -680,7 +680,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 			enableComponents(true);
 		} else if (e.getSource() == menuItemAbsoluteToRelativeDirectory) {
 			enableComponents(false);
-			int s[] = jtKeywords.getSelectedRows();
+			int[] s = jtKeywords.getSelectedRows();
 			String val = "";
 			for (int i = 0; i < s.length; i++) {
 				val = (String)jtKeywords.getValueAt(s[i], 2);

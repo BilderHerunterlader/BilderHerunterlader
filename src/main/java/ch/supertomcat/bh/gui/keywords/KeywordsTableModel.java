@@ -40,7 +40,7 @@ public class KeywordsTableModel extends DefaultTableModel {
 	 * @param k Keyword
 	 */
 	public void addRow(Keyword k) {
-		Object data[] = new Object[5];
+		Object[] data = new Object[5];
 		data[0] = k.getTitle();
 		data[1] = k.getKeywords();
 		data[2] = k.getDownloadPath();
@@ -56,7 +56,7 @@ public class KeywordsTableModel extends DefaultTableModel {
 	 * @param position Position
 	 */
 	public void addRow(Keyword k, int position) {
-		Object data[] = new Object[5];
+		Object[] data = new Object[5];
 		data[0] = k.getTitle();
 		data[1] = k.getKeywords();
 		data[2] = k.getDownloadPath();

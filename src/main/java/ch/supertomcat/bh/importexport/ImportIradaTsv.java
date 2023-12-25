@@ -63,13 +63,10 @@ public abstract class ImportIradaTsv {
 
 		// Get a BufferedReader
 		InputStreamReader isr = new InputStreamReader(is, "UTF-16");
-		BufferedReader br = new BufferedReader(isr);
-
-		// Get the Tsv-Objects
-		List<Tsv> retval = importTsv(br);
-		br.close();
-		br = null;
-		return retval;
+		try (BufferedReader br = new BufferedReader(isr)) {
+			// Get the Tsv-Objects
+			return importTsv(br);
+		}
 	}
 
 	/**
@@ -81,7 +78,7 @@ public abstract class ImportIradaTsv {
 	 */
 	private static List<Tsv> importTsv(BufferedReader br) throws IOException {
 		String line;
-		String val[];
+		String[] val;
 		String rPath;
 		String cURL;
 		long lMod;

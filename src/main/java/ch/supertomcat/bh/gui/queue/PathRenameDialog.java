@@ -155,9 +155,7 @@ public class PathRenameDialog extends JDialog implements ActionListener {
 	 */
 	public void okPressed() {
 		canceled = false;
-		if (!canceled) {
-			this.dispose();
-		}
+		this.dispose();
 	}
 
 	/**
@@ -198,7 +196,6 @@ public class PathRenameDialog extends JDialog implements ActionListener {
 		if (frd.isCanceled()) {
 			return null;
 		}
-		String retval = frd.getValue();
-		return retval;
+		return frd.getValue();
 	}
 }

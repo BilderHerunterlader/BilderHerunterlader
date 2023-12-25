@@ -70,7 +70,6 @@ public class ImportQueue extends ImportExportBase {
 			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			// read the file
 			read(file);
-			file = null;
 		}
 	}
 
@@ -120,7 +119,7 @@ public class ImportQueue extends ImportExportBase {
 						continue;
 					}
 
-					String arr[] = row.split("\t");
+					String[] arr = row.split("\t");
 					if (arr.length == 10) {
 						String containerURL = arr[0];
 						String thumbnailURL = arr[1];

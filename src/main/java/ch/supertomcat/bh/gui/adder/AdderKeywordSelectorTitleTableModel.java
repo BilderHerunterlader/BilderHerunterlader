@@ -45,7 +45,7 @@ public class AdderKeywordSelectorTitleTableModel extends DefaultTableModel {
 	 * @param matchType MatchType
 	 */
 	public void addRow(Keyword keyword, KeywordMatchType matchType) {
-		Object data[] = new Object[includeMatchType ? 3 : 2];
+		Object[] data = new Object[includeMatchType ? 3 : 2];
 		data[0] = keyword;
 		data[1] = keyword.getKeywords();
 		if (includeMatchType) {

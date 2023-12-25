@@ -25,7 +25,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
@@ -40,9 +39,11 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
+import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -954,7 +955,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		setTitle(Localization.getString("Settings"));
 		setModal(true);
 		setIconImage(Icons.getBHImage("BH.png"));
-		setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setLayout(gbl);
 
 		this.txtStdSavePath = new JTextField(settingsManager.getSavePath());
@@ -1035,7 +1036,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		txtMinFilesize.setToolTipText(Localization.getString("MinFilesizeToolTip"));
 
 		tp.setFocusable(false);
-		tp.setTabPlacement(JTabbedPane.TOP);
+		tp.setTabPlacement(SwingConstants.TOP);
 		tp.addTab(Localization.getString("SettingsGUI"), Icons.getTangoIcon("apps/preferences-system-windows.png", 22), spGUI);
 		tp.addTab(Localization.getString("SettingsConnection"), Icons.getTangoIcon("status/network-idle.png", 22), spConnection);
 		tp.addTab(Localization.getString("SettingsPaths"), Icons.getTangoIcon("places/folder.png", 22), spPaths);
@@ -1322,7 +1323,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblLAF, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbLAF, pnlGUI);
-		// i++;
+
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblLanguage, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
@@ -1332,7 +1333,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblSizeView, pnlGUI);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, cmbSizeView, pnlGUI);
-		// i++;
+
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblGUI, gbc, lblProgressView, pnlGUI);
 		gbc = gblt.getGBC(3, i, 1, 1, 0.0, 0.0);
@@ -1727,17 +1728,12 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesOpera.setText(strFile);
-				strFile = null;
 			}
-			file = null;
 		} else if (e.getSource() == btnCookiesOperaNew) {
 			FileFilter filter = new FileFilter() {
 				@Override
 				public boolean accept(File f) {
-					if (f.getName().equals("Cookies") || f.isDirectory()) {
-						return true;
-					}
-					return false;
+					return f.getName().equals("Cookies") || f.isDirectory();
 				}
 
 				@Override
@@ -1749,17 +1745,12 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesOperaNew.setText(strFile);
-				strFile = null;
 			}
-			file = null;
 		} else if (e.getSource() == btnCookiesFirefox) {
 			FileFilter filter = new FileFilter() {
 				@Override
 				public boolean accept(File f) {
-					if (f.getName().equals("cookies.txt") || f.getName().equals("cookies.sqlite") || f.isDirectory()) {
-						return true;
-					}
-					return false;
+					return f.getName().equals("cookies.txt") || f.getName().equals("cookies.sqlite") || f.isDirectory();
 				}
 
 				@Override
@@ -1771,17 +1762,12 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesFirefox.setText(strFile);
-				strFile = null;
 			}
-			file = null;
 		} else if (e.getSource() == btnCookiesPaleMoon) {
 			FileFilter filter = new FileFilter() {
 				@Override
 				public boolean accept(File f) {
-					if (f.getName().equals("cookies.sqlite") || f.isDirectory()) {
-						return true;
-					}
-					return false;
+					return f.getName().equals("cookies.sqlite") || f.isDirectory();
 				}
 
 				@Override
@@ -1793,13 +1779,11 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			if (file != null) {
 				String strFile = file.getAbsolutePath();
 				txtCookiesPaleMoon.setText(strFile);
-				strFile = null;
 			}
-			file = null;
 		} else if (e.getSource() == menuItemNew || e.getSource() == btnSubdirNew) {
 			subdirModel.addEmptyRow();
 		} else if (e.getSource() == menuItemDelete || e.getSource() == btnSubdirDelete) {
-			int rows[] = jtSubdirs.getSelectedRows();
+			int[] rows = jtSubdirs.getSelectedRows();
 			for (int i = 0; i < rows.length; i++) {
 				subdirModel.removeRow(rows[i]);
 			}
@@ -1932,7 +1916,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			String resMin = (String)jtSubdirs.getValueAt(i, 3);
 			String resMax = (String)jtSubdirs.getValueAt(i, 4);
 
-			String arr[] = resMin.split("x");
+			String[] arr = resMin.split("x");
 			if (arr.length == 2) {
 				resMinW = SubdirResolutionCellEditorComponent.parseIntVal(arr[0]);
 				resMinH = SubdirResolutionCellEditorComponent.parseIntVal(arr[1]);
@@ -1972,13 +1956,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			try {
 				UIManager.setLookAndFeel(selectedLookAndFeel.getClassName());
 				SwingUtilities.updateComponentTreeUI(owner);
-			} catch (ClassNotFoundException e1) {
-				logger.error(e1.getMessage(), e1);
-			} catch (InstantiationException e1) {
-				logger.error(e1.getMessage(), e1);
-			} catch (IllegalAccessException e1) {
-				logger.error(e1.getMessage(), e1);
-			} catch (UnsupportedLookAndFeelException e1) {
+			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
@@ -2006,9 +1984,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 			boolean b1 = rbNoProxy.isSelected();
 			boolean b2 = rbHTTP.isSelected();
 			boolean b = false;
-			if (b1) {
-				b = false;
-			} else if (b2) {
+			if (b2) {
 				b = true;
 			}
 			lblProxyName.setEnabled(b);
@@ -2110,7 +2086,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsSubdirs(TableUtil.serializeColWidthSetting(jtSubdirs));
@@ -2121,7 +2097,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * updateColWidthsFromSettingsManager
 	 */
 	private void updateColWidthsFromSettingsManager() {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(jtSubdirs, settingsManager.getColWidthsSubdirs());

@@ -60,12 +60,12 @@ public class TransmitterSocket implements Runnable {
 					// wait for incomming connection
 					@SuppressWarnings("resource")
 					Socket socket = ss.accept();
-					logger.info("Accepted connection at " + socket.getLocalAddress() + ":" + socket.getLocalPort() + " from " + socket.getInetAddress() + ":" + socket.getPort());
+					logger.info("Accepted connection at {}:{} from {}:{}", socket.getLocalAddress(), socket.getLocalPort(), socket.getInetAddress(), socket.getPort());
 					if (!stop && acceptConnections) {
 						// Start new thread, which will read data from the stream
 						TransmitterThread t = new TransmitterThread(socket, transmitterHelper);
 						t.setName("TransmitterReader-" + t.getId());
-						logger.info("Handle connection by thread: " + t.getName());
+						logger.info("Handle connection by thread: {}", t.getName());
 						t.start();
 					} else {
 						logger.warn("Close connection, because acceptConnections Flag is false");
@@ -97,7 +97,6 @@ public class TransmitterSocket implements Runnable {
 			out.write(String.valueOf(port));
 			// Close the file
 			out.flush();
-			out.close();
 		} catch (IOException e) {
 			logger.error("Could not write port file: {}", file.getAbsolutePath(), e);
 		}

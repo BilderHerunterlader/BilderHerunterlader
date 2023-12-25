@@ -169,7 +169,7 @@ public class Pic {
 		urlContainer = HTTPUtil.trimURL(urlContainer);
 		this.containerURL = urlContainer;
 		this.targetPath = targetPath;
-		if ((this.targetPath.endsWith("/") == false) && (this.targetPath.endsWith("\\") == false)) {
+		if (!this.targetPath.endsWith("/") && !this.targetPath.endsWith("\\")) {
 			this.targetPath += FileUtil.FILE_SEPERATOR;
 		}
 		this.targetFilename = targetFilename;
@@ -427,7 +427,7 @@ public class Pic {
 	 */
 	public void setTargetPath(String targetPath) {
 		this.targetPath = targetPath;
-		if ((this.targetPath.endsWith("/") == false) && (this.targetPath.endsWith("\\") == false)) {
+		if (!this.targetPath.endsWith("/") && !this.targetPath.endsWith("\\")) {
 			this.targetPath += FileUtil.FILE_SEPERATOR;
 		}
 		targetChanged();

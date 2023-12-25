@@ -161,7 +161,7 @@ public class RuleMainEditor extends JDialog {
 			dispose();
 		});
 
-		pnlGeneral = new RuleGeneralPanel(rule, definition, this, settingsManager, developerCheckboxAvailable, x -> updateRedirectState(x));
+		pnlGeneral = new RuleGeneralPanel(rule, definition, this, settingsManager, developerCheckboxAvailable, this::updateRedirectState);
 
 		pnlPipes = new RulePipesPanel(definition, this, settingsManager);
 

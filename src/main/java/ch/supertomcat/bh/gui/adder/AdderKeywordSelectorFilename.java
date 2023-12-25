@@ -178,7 +178,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 
 			cb.setSelectedIndex(select);
 
-			Object data[] = new Object[2];
+			Object[] data = new Object[2];
 			data[0] = url;
 			data[1] = cb;
 			model.addRow(data);

@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
@@ -49,8 +50,8 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 	 * Constructor
 	 */
 	public SubdirResolutionCellEditorComponent() {
-		txtValMin.setHorizontalAlignment(JTextField.LEFT);
-		txtValMax.setHorizontalAlignment(JTextField.LEFT);
+		txtValMin.setHorizontalAlignment(SwingConstants.LEFT);
+		txtValMax.setHorizontalAlignment(SwingConstants.LEFT);
 		this.setLayout(new BorderLayout());
 
 		JPanel pnlTextFields = new JPanel();
@@ -60,7 +61,7 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 		gbc = gblt.getGBC(0, 0, 1, 1, 0.475, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtValMin, pnlTextFields);
 		gbc = gblt.getGBC(1, 0, 1, 1, 0.05, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gbl, gbc, new JLabel("x", JLabel.CENTER), pnlTextFields);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, new JLabel("x", SwingConstants.CENTER), pnlTextFields);
 		gbc = gblt.getGBC(2, 0, 1, 1, 0.475, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtValMax, pnlTextFields);
 
@@ -76,7 +77,7 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 	 * @param val Value
 	 */
 	public void setText(String val) {
-		String arr[] = val.split("x");
+		String[] arr = val.split("x");
 		if (arr.length == 2) {
 			txtValMin.setText(arr[0]);
 			txtValMax.setText(arr[1]);
@@ -103,23 +104,16 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 	 */
 	public static int parseIntVal(String val) {
 		try {
-			int l = Integer.parseInt(val);
-			return l;
+			return Integer.parseInt(val);
 		} catch (NumberFormatException nfe) {
 		}
 		try {
-			int l = Integer.parseInt(defaultVal);
-			return l;
+			return Integer.parseInt(defaultVal);
 		} catch (NumberFormatException nfe) {
 		}
 		return 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.Component#toString()
-	 */
 	@Override
 	public String toString() {
 		return parseIntVal(txtValMin.getText()) + "x" + parseIntVal(txtValMax.getText());

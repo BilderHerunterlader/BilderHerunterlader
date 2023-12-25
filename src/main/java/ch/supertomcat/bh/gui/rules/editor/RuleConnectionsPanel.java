@@ -135,7 +135,7 @@ public class RuleConnectionsPanel extends JPanel implements RuleEditorPart {
 		if (domainToAdd.length() == 0) {
 			return;
 		}
-		if (modelMaxConnectionsDomains.contains(domainToAdd) == false) {
+		if (!modelMaxConnectionsDomains.contains(domainToAdd)) {
 			modelMaxConnectionsDomains.addElement(domainToAdd);
 		}
 	}

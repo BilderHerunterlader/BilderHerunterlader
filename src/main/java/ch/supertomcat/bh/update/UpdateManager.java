@@ -225,7 +225,7 @@ public class UpdateManager {
 		if (mainUpdate && mainUpdateOK) {
 			fireNewProgramVersionInstalled();
 			fireUpdatesComplete();
-		} else if (mainUpdate && (mainUpdateOK == false)) {
+		} else if (mainUpdate && !mainUpdateOK) {
 			fireNewProgramVersionInstallFailed();
 			fireUpdatesFailed();
 		} else if (updatesInstalled > 0) {

@@ -17,7 +17,7 @@ public class TransmitterHTTP extends NanoHTTPD {
 	/**
 	 * Pattern for content type
 	 */
-	private static final Pattern CONTENT_TYPE_PATTERN = Pattern.compile(";[ ]*charset=([^;]+)$");
+	private static final Pattern CONTENT_TYPE_PATTERN = Pattern.compile("; *charset=([^;]+)$");
 
 	/**
 	 * Logger for this class

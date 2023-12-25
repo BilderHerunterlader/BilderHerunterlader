@@ -57,7 +57,6 @@ public class ImportKeywords extends ImportExportBase {
 		if (file != null) {
 			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
 			importKeywords(file.getAbsolutePath());
-			file = null;
 		}
 	}
 
@@ -95,7 +94,7 @@ public class ImportKeywords extends ImportExportBase {
 				pg.progressChanged(Localization.getString("KeywordsImporting") + "...");
 				while ((row = br.readLine()) != null) {
 					// Split the line
-					String line[] = row.split("\t");
+					String[] line = row.split("\t");
 					if (line.length == 5) {
 						// If there is no title, ignore the whole line!
 						if (line[0].length() == 0) {

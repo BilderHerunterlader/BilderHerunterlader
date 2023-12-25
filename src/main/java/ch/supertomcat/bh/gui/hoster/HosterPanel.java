@@ -156,7 +156,7 @@ public class HosterPanel extends JPanel {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		settingsManager.setColWidthsHosts(TableUtil.serializeColWidthSetting(jtHoster));
@@ -169,7 +169,7 @@ public class HosterPanel extends JPanel {
 	 * @param settingsManager Settings Manager
 	 */
 	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (settingsManager.isSaveTableColumnSizes() == false) {
+		if (!settingsManager.isSaveTableColumnSizes()) {
 			return;
 		}
 		TableUtil.applyColWidths(jtHoster, settingsManager.getColWidthsHosts());

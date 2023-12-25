@@ -343,7 +343,7 @@ public class HostFlickr extends Host implements IHoster {
 			}
 
 			if (directLink.length() > 0) {
-				String adResult[] = parseAlbumTitleAndDate(baseContainerUrl, baseContainerPage);
+				String[] adResult = parseAlbumTitleAndDate(baseContainerUrl, baseContainerPage);
 				String albumTitle = adResult[0];
 				String date = adResult[1];
 				String title = regexTitle.doPageSourcecodeReplace(baseContainerPage, 0, baseContainerUrl, null);
@@ -422,7 +422,7 @@ public class HostFlickr extends Host implements IHoster {
 		Matcher linkMatcher = this.subContainerLinkPattern.matcher(page);
 		while (linkMatcher.find()) {
 			PhotoSizeID sizeId = PhotoSizeID.getByAbbreviationOrName(linkMatcher.group(2));
-			if (sizeId != null && maxSizeId.ordinal() < sizeId.ordinal()) {
+			if (sizeId != null && (maxSizeId == null || maxSizeId.ordinal() < sizeId.ordinal())) {
 				maxSizeId = sizeId;
 			}
 		}

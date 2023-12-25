@@ -35,7 +35,7 @@ public class KeywordSearchThread extends Thread {
 	/**
 	 * Search-Strings
 	 */
-	private String strS[];
+	private String[] strS;
 
 	/**
 	 * Title- or Filename Search
@@ -50,7 +50,7 @@ public class KeywordSearchThread extends Thread {
 	/**
 	 * Target directories
 	 */
-	private Keyword retval[];
+	private Keyword[] retval;
 
 	/**
 	 * Keywords
@@ -118,7 +118,7 @@ public class KeywordSearchThread extends Thread {
 	 * @param keywordManager Keyword Manager
 	 * @param settingsManager Settings Manager
 	 */
-	public KeywordSearchThread(String strS[], JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager, SettingsManager settingsManager) {
+	public KeywordSearchThread(String[] strS, JFrame owner, boolean multiResultDisplay, boolean byTitle, boolean localFiles, KeywordManager keywordManager, SettingsManager settingsManager) {
 		this.strS = strS;
 		this.owner = owner;
 		this.multiResultDisplay = multiResultDisplay;
@@ -151,10 +151,6 @@ public class KeywordSearchThread extends Thread {
 					keywords = keywordManager.getKeywords();
 					this.retval[i] = search(strS[i]);
 				}
-			}
-
-			if (this.retval == null) {
-				return;
 			}
 		} finally {
 			progressBarStatusChanged(false); // hide the progressbar
@@ -199,7 +195,7 @@ public class KeywordSearchThread extends Thread {
 			boolean bExactMatch = false;
 
 			// Check if we have an exact match
-			String ksArr[] = ks.split(";"); // Split the keywordgroups
+			String[] ksArr = ks.split(";"); // Split the keywordgroups
 			for (String singleKeyword : ksArr) {
 				// Check if the searchstring contains the complete keyword
 				if (str.contains(singleKeyword)) {
@@ -219,7 +215,7 @@ public class KeywordSearchThread extends Thread {
 			if (!bExactMatch) {
 				// Check if all or some keywords match
 				for (String singleKeyword : ksArr) {
-					String ksSingleArr[] = singleKeyword.split(" ");
+					String[] ksSingleArr = singleKeyword.split(" ");
 					int foundCount = 0;
 
 					for (String singleKeywordPart : ksSingleArr) {
@@ -332,7 +328,7 @@ public class KeywordSearchThread extends Thread {
 	 * @param search Searchstring
 	 * @return Target directory
 	 */
-	private Keyword[] search(String search[]) {
+	private Keyword[] search(String[] search) {
 		progressBarStatusChanged(true); // Show progressbar
 		progressBarChanged(0, search.length, 0); // configure progressbar
 
@@ -352,7 +348,7 @@ public class KeywordSearchThread extends Thread {
 				boolean bExactMatch = false; // exakte Uebereinstimmung
 
 				// Check if there are exact matches
-				String ksArr[] = ks.split(";");
+				String[] ksArr = ks.split(";");
 				for (String singleKeyword : ksArr) {
 					if (str.contains(singleKeyword)) {
 						bExactMatch = true;
@@ -361,10 +357,10 @@ public class KeywordSearchThread extends Thread {
 					}
 				}
 
-				if (bExactMatch == false) {
+				if (!bExactMatch) {
 					// Check if all or some keywords match
 					for (int i = 0; i < ksArr.length; i++) {
-						String ksSingleArr[] = ksArr[i].split(" ");
+						String[] ksSingleArr = ksArr[i].split(" ");
 						int foundCount = 0;
 						/*
 						 * Here we can't do a strict search, because it is not useful in an URL
@@ -463,7 +459,7 @@ public class KeywordSearchThread extends Thread {
 		}
 
 		// If no exact matches or no all keywords machted, then we don't have to do anything
-		if ((bExact == false) && (bAll == false)) {
+		if (!bExact && !bAll) {
 			return;
 		}
 

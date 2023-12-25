@@ -127,12 +127,12 @@ public class Keyword implements Comparable<Keyword> {
 		String retval = "";
 		if (relativePath) {
 			retval = settingsManager.getSavePath() + relativeDownloadPath;
-			if ((retval.endsWith("/") == false) && (retval.endsWith("\\") == false)) {
+			if (!retval.endsWith("/") && !retval.endsWith("\\")) {
 				retval += FileUtil.FILE_SEPERATOR;
 			}
 		} else {
 			retval = downloadPath;
-			if ((retval.endsWith("/") == false) && (retval.endsWith("\\") == false)) {
+			if (!retval.endsWith("/") && !retval.endsWith("\\")) {
 				retval += FileUtil.FILE_SEPERATOR;
 			}
 		}

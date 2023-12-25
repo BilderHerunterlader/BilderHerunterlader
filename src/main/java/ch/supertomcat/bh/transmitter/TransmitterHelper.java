@@ -277,13 +277,12 @@ public class TransmitterHelper {
 				// If we recieved only a URL which contains all the URLs, we download the URL
 				if (url.matches("^https?://.*/?.*")) {
 					logger.debug("Recieved URL to Download: {}", url);
-					// ImportHTML.importHTML(url, url, imgs);
 					urlImporter.importURL(url, url, imgs);
 				} else {
 					logger.error("URL did not match URL-Pattern: {}", url);
 				}
 				logger.info("Handled Connection successfully");
-			} else if ((fullList) && (urls.size() > 0) && (eof)) {
+			} else if ((fullList) && !urls.isEmpty() && eof) {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog

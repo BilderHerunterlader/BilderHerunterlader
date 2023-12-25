@@ -3,7 +3,6 @@ package ch.supertomcat.bh.settings;
 import static ch.supertomcat.bh.settings.SettingsToolkit.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -17,7 +16,6 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.logging.log4j.Level;
 import org.jdom2.Document;
 import org.jdom2.Element;
-import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
@@ -777,7 +775,7 @@ public class SettingsManager {
 			/* Directories */
 			// SavePath
 			this.savePath = readStringValue("Directories.SavePath", root, this.savePath);
-			if ((this.savePath.endsWith("/") == false) && (this.savePath.endsWith("\\") == false)) {
+			if (!this.savePath.endsWith("/") && !this.savePath.endsWith("\\")) {
 				this.savePath += FileUtil.FILE_SEPERATOR;
 			}
 			this.saveLastPath = readBooleanValue("Directories.RememberLastUsedPath", root, this.saveLastPath);
@@ -912,7 +910,7 @@ public class SettingsManager {
 
 			// AdderAdd
 			Element eAdderAdd = getElementByPath("GUI.adderAdd", root);
-			if (eAdderAdd != null && eAdderAdd.getChildren("add").size() > 0) {
+			if (eAdderAdd != null && !eAdderAdd.getChildren("add").isEmpty()) {
 				this.adderAdd = getListForXmlElement(eAdderAdd, "add");
 			} else {
 				String strAdderAdd = readStringValue("GUI.adderAdd", root, "");
@@ -932,7 +930,7 @@ public class SettingsManager {
 
 			// TargetDirChangeHistory
 			Element eTargetDirChangeHistory = getElementByPath("GUI.targetDirChangeHistory", root);
-			if (eTargetDirChangeHistory != null && eTargetDirChangeHistory.getChildren("targetDir").size() > 0) {
+			if (eTargetDirChangeHistory != null && !eTargetDirChangeHistory.getChildren("targetDir").isEmpty()) {
 				this.targetDirChangeHistory = getListForXmlElement(eTargetDirChangeHistory, "targetDir");
 			} else {
 				String strTargetDirChangeHistory = readStringValue("GUI.targetDirChangeHistory", root, "");
@@ -948,7 +946,7 @@ public class SettingsManager {
 
 			// FilenameChangeHistory
 			Element eFilenameChangeHistory = getElementByPath("GUI.FilenameChangeHistory", root);
-			if (eFilenameChangeHistory != null && eFilenameChangeHistory.getChildren("filename").size() > 0) {
+			if (eFilenameChangeHistory != null && !eFilenameChangeHistory.getChildren("filename").isEmpty()) {
 				this.filenameChangeHistory = getListForXmlElement(eFilenameChangeHistory, "filename");
 			} else {
 				String strFilenameChangeHistory = readStringValue("GUI.FilenameChangeHistory", root, "");
@@ -1015,7 +1013,7 @@ public class SettingsManager {
 
 			// DeactivatedHosts
 			Element eDeactivatedHosts = getElementByPath("Hosts.deactivatedHosts", root);
-			if (eDeactivatedHosts != null && eDeactivatedHosts.getChildren("host").size() > 0) {
+			if (eDeactivatedHosts != null && !eDeactivatedHosts.getChildren("host").isEmpty()) {
 				this.deactivatedHosts = getMapForXmlElement(eDeactivatedHosts, "host", "deactivated");
 			}
 
@@ -1111,7 +1109,7 @@ public class SettingsManager {
 					}
 					String subVal = eSub.getValue();
 					if ((subVal.length() > 0) && (subVal.contains("|"))) {
-						String parts[] = subVal.split("\\|");
+						String[] parts = subVal.split("\\|");
 						if (parts.length == 7) {
 							String name = parts[0];
 							try {
@@ -1137,19 +1135,10 @@ public class SettingsManager {
 			regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename", getRegexReplaces(root, "Downloads", "regexReplaceFilename"));
 
 			settingsChanged();
-			doc = null;
-			root = null;
-			b = null;
-			settingsFile = null;
 			return true;
-		} catch (JDOMException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-		settingsFile = null;
 		return false;
 	}
 
@@ -1399,14 +1388,9 @@ public class SettingsManager {
 				CopyUtil.copy(strSettingsFile, strSettingsFileBackup);
 			}
 			return true;
-		} catch (FileNotFoundException e) {
-			logger.error(e.getMessage(), e);
-		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
 		} catch (Exception e) {
 			logger.error(e.getMessage(), e);
 		}
-		settingsFile = null;
 		return false;
 	}
 
@@ -1508,10 +1492,6 @@ public class SettingsManager {
 		return map;
 	}
 
-	/*
-	 * START OF LISTENER METHODS
-	 */
-
 	/**
 	 * Benachrichtigung ueber Einstellungsaenderungen
 	 */
@@ -1541,16 +1521,9 @@ public class SettingsManager {
 		listeners.remove(l);
 	}
 
-	/*
-	 * END OF LISTENER METHODS
-	 */
-
-	/*
-	 * START OF EXTERNAL OPTION METHODS
-	 */
 	private void readOptions(Element root) {
 		List<Element> l = root.getChildren();
-		if (l.size() > 0) {
+		if (!l.isEmpty()) {
 			Iterator<Element> it = l.iterator();
 			while (it.hasNext()) {
 				readOption("", it.next());
@@ -1565,7 +1538,7 @@ public class SettingsManager {
 			path += "." + e.getName();
 		}
 		List<Element> l = e.getChildren();
-		if (l.size() > 0) {
+		if (!l.isEmpty()) {
 			Iterator<Element> it = l.iterator();
 			while (it.hasNext()) {
 				readOption(path, it.next());
@@ -1904,7 +1877,7 @@ public class SettingsManager {
 	 */
 	private Option<?> getOptionForPath(String path) throws OptionException {
 		boolean b = checkOptionPath(path);
-		if (b == false) {
+		if (!b) {
 			throw new OptionException("This path is restricted by the SettingsManager and can not be get or set by this way.");
 		}
 		for (int i = 0; i < options.size(); i++) {
@@ -1934,14 +1907,6 @@ public class SettingsManager {
 		}
 		return true;
 	}
-
-	/*
-	 * END OF EXTERNAL OPTION METHODS
-	 */
-
-	/*
-	 * START OF DEBUG LEVEL
-	 */
 
 	/**
 	 * Checks if the string is an available debug-level
@@ -1997,14 +1962,6 @@ public class SettingsManager {
 		}
 		return Level.WARN;
 	}
-
-	/*
-	 * END OF DEBUG LEVEL
-	 */
-
-	/*
-	 * START OF SUBDIRS
-	 */
 
 	/**
 	 * @return the subdirs
@@ -2757,7 +2714,7 @@ public class SettingsManager {
 	 * @param adderAdd AdderAdd
 	 */
 	public synchronized void addAdderAdd(String adderAdd) {
-		if (this.adderAdd.contains(adderAdd) == false) {
+		if (!this.adderAdd.contains(adderAdd)) {
 			this.adderAdd.add(adderAdd);
 		}
 	}
@@ -2786,7 +2743,7 @@ public class SettingsManager {
 	 * @param targetDirChangeHistory TargetDirChangeHistory
 	 */
 	public synchronized void addTargetDirChangeHistory(String targetDirChangeHistory) {
-		if (this.targetDirChangeHistory.contains(targetDirChangeHistory) == false) {
+		if (!this.targetDirChangeHistory.contains(targetDirChangeHistory)) {
 			this.targetDirChangeHistory.add(targetDirChangeHistory);
 		}
 	}
@@ -2815,7 +2772,7 @@ public class SettingsManager {
 	 * @param filenameChangeHistory FilenameChangeHistory
 	 */
 	public synchronized void addFilenameChangeHistory(String filenameChangeHistory) {
-		if (this.filenameChangeHistory.contains(filenameChangeHistory) == false) {
+		if (!this.filenameChangeHistory.contains(filenameChangeHistory)) {
 			this.filenameChangeHistory.add(filenameChangeHistory);
 		}
 	}

@@ -73,7 +73,6 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 			t.setName("URL-Check-Thread-" + t.getId());
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
-			t = null;
 		}
 	}
 
@@ -82,7 +81,7 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 		running = true;
 		v = new ArrayList<>();
 		List<URL> urls = urlList.getUrls();
-		if (urls == null || urls.size() == 0) {
+		if (urls == null || urls.isEmpty()) {
 			// if there are now urls to check
 			linksChecked(null);
 			running = false;
@@ -113,10 +112,10 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 			if (bOK.get()) {
 				v.add(urlObject);
 			}
-			if (additionalURLs != null && additionalURLs.size() > 0) {
+			if (additionalURLs != null && !additionalURLs.isEmpty()) {
 				progressChanged(Localization.getString("CheckingLinks") + "... " + (i + 1) + "/" + urls.size() + " | " + Localization.getString("AddLinksToCheck") + "... ");
 				for (int o = 0; o < additionalURLs.size(); o++) {
-					if (urls.contains(additionalURLs.get(o)) == false) {
+					if (!urls.contains(additionalURLs.get(o))) {
 						urls.add(additionalURLs.get(o));
 					}
 				}
@@ -137,7 +136,6 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 		// Let the listeners know that the urls are checked
 		linksChecked(v);
 		v = null;
-		urls = null;
 		running = false;
 		stop = false;
 	}

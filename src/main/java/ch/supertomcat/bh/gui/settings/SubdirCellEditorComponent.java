@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,7 +39,7 @@ public class SubdirCellEditorComponent extends JPanel {
 	 * Constructor
 	 */
 	public SubdirCellEditorComponent() {
-		txtVal.setHorizontalAlignment(JTextField.LEFT);
+		txtVal.setHorizontalAlignment(SwingConstants.LEFT);
 		this.setLayout(new BorderLayout());
 		add(txtVal, BorderLayout.CENTER);
 
@@ -81,11 +82,6 @@ public class SubdirCellEditorComponent extends JPanel {
 		return parseVal(val);
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.Component#toString()
-	 */
 	@Override
 	public String toString() {
 		String val = txtVal.getText();
@@ -120,14 +116,12 @@ public class SubdirCellEditorComponent extends JPanel {
 	 */
 	private long parseVal(String val) {
 		try {
-			long l = Long.parseLong(val);
-			return l;
+			return Long.parseLong(val);
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
 		}
 		try {
-			long l = Long.parseLong(defaultVal);
-			return l;
+			return Long.parseLong(defaultVal);
 		} catch (NumberFormatException nfe) {
 			logger.error(nfe.getMessage(), nfe);
 		}
