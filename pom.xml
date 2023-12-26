@@ -232,6 +232,7 @@
 				<artifactId>nexus-staging-maven-plugin</artifactId>
 				<configuration>
 					<!-- Disable nexus staging plugin -->
+					<skipNexusStagingDeployMojo>true</skipNexusStagingDeployMojo>
 					<skipStaging>true</skipStaging>
 				</configuration>
 			</plugin>
