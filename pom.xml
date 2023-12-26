@@ -230,13 +230,10 @@
 			<plugin>
 				<groupId>org.sonatype.plugins</groupId>
 				<artifactId>nexus-staging-maven-plugin</artifactId>
-				<executions>
-					<execution>
-						<!-- Disable nexus staging plugin -->
-						<id>default-deploy</id>
-						<phase>none</phase>
-					</execution>
-				</executions>
+				<configuration>
+					<!-- Disable nexus staging plugin -->
+					<skipStaging>true</skipStaging>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>
