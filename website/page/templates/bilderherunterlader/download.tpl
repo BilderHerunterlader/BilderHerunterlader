@@ -9,8 +9,8 @@
 <pre>
 <img src="bilderherunterlader/java.gif" alt="Java" />
 <b>Requirement:</b>
-JRE (Java  Runtime Environment)
-<a href="http://java.sun.com/javase/downloads/index.jsp">Download-Page</a>
+JRE (Java  Runtime Environment) Version 11 or higher
+<a href="https://adoptium.net/temurin/releases/">Download-Page</a>
 
 <b>Supported Operating Systems:</b>
 Windows, Linux, MacOS, BSD und any other operating system for which the JRE (Java Runtime Environment) is available.

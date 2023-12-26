@@ -4,7 +4,7 @@ Ja, falls es technisch möglich ist. Schicke eine E-Mail falls du einen Hoster h
 Und schicke auch gleich Links zu Beispielen mit. Du kannst aber auch selber ein Regel erstellen und mir dann die XML-Datei davon schicken.
 
 <b>Das Programm hat einen Fehler verursacht. Was soll ich tun?</b>
-Schreib mir ein E-Mail mit einer möglichst genauen Beschreibung des Fehler.
+Schreib mir eine E-Mail mit einer möglichst genauen Beschreibung des Fehler.
 Als Anhang solltest du das Logfile (BH.log) mitschicken. Das Logfile findest du in deinem Profil-Ordner im Unterordner .BH.
 
 <b>Wo befindet sich mein Profil-Ordner?</b>
@@ -35,8 +35,4 @@ Ja hier ist die volle Liste:
 Und diese beiden Argumente sind nur für das automatisch generieren der Setups:
 -version -> Gibt die Version aus (z.B. 1.2.0)
 -versionNumber -> Gibt die Version-Nummer aus (z.B. 120)
-
-<b>Gibt es ähnliche Programme?</b>
-Unter http://www.supernerd.com.au/~hiereus/ss/WorkingWithFileHosters.html findet man eine Zusammenstellung von Programmen die alle darauf ausgelegt sind Bilder von Bildhostern runterzuladen.
-Die Webseite ist allerdings english.
 </pre>

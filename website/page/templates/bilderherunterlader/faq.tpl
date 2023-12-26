@@ -21,7 +21,7 @@ For every day one logfile is created. (e.g. BH.log.2007-05-20)
 <i>port.txt</i> -> That file contains the port which is used by the program (needed for Firefox/Seamonkey-Extension, IE-Plugin)
 
 <b>A image is downloaded, but the progressbar ins't moving. Why?</b>
-Some server doesen't send the size of the image. Without the size the progressbar can't be shown correctly. So the progressbar isn't moving.
+Some server doesn't send the size of the image. Without the size the progressbar can't be shown correctly. So the progressbar isn't moving.
 
 <b>When starting the program and JRE6 is used, a problem with the System tray arises. What should i do?</b>
 The commandline argument "-noTray" is starting the program without using the system tray.
@@ -37,7 +37,4 @@ And these 2 arguments are only for automating the setup creaton:
 
 <b>What's the meaning of BilderHerunterlader?</b>
 BilderHerunterlader is german and translated in english it means image downloader.
-
-<b>Are there similar applications?</b>
-On http://www.supernerd.com.au/~hiereus/ss/WorkingWithFileHosters.html you can find a list of other applications.
 </pre>
