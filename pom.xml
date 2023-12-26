@@ -9,7 +9,7 @@
 	
 	<groupId>ch.supertomcat</groupId>
 	<artifactId>bh</artifactId>
-	<version>5.0.0-SNAPSHOT</version>
+	<version>5.0.0</version>
 	<name>BilderHerunterlader</name>
 	<description>Download files from file hosts</description>
 	<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
@@ -241,7 +241,7 @@
 		<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
 		<connection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</connection>
 		<developerConnection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>bh-5.0.0</tag>
 	</scm>
 	<distributionManagement>
 		<repository>
