@@ -35,6 +35,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -94,7 +95,12 @@ public class MainMenuBar {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemReportIssue = new JMenuItem(Localization.getString("ReportIssue"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem itemReportIssueEMail = new JMenuItem(Localization.getString("ReportIssueEMail"), Icons.getTangoIcon("actions/mail-message-new.png", 16));
+
+	/**
+	 * MenuItem
+	 */
+	private JMenuItem itemReportIssueGithub = new JMenuItem(Localization.getString("ReportIssueGithub"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
 
 	/**
 	 * MenuItem
@@ -135,7 +141,8 @@ public class MainMenuBar {
 		menuHelp.add(itemUpdate);
 		menuHelp.add(itemLogFolder);
 		menuHelp.add(itemTutorial);
-		menuHelp.add(itemReportIssue);
+		menuHelp.add(itemReportIssueEMail);
+		menuHelp.add(itemReportIssueGithub);
 		menuHelp.add(itemAbout);
 
 		itemExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_F4, ActionEvent.ALT_MASK));
@@ -168,7 +175,12 @@ public class MainMenuBar {
 			openURL(url);
 		});
 
-		itemReportIssue.addActionListener(e -> {
+		itemReportIssueEMail.addActionListener(e -> {
+			String emailAddress = ApplicationProperties.getProperty("MailAddress");
+			openEMail(emailAddress);
+		});
+
+		itemReportIssueGithub.addActionListener(e -> {
 			String url = ApplicationProperties.getProperty("ReportIssueURL");
 			openURL(url);
 		});
@@ -239,6 +251,26 @@ public class MainMenuBar {
 			}
 		} else {
 			logger.error("Could not open URL, because Desktop is not supported: {}", url);
+		}
+	}
+
+	/**
+	 * Open E-Mail
+	 * 
+	 * @param emailAddress E-Mail Address
+	 */
+	private void openEMail(String emailAddress) {
+		if (Desktop.isDesktopSupported()) {
+			Desktop desktop = Desktop.getDesktop();
+			if (desktop.isSupported(Desktop.Action.MAIL)) {
+				try {
+					desktop.mail(new URI("mailto:" + emailAddress));
+				} catch (URISyntaxException | IOException e) {
+					logger.error("Could not open email: {}", emailAddress, e);
+				}
+			}
+		} else {
+			logger.error("Could not open email, because Desktop is not supported: {}", emailAddress);
 		}
 	}
 }
