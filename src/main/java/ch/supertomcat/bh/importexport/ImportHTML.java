@@ -152,7 +152,6 @@ public class ImportHTML extends AdderImportBase {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return null;
 				}

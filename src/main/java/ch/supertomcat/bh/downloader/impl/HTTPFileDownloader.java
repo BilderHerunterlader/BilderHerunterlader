@@ -252,7 +252,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		if (statusCode < 200 || statusCode >= 300) {
 			failDownload(pic, result, false, "HTTP-Error: " + statusLine);
-			method.abort();
 			return false;
 		}
 
@@ -275,13 +274,11 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			if (fRetval == null) {
 				// If the file coult not be created
 				failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
-				method.abort();
 				return false;
 			}
 		} catch (IOException e) {
 			// If the file coult not be created
 			failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
-			method.abort();
 			return false;
 		}
 
@@ -320,7 +317,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			logger.error("Download failed (Filesize is too small): '{}'", pic.getContainerURL());
 			// Now we have to delete the file
 			deleteFile(targetContainer);
-			method.abort();
 			return false;
 		}
 
@@ -374,7 +370,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 * I will now see if this is really a good solution...
 				 */
 				if (pic.isStop()) {
-					method.abort();
 					break;
 				}
 				iBW += n;

@@ -301,7 +301,6 @@ public class IradaTsvDialog extends JDialog {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
 				if (statusCode != 200) {
-					method.abort();
 					displayErrorMessage("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 					return false;
 				} else {

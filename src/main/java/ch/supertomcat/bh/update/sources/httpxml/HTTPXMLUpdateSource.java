@@ -63,7 +63,6 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 				}
 

@@ -155,7 +155,6 @@ public final class LinkExtract {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					throw new HostHttpIOException("LinkExtract: Container-Page: HTTP-Error: " + statusCode);
 				}
 

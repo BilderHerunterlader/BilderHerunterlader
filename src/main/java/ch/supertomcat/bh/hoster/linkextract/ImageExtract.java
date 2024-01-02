@@ -123,7 +123,6 @@ public final class ImageExtract {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					throw new HostHttpIOException("ImageExtract: Container-Page: HTTP-Error: " + statusCode);
 				}
 

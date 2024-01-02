@@ -50,13 +50,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 3.2
+ * @version 3.3
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.2";
+	public static final String VERSION = "3.3";
 
 	/**
 	 * Name dieser Klasse
@@ -172,7 +172,6 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					throw new HostHttpIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
 				}

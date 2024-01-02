@@ -125,7 +125,6 @@ public class ImportURL {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode < 200 && statusCode >= 400) {
-					method.abort();
 					JOptionPane.showMessageDialog(parentComponent, "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return null;
 				}

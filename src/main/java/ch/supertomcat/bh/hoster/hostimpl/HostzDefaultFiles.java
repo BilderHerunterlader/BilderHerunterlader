@@ -249,7 +249,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode < 200 && statusCode >= 400) {
-					method.abort();
 					throw new HostHttpIOException("HTTP-Error: " + statusCode);
 				}
 

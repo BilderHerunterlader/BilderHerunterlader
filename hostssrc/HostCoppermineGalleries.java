@@ -47,13 +47,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.4
+ * @version 4.5
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.4";
+	public static final String VERSION = "4.5";
 
 	/**
 	 * Name dieser Klasse
@@ -162,7 +162,6 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					return null;
 				}
@@ -240,7 +239,6 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				int statusCode = statusLine.getStatusCode();
 
 				if (statusCode != 200) {
-					method.abort();
 					JOptionPane.showMessageDialog(getMainWindow(), "HTTP-Error:" + statusCode, "Error", JOptionPane.ERROR_MESSAGE);
 					throw new HostHttpIOException(NAME + ": Container-Page: " + url + " :HTTP-Error: " + statusCode);
 				}

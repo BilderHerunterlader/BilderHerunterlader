@@ -486,7 +486,6 @@ public abstract class Hoster {
 				int statusCode = statusLine.getStatusCode();
 
 				if ((options == null || options.isCheckStatusCode()) && (statusCode < 200 || statusCode >= 300)) {
-					method.abort();
 					throw new HostHttpIOException(hosterName + ": Container-Page: HTTP-Error: " + statusCode + " URL: " + encodedURL);
 				}
 
