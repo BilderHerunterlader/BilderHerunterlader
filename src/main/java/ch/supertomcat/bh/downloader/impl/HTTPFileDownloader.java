@@ -12,6 +12,7 @@ import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 
 import org.apache.hc.client5.http.ContextBuilder;
@@ -22,6 +23,7 @@ import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
+import org.apache.hc.core5.http.ConnectionClosedException;
 import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
@@ -183,6 +185,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			nonMultiThreadedHttpClient = true;
 		}
 
+		AtomicBoolean abortedFlag = new AtomicBoolean(false);
 		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? proxyManager.getNonMultithreadedHTTPClient() : proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(url);
 
@@ -219,10 +222,22 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				cookieManager.fillCookies(url, cookieStore);
 			}
 
-			return client.execute(method, context, response -> handleResponse(method, response, targetContainer, pic, result, lastURL, currentURL, urlCount));
+			return client.execute(method, context, response -> handleResponse(method, abortedFlag, response, targetContainer, pic, result, lastURL, currentURL, urlCount));
 		} catch (MalformedURLException e) {
 			failDownload(pic, result, false, e);
 			return false;
+		} catch (ConnectionClosedException e) {
+			if (abortedFlag.get()) {
+				/*
+				 * Ignore exception, because download was aborted
+				 */
+				return false;
+			} else {
+				failDownload(pic, result, false, e);
+				// Delete the file
+				deleteFile(targetContainer);
+				return false;
+			}
 		} catch (Exception e) {
 			failDownload(pic, result, false, e);
 			// Delete the file
@@ -235,6 +250,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * Handle Response
 	 * 
 	 * @param method HTTP Method
+	 * @param abortedFlag Aborted Flag
 	 * @param response Response
 	 * @param targetContainer Target Container
 	 * @param pic Pic
@@ -245,8 +261,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @return True if download was successful, false otherwise
 	 * @throws IOException
 	 */
-	private boolean handleResponse(HttpUriRequest method, ClassicHttpResponse response, TargetContainer targetContainer, Pic pic, URLParseObject result, boolean lastURL, int currentURL,
-			int urlCount) throws IOException {
+	private boolean handleResponse(HttpUriRequest method, AtomicBoolean abortedFlag, ClassicHttpResponse response, TargetContainer targetContainer, Pic pic, URLParseObject result, boolean lastURL,
+			int currentURL, int urlCount) throws IOException {
 		StatusLine statusLine = new StatusLine(response);
 		int statusCode = statusLine.getStatusCode();
 
@@ -274,11 +290,15 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			if (fRetval == null) {
 				// If the file coult not be created
 				failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
+				abortedFlag.set(true);
+				method.abort();
 				return false;
 			}
 		} catch (IOException e) {
 			// If the file coult not be created
 			failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
+			abortedFlag.set(true);
+			method.abort();
 			return false;
 		}
 
@@ -317,6 +337,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			logger.error("Download failed (Filesize is too small): '{}'", pic.getContainerURL());
 			// Now we have to delete the file
 			deleteFile(targetContainer);
+			abortedFlag.set(true);
+			method.abort();
 			return false;
 		}
 
@@ -329,79 +351,95 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		// Now get the inputstream and outputstream
 		try (@SuppressWarnings("resource")
-		InputStream in = response.getEntity().getContent(); FileOutputStream out = new FileOutputStream(targetContainer.getTarget())) {
-			// Read some bytes to a buffer and write them to the outputstream
-			int n; // the amount of bytes where were read per loop course
-			byte[] buf = new byte[8192]; // The buffer
-			int iBWs = 0; // the amount of bytes read since last download rate calculation
-			int nReads = 0;
-			long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
-			picProgress.setBytesDownloaded(0);
-			pic.progressUpdated();
-
+		InputStream in = response.getEntity().getContent()) {
 			/*
-			 * Create a new timer, which sets every 10 seconds the recalculate-flag
-			 * to true, so we know, we have to recalculate the download rate.
-			 * I do this, because calculating the download rate over all bytes
-			 * read since start of downloading, doesn't provide the information
-			 * of wath the download rate is at this moment.
-			 * And we should make the rate depending on the time, not on the bytes
-			 * read.
+			 * We need a separate try block for the output file, because if a download is aborted, we need to delete the file, but this is only possible after
+			 * the OutputStream is closed. And we have to delete the file and set status and so on, before the entity content is closed.
 			 */
-			boolean downloadRate = settingsManager.isDownloadRate();
-			// Ok, now start downloading
-			while ((n = in.read(buf)) > 0) {
-				/*
-				 * Old:
-				 * I commented this out, because when downloading from rapidshare
-				 * and we stop downloading before the complete file is downloaded
-				 * the close-Method (or was it releaseConnection?, don't remember)
-				 * of the inputstream will block this thread for ever.
-				 * This happend only on downloads from rapidshare. I didn't
-				 * found out why.
-				 * It would be not so nice, but maybe an idea to check if we are
-				 * downloading from rapidshare, and when not we allow to stop
-				 * otherwise not.
-				 * 
-				 * New:
-				 * I found out that with method.abort() it works to close the connection.
-				 * But internal the data is still downloaded on connection to some servers.
-				 * But the data is not written to a file, but to /dev/nul
-				 * I will now see if this is really a good solution...
-				 */
-				if (pic.isStop()) {
-					break;
-				}
-				iBW += n;
-				iBWs += n;
-				out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
-				out.flush();
-				nReads++;
-				if (nReads > 12) {
-					nReads = 0;
-					// change the progressbar
-					picProgress.setBytesDownloaded(iBW);
-					picProgress.setUrlCount(urlCount);
-					picProgress.setCurrentURLIndex(currentURL);
-					pic.progressUpdated();
-				}
-				if (pic.isRecalcutateRate() && downloadRate) {
-					// the flag is set to true, so we recalculate the download rate
-					long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
-					// get the string for the rate
-					double downloadBitrate = UnitFormatUtil.getBitrate(iBWs, size, timeStarted, now);
-					picProgress.setRate(downloadBitrate);
+			try (FileOutputStream out = new FileOutputStream(targetContainer.getTarget())) {
+				// Read some bytes to a buffer and write them to the outputstream
+				int n; // the amount of bytes where were read per loop course
+				byte[] buf = new byte[8192]; // The buffer
+				int iBWs = 0; // the amount of bytes read since last download rate calculation
+				int nReads = 0;
+				long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
+				picProgress.setBytesDownloaded(0);
+				pic.progressUpdated();
 
+				/*
+				 * Create a new timer, which sets every 10 seconds the recalculate-flag
+				 * to true, so we know, we have to recalculate the download rate.
+				 * I do this, because calculating the download rate over all bytes
+				 * read since start of downloading, doesn't provide the information
+				 * of wath the download rate is at this moment.
+				 * And we should make the rate depending on the time, not on the bytes
+				 * read.
+				 */
+				boolean downloadRate = settingsManager.isDownloadRate();
+				// Ok, now start downloading
+				while ((n = in.read(buf)) > 0) {
 					/*
-					 * With this, we get always the actual download rate, not
-					 * just an average over all the time
+					 * Old:
+					 * I commented this out, because when downloading from rapidshare
+					 * and we stop downloading before the complete file is downloaded
+					 * the close-Method (or was it releaseConnection?, don't remember)
+					 * of the inputstream will block this thread for ever.
+					 * This happend only on downloads from rapidshare. I didn't
+					 * found out why.
+					 * It would be not so nice, but maybe an idea to check if we are
+					 * downloading from rapidshare, and when not we allow to stop
+					 * otherwise not.
+					 * 
+					 * New:
+					 * I found out that with method.abort() it works to close the connection.
+					 * But internal the data is still downloaded on connection to some servers.
+					 * But the data is not written to a file, but to /dev/nul
+					 * I will now see if this is really a good solution...
 					 */
-					timeStarted = now; // set this variable to current timestamp
-					iBWs = 0; // set bytes read since last calculation to 0
-					pic.rateRecalculated();
+					if (pic.isStop()) {
+						logger.info("Aborting download: exit download loop");
+						break;
+					}
+					iBW += n;
+					iBWs += n;
+					out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
+					out.flush();
+					nReads++;
+					if (nReads > 12) {
+						nReads = 0;
+						// change the progressbar
+						picProgress.setBytesDownloaded(iBW);
+						picProgress.setUrlCount(urlCount);
+						picProgress.setCurrentURLIndex(currentURL);
+						pic.progressUpdated();
+					}
+					if (pic.isRecalcutateRate() && downloadRate) {
+						// the flag is set to true, so we recalculate the download rate
+						long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
+						// get the string for the rate
+						double downloadBitrate = UnitFormatUtil.getBitrate(iBWs, size, timeStarted, now);
+						picProgress.setRate(downloadBitrate);
+
+						/*
+						 * With this, we get always the actual download rate, not
+						 * just an average over all the time
+						 */
+						timeStarted = now; // set this variable to current timestamp
+						iBWs = 0; // set bytes read since last calculation to 0
+						pic.rateRecalculated();
+					}
 				}
+				pic.rateRecalculated();
 			}
-			pic.rateRecalculated();
+
+			if (pic.isStop()) {
+				logger.info("Aborting download: Set status and delete file");
+				// If the user stopped the download
+				stopDownload(pic);
+				// Delete the file
+				deleteFile(targetContainer);
+				return false;
+			}
 		}
 
 		// If we have to set last modification timestamp to the file, we do it
@@ -410,6 +448,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		if (pic.isStop()) {
+			logger.info("Aborting download: Set status and delete file");
 			// If the user stopped the download
 			stopDownload(pic);
 			// Delete the file

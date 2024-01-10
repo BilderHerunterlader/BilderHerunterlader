@@ -138,6 +138,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param pic Pic
 	 */
 	protected void stopDownload(Pic pic) {
+		logger.info("Stop download, set Status to SLEEPING");
 		changeStatusAndReturnSlot(pic, PicState.SLEEPING, 0);
 	}
 
