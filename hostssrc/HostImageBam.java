@@ -1,3 +1,4 @@
+import java.time.Instant;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -7,6 +8,7 @@ import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -19,17 +21,18 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Host class for ImageBam
  * 
- * @version 4.4
+ * @version 4.5
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.4";
+	public static final String VERSION = "4.5";
 
 	/**
 	 * Name dieser Klasse
@@ -175,6 +178,14 @@ public class HostImageBam extends Host implements IHoster {
 
 			String downloadURL = parseURL(upo, context);
 			if (downloadURL == null) {
+				/*
+				 * Set cookie like javascript in page would
+				 */
+				BasicClientCookie cookie = new BasicClientCookie("nsfw_inter", "1");
+				cookie.setDomain(HTTPUtil.getDomainFromURL(upo.getContainerURL()));
+				cookie.setPath("/");
+				cookie.setExpiryDate(Instant.now().plusMillis(6 * 60 * 60 * 1000L));
+				context.getCookieStore().addCookie(cookie);
 				downloadURL = parseURL(upo, context);
 			}
 
