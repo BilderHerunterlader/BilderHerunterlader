@@ -529,11 +529,12 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	public void itemStateChanged(ItemEvent e) {
 		if (e.getSource() == cbClear) {
 			boolean b = cbClear.isSelected();
-			lblFilename.setEnabled(!b);
+			boolean bOriginalFilenames = cbOriginalFilenames.isSelected();
+			lblFilename.setEnabled(!b && !bOriginalFilenames);
 			lblStartNumber.setEnabled(!b);
 			lblStep.setEnabled(!b);
-			txtFilename.setEnabled(!b);
-			btnClear.setEnabled(!b);
+			txtFilename.setEnabled(!b && !bOriginalFilenames);
+			btnClear.setEnabled(!b && !bOriginalFilenames);
 			txtStartNumber.setEnabled(!b);
 			txtStep.setEnabled(!b);
 			txtPrefix.setEnabled(!b);
