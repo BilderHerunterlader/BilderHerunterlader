@@ -187,6 +187,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				oldSettingsConverter.convertSettings(settings);
 				checkSettings();
 				converted = true;
+				languageFirstRun = false;
 			}
 
 			try {
