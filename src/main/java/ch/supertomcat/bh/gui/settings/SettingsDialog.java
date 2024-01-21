@@ -398,7 +398,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtCookiesOpera = new JTextField(20);
+	private JTextField txtCookiesOpera = new JTextField(60);
 
 	/**
 	 * Button
@@ -423,7 +423,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtCookiesOperaNew = new JTextField(20);
+	private JTextField txtCookiesOperaNew = new JTextField(60);
 
 	/**
 	 * Button
@@ -448,7 +448,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtCookiesFirefox = new JTextField(20);
+	private JTextField txtCookiesFirefox = new JTextField(60);
 
 	/**
 	 * Button
@@ -473,7 +473,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtCookiesPaleMoon = new JTextField(20);
+	private JTextField txtCookiesPaleMoon = new JTextField(60);
 
 	/**
 	 * Button
@@ -838,7 +838,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtDefaultUserAgent = new JTextField("");
+	private JTextField txtDefaultUserAgent = new JTextField("", 80);
 
 	/**
 	 * Label
@@ -848,7 +848,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * TextField
 	 */
-	private JTextField txtUserAgent = new JTextField("");
+	private JTextField txtUserAgent = new JTextField("", 80);
 
 	/**
 	 * Label
@@ -993,7 +993,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setLayout(gbl);
 
-		this.txtStdSavePath = new JTextField(settingsManager.getSavePath());
+		this.txtStdSavePath = new JTextField(settingsManager.getSavePath(), 40);
 		this.pnlRegexReplacePageTitle = new RegexReplacePanel(settingsManager.getRegexReplacePipelinePageTitle(), settingsManager);
 		this.pnlRegexReplaceFilename = new RegexReplacePanel(settingsManager.getRegexReplacePipelineFilename(), settingsManager);
 
