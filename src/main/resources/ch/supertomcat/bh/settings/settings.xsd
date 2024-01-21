@@ -1,0 +1,385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+	<!-- Root Element -->
+	<xs:element name="settings">
+		<xs:complexType>
+			<xs:sequence>
+				<!-- Directories -->
+				<xs:element name="directorySettings" type="DirectorySettings" />
+	
+				<!-- Connection -->
+				<xs:element name="connectionSettings" type="ConnectionSettings" />
+
+				<!-- GUI -->
+				<xs:element name="guiSettings" type="GUISettings" />
+				
+				<!-- Hosts -->
+				<xs:element name="hostsSettings" type="HostsSettings" />
+
+				<!-- Downloads -->
+				<xs:element name="downloadSettings" type="DownloadSettings" />
+				
+				<!-- Keywords -->
+				<xs:element name="keywordsSettings" type="KeywordsSettings" />
+
+				<!-- Other Settings -->
+				<xs:element name="checkForUpdatesOnStart" type="xs:boolean" default="false" />
+				<xs:element name="checkClipboard" type="xs:boolean" default="false" />
+				<!-- HTTP Port for connections from WebExtension -->
+				<xs:element name="webExtensionPort" type="xs:int" default="35990" />
+				
+				<xs:element name="backupDbOnStart" type="xs:boolean" default="true" />
+				<xs:element name="defragDBOnStart" type="xs:boolean" default="true" />
+				<xs:element name="defragMinFilesize" type="xs:long" default="5000000" />
+				<!--
+				Count of threads that should be used to process tasks which
+				need a lot of cpu-usage and can be speed up by using multiple threads.
+				-->
+				<xs:element name="threadCount" type="xs:int" default="1" />
+				<xs:element name="logLevel" type="LogLevelSetting" default="INFO" />
+				
+				<!-- Hoster Specific Settings -->
+				<xs:element name="hosterSettings" type="HosterSettings" minOccurs="0" maxOccurs="unbounded" />
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+	<!-- Log Level -->
+	<xs:simpleType name="LogLevelSetting" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="TRACE" />
+			<xs:enumeration value="DEBUG" />
+			<xs:enumeration value="INFO" />
+			<xs:enumeration value="WARN" />
+			<xs:enumeration value="ERROR" />
+			<xs:enumeration value="FATAL" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<!-- Directory Settings -->
+	<xs:complexType name="DirectorySettings">
+		<xs:sequence>
+			<!-- Default Download Directory -->
+			<xs:element name="savePath" type="xs:string" />
+			<xs:element name="rememberLastUsedPath" type="xs:boolean" default="false" />
+			
+			<xs:element name="lastUsedImportPath" type="xs:string" nillable="true" />
+			<xs:element name="lastUsedExportPath" type="xs:string" nillable="true" />
+			
+			<!-- Automatic Download Directory Recognition -->
+			<!-- TODO Not used anymore? not present in settings dialog -->
+			<xs:element name="autoTargetDir" type="xs:boolean" default="false" />
+			<!-- TODO Not used anymore? not present in settings dialog -->
+			<xs:element name="autoTargetDirMode" type="AutoTargetDirMode" default="BY_TITLE" />
+			
+			<xs:element name="subDirsEnabled" type="xs:boolean" default="false" />
+			<xs:element name="subDirsResolutionMode" type="SubdirsResolutionMode" default="RESOLUTION_ONLY_LOWER" />
+			
+			<xs:element name="subDirSettings" type="SubDirSetting" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="AutoTargetDirMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="BY_TITLE" />
+			<xs:enumeration value="BY_FILENAME" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="SubdirsResolutionMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="RESOLUTION_ONLY_LOWER" />
+			<xs:enumeration value="RESOLUTION_ONLY_HIGHER" />
+			<xs:enumeration value="RESOLUTION_ONLY_WIDTH" />
+			<xs:enumeration value="RESOLUTION_ONLY_HEIGHT" />
+			<xs:enumeration value="RESOLUTION_BOTH" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="SubDirSetting">
+		<xs:sequence>
+			<xs:element name="name" type="xs:string" />
+			<xs:element name="min" type="xs:long" default="0" />
+			<xs:element name="max" type="xs:long" default="0" />
+			<xs:element name="resMinWidth" type="xs:int" default="0" />
+			<xs:element name="resMinHeight" type="xs:int" default="0" />
+			<xs:element name="resMaxWidth" type="xs:int" default="0" />
+			<xs:element name="resMaxHeight" type="xs:int" default="0" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Connection Settings -->
+	<xs:complexType name="ConnectionSettings">
+		<xs:sequence>
+			<xs:element name="maxConnections" type="xs:int" default="32" />
+			<xs:element name="maxConnectionsPerHost" type="xs:int" default="8" />
+			<xs:element name="connectTimeout" type="xs:int" default="60000" />
+			<xs:element name="socketTimeout" type="xs:int" default="60000" />
+			<xs:element name="connectionRequestTimeout" type="xs:int" default="60000" />
+			<xs:element name="proxy" type="ProxySettings" />
+			
+			<xs:element name="userAgent" type="xs:string" default="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:5.1) Goanna/20220507 PaleMoon/31.0.0" />
+			
+			<xs:element name="browserCookiesMode" type="BrowserCookiesMode" default="NO_COOKIES" />
+			<xs:element name="browserCookiesOpera" type="BrowserCookiesSetting" />
+			<xs:element name="browserCookiesOperaNew" type="BrowserCookiesSetting" />
+			<xs:element name="browserCookiesFirefox" type="BrowserCookiesSetting" />
+			<xs:element name="browserCookiesPaleMoon" type="BrowserCookiesSetting" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- Proxy Settings -->
+	<xs:complexType name="ProxySettings">
+		<xs:sequence>
+			<xs:element name="mode" type="ProxyMode" default="DIRECT_CONNECTION" />
+			<xs:element name="host" type="xs:string" default="127.0.0.1" />
+			<xs:element name="port" type="xs:int" default="0" />
+			<xs:element name="user" type="xs:string" default="" />
+			<xs:element name="password" type="xs:string" default="" />
+			<xs:element name="auth" type="xs:boolean" default="false" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="ProxyMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="DIRECT_CONNECTION" />
+			<xs:enumeration value="PROXY" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:simpleType name="BrowserCookiesMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="NO_COOKIES" />
+			<xs:enumeration value="BROWSER_IE" />
+			<xs:enumeration value="BROWSER_FIREFOX" />
+			<xs:enumeration value="BROWSER_OPERA" />
+			<xs:enumeration value="BROWSER_PALE_MOON" />
+			<xs:enumeration value="BROWSER_OPERA_NEW" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:complexType name="BrowserCookiesSetting">
+		<xs:sequence>
+			<!-- Path to cookie file, only used if cookieFileFixed is true -->
+			<xs:element name="cookieFile" type="xs:string" default="" />
+			<!-- If true the path defined above is used, otherwise the path is determined dynamically -->
+			<xs:element name="cookieFileFixed" type="xs:boolean" default="false" />
+		</xs:sequence>
+	</xs:complexType>
+
+	<!-- GUI Settings -->
+	<xs:complexType name="GUISettings">
+		<xs:sequence>
+			<xs:element name="language" type="xs:string" nillable="true" />
+			<xs:element name="saveTableColumnSizes" type="xs:boolean" default="false" />
+			<xs:element name="saveTableSortOrders" type="xs:boolean" default="false" />
+			
+			<xs:element name="colWidthsQueue" type="xs:string" default="" />
+			<xs:element name="colWidthsLog" type="xs:string" default="" />
+			<xs:element name="colWidthsKeywords" type="xs:string" default="" />
+			<xs:element name="colWidthsRules" type="xs:string" default="" />
+			<xs:element name="colWidthsRulesEditor" type="xs:string" default="" />
+			<xs:element name="colWidthsHosts" type="xs:string" default="" />
+			<xs:element name="colWidthsSubdirs" type="xs:string" default="" />
+			<xs:element name="colWidthsUpdate" type="xs:string" default="" />
+			<xs:element name="colWidthsAdder" type="xs:string" default="" />
+			<xs:element name="colWidthsAdderKeywordSelectorFilename" type="xs:string" default="" />
+			
+			<xs:element name="tableSortOrdersKeywords" type="xs:string" default="" />
+			
+			<xs:element name="sizeDisplayMode" type="SizeDisplayMode" default="AUTO_CHANGE_SIZE" />
+			<xs:element name="progressDisplayMode" type="ProgressDisplayMode" default="PROGRESSBAR_PERCENT" />
+			<xs:element name="downloadRate" type="xs:boolean" default="true" />
+			<xs:element name="lookAndFeel" type="LookAndFeelSetting" default="LAF_OS" />
+			
+			<!-- Always add the title automatically to the downloadpath -->
+			<xs:element name="alwaysAddTitle" type="xs:boolean" default="false" />
+			
+			<!-- Regex Replacements used on Page-Title in Download-Selection-Window -->
+			<xs:element name="regexReplacesPageTitle" type="RegexReplaceSetting" minOccurs="0" maxOccurs="unbounded" />
+			
+			<!-- Strings in ComboBox for the "+" Button for adding String to Download-Directory in Download-Selection-Window -->
+			<xs:element name="downloadSelectionAddStrings" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+			
+			<!-- Strings in ComboBox for the target directory in Download-Selection-Window -->
+			<xs:element name="targetDirChangeHistory" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+			
+			<!-- Strings in ComboBox for file rename in File-Rename-Dialog -->
+			<xs:element name="filenameChangeHistory" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
+			<xs:element name="filenameChangePrefix" type="xs:string" default="" />
+			<xs:element name="appendPrefixFilenameChange" type="xs:boolean" default="false" />
+			<xs:element name="filenameChangeAppendix" type="xs:string" default=".jpg" />
+			<xs:element name="appendAppendixFilenameChange" type="xs:boolean" default="false" />
+			<xs:element name="filenameChangeKeepOriginal" type="xs:boolean" default="false" />
+			
+			<xs:element name="downloadsCompleteNotification" type="xs:boolean" default="false" />
+			
+			<xs:element name="directoryLogFilterEnabled" type="xs:boolean" default="false" />
+			<xs:element name="directoryLogDirCount" type="xs:int" default="200" />
+			<xs:element name="directoryLogOnlyExisting" type="xs:boolean" default="true" />
+			
+			<xs:element name="downloadPreviews" type="xs:boolean" default="false" />
+			<xs:element name="previewSize" type="xs:int" default="100" />
+			
+			<xs:element name="mainWindow" type="WindowSettings" />
+			<xs:element name="downloadSelectionWindow" type="WindowSettings" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="SizeDisplayMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="AUTO_CHANGE_SIZE" />
+			<xs:enumeration value="ONLY_B" />
+			<xs:enumeration value="ONLY_KIB" />
+			<xs:enumeration value="ONLY_MIB" />
+			<xs:enumeration value="ONLY_GIB" />
+			<xs:enumeration value="ONLY_TIB" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="ProgressDisplayMode" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="PROGRESSBAR_PERCENT" />
+			<xs:enumeration value="PROGRESSBAR_SIZE" />
+			<xs:enumeration value="NO_PROGRESSBAR_PERCENT" />
+			<xs:enumeration value="NO_PROGRESSBAR_SIZE" />
+		</xs:restriction>
+	</xs:simpleType>
+
+	<xs:simpleType name="LookAndFeelSetting" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="LAF_DEFAULT" />
+			<xs:enumeration value="LAF_OS" />
+			<xs:enumeration value="LAF_METAL" />
+			<xs:enumeration value="LAF_WINDOWS" />
+			<xs:enumeration value="LAF_WINDOWS_CLASSIC" />
+			<xs:enumeration value="LAF_MOTIF" />
+			<xs:enumeration value="LAF_GTK" />
+			<xs:enumeration value="LAF_MACOS" />
+			<xs:enumeration value="LAF_NIMBUS" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<xs:complexType name="WindowSettings">
+		<xs:sequence>
+			<xs:element name="width" type="xs:int" default="0" />
+			<xs:element name="height" type="xs:int" default="0" />
+			<xs:element name="x" type="xs:int" default="0" />
+			<xs:element name="y" type="xs:int" default="0" />
+			<xs:element name="state" type="xs:int" default="0" />
+		</xs:sequence>
+		<!-- Required Window Name -->
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<!-- Required Flag if Window Size and Position should be saved -->
+		<xs:attribute name="save" type="xs:boolean" use="required" />
+	</xs:complexType>
+	
+	<xs:complexType name="RegexReplaceSetting">
+		<!-- Required Regex Pattern -->
+		<xs:attribute name="pattern" type="xs:string" use="required" />
+		<!-- Required replacement -->
+		<xs:attribute name="replacement" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- Keywords Settings -->
+	<xs:complexType name="KeywordsSettings">
+		<xs:sequence>
+			<xs:element name="filterEnabled" type="xs:boolean" default="false" />
+			<xs:element name="matchMode" type="KeywordMatchMode" default="MATCH_ALL_STRICT" />
+			<xs:element name="displayKeywordsWhenNoMatches" type="xs:boolean" default="true" />
+			
+			<!-- Deselect files in Download-Selection-Window when no keyword has matched -->
+			<xs:element name="deselectNoKeyword" type="xs:boolean" default="false" />
+			<!-- Delete local files when no keyword has matched -->
+			<xs:element name="deleteNoKeyword" type="xs:boolean" default="false" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:simpleType name="KeywordMatchMode" >
+		<xs:restriction base="xs:string">
+			<!-- Only exact matches -->
+			<xs:enumeration value="MATCH_ONLY_EXACT" />
+			<!-- All keywords found, but strict search -->
+			<xs:enumeration value="MATCH_ALL_STRICT" />
+			<!-- All keywords found -->
+			<xs:enumeration value="MATCH_ALL" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- Hosts Settings -->
+	<xs:complexType name="HostsSettings">
+		<xs:sequence>
+			<xs:element name="rulesBeforeClasses" type="xs:boolean" default="false" />
+			<xs:element name="deactivations" type="HostDeactivationSetting" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="HostDeactivationSetting">
+		<xs:simpleContent>
+			<xs:extension base="xs:string">
+				<xs:attribute name="deactivated" type="xs:boolean" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
+	</xs:complexType>
+	
+	<!-- Download Settings -->
+	<xs:complexType name="DownloadSettings">
+		<xs:sequence>
+			<!-- Autostart downloads when they are added to the queue -->
+			<xs:element name="autoStartDownloads" type="xs:boolean" default="false" />
+			<xs:element name="overallDownloadedBytes" type="xs:long" default="0" />
+			<xs:element name="overallDownloadedFiles" type="xs:long" default="0" />
+			<xs:element name="saveLogs" type="xs:boolean" default="true" />
+			<xs:element name="currentDownloadLogFile" type="xs:string" default="BH-logs.txt" />
+			<!--
+			Amount of failures before the download will automatically be deactivated
+			0 = Infinit (So Downloads are not automatically deactivated)
+			-->
+			<xs:element name="maxFailedCount" type="xs:int" default="2" />
+			<!--
+			Minimum filesize (When the file is smaller the download is treated as failure)
+			0 = Deactivates this check
+			Unit: Byte
+			-->
+			<xs:element name="minFileSize" type="xs:int" default="0" />
+			
+			<xs:element name="autoRetryAfterDownloadsComplete" type="xs:boolean" default="false" />
+			
+			<xs:element name="allowedFilenameCharacters" type="AllowedFilenameCharacters" default="ALL" />
+			
+			<!-- Regex Replacements used on Filename after download URL und Filename were determined -->
+			<xs:element name="regexReplacesFilename" type="RegexReplaceSetting" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Allowed Filename Characters -->
+	<xs:simpleType name="AllowedFilenameCharacters" >
+		<xs:restriction base="xs:string">
+			<xs:enumeration value="ASCII_ONLY" />
+			<xs:enumeration value="ASCII_UMLAUT" />
+			<xs:enumeration value="ALL" />
+		</xs:restriction>
+	</xs:simpleType>
+	
+	<!-- Hoster Specific Settings -->
+	<xs:complexType name="HosterSettings">
+		<xs:sequence>
+			<!-- Settings -->
+			<xs:element name="settings" type="CustomSetting" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+		<!-- Required Hoster Name -->
+		<xs:attribute name="name" type="xs:string" use="required" />
+	</xs:complexType>
+	
+	<!-- Custom Setting -->
+	<xs:complexType name="CustomSetting">
+		<xs:sequence>
+			<!-- Required Value -->
+			<xs:element name="value" type="xs:string" />
+		</xs:sequence>
+		<!-- Required Setting Name -->
+		<xs:attribute name="name" type="xs:string" use="required" />
+		<!-- Required Data Type -->
+		<xs:attribute name="dataType" type="xs:string" use="required" />
+	</xs:complexType>
+</xs:schema>

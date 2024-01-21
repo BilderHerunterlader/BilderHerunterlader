@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<settings>
+	<directorySettings>
+		<savePath />
+		<rememberLastUsedPath />
+		<lastUsedImportPath />
+		<lastUsedExportPath />
+		<autoTargetDir />
+		<autoTargetDirMode />
+		<subDirsEnabled />
+		<subDirsResolutionMode />
+	</directorySettings>
+
+	<connectionSettings>
+		<maxConnections />
+		<maxConnectionsPerHost />
+		<connectTimeout />
+		<socketTimeout />
+		<connectionRequestTimeout />
+		<proxy>
+			<mode />
+			<host />
+			<port />
+			<user />
+			<password />
+			<auth />
+		</proxy>
+		<userAgent />
+		<browserCookiesMode />
+		<browserCookiesOpera>
+			<cookieFile />
+			<cookieFileFixed />
+		</browserCookiesOpera>
+		<browserCookiesOperaNew>
+			<cookieFile />
+			<cookieFileFixed />
+		</browserCookiesOperaNew>
+		<browserCookiesFirefox>
+			<cookieFile />
+			<cookieFileFixed />
+		</browserCookiesFirefox>
+		<browserCookiesPaleMoon>
+			<cookieFile />
+			<cookieFileFixed />
+		</browserCookiesPaleMoon>
+	</connectionSettings>
+	
+	<guiSettings>
+		<language />
+		<saveTableColumnSizes />
+		<saveTableSortOrders />		
+		<colWidthsQueue />
+		<colWidthsLog />
+		<colWidthsKeywords />
+		<colWidthsRules />
+		<colWidthsRulesEditor />
+		<colWidthsHosts />
+		<colWidthsSubdirs />
+		<colWidthsUpdate />
+		<colWidthsAdder />
+		<colWidthsAdderKeywordSelectorFilename />
+		<tableSortOrdersKeywords />
+		<sizeDisplayMode />
+		<progressDisplayMode />
+		<downloadRate />
+		<lookAndFeel />
+		<alwaysAddTitle />
+		<downloadSelectionAddStrings />
+		<targetDirChangeHistory />
+		<filenameChangeHistory />
+		<filenameChangePrefix />
+		<appendPrefixFilenameChange />
+		<filenameChangeAppendix />
+		<appendAppendixFilenameChange />
+		<filenameChangeKeepOriginal />
+		<downloadsCompleteNotification />
+		<directoryLogFilterEnabled />
+		<directoryLogDirCount />
+		<directoryLogOnlyExisting />
+		<downloadPreviews />
+		<previewSize />
+		<mainWindow name="MainWindow" save="false">
+			<width />
+			<height />
+			<x />
+			<y />
+			<state />
+		</mainWindow>
+		<downloadSelectionWindow name="DownloadSelectionWindow" save="false">
+			<width />
+			<height />
+			<x />
+			<y />
+			<state />
+		</downloadSelectionWindow>
+	</guiSettings>
+	
+	<hostsSettings>
+		<rulesBeforeClasses />
+	</hostsSettings>
+	
+	<downloadSettings>
+		<autoStartDownloads />
+		<overallDownloadedBytes />
+		<overallDownloadedFiles />
+		<saveLogs />
+		<currentDownloadLogFile />
+		<maxFailedCount />
+		<minFileSize />
+		<autoRetryAfterDownloadsComplete />
+		<allowedFilenameCharacters />
+	</downloadSettings>
+	
+	<keywordsSettings>
+		<filterEnabled />
+		<matchMode />
+		<displayKeywordsWhenNoMatches />
+		<deselectNoKeyword />
+		<deleteNoKeyword />
+	</keywordsSettings>
+
+	<checkForUpdatesOnStart />
+	<checkClipboard />
+	<webExtensionPort />
+	<backupDbOnStart />
+	<defragDBOnStart />
+	<defragMinFilesize />
+	<threadCount />
+	<logLevel />
+</settings>
