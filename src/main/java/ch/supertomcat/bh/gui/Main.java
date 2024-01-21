@@ -231,7 +231,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		this.setTitle(windowTitlePrefix + Localization.getString("Queue") + windowTitleSuffix);
 
 		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		if (mainWindowSettings.isSave()) {
+		if (mainWindowSettings.isSave() && mainWindowSettings.getWidth() > 0 && mainWindowSettings.getHeight() > 0) {
 			this.setSize(mainWindowSettings.getWidth(), mainWindowSettings.getHeight());
 			this.setLocation(mainWindowSettings.getX(), mainWindowSettings.getY());
 			this.setExtendedState(mainWindowSettings.getState());

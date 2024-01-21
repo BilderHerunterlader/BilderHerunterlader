@@ -925,7 +925,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 		am.put(windowOkKey, windowOkAction);
 
 		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		if (mainWindowSettings.isSave()) {
+		if (mainWindowSettings.isSave() && mainWindowSettings.getWidth() > 0 && mainWindowSettings.getHeight() > 0) {
 			this.setSize(mainWindowSettings.getWidth(), mainWindowSettings.getHeight());
 			this.setLocation(mainWindowSettings.getX(), mainWindowSettings.getY());
 		} else {
