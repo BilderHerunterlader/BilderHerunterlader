@@ -450,6 +450,13 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	}
 
 	/**
+	 * @return Default User Agent
+	 */
+	public String getDefaultUserAgent() {
+		return DEFAULT_USER_AGENT;
+	}
+
+	/**
 	 * @return User Agent
 	 */
 	public String getUserAgent() {

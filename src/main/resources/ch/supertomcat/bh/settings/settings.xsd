@@ -116,7 +116,7 @@
 			<xs:element name="connectionRequestTimeout" type="xs:int" default="60000" />
 			<xs:element name="proxy" type="ProxySettings" />
 			
-			<xs:element name="userAgent" type="xs:string" default="Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:5.1) Goanna/20220507 PaleMoon/31.0.0" />
+			<xs:element name="userAgent" type="xs:string" default="" />
 			
 			<xs:element name="browserCookiesMode" type="BrowserCookiesMode" default="NO_COOKIES" />
 			<xs:element name="browserCookiesOpera" type="BrowserCookiesSetting" />

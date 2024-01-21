@@ -833,6 +833,16 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * Label
 	 */
+	private JLabel lblDefaultUserAgent = new JLabel(Localization.getString("DefaultUserAgent"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtDefaultUserAgent = new JTextField("");
+
+	/**
+	 * Label
+	 */
 	private JLabel lblUserAgent = new JLabel(Localization.getString("UserAgent"));
 
 	/**
@@ -1004,6 +1014,9 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtConnectionCount.setEditable(false);
 		txtConnectionCountPerHost.setEditable(false);
 		txtThreadCount.setEditable(false);
+
+		txtDefaultUserAgent.setEditable(false);
+		txtDefaultUserAgent.setToolTipText(Localization.getString("DefaultUserAgentToolTip"));
 
 		btnCancel.setMnemonic(KeyEvent.VK_C);
 
@@ -1347,6 +1360,11 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesPaleMoon, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblDefaultUserAgent, pnlConnection);
+		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtDefaultUserAgent, pnlConnection);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblUserAgent, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtUserAgent, pnlConnection);
@@ -1583,6 +1601,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtSocketTimeout.setText(String.valueOf(connectionSettings.getSocketTimeout()));
 		txtConnectionRequestTimeout.setText(String.valueOf(connectionSettings.getConnectionRequestTimeout()));
 
+		txtDefaultUserAgent.setText(settingsManager.getDefaultUserAgent());
 		txtUserAgent.setText(connectionSettings.getUserAgent());
 
 		txtProxyName.setText(proxyManager.getProxyname());
