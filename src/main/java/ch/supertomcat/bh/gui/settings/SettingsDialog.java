@@ -41,8 +41,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -61,10 +59,27 @@ import ch.supertomcat.bh.gui.renderer.LookAndFeelComboBoxRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.MappedLookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
+import ch.supertomcat.bh.settings.xml.AllowedFilenameCharacters;
+import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
+import ch.supertomcat.bh.settings.xml.BrowserCookiesSetting;
+import ch.supertomcat.bh.settings.xml.ConnectionSettings;
+import ch.supertomcat.bh.settings.xml.DirectorySettings;
+import ch.supertomcat.bh.settings.xml.DownloadSettings;
+import ch.supertomcat.bh.settings.xml.GUISettings;
+import ch.supertomcat.bh.settings.xml.HostsSettings;
+import ch.supertomcat.bh.settings.xml.KeywordMatchMode;
+import ch.supertomcat.bh.settings.xml.KeywordsSettings;
+import ch.supertomcat.bh.settings.xml.LogLevelSetting;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.xml.ProgressDisplayMode;
+import ch.supertomcat.bh.settings.xml.ProxyMode;
+import ch.supertomcat.bh.settings.xml.Settings;
+import ch.supertomcat.bh.settings.xml.SizeDisplayMode;
+import ch.supertomcat.bh.settings.xml.SubdirsResolutionMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
@@ -79,7 +94,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Settings-Panel
  */
-public class Settings extends JDialog implements ActionListener, ItemListener, ChangeListener, BHSettingsListener, MouseListener, TableColumnModelListener, WindowListener {
+public class SettingsDialog extends JDialog implements ActionListener, ItemListener, ChangeListener, BHSettingsListener, MouseListener, TableColumnModelListener, WindowListener {
 	/**
 	 * UID
 	 */
@@ -88,7 +103,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * Logger for this class
 	 */
-	private static Logger logger = LoggerFactory.getLogger(Settings.class);
+	private static Logger logger = LoggerFactory.getLogger(SettingsDialog.class);
 
 	/**
 	 * TabbedPane
@@ -288,7 +303,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbSizeView = new JComboBox<>();
+	private JComboBox<SizeDisplayMode> cmbSizeView = new JComboBox<>();
 
 	/**
 	 * Label
@@ -298,7 +313,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbProgressView = new JComboBox<>();
+	private JComboBox<ProgressDisplayMode> cmbProgressView = new JComboBox<>();
 
 	/**
 	 * Label
@@ -363,7 +378,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbCookies = new JComboBox<>();
+	private JComboBox<BrowserCookiesMode> cmbCookies = new JComboBox<>();
 
 	/**
 	 * Label
@@ -488,7 +503,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbKeywordMatchMode = new JComboBox<>();
+	private JComboBox<KeywordMatchMode> cmbKeywordMatchMode = new JComboBox<>();
 
 	/**
 	 * Label
@@ -568,17 +583,17 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbAllowedFilenameChars = new JComboBox<>();
+	private JComboBox<AllowedFilenameCharacters> cmbAllowedFilenameChars = new JComboBox<>();
 
 	/**
 	 * Label
 	 */
-	private JLabel lblDebugLevel = new JLabel("Debug-Level");
+	private JLabel lblLogLevel = new JLabel("Log-Level");
 
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbDebugLevel = new JComboBox<>();
+	private JComboBox<LogLevelSetting> cmbLogLevel = new JComboBox<>();
 
 	/**
 	 * Panel
@@ -618,12 +633,32 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * Label
 	 */
-	private JLabel lblTimeout = new JLabel(Localization.getString("Timeout"));
+	private JLabel lblConnectTimeout = new JLabel(Localization.getString("ConnectTimeout"));
 
 	/**
 	 * TextField
 	 */
-	private JTextField txtTimeout = new JTextField("30000");
+	private JTextField txtConnectTimeout = new JTextField("30000");
+
+	/**
+	 * Label
+	 */
+	private JLabel lblSocketTimeout = new JLabel(Localization.getString("SocketTimeout"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtSocketTimeout = new JTextField("30000");
+
+	/**
+	 * Label
+	 */
+	private JLabel lblConnectionRequestTimeout = new JLabel(Localization.getString("ConnectionRequestTimeout"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtConnectionRequestTimeout = new JTextField("30000");
 
 	/**
 	 * Label
@@ -673,7 +708,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<String> cmbSubdirsResolutionMode = new JComboBox<>();
+	private JComboBox<SubdirsResolutionMode> cmbSubdirsResolutionMode = new JComboBox<>();
 
 	/**
 	 * TableModel
@@ -744,16 +779,6 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * CheckBox
 	 */
 	private JCheckBox chkSaveTableSortOrders = new JCheckBox(Localization.getString("SaveTableSortOrders"), false);
-
-	/**
-	 * Label
-	 */
-	private JLabel lblSortDownloadsOnStart = new JLabel(Localization.getString("SortDownloadsOnStart"));
-
-	/**
-	 * ComboBox
-	 */
-	private JComboBox<String> cmbSortDownloadsOnStart = new JComboBox<>();
 
 	/**
 	 * Label
@@ -945,7 +970,7 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * @param cookieManager Cookie Manager
 	 * @param hostManager Host Manager
 	 */
-	public Settings(Window owner, MainWindowAccess mainWindowAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
+	public SettingsDialog(Window owner, MainWindowAccess mainWindowAccess, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager) {
 		this.owner = owner;
 		this.mainWindowAccess = mainWindowAccess;
 		this.proxyManager = proxyManager;
@@ -1048,50 +1073,51 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		buttonGroup.add(rbHTTP);
 		txtProxyPassword.setEchoChar('*');
 
-		cmbSizeView.addItem(Localization.getString("AutoChangeSize"));
-		cmbSizeView.addItem(Localization.getString("OnlyB"));
-		cmbSizeView.addItem(Localization.getString("OnlyKiB"));
-		cmbSizeView.addItem(Localization.getString("OnlyMiB"));
-		cmbSizeView.addItem(Localization.getString("OnlyGiB"));
-		cmbSizeView.addItem(Localization.getString("OnlyTiB"));
-		cmbProgressView.addItem(Localization.getString("ProgressbarPercent"));
-		cmbProgressView.addItem(Localization.getString("ProgressbarSize"));
-		cmbProgressView.addItem(Localization.getString("NoProgressbarPercent"));
-		cmbProgressView.addItem(Localization.getString("NoProgressbarSize"));
-		cmbKeywordMatchMode.addItem(Localization.getString("MatchOnlyExact"));
-		cmbKeywordMatchMode.addItem(Localization.getString("MatchAllStrict"));
-		cmbKeywordMatchMode.addItem(Localization.getString("MatchAll"));
+		cmbSizeView.addItem(SizeDisplayMode.AUTO_CHANGE_SIZE);
+		cmbSizeView.addItem(SizeDisplayMode.ONLY_B);
+		cmbSizeView.addItem(SizeDisplayMode.ONLY_KIB);
+		cmbSizeView.addItem(SizeDisplayMode.ONLY_MIB);
+		cmbSizeView.addItem(SizeDisplayMode.ONLY_GIB);
+		cmbSizeView.addItem(SizeDisplayMode.ONLY_TIB);
+		cmbSizeView.setRenderer(new SizeDisplayModeComboBoxRenderer());
+
+		cmbProgressView.addItem(ProgressDisplayMode.PROGRESSBAR_PERCENT);
+		cmbProgressView.addItem(ProgressDisplayMode.PROGRESSBAR_SIZE);
+		cmbProgressView.addItem(ProgressDisplayMode.NO_PROGRESSBAR_SIZE);
+		cmbProgressView.addItem(ProgressDisplayMode.NO_PROGRESSBAR_SIZE);
+		cmbProgressView.setRenderer(new ProgressDisplayModeComboBoxRenderer());
+
+		cmbKeywordMatchMode.addItem(KeywordMatchMode.MATCH_ONLY_EXACT);
+		cmbKeywordMatchMode.addItem(KeywordMatchMode.MATCH_ALL_STRICT);
+		cmbKeywordMatchMode.addItem(KeywordMatchMode.MATCH_ALL);
+		cmbKeywordMatchMode.setRenderer(new KeywordMatchModeComboBoxRenderer());
 		cmbKeywordMatchMode.setToolTipText(Localization.getString("KeywordSearchTooltip"));
+
 		cmbLanguage.addItem(Localization.getString("German"));
 		cmbLanguage.addItem(Localization.getString("English"));
 		cmbLanguage.setToolTipText(Localization.getString("LanguageTooltip"));
 
-		for (LookAndFeelSetting lookAndFeel : LookAndFeelSetting.values()) {
+		for (MappedLookAndFeelSetting lookAndFeel : MappedLookAndFeelSetting.values()) {
 			if (lookAndFeel.isAvailable()) {
-				cmbLAF.addItem(lookAndFeel);
+				cmbLAF.addItem(lookAndFeel.getXMLValue());
 			}
 		}
 		cmbLAF.setRenderer(new LookAndFeelComboBoxRenderer());
 
-		cmbCookies.addItem(Localization.getString("CookiesNo"));
-		cmbCookies.addItem(Localization.getString("CookiesIE"));
-		cmbCookies.addItem(Localization.getString("CookiesFF"));
-		cmbCookies.addItem(Localization.getString("CookiesOP"));
-		cmbCookies.addItem(Localization.getString("CookiesPM"));
-		cmbCookies.addItem(Localization.getString("CookiesOPNEW"));
+		cmbCookies.addItem(BrowserCookiesMode.NO_COOKIES);
+		cmbCookies.addItem(BrowserCookiesMode.BROWSER_IE);
+		cmbCookies.addItem(BrowserCookiesMode.BROWSER_FIREFOX);
+		cmbCookies.addItem(BrowserCookiesMode.BROWSER_OPERA);
+		cmbCookies.addItem(BrowserCookiesMode.BROWSER_PALE_MOON);
+		cmbCookies.addItem(BrowserCookiesMode.BROWSER_OPERA_NEW);
 		cmbCookies.addItemListener(this);
-		cmbSortDownloadsOnStart.addItem(Localization.getString("ByContainerURLAndDirectory"));
-		cmbSortDownloadsOnStart.addItem(Localization.getString("ByDirectoryAndContainerURL"));
-		cmbSortDownloadsOnStart.addItem(Localization.getString("ByContainerURLOnly"));
-		cmbSortDownloadsOnStart.addItem(Localization.getString("ByDirectoryOnly"));
-		cmbSortDownloadsOnStart.addItem(Localization.getString("NoSort"));
-		cmbSortDownloadsOnStart.addItem(Localization.getString("ByDateTimeOnly"));
 
-		cmbSubdirsResolutionMode.addItem(Localization.getString("SubdirResolutionModeOnlyLower"));
-		cmbSubdirsResolutionMode.addItem(Localization.getString("SubdirResolutionModeOnlyHigher"));
-		cmbSubdirsResolutionMode.addItem(Localization.getString("SubdirResolutionModeOnlyWidth"));
-		cmbSubdirsResolutionMode.addItem(Localization.getString("SubdirResolutionModeOnlyHeight"));
-		cmbSubdirsResolutionMode.addItem(Localization.getString("SubdirResolutionModeBoth"));
+		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_LOWER);
+		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_HIGHER);
+		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_WIDTH);
+		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_HEIGHT);
+		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_BOTH);
+		cmbSubdirsResolutionMode.setRenderer(new SubdirsResolutionModeComboBoxRenderer());
 
 		pnlCookiesOpera.add(cbCookiesOperaFixed, BorderLayout.WEST);
 		pnlCookiesOpera.add(txtCookiesOpera, BorderLayout.CENTER);
@@ -1137,19 +1163,18 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		btnCookiesPaleMoon.addActionListener(this);
 		cbCookiesPaleMoonFixed.addItemListener(this);
 
-		cmbAllowedFilenameChars.addItem(Localization.getString("FilenameAsciiOnly"));
-		cmbAllowedFilenameChars.addItem(Localization.getString("FilenameAsciiUmlaut"));
-		cmbAllowedFilenameChars.addItem(Localization.getString("FilenameAlle"));
+		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ASCII_ONLY);
+		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ASCII_UMLAUT);
+		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ALL);
+		cmbAllowedFilenameChars.setRenderer(new AllowedFilenameCharactersComboBoxRenderer());
 
-		cmbDebugLevel.addItem("Off");
-		cmbDebugLevel.addItem("All");
-		cmbDebugLevel.addItem("Info");
-		cmbDebugLevel.addItem("Trace");
-		cmbDebugLevel.addItem("Debug");
-		cmbDebugLevel.addItem("Warn");
-		cmbDebugLevel.addItem("Error");
-		cmbDebugLevel.addItem("Fatal");
-		cmbDebugLevel.setSelectedIndex(5);
+		cmbLogLevel.addItem(LogLevelSetting.TRACE);
+		cmbLogLevel.addItem(LogLevelSetting.DEBUG);
+		cmbLogLevel.addItem(LogLevelSetting.INFO);
+		cmbLogLevel.addItem(LogLevelSetting.WARN);
+		cmbLogLevel.addItem(LogLevelSetting.ERROR);
+		cmbLogLevel.addItem(LogLevelSetting.FATAL);
+		cmbLogLevel.setSelectedItem(LogLevelSetting.INFO);
 
 		chkDeselectNoKeyword.setToolTipText(Localization.getString("DeselectNoKeywordTooltip"));
 		chkSaveLogs.setToolTipText(Localization.getString("SaveLogsTooltip"));
@@ -1283,9 +1308,19 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtConnectionCountPerHost, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblTimeout, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblConnectTimeout, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtTimeout, pnlConnection);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtConnectTimeout, pnlConnection);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblSocketTimeout, pnlConnection);
+		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtSocketTimeout, pnlConnection);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblConnectionRequestTimeout, pnlConnection);
+		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtConnectionRequestTimeout, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblCookies, pnlConnection);
@@ -1430,11 +1465,6 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, txtMinFilesize, pnlDownload);
 		i++;
-		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblSortDownloadsOnStart, pnlDownload);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, cmbSortDownloadsOnStart, pnlDownload);
-		i++;
 		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, pnlRegexReplaceFilename, pnlDownload);
 
@@ -1481,9 +1511,9 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, txtDefragMinFilesize, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblDebugLevel, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblLogLevel, pnlOther);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
-		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, cmbDebugLevel, pnlOther);
+		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, cmbLogLevel, pnlOther);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblThreadCount, pnlOther);
@@ -1508,7 +1538,9 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtProxyName);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtProxyPort);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtProxyUser);
-		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtTimeout);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtConnectTimeout);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtSocketTimeout);
+		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtConnectionRequestTimeout);
 
 		addWindowListener(this);
 
@@ -1524,133 +1556,49 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	 * Initialize
 	 */
 	private void init() {
-		txtStdSavePath.setText(settingsManager.getSavePath());
-		txtConnectionCount.setText(String.valueOf(settingsManager.getConnections()));
-		txtConnectionCountPerHost.setText(String.valueOf(settingsManager.getConnectionsPerHost()));
-		txtThreadCount.setText(String.valueOf(settingsManager.getThreadCount()));
-		txtMaxFailedCount.setText(String.valueOf(settingsManager.getMaxFailedCount()));
-		txtMinFilesize.setText(String.valueOf(settingsManager.getMinFilesize()));
-		txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
-		txtDefragMinFilesize.setText(String.valueOf(settingsManager.getDefragMinFilesize()));
-		txtUserAgent.setText(settingsManager.getUserAgent());
-		chkUpdates.setSelected(settingsManager.isUpdates());
-		chkSaveLogs.setSelected(settingsManager.isSaveLogs());
-		chkAutoStartDownloads.setSelected(settingsManager.isAutoStartDownloads());
-		chkAutoRetryAfterDownloadsComplete.setSelected(settingsManager.isAutoRetryAfterDownloadsComplete());
-		chkCheckClipboard.setSelected(settingsManager.isCheckClipboard());
-		txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
-		chkDefragDB.setSelected(settingsManager.isDefragDBOnStart());
-		chkBackupDB.setSelected(settingsManager.isBackupDbOnStart());
-		chkSubdirsEnabled.setSelected(settingsManager.isSubdirsEnabled());
-		chkDownloadRate.setSelected(settingsManager.isDownloadRate());
-		chkDownloadsCompleteNotification.setSelected(settingsManager.isDownloadsCompleteNotification());
-		chkDownloadPreviews.setSelected(settingsManager.isDownloadPreviews());
-		txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
-		sldConnectionCount.setValue(settingsManager.getConnections());
-		sldConnectionCountPerHost.setValue(settingsManager.getConnectionsPerHost());
-		sldThreadCount.setValue(settingsManager.getThreadCount());
+		Settings settings = settingsManager.getSettings();
 
-		String lang = settingsManager.getLanguage();
-		if (lang.equals("de_DE")) {
-			cmbLanguage.setSelectedIndex(0);
-		} else {
-			cmbLanguage.setSelectedIndex(1);
-		}
-		cmbSizeView.setSelectedIndex(settingsManager.getSizeView());
+		DirectorySettings directorySettings = settings.getDirectorySettings();
 
-		cmbProgressView.setSelectedIndex(settingsManager.getProgessView());
+		txtStdSavePath.setText(directorySettings.getSavePath());
+		chkRememberLastUsedPath.setSelected(directorySettings.isRememberLastUsedPath());
 
-		cmbKeywordMatchMode.setSelectedIndex(settingsManager.getKeywordMatchMode());
+		chkSubdirsEnabled.setSelected(directorySettings.isSubDirsEnabled());
+		cmbSubdirsResolutionMode.setSelectedItem(directorySettings.getSubDirsResolutionMode());
 
-		cmbLAF.setSelectedItem(settingsManager.getLookAndFeel());
-
-		cmbCookies.setSelectedIndex(settingsManager.getCookiesFromBrowser());
-
-		cmbSortDownloadsOnStart.setSelectedIndex(settingsManager.getSortDownloadsOnStart());
-
-		cmbSubdirsResolutionMode.setSelectedIndex(settingsManager.getSubdirsResolutionMode());
-
-		boolean bOpera = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA);
-		boolean bOperaNew = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_OPERA_NEW);
-		boolean bFirefox = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_FIREFOX);
-		boolean bPaleMoon = (settingsManager.getCookiesFromBrowser() == BrowserCookies.BROWSER_PALE_MOON);
-		lblCookiesOpera.setVisible(bOpera);
-		cbCookiesOperaFixed.setVisible(bOpera);
-		txtCookiesOpera.setVisible(bOpera);
-		btnCookiesOpera.setVisible(bOpera);
-
-		lblCookiesOperaNew.setVisible(bOperaNew);
-		cbCookiesOperaNewFixed.setVisible(bOperaNew);
-		txtCookiesOperaNew.setVisible(bOperaNew);
-		btnCookiesOperaNew.setVisible(bOperaNew);
-
-		lblCookiesFirefox.setVisible(bFirefox);
-		cbCookiesFirefoxFixed.setVisible(bFirefox);
-		txtCookiesFirefox.setVisible(bFirefox);
-		btnCookiesFirefox.setVisible(bFirefox);
-
-		lblCookiesPaleMoon.setVisible(bPaleMoon);
-		cbCookiesPaleMoonFixed.setVisible(bPaleMoon);
-		txtCookiesPaleMoon.setVisible(bPaleMoon);
-		btnCookiesPaleMoon.setVisible(bPaleMoon);
-
-		btnCookiesOpera.setEnabled(cbCookiesOperaFixed.isSelected());
-		btnCookiesOperaNew.setEnabled(cbCookiesOperaNewFixed.isSelected());
-		btnCookiesFirefox.setEnabled(cbCookiesFirefoxFixed.isSelected());
-		btnCookiesPaleMoon.setEnabled(cbCookiesPaleMoonFixed.isSelected());
-
-		cbCookiesOperaFixed.setSelected(settingsManager.isCookieFileOperaFixed());
-		cbCookiesOperaNewFixed.setSelected(settingsManager.isCookieFileOperaNewFixed());
-		cbCookiesFirefoxFixed.setSelected(settingsManager.isCookieFileFirefoxFixed());
-		cbCookiesPaleMoonFixed.setSelected(settingsManager.isCookieFilePaleMoonFixed());
-
-		txtCookiesOpera.setText(cookieManager.getCookieFileForOpera(false));
-		txtCookiesOperaNew.setText(cookieManager.getCookieFileForOperaNew());
-		txtCookiesFirefox.setText(cookieManager.getCookieFileForFirefox());
-		txtCookiesPaleMoon.setText(cookieManager.getCookieFileForPaleMoon());
-
-		cmbAllowedFilenameChars.setSelectedIndex(settingsManager.getAllowedFilenameChars());
-
-		String debugLevel = settingsManager.getDebugLevel();
-		for (int i = 0; i < cmbDebugLevel.getItemCount(); i++) {
-			if (cmbDebugLevel.getItemAt(i).equals(debugLevel)) {
-				cmbDebugLevel.setSelectedIndex(i);
-				break;
-			}
+		subdirModel.removeAllRows();
+		List<Subdir> v = settingsManager.getSubDirs();
+		for (int s = 0; s < v.size(); s++) {
+			subdirModel.addRow(v.get(s));
 		}
 
-		chkWindowSizePos.setSelected(settingsManager.isSaveWindowSizePosition());
+		ConnectionSettings connectionSettings = settings.getConnectionSettings();
 
-		chkDownloadSelectionWindowSizePos.setSelected(settingsManager.isSaveDownloadSelectionWindowSizePosition());
+		txtConnectionCount.setText(String.valueOf(connectionSettings.getMaxConnections()));
+		sldConnectionCount.setValue(connectionSettings.getMaxConnections());
 
-		chkSaveTableColumnSizes.setSelected(settingsManager.isSaveTableColumnSizes());
+		txtConnectionCountPerHost.setText(String.valueOf(connectionSettings.getMaxConnectionsPerHost()));
+		sldConnectionCountPerHost.setValue(connectionSettings.getMaxConnectionsPerHost());
 
-		chkSaveTableSortOrders.setSelected(settingsManager.isSaveTableSortOrders());
+		txtConnectTimeout.setText(String.valueOf(connectionSettings.getConnectTimeout()));
+		txtSocketTimeout.setText(String.valueOf(connectionSettings.getSocketTimeout()));
+		txtConnectionRequestTimeout.setText(String.valueOf(connectionSettings.getConnectionRequestTimeout()));
 
-		chkRememberLastUsedPath.setSelected(settingsManager.isSaveLastPath());
+		txtUserAgent.setText(connectionSettings.getUserAgent());
 
-		chkAlwaysAddTitle.setSelected(settingsManager.isAlwaysAddTitle());
-
-		chkDeselectNoKeyword.setSelected(settingsManager.isDeselectNoKeyword());
-
-		chkDisplayKeywordsWhenNoMatches.setSelected(settingsManager.isDisplayKeywordsWhenNoMatches());
-
-		chkRulesBefore.setSelected(settingsManager.isRulesBeforeClasses());
-
-		proxyManager.readFromSettings();
 		txtProxyName.setText(proxyManager.getProxyname());
 		txtProxyPort.setText(String.valueOf(proxyManager.getProxyport()));
 		txtProxyUser.setText(proxyManager.getProxyuser());
 		txtProxyPassword.setText(proxyManager.getProxypassword());
 
-		int mode = proxyManager.getMode();
-		if (mode == ProxyManager.DIRECT_CONNECTION) {
+		ProxyMode mode = proxyManager.getMode();
+		if (mode == ProxyMode.DIRECT_CONNECTION) {
 			rbNoProxy.setSelected(true);
-		} else if (mode == ProxyManager.HTTP_PROXY) {
+		} else if (mode == ProxyMode.PROXY) {
 			rbHTTP.setSelected(true);
 		}
 		boolean b = proxyManager.isAuth();
-		if (b && (mode > 0)) {
+		if (b && (mode != ProxyMode.DIRECT_CONNECTION)) {
 			cbAuth.setSelected(true);
 		}
 
@@ -1665,11 +1613,109 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		txtProxyUser.setEnabled(cbAuth.isSelected());
 		txtProxyPassword.setEnabled(cbAuth.isSelected());
 
-		subdirModel.removeAllRows();
-		List<Subdir> v = settingsManager.getSubdirs();
-		for (int s = 0; s < v.size(); s++) {
-			subdirModel.addRow(v.get(s));
+		BrowserCookiesMode browserCookiesMode = connectionSettings.getBrowserCookiesMode();
+		cmbCookies.setSelectedItem(browserCookiesMode);
+
+		boolean bOpera = browserCookiesMode == BrowserCookiesMode.BROWSER_OPERA;
+		boolean bOperaNew = browserCookiesMode == BrowserCookiesMode.BROWSER_OPERA_NEW;
+		boolean bFirefox = browserCookiesMode == BrowserCookiesMode.BROWSER_FIREFOX;
+		boolean bPaleMoon = browserCookiesMode == BrowserCookiesMode.BROWSER_PALE_MOON;
+
+		BrowserCookiesSetting operaBrowserCookiesSetting = connectionSettings.getBrowserCookiesOpera();
+		lblCookiesOpera.setVisible(bOpera);
+		cbCookiesOperaFixed.setVisible(bOpera);
+		txtCookiesOpera.setVisible(bOpera);
+		btnCookiesOpera.setVisible(bOpera);
+		btnCookiesOpera.setEnabled(cbCookiesOperaFixed.isSelected());
+		cbCookiesOperaFixed.setSelected(operaBrowserCookiesSetting.isCookieFileFixed());
+		txtCookiesOpera.setText(cookieManager.getCookieFileForOpera(false));
+
+		BrowserCookiesSetting operaNewBrowserCookiesSetting = connectionSettings.getBrowserCookiesOperaNew();
+		lblCookiesOperaNew.setVisible(bOperaNew);
+		cbCookiesOperaNewFixed.setVisible(bOperaNew);
+		txtCookiesOperaNew.setVisible(bOperaNew);
+		btnCookiesOperaNew.setVisible(bOperaNew);
+		btnCookiesOperaNew.setEnabled(cbCookiesOperaNewFixed.isSelected());
+		cbCookiesOperaNewFixed.setSelected(operaNewBrowserCookiesSetting.isCookieFileFixed());
+		txtCookiesOperaNew.setText(cookieManager.getCookieFileForOperaNew());
+
+		BrowserCookiesSetting firefoxBrowserCookiesSetting = connectionSettings.getBrowserCookiesFirefox();
+		lblCookiesFirefox.setVisible(bFirefox);
+		cbCookiesFirefoxFixed.setVisible(bFirefox);
+		txtCookiesFirefox.setVisible(bFirefox);
+		btnCookiesFirefox.setVisible(bFirefox);
+		btnCookiesFirefox.setEnabled(cbCookiesFirefoxFixed.isSelected());
+		cbCookiesFirefoxFixed.setSelected(firefoxBrowserCookiesSetting.isCookieFileFixed());
+		txtCookiesFirefox.setText(cookieManager.getCookieFileForFirefox());
+
+		BrowserCookiesSetting palemoonBrowserCookiesSetting = connectionSettings.getBrowserCookiesPaleMoon();
+		lblCookiesPaleMoon.setVisible(bPaleMoon);
+		cbCookiesPaleMoonFixed.setVisible(bPaleMoon);
+		txtCookiesPaleMoon.setVisible(bPaleMoon);
+		btnCookiesPaleMoon.setVisible(bPaleMoon);
+		btnCookiesPaleMoon.setEnabled(cbCookiesPaleMoonFixed.isSelected());
+		cbCookiesPaleMoonFixed.setSelected(palemoonBrowserCookiesSetting.isCookieFileFixed());
+		txtCookiesPaleMoon.setText(cookieManager.getCookieFileForPaleMoon());
+
+		GUISettings guiSettings = settings.getGuiSettings();
+
+		String lang = guiSettings.getLanguage();
+		if (lang.equals("de_DE")) {
+			cmbLanguage.setSelectedIndex(0);
+		} else {
+			cmbLanguage.setSelectedIndex(1);
 		}
+
+		chkSaveTableColumnSizes.setSelected(guiSettings.isSaveTableColumnSizes());
+		chkSaveTableSortOrders.setSelected(guiSettings.isSaveTableSortOrders());
+
+		cmbSizeView.setSelectedItem(guiSettings.getSizeDisplayMode());
+		cmbProgressView.setSelectedItem(guiSettings.getProgressDisplayMode());
+		chkDownloadRate.setSelected(guiSettings.isDownloadRate());
+		cmbLAF.setSelectedItem(guiSettings.getLookAndFeel());
+
+		chkAlwaysAddTitle.setSelected(guiSettings.isAlwaysAddTitle());
+
+		chkDownloadsCompleteNotification.setSelected(guiSettings.isDownloadsCompleteNotification());
+
+		chkDownloadPreviews.setSelected(guiSettings.isDownloadPreviews());
+		txtPreviewSize.setText(String.valueOf(guiSettings.getPreviewSize()));
+
+		chkWindowSizePos.setSelected(guiSettings.getMainWindow().isSave());
+		chkDownloadSelectionWindowSizePos.setSelected(guiSettings.getDownloadSelectionWindow().isSave());
+
+		KeywordsSettings keywordsSettings = settings.getKeywordsSettings();
+
+		cmbKeywordMatchMode.setSelectedItem(keywordsSettings.getMatchMode());
+		chkDisplayKeywordsWhenNoMatches.setSelected(keywordsSettings.isDisplayKeywordsWhenNoMatches());
+		chkDeselectNoKeyword.setSelected(keywordsSettings.isDeselectNoKeyword());
+
+		DownloadSettings downloadSettings = settings.getDownloadSettings();
+
+		chkAutoStartDownloads.setSelected(downloadSettings.isAutoStartDownloads());
+		chkSaveLogs.setSelected(downloadSettings.isSaveLogs());
+		txtMaxFailedCount.setText(String.valueOf(downloadSettings.getMaxFailedCount()));
+		txtMinFilesize.setText(String.valueOf(downloadSettings.getMinFileSize()));
+		chkAutoRetryAfterDownloadsComplete.setSelected(downloadSettings.isAutoRetryAfterDownloadsComplete());
+		cmbAllowedFilenameChars.setSelectedItem(downloadSettings.getAllowedFilenameCharacters());
+
+		chkUpdates.setSelected(settings.isCheckForUpdatesOnStart());
+
+		chkCheckClipboard.setSelected(settings.isCheckClipboard());
+		txtWebExtensionPort.setText(String.valueOf(settings.getWebExtensionPort()));
+
+		chkDefragDB.setSelected(settings.isDefragDBOnStart());
+		chkBackupDB.setSelected(settings.isBackupDbOnStart());
+		txtDefragMinFilesize.setText(String.valueOf(settings.getDefragMinFilesize()));
+
+		txtThreadCount.setText(String.valueOf(settings.getThreadCount()));
+		sldThreadCount.setValue(settings.getThreadCount());
+
+		cmbLogLevel.setSelectedItem(settings.getLogLevel());
+
+		HostsSettings hostsSettings = settings.getHostsSettings();
+
+		chkRulesBefore.setSelected(hostsSettings.isRulesBeforeClasses());
 	}
 
 	@Override
@@ -1810,101 +1856,18 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 	private void applySettings() {
 		settingsManager.removeSettingsListener(this);
 		mainWindowAccess.setMessage(Localization.getString("ApplyingSettings"));
-		settingsManager.setConnections(sldConnectionCount.getValue());
-		settingsManager.setConnectionsPerHost(sldConnectionCountPerHost.getValue());
-		settingsManager.setThreadCount(sldThreadCount.getValue());
-		settingsManager.setMaxFailedCount(Integer.parseInt(txtMaxFailedCount.getText()));
-		try {
-			settingsManager.setMinFilesize(Integer.parseInt(txtMinFilesize.getText()));
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-			txtMinFilesize.setText(String.valueOf(settingsManager.getMinFilesize()));
-		}
-		try {
-			settingsManager.setDefragMinFilesize(Integer.parseInt(txtDefragMinFilesize.getText()));
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-			txtDefragMinFilesize.setText(String.valueOf(settingsManager.getDefragMinFilesize()));
-		}
-		try {
-			int val = Integer.parseInt(txtTimeout.getText());
-			if (val <= 1000) {
-				txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
-			} else {
-				settingsManager.setTimeout(val);
-			}
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-			txtTimeout.setText(String.valueOf(settingsManager.getTimeout()));
-		}
-		settingsManager.setSavePath(txtStdSavePath.getText());
-		settingsManager.setUserAgent(txtUserAgent.getText());
-		settingsManager.setUpdates(chkUpdates.isSelected());
-		settingsManager.setSaveLogs(chkSaveLogs.isSelected());
-		settingsManager.setAutoStartDownloads(chkAutoStartDownloads.isSelected());
-		settingsManager.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
-		settingsManager.setCheckClipboard(chkCheckClipboard.isSelected());
-		try {
-			int val = Integer.parseInt(txtWebExtensionPort.getText());
-			if (val < 0 || val > 65535) {
-				txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
-			} else {
-				settingsManager.setWebExtensionPort(val);
-			}
-		} catch (NumberFormatException nfe) {
-			logger.error("WebExtensionPort is not an integer: {}", txtWebExtensionPort.getText(), nfe);
-			txtWebExtensionPort.setText(String.valueOf(settingsManager.getWebExtensionPort()));
-		}
-		settingsManager.setDownloadRate(chkDownloadRate.isSelected());
-		if (cmbLanguage.getSelectedIndex() == 0) {
-			settingsManager.setLanguage("de_DE");
-		} else {
-			settingsManager.setLanguage("en_EN");
-		}
-		settingsManager.setSizeView(cmbSizeView.getSelectedIndex());
-		settingsManager.setProgessView(cmbProgressView.getSelectedIndex());
-		settingsManager.setKeywordMatchMode(cmbKeywordMatchMode.getSelectedIndex());
-		LookAndFeelSetting previousLookAndFeel = settingsManager.getLookAndFeel();
-		settingsManager.setLookAndFeel((LookAndFeelSetting)cmbLAF.getSelectedItem());
-		settingsManager.setCookiesFromBrowser(cmbCookies.getSelectedIndex());
-		settingsManager.setCookieFileOperaFixed(cbCookiesOperaFixed.isSelected());
-		settingsManager.setCookieFileOpera(txtCookiesOpera.getText());
-		settingsManager.setCookieFileOperaNewFixed(cbCookiesOperaNewFixed.isSelected());
-		settingsManager.setCookieFileOperaNew(txtCookiesOperaNew.getText());
-		settingsManager.setCookieFileFirefoxFixed(cbCookiesFirefoxFixed.isSelected());
-		settingsManager.setCookieFileFirefox(txtCookiesFirefox.getText());
-		settingsManager.setCookieFilePaleMoonFixed(cbCookiesPaleMoonFixed.isSelected());
-		settingsManager.setCookieFilePaleMoon(txtCookiesPaleMoon.getText());
-		settingsManager.setAllowedFilenameChars(cmbAllowedFilenameChars.getSelectedIndex());
-		settingsManager.setDebugLevel((String)cmbDebugLevel.getSelectedItem());
-		settingsManager.setSaveWindowSizePosition(chkWindowSizePos.isSelected());
-		settingsManager.setSaveDownloadSelectionWindowSizePosition(chkDownloadSelectionWindowSizePos.isSelected());
-		settingsManager.setSaveTableColumnSizes(chkSaveTableColumnSizes.isSelected());
-		settingsManager.setSaveTableSortOrders(chkSaveTableSortOrders.isSelected());
-		settingsManager.setSaveLastPath(chkRememberLastUsedPath.isSelected());
-		settingsManager.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
-		settingsManager.setDeselectNoKeyword(chkDeselectNoKeyword.isSelected());
-		settingsManager.setDisplayKeywordsWhenNoMatches(chkDisplayKeywordsWhenNoMatches.isSelected());
-		settingsManager.setDefragDBOnStart(chkDefragDB.isSelected());
-		settingsManager.setBackupDbOnStart(chkBackupDB.isSelected());
-		settingsManager.setSubdirsEnabled(chkSubdirsEnabled.isSelected());
-		settingsManager.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
-		settingsManager.setDownloadPreviews(chkDownloadPreviews.isSelected());
-		try {
-			int val = Integer.parseInt(txtPreviewSize.getText());
-			if (val < 100 || val > 1000) {
-				txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
-			} else {
-				settingsManager.setPreviewSize(val);
-			}
-		} catch (NumberFormatException nfe) {
-			logger.error(nfe.getMessage(), nfe);
-			txtPreviewSize.setText(String.valueOf(settingsManager.getPreviewSize()));
-		}
-		settingsManager.setSortDownloadsOnStart(cmbSortDownloadsOnStart.getSelectedIndex());
-		settingsManager.setSubdirsResolutionMode(cmbSubdirsResolutionMode.getSelectedIndex());
 
-		List<Subdir> v = new ArrayList<>();
+		Settings settings = settingsManager.getSettings();
+
+		DirectorySettings directorySettings = settings.getDirectorySettings();
+
+		directorySettings.setSavePath(txtStdSavePath.getText());
+		directorySettings.setRememberLastUsedPath(chkRememberLastUsedPath.isSelected());
+
+		directorySettings.setSubDirsEnabled(chkSubdirsEnabled.isSelected());
+		directorySettings.setSubDirsResolutionMode((SubdirsResolutionMode)cmbSubdirsResolutionMode.getSelectedItem());
+
+		List<Subdir> subDirs = new ArrayList<>();
 		for (int i = 0; i < jtSubdirs.getRowCount(); i++) {
 			String name = (String)jtSubdirs.getValueAt(i, 0);
 			long min = (Long)jtSubdirs.getValueAt(i, 1);
@@ -1928,18 +1891,29 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 				resMaxH = SubdirResolutionCellEditorComponent.parseIntVal(arr[1]);
 			}
 
-			v.add(new Subdir(name, min, max, resMinW, resMinH, resMaxW, resMaxH));
+			subDirs.add(new Subdir(name, min, max, resMinW, resMinH, resMaxW, resMaxH));
 		}
-		settingsManager.addSubdirs(v, true);
+		settingsManager.setSubdirs(subDirs);
 
-		settingsManager.setRulesBeforeClasses(chkRulesBefore.isSelected());
-		hostManager.reInitHosterList();
+		ConnectionSettings connectionSettings = settings.getConnectionSettings();
+
+		connectionSettings.setMaxConnections(sldConnectionCount.getValue());
+		connectionSettings.setMaxConnectionsPerHost(sldConnectionCountPerHost.getValue());
+
+		int connectTimeout = parseTimeoutSetting(txtConnectTimeout, connectionSettings.getConnectTimeout());
+		int socketTimeout = parseTimeoutSetting(txtSocketTimeout, connectionSettings.getSocketTimeout());
+		int connectionRequestTimeout = parseTimeoutSetting(txtConnectionRequestTimeout, connectionSettings.getConnectionRequestTimeout());
+		connectionSettings.setConnectTimeout(connectTimeout);
+		connectionSettings.setSocketTimeout(socketTimeout);
+		connectionSettings.setConnectionRequestTimeout(connectionRequestTimeout);
+
+		connectionSettings.setUserAgent(txtUserAgent.getText());
 
 		proxyManager.setAuth(cbAuth.isSelected());
 		if (rbNoProxy.isSelected()) {
-			proxyManager.setMode(ProxyManager.DIRECT_CONNECTION);
+			proxyManager.setMode(ProxyMode.DIRECT_CONNECTION);
 		} else if (rbHTTP.isSelected()) {
-			proxyManager.setMode(ProxyManager.HTTP_PROXY);
+			proxyManager.setMode(ProxyMode.PROXY);
 		}
 		proxyManager.setProxyname(txtProxyName.getText());
 		try {
@@ -1950,17 +1924,124 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 		proxyManager.setProxyuser(txtProxyUser.getText());
 		proxyManager.setProxypassword(String.valueOf(txtProxyPassword.getPassword()));
 		proxyManager.writeToSettings();
-		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
-		LookAndFeelSetting selectedLookAndFeel = (LookAndFeelSetting)cmbLAF.getSelectedItem();
-		if (selectedLookAndFeel != previousLookAndFeel && selectedLookAndFeel.isAvailable()) {
-			try {
-				UIManager.setLookAndFeel(selectedLookAndFeel.getClassName());
-				SwingUtilities.updateComponentTreeUI(owner);
-			} catch (ClassNotFoundException | InstantiationException | IllegalAccessException | UnsupportedLookAndFeelException e1) {
-				logger.error(e1.getMessage(), e1);
-			}
+
+		connectionSettings.setBrowserCookiesMode((BrowserCookiesMode)cmbCookies.getSelectedItem());
+
+		BrowserCookiesSetting operaBrowserCookiesSetting = connectionSettings.getBrowserCookiesOpera();
+		operaBrowserCookiesSetting.setCookieFileFixed(cbCookiesOperaFixed.isSelected());
+		operaBrowserCookiesSetting.setCookieFile(txtCookiesOpera.getText());
+
+		BrowserCookiesSetting operaNewBrowserCookiesSetting = connectionSettings.getBrowserCookiesOperaNew();
+		operaNewBrowserCookiesSetting.setCookieFileFixed(cbCookiesOperaNewFixed.isSelected());
+		operaNewBrowserCookiesSetting.setCookieFile(txtCookiesOperaNew.getText());
+
+		BrowserCookiesSetting firefoxBrowserCookiesSetting = connectionSettings.getBrowserCookiesFirefox();
+		firefoxBrowserCookiesSetting.setCookieFileFixed(cbCookiesFirefoxFixed.isSelected());
+		firefoxBrowserCookiesSetting.setCookieFile(txtCookiesFirefox.getText());
+
+		BrowserCookiesSetting palemoonBrowserCookiesSetting = connectionSettings.getBrowserCookiesPaleMoon();
+		palemoonBrowserCookiesSetting.setCookieFileFixed(cbCookiesPaleMoonFixed.isSelected());
+		palemoonBrowserCookiesSetting.setCookieFile(txtCookiesPaleMoon.getText());
+
+		GUISettings guiSettings = settings.getGuiSettings();
+
+		if (cmbLanguage.getSelectedIndex() == 0) {
+			guiSettings.setLanguage("de_DE");
+		} else {
+			guiSettings.setLanguage("en_EN");
 		}
+
+		guiSettings.setSaveTableColumnSizes(chkSaveTableColumnSizes.isSelected());
+		guiSettings.setSaveTableSortOrders(chkSaveTableSortOrders.isSelected());
+
+		guiSettings.setSizeDisplayMode((SizeDisplayMode)cmbSizeView.getSelectedItem());
+		guiSettings.setProgressDisplayMode((ProgressDisplayMode)cmbProgressView.getSelectedItem());
+		guiSettings.setDownloadRate(chkDownloadRate.isSelected());
+
+		LookAndFeelSetting selectedLookAndFeel = (LookAndFeelSetting)cmbLAF.getSelectedItem();
+		boolean lookAndFeelChanged = settingsManager.setLookAndFeel(selectedLookAndFeel);
+
+		guiSettings.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
+
+		guiSettings.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
+
+		guiSettings.setDownloadPreviews(chkDownloadPreviews.isSelected());
+		try {
+			int val = Integer.parseInt(txtPreviewSize.getText());
+			if (val < 100 || val > 1000) {
+				txtPreviewSize.setText(String.valueOf(guiSettings.getPreviewSize()));
+			} else {
+				guiSettings.setPreviewSize(val);
+			}
+		} catch (NumberFormatException nfe) {
+			logger.error(nfe.getMessage(), nfe);
+			txtPreviewSize.setText(String.valueOf(guiSettings.getPreviewSize()));
+		}
+
+		guiSettings.getMainWindow().setSave(chkWindowSizePos.isSelected());
+		guiSettings.getDownloadSelectionWindow().setSave(chkDownloadSelectionWindowSizePos.isSelected());
+
+		KeywordsSettings keywordsSettings = settings.getKeywordsSettings();
+
+		keywordsSettings.setMatchMode((KeywordMatchMode)cmbKeywordMatchMode.getSelectedItem());
+		keywordsSettings.setDisplayKeywordsWhenNoMatches(chkDisplayKeywordsWhenNoMatches.isSelected());
+		keywordsSettings.setDeselectNoKeyword(chkDeselectNoKeyword.isSelected());
+
+		DownloadSettings downloadSettings = settings.getDownloadSettings();
+
+		downloadSettings.setAutoStartDownloads(chkAutoStartDownloads.isSelected());
+		downloadSettings.setSaveLogs(chkSaveLogs.isSelected());
+		downloadSettings.setMaxFailedCount(Integer.parseInt(txtMaxFailedCount.getText()));
+		try {
+			downloadSettings.setMinFileSize(Integer.parseInt(txtMinFilesize.getText()));
+		} catch (NumberFormatException nfe) {
+			logger.error(nfe.getMessage(), nfe);
+			txtMinFilesize.setText(String.valueOf(downloadSettings.getMinFileSize()));
+		}
+		downloadSettings.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
+		downloadSettings.setAllowedFilenameCharacters((AllowedFilenameCharacters)cmbAllowedFilenameChars.getSelectedItem());
+
+		settings.setCheckForUpdatesOnStart(chkUpdates.isSelected());
+
+		settings.setCheckClipboard(chkCheckClipboard.isSelected());
+		try {
+			int val = Integer.parseInt(txtWebExtensionPort.getText());
+			if (val < 0 || val > 65535) {
+				txtWebExtensionPort.setText(String.valueOf(settings.getWebExtensionPort()));
+			} else {
+				settings.setWebExtensionPort(val);
+			}
+		} catch (NumberFormatException nfe) {
+			logger.error("WebExtensionPort is not an integer: {}", txtWebExtensionPort.getText(), nfe);
+			txtWebExtensionPort.setText(String.valueOf(settings.getWebExtensionPort()));
+		}
+
+		settings.setDefragDBOnStart(chkDefragDB.isSelected());
+		settings.setBackupDbOnStart(chkBackupDB.isSelected());
+		try {
+			settings.setDefragMinFilesize(Integer.parseInt(txtDefragMinFilesize.getText()));
+		} catch (NumberFormatException nfe) {
+			logger.error(nfe.getMessage(), nfe);
+			txtDefragMinFilesize.setText(String.valueOf(settings.getDefragMinFilesize()));
+		}
+
+		settings.setThreadCount(sldThreadCount.getValue());
+
+		settings.setLogLevel((LogLevelSetting)cmbLogLevel.getSelectedItem());
+
+		HostsSettings hostsSettings = settings.getHostsSettings();
+
+		hostsSettings.setRulesBeforeClasses(chkRulesBefore.isSelected());
+		hostManager.reInitHosterList();
+
+		settingsManager.fireSettingsChanged();
+
+		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
 		settingsManager.addSettingsListener(this);
+
+		if (lookAndFeelChanged) {
+			SwingUtilities.updateComponentTreeUI(owner);
+		}
 	}
 
 	@Override
@@ -2152,5 +2233,21 @@ public class Settings extends JDialog implements ActionListener, ItemListener, C
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+	}
+
+	private int parseTimeoutSetting(JTextField textField, int defaultValue) {
+		try {
+			int val = Integer.parseInt(textField.getText());
+			if (val <= 1000) {
+				textField.setText(String.valueOf(defaultValue));
+				return defaultValue;
+			} else {
+				return val;
+			}
+		} catch (NumberFormatException nfe) {
+			logger.error(nfe.getMessage(), nfe);
+			textField.setText(String.valueOf(defaultValue));
+			return defaultValue;
+		}
 	}
 }

@@ -49,7 +49,7 @@ public class ClipboardObserver implements ClipboardOwner {
 	 */
 	public ClipboardObserver(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
-		if (settingsManager.isCheckClipboard()) {
+		if (settingsManager.getSettings().isCheckClipboard()) {
 			init();
 		}
 	}
@@ -153,7 +153,7 @@ public class ClipboardObserver implements ClipboardOwner {
 				if (ownContent) {
 					continue;
 				}
-				if (settingsManager.isCheckClipboard()) {
+				if (settingsManager.getSettings().isCheckClipboard()) {
 					checkClipboard();
 				}
 			}

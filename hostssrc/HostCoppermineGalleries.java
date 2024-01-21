@@ -47,13 +47,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.5
+ * @version 4.6
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.5";
+	public static final String VERSION = "4.6";
 
 	/**
 	 * Name dieser Klasse
@@ -105,8 +105,8 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		String strArchive = "(7z|arj|bz2|bzip2|cab|cpio|deb|dmg|gz|gzip|hfs|iso|lha|lzh|lzma|rar|rpm|split|swm|tar|taz|tbz|tbz2|tgz|tpz|wim|xar|z|zip)";
 		patternDisplayDirectLinkedArchiveSearch = Pattern.compile("^(https?://.*/|).*\\." + strArchive + "$");
 
-		updateBooleanOptionValue(NAME + ".recursive", false);
-		updateBooleanOptionValue(NAME + ".metaAlbumsEnabled", false);
+		updateBooleanOptionValue("recursive", false);
+		updateBooleanOptionValue("metaAlbumsEnabled", false);
 	}
 
 	@Override
@@ -415,9 +415,9 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == btnOK) {
 					recursive = cbRecursive.isSelected();
-					setBooleanOptionValue(NAME + ".recursive", recursive);
+					setBooleanOptionValue("recursive", recursive);
 					metaAlbumsEnabled = cbMetaAlbumsEnabled.isSelected();
-					setBooleanOptionValue(NAME + ".metaAlbumsEnabled", metaAlbumsEnabled);
+					setBooleanOptionValue("metaAlbumsEnabled", metaAlbumsEnabled);
 					deactivateOption.saveOption();
 					getSettingsManager().writeSettings(true);
 					dialog.dispose();
@@ -438,12 +438,12 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 	private void updateBooleanOptionValue(String option, boolean defaultvalue) {
 		boolean bVal = false;
 		try {
-			bVal = getSettingsManager().getBooleanValue(option);
-			if (option.equals(NAME + ".recursive")) {
+			bVal = getSettingsManager().getBooleanValue(NAME, option);
+			if (option.equals("recursive")) {
 				recursive = bVal;
-			} else if (option.equals(NAME + ".deactivated")) {
+			} else if (option.equals("deactivated")) {
 				deactivateOption.setDeactivated(bVal);
-			} else if (option.equals(NAME + ".metaAlbumsEnabled")) {
+			} else if (option.equals("metaAlbumsEnabled")) {
 				metaAlbumsEnabled = bVal;
 			}
 		} catch (Exception e2) {
@@ -453,7 +453,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			getSettingsManager().setOptionValue(option, value);
+			getSettingsManager().setHosterSettingValue(NAME, option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

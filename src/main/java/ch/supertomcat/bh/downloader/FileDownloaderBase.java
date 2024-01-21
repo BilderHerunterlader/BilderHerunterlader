@@ -177,9 +177,9 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 */
 	protected void failDownload(Pic pic, URLParseObject upo, boolean disableDownload, String errorMessage, Throwable e) {
 		if (disableDownload) {
-			pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
+			pic.setToMaxFailedCount(settingsManager.getDownloadsSettings().getMaxFailedCount());
 		} else {
-			pic.increaseFailedCount(settingsManager.getMaxFailedCount());
+			pic.increaseFailedCount(settingsManager.getDownloadsSettings().getMaxFailedCount());
 		}
 		if (errorMessage != null) {
 			changeStatusAndReturnSlot(pic, PicState.FAILED, 0, errorMessage);
@@ -202,7 +202,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param e Exception
 	 */
 	protected void failDownloadTemporaryOffline(Pic pic, HostFileTemporaryOfflineException e) {
-		pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
+		pic.setToMaxFailedCount(settingsManager.getDownloadsSettings().getMaxFailedCount());
 		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_TEMPORARY_OFFLINE, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());
@@ -216,7 +216,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @param e Exception
 	 */
 	protected void failDownloadFileNotExist(Pic pic, HostFileNotExistException e) {
-		pic.setToMaxFailedCount(settingsManager.getMaxFailedCount());
+		pic.setToMaxFailedCount(settingsManager.getDownloadsSettings().getMaxFailedCount());
 		changeStatusAndReturnSlot(pic, PicState.FAILED_FILE_NOT_EXIST, 0, e);
 		if (e != null) {
 			logger.debug("Download failed: {}", e.getMessage());

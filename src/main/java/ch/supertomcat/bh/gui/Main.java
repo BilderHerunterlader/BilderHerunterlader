@@ -48,6 +48,7 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -229,11 +230,11 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 		tab.addChangeListener(this);
 		this.setTitle(windowTitlePrefix + Localization.getString("Queue") + windowTitleSuffix);
 
-		SettingsManager sm = settingsManager;
-		if (sm.isSaveWindowSizePosition()) {
-			this.setSize(sm.getWindowWidth(), sm.getWindowHeight());
-			this.setLocation(sm.getWindowXPos(), sm.getWindowYPos());
-			this.setExtendedState(sm.getWindowState());
+		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+		if (mainWindowSettings.isSave()) {
+			this.setSize(mainWindowSettings.getWidth(), mainWindowSettings.getHeight());
+			this.setLocation(mainWindowSettings.getX(), mainWindowSettings.getY());
+			this.setExtendedState(mainWindowSettings.getState());
 		} else {
 			pack();
 			setLocationRelativeTo(null);
@@ -260,16 +261,18 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 
 	@Override
 	public void componentMoved(ComponentEvent e) {
-		settingsManager.setWindowXPos(this.getX());
-		settingsManager.setWindowYPos(this.getY());
+		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+		mainWindowSettings.setX(Main.this.getX());
+		mainWindowSettings.setY(Main.this.getY());
 		settingsManager.writeSettings(true);
 	}
 
 	@Override
 	public void componentResized(ComponentEvent e) {
-		settingsManager.setWindowWidth(this.getWidth());
-		settingsManager.setWindowHeight(this.getHeight());
-		settingsManager.setWindowState(this.getExtendedState());
+		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+		mainWindowSettings.setWidth(Main.this.getWidth());
+		mainWindowSettings.setHeight(Main.this.getHeight());
+		mainWindowSettings.setState(Main.this.getExtendedState());
 		settingsManager.writeSettings(true);
 	}
 

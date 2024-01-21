@@ -10,8 +10,8 @@ import ch.supertomcat.bh.pic.PicDownloadListener;
 import ch.supertomcat.bh.pic.PicDownloadResult;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.queue.QueueManagerBase;
 import ch.supertomcat.supertomcatutils.queue.QueueTask;
 import ch.supertomcat.supertomcatutils.queue.QueueTaskFactory;
@@ -82,14 +82,14 @@ public class DownloadQueueManager extends QueueManagerBase<PicDownloadListener, 
 	 * @param queueTaskFactory Queue Task Factory
 	 */
 	public DownloadQueueManager(DownloadQueueManagerRestrictions restrictions, SettingsManager settingsManager, QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory) {
-		super(queueTaskFactory, settingsManager.getConnections(), settingsManager.getConnectionsPerHost());
+		super(queueTaskFactory, settingsManager.getConnectionSettings().getMaxConnections(), settingsManager.getConnectionSettings().getMaxConnectionsPerHost());
 		this.restrictions = restrictions;
 		this.settingsManager = settingsManager;
 		this.settingsManager.addSettingsListener(new BHSettingsListener() {
 			@Override
 			public void settingsChanged() {
-				setMaxConnectionCount(settingsManager.getConnections());
-				setMaxConnectionCountPerHost(settingsManager.getConnectionsPerHost());
+				setMaxConnectionCount(settingsManager.getConnectionSettings().getMaxConnections());
+				setMaxConnectionCountPerHost(settingsManager.getConnectionSettings().getMaxConnectionsPerHost());
 			}
 
 			@Override

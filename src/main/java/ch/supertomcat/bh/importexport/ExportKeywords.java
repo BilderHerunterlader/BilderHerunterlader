@@ -50,7 +50,8 @@ public class ExportKeywords extends ImportExportBase {
 	public void exportKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
 		if (file != null) {
-			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.getDirectorySettings().setLastUsedExportPath(FileUtil.getPathFromFile(file));
+			settingsManager.writeSettings(true);
 			// export the keywords
 			exportKeywords(file.getAbsolutePath());
 		}

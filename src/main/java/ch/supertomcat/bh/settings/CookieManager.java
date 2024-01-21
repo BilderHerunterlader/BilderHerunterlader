@@ -11,6 +11,9 @@ import org.apache.hc.client5.http.cookie.CookieIdentityComparator;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
 
+import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
+import ch.supertomcat.bh.settings.xml.BrowserCookiesSetting;
+import ch.supertomcat.bh.settings.xml.ConnectionSettings;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookie;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
 import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookieStrategy;
@@ -101,38 +104,49 @@ public class CookieManager {
 	private <T> T getCookies(String url, CookiesFunction<T> cookiesFunction) {
 		Map<String, String> cookieStrategyOptions = new HashMap<>();
 
-		int browser = settingsManager.getCookiesFromBrowser();
-		switch (browser) {
-			case BrowserCookies.BROWSER_NO_COOKIES:
+		ConnectionSettings connectionSettings = settingsManager.getConnectionSettings();
+		BrowserCookiesMode browserCookiesMode = connectionSettings.getBrowserCookiesMode();
+		int browser;
+		switch (browserCookiesMode) {
+			case BROWSER_IE:
+				browser = BrowserCookies.BROWSER_IE;
 				break;
-			case BrowserCookies.BROWSER_IE:
-				break;
-			case BrowserCookies.BROWSER_FIREFOX:
-				if (settingsManager.isCookieFileFirefoxFixed()) {
-					String cookieFile = settingsManager.getCookieFileFirefox();
+			case BROWSER_FIREFOX:
+				browser = BrowserCookies.BROWSER_FIREFOX;
+				BrowserCookiesSetting firefoxBrowserCookiesSetting = connectionSettings.getBrowserCookiesFirefox();
+				if (firefoxBrowserCookiesSetting.isCookieFileFixed()) {
+					String cookieFile = firefoxBrowserCookiesSetting.getCookieFile();
 					cookieStrategyOptions.put(FirefoxCookieStrategy.COOKIE_FILE_FF_KEY, cookieFile);
 					cookieStrategyOptions.put(FirefoxCookieStrategy.COOKIE_FILE_FF_V3_KEY, cookieFile);
 				}
 				break;
-			case BrowserCookies.BROWSER_OPERA:
-				if (settingsManager.isCookieFileOperaFixed()) {
-					String cookieFile = settingsManager.getCookieFileOpera();
+			case BROWSER_OPERA:
+				browser = BrowserCookies.BROWSER_OPERA;
+				BrowserCookiesSetting operaBrowserCookiesSetting = connectionSettings.getBrowserCookiesOpera();
+				if (operaBrowserCookiesSetting.isCookieFileFixed()) {
+					String cookieFile = operaBrowserCookiesSetting.getCookieFile();
 					cookieStrategyOptions.put(OperaCookieStrategy.COOKIE_FILE_OPERA_KEY, cookieFile);
 				}
 				break;
-			case BrowserCookies.BROWSER_PALE_MOON:
-				if (settingsManager.isCookieFilePaleMoonFixed()) {
-					String cookieFile = settingsManager.getCookieFilePaleMoon();
+			case BROWSER_PALE_MOON:
+				browser = BrowserCookies.BROWSER_PALE_MOON;
+				BrowserCookiesSetting palemoonBrowserCookiesSetting = connectionSettings.getBrowserCookiesPaleMoon();
+				if (palemoonBrowserCookiesSetting.isCookieFileFixed()) {
+					String cookieFile = palemoonBrowserCookiesSetting.getCookieFile();
 					cookieStrategyOptions.put(PaleMoonCookieStrategy.COOKIE_FILE_PALE_MOON_KEY, cookieFile);
 				}
 				break;
-			case BrowserCookies.BROWSER_OPERA_NEW:
-				if (settingsManager.isCookieFileOperaNewFixed()) {
-					String cookieFile = settingsManager.getCookieFileOperaNew();
+			case BROWSER_OPERA_NEW:
+				browser = BrowserCookies.BROWSER_OPERA_NEW;
+				BrowserCookiesSetting operaNewBrowserCookiesSetting = connectionSettings.getBrowserCookiesOperaNew();
+				if (operaNewBrowserCookiesSetting.isCookieFileFixed()) {
+					String cookieFile = operaNewBrowserCookiesSetting.getCookieFile();
 					cookieStrategyOptions.put(OperaNewCookieStrategy.COOKIE_FILE_OPERA_NEW_KEY, cookieFile);
 				}
 				break;
+			case NO_COOKIES:
 			default:
+				browser = BrowserCookies.BROWSER_NO_COOKIES;
 				break;
 		}
 
@@ -145,8 +159,9 @@ public class CookieManager {
 	 * @return Cookie-File-Path
 	 */
 	public String getCookieFileForFirefox() {
-		if (settingsManager.isCookieFileFirefoxFixed()) {
-			return settingsManager.getCookieFileFirefox();
+		BrowserCookiesSetting browserCookiesSetting = settingsManager.getConnectionSettings().getBrowserCookiesFirefox();
+		if (browserCookiesSetting.isCookieFileFixed()) {
+			return browserCookiesSetting.getCookieFile();
 		}
 
 		return FirefoxCookies.getPathForFirefox() + "cookies.txt";
@@ -158,8 +173,9 @@ public class CookieManager {
 	 * @return Cookie-File-Path
 	 */
 	public String getCookieFileForFirefox3() {
-		if (settingsManager.isCookieFileFirefoxFixed()) {
-			return settingsManager.getCookieFileFirefox();
+		BrowserCookiesSetting browserCookiesSetting = settingsManager.getConnectionSettings().getBrowserCookiesFirefox();
+		if (browserCookiesSetting.isCookieFileFixed()) {
+			return browserCookiesSetting.getCookieFile();
 		}
 
 		return FirefoxCookies.getPathForFirefox() + "cookies.sqlite";
@@ -171,8 +187,9 @@ public class CookieManager {
 	 * @return Cookie-File-Path
 	 */
 	public String getCookieFileForPaleMoon() {
-		if (settingsManager.isCookieFilePaleMoonFixed()) {
-			return settingsManager.getCookieFilePaleMoon();
+		BrowserCookiesSetting browserCookiesSetting = settingsManager.getConnectionSettings().getBrowserCookiesPaleMoon();
+		if (browserCookiesSetting.isCookieFileFixed()) {
+			return browserCookiesSetting.getCookieFile();
 		}
 
 		return PaleMoonCookies.getPathForPaleMoon() + "cookies.sqlite";
@@ -185,8 +202,9 @@ public class CookieManager {
 	 * @return Cookie Pfad
 	 */
 	public String getCookieFileForOpera(boolean checkExist) {
-		if (settingsManager.isCookieFileOperaFixed()) {
-			return settingsManager.getCookieFileOpera();
+		BrowserCookiesSetting browserCookiesSetting = settingsManager.getConnectionSettings().getBrowserCookiesOpera();
+		if (browserCookiesSetting.isCookieFileFixed()) {
+			return browserCookiesSetting.getCookieFile();
 		}
 
 		return OperaCookies.getCookieFileForOpera(checkExist);
@@ -198,8 +216,9 @@ public class CookieManager {
 	 * @return Cookie Pfad
 	 */
 	public String getCookieFileForOperaNew() {
-		if (settingsManager.isCookieFileOperaNewFixed()) {
-			return settingsManager.getCookieFileOperaNew();
+		BrowserCookiesSetting browserCookiesSetting = settingsManager.getConnectionSettings().getBrowserCookiesOperaNew();
+		if (browserCookiesSetting.isCookieFileFixed()) {
+			return browserCookiesSetting.getCookieFile();
 		}
 
 		return OperaNewCookies.getCookieFileForOpera();

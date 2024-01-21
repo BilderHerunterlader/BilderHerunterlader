@@ -55,7 +55,8 @@ public class ImportKeywords extends ImportExportBase {
 	public void importKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
 		if (file != null) {
-			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
+			settingsManager.writeSettings(true);
 			importKeywords(file.getAbsolutePath());
 		}
 	}

@@ -37,13 +37,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 3.2
+ * @version 3.3
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.2";
+	public static final String VERSION = "3.3";
 
 	/**
 	 * Name dieser Klasse
@@ -77,10 +77,10 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		regexImg.setReplace("$1$2");
 
 		try {
-			recursive = getBooleanOptionValue(NAME + ".recursive");
+			recursive = getBooleanOptionValue("recursive");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".recursive", false);
+				setBooleanOptionValue("recursive", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -207,7 +207,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 			public void actionPerformed(ActionEvent e) {
 				if (e.getSource() == btnOK) {
 					recursive = cbRecursive.isSelected();
-					setBooleanOptionValue(NAME + ".recursive", recursive);
+					setBooleanOptionValue("recursive", recursive);
 					deactivateOption.saveOption();
 					getSettingsManager().writeSettings(true);
 					dialog.dispose();
@@ -226,12 +226,12 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 	}
 
 	private boolean getBooleanOptionValue(String name) throws Exception {
-		return getSettingsManager().getBooleanValue(name);
+		return getSettingsManager().getBooleanValue(NAME, name);
 	}
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			getSettingsManager().setOptionValue(option, value);
+			getSettingsManager().setHosterSettingValue(NAME, option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

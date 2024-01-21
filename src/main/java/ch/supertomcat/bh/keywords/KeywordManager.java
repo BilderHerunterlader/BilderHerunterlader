@@ -21,21 +21,6 @@ public class KeywordManager {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Only exact matches
-	 */
-	public static final int MATCH_ONLY_EXACT = 0;
-
-	/**
-	 * All keywords found, but strict search
-	 */
-	public static final int MATCH_ALL_STRICT = 1;
-
-	/**
-	 * All keywords found
-	 */
-	public static final int MATCH_ALL = 2;
-
-	/**
 	 * Keywords
 	 */
 	private List<Keyword> keywords = new ArrayList<>();
@@ -53,8 +38,8 @@ public class KeywordManager {
 	 * @param settingsManager Settings Manager
 	 */
 	public KeywordManager(SettingsManager settingsManager) {
-		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.isBackupDbOnStart(), settingsManager
-				.isDefragDBOnStart(), settingsManager.getDefragMinFilesize());
+		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
+				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 		List<Keyword> keywordsFromDB = keywordsSQLiteDB.getAllEntries();
 		keywords.addAll(keywordsFromDB);
 	}

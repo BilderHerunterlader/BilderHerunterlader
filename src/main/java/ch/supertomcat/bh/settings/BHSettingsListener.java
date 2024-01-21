@@ -1,5 +1,6 @@
 package ch.supertomcat.bh.settings;
 
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.settings.SettingsListener;
 
 /**

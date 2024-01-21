@@ -17,25 +17,20 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
+import ch.supertomcat.bh.settings.xml.ConnectionSettings;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.xml.ProxyMode;
+import ch.supertomcat.bh.settings.xml.ProxySettings;
+
 /**
  * Class which provides method to get a preconfigured HttpClient, so that
  * in the hole program the proxysettings can be used.
  */
 public class ProxyManager {
 	/**
-	 * Direct connection
-	 */
-	public static final int DIRECT_CONNECTION = 0;
-
-	/**
-	 * Connection over a proxy
-	 */
-	public static final int HTTP_PROXY = 1;
-
-	/**
 	 * Mode
 	 */
-	private int mode = ProxyManager.DIRECT_CONNECTION;
+	private ProxyMode mode = ProxyMode.DIRECT_CONNECTION;
 
 	/**
 	 * Name
@@ -111,9 +106,10 @@ public class ProxyManager {
 	 * @return Connection Config
 	 */
 	private ConnectionConfig createConnectionConfig() {
+		ConnectionSettings conSettings = settingsManager.getConnectionSettings();
 		ConnectionConfig.Builder defaultConnectionConfigBuilder = ConnectionConfig.custom();
-		defaultConnectionConfigBuilder.setSocketTimeout(Timeout.ofMilliseconds(settingsManager.getTimeout()));
-		defaultConnectionConfigBuilder.setConnectTimeout(Timeout.ofMilliseconds(settingsManager.getTimeout()));
+		defaultConnectionConfigBuilder.setSocketTimeout(Timeout.ofMilliseconds(conSettings.getSocketTimeout()));
+		defaultConnectionConfigBuilder.setConnectTimeout(Timeout.ofMilliseconds(conSettings.getConnectTimeout()));
 		return defaultConnectionConfigBuilder.build();
 	}
 
@@ -124,13 +120,14 @@ public class ProxyManager {
 	 */
 	public RequestConfig.Builder getDefaultRequestConfigBuilder() {
 		RequestConfig.Builder requestConfigBuilder = RequestConfig.custom();
-		requestConfigBuilder.setConnectionRequestTimeout(Timeout.ofMilliseconds(settingsManager.getTimeout()));
+		ConnectionSettings conSettings = settingsManager.getConnectionSettings();
+		requestConfigBuilder.setConnectionRequestTimeout(Timeout.ofMilliseconds(conSettings.getConnectionRequestTimeout()));
 		requestConfigBuilder.setCookieSpec(StandardCookieSpec.RELAXED);
 		return requestConfigBuilder;
 	}
 
 	private void configureHttpClientBuilder(HttpClientBuilder clientBuilder) {
-		if (mode != ProxyManager.DIRECT_CONNECTION) {
+		if (mode != ProxyMode.DIRECT_CONNECTION) {
 			HttpHost proxy = new HttpHost(proxyname, proxyport);
 			if (auth) {
 				AuthScope authScope = new AuthScope(proxyname, proxyport);
@@ -200,12 +197,14 @@ public class ProxyManager {
 	 * Save the settings
 	 */
 	public void writeToSettings() {
-		settingsManager.setProxymode(mode);
-		settingsManager.setProxyname(proxyname);
-		settingsManager.setProxyport(proxyport);
-		settingsManager.setProxyuser(proxyuser);
-		settingsManager.setProxypassword(proxypassword);
-		settingsManager.setProxyauth(auth);
+		ConnectionSettings conSettings = settingsManager.getConnectionSettings();
+		ProxySettings proxySettings = conSettings.getProxy();
+		proxySettings.setMode(mode);
+		proxySettings.setHost(proxyname);
+		proxySettings.setPort(proxyport);
+		proxySettings.setUser(proxyuser);
+		proxySettings.setPassword(proxypassword);
+		proxySettings.setAuth(auth);
 		settingsManager.writeSettings(true);
 	}
 
@@ -213,12 +212,14 @@ public class ProxyManager {
 	 * Read the settings
 	 */
 	public void readFromSettings() {
-		mode = settingsManager.getProxymode();
-		proxyname = settingsManager.getProxyname();
-		proxyport = settingsManager.getProxyport();
-		proxyuser = settingsManager.getProxyuser();
-		proxypassword = settingsManager.getProxypassword();
-		auth = settingsManager.isProxyauth();
+		ConnectionSettings conSettings = settingsManager.getConnectionSettings();
+		ProxySettings proxySettings = conSettings.getProxy();
+		mode = proxySettings.getMode();
+		proxyname = proxySettings.getHost();
+		proxyport = proxySettings.getPort();
+		proxyuser = proxySettings.getUser();
+		proxypassword = proxySettings.getPassword();
+		auth = proxySettings.isAuth();
 	}
 
 	/**
@@ -244,7 +245,7 @@ public class ProxyManager {
 	 * 
 	 * @return mode
 	 */
-	public int getMode() {
+	public ProxyMode getMode() {
 		return mode;
 	}
 
@@ -253,7 +254,7 @@ public class ProxyManager {
 	 * 
 	 * @param mode mode
 	 */
-	public void setMode(int mode) {
+	public void setMode(ProxyMode mode) {
 		this.mode = mode;
 	}
 

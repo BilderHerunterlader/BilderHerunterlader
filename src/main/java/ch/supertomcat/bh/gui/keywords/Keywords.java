@@ -355,14 +355,14 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		pnlP.add(pnlInfo, BorderLayout.NORTH);
 		pnlP.add(pnlFilter, BorderLayout.CENTER);
 		add(pnlP, BorderLayout.NORTH);
-		boolean filterEnabled = settingsManager.isKeywordFilterEnabled();
+		boolean filterEnabled = settingsManager.getKeywordsSettings().isFilterEnabled();
 		btnFilter.setSelected(filterEnabled);
 		pnlFilter.setVisible(filterEnabled);
 		btnFilter.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				pnlFilter.setVisible(btnFilter.isSelected());
-				settingsManager.setKeywordFilterEnabled(btnFilter.isSelected());
+				settingsManager.getKeywordsSettings().setFilterEnabled(btnFilter.isSelected());
 				settingsManager.writeSettings(true);
 			}
 		});

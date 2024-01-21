@@ -50,13 +50,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 3.3
+ * @version 3.4
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.3";
+	public static final String VERSION = "3.4";
 
 	/**
 	 * Name dieser Klasse
@@ -102,17 +102,17 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 		patternPhpBBThread = Pattern.compile("^((https?://([^/]{1,}/){1,}|)viewtopic\\.php\\?t=([0-9]+).*?)(&start=([0-9]+))");
 
 		try {
-			maxPages = getSettingsManager().getIntValue(NAME + ".maxPages");
+			maxPages = getSettingsManager().getIntValue(NAME, "maxPages");
 		} catch (Exception e) {
 			try {
-				getSettingsManager().setOptionValue(NAME + ".maxPages", maxPages);
+				getSettingsManager().setHosterSettingValue(NAME, "maxPages", maxPages);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
-		updateBooleanOptionValue(NAME + ".vBulletin", false);
-		updateBooleanOptionValue(NAME + ".phpBB", false);
+		updateBooleanOptionValue("vBulletin", false);
+		updateBooleanOptionValue("phpBB", false);
 	}
 
 	@Override
@@ -335,12 +335,12 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 					bVBulletin = cbVBulletin.isSelected();
 					bPhpBB = cbPhpBB.isSelected();
 					try {
-						getSettingsManager().setOptionValue(NAME + ".maxPages", maxPages);
+						getSettingsManager().setHosterSettingValue(NAME, "maxPages", maxPages);
 					} catch (Exception e1) {
 						logger.error(e1.getMessage(), e1);
 					}
-					setBooleanOptionValue(NAME + ".vBulletin", bVBulletin);
-					setBooleanOptionValue(NAME + ".phpBB", bPhpBB);
+					setBooleanOptionValue("vBulletin", bVBulletin);
+					setBooleanOptionValue("phpBB", bPhpBB);
 					deactivateOption.saveOption();
 					getSettingsManager().writeSettings(true);
 					dialog.dispose();
@@ -361,12 +361,12 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 	private void updateBooleanOptionValue(String option, boolean defaultvalue) {
 		boolean bVal = false;
 		try {
-			bVal = getSettingsManager().getBooleanValue(option);
-			if (option.equals(NAME + ".vBulletin")) {
+			bVal = getSettingsManager().getBooleanValue(NAME, option);
+			if (option.equals("vBulletin")) {
 				bVBulletin = bVal;
-			} else if (option.equals(NAME + ".phpBB")) {
+			} else if (option.equals("phpBB")) {
 				bPhpBB = bVal;
-			} else if (option.equals(NAME + ".deactivated")) {
+			} else if (option.equals("deactivated")) {
 				deactivateOption.setDeactivated(bVal);
 			}
 		} catch (Exception e2) {
@@ -376,7 +376,7 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 
 	private void setBooleanOptionValue(String option, boolean value) {
 		try {
-			getSettingsManager().setOptionValue(option, value);
+			getSettingsManager().setHosterSettingValue(NAME, option, value);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

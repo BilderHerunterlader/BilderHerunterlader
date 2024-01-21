@@ -185,7 +185,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 		}
 
 		if (localFiles) {
-			chkDeleteNoKeyword.setSelected(settingsManager.isDeleteNoKeyword());
+			chkDeleteNoKeyword.setSelected(settingsManager.getKeywordsSettings().isDeleteNoKeyword());
 			chkDeleteNoKeyword.setVisible(true);
 		} else {
 			chkDeleteNoKeyword.setVisible(false);
@@ -196,7 +196,7 @@ public class AdderKeywordSelectorFilename extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				cancelled = false;
 				if (localFiles) {
-					settingsManager.setDeleteNoKeyword(chkDeleteNoKeyword.isSelected());
+					settingsManager.getKeywordsSettings().setDeleteNoKeyword(chkDeleteNoKeyword.isSelected());
 					settingsManager.writeSettings(true);
 				}
 				dispose();

@@ -70,9 +70,9 @@ public abstract class ImportExportBase {
 			}
 		};
 		if (save) {
-			return FileDialogUtil.showFileSaveDialog(parentComponent, settingsManager.getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileSaveDialog(parentComponent, settingsManager.getDirectorySettings().getLastUsedImportPath(), filter);
 		} else {
-			return FileDialogUtil.showFileOpenDialog(parentComponent, settingsManager.getLastUsedImportDialogPath(), filter);
+			return FileDialogUtil.showFileOpenDialog(parentComponent, settingsManager.getDirectorySettings().getLastUsedImportPath(), filter);
 		}
 	}
 

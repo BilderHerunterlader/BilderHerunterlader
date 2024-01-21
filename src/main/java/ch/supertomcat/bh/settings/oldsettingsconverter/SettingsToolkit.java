@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.settings;
+package ch.supertomcat.bh.settings.oldsettingsconverter;
 
 import java.util.HashSet;
 import java.util.Set;

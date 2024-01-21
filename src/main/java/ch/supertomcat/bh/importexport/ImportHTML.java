@@ -81,7 +81,8 @@ public class ImportHTML extends AdderImportBase {
 			mainWindowAccess.addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("ImportingHTMLFile") + "...");
-			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
+			settingsManager.writeSettings(true);
 
 			try (FileInputStream in = new FileInputStream(file)) {
 				// Parse the inputstream by tidy

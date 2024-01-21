@@ -183,8 +183,8 @@ public class DirectoryLog extends JPanel {
 		popupMenu.add(menuItemOpenDirectory);
 		menuItemOpenDirectory.addActionListener(e -> actionOpenDirectories());
 
-		this.txtDirCount = new JTextField(String.valueOf(settingsManager.getDirectoryLogDirCount()), 5);
-		this.chkFilterOnlyExistingDirs = new JCheckBox(Localization.getString("OnlyExistingDirectories"), settingsManager.isDirectoryLogOnlyExisting());
+		this.txtDirCount = new JTextField(String.valueOf(settingsManager.getGUISettings().getDirectoryLogDirCount()), 5);
+		this.chkFilterOnlyExistingDirs = new JCheckBox(Localization.getString("OnlyExistingDirectories"), settingsManager.getGUISettings().isDirectoryLogOnlyExisting());
 
 		TitledBorder brdFilter = BorderFactory.createTitledBorder(Localization.getString("Filter"));
 		pnlFilter.setBorder(brdFilter);
@@ -274,14 +274,14 @@ public class DirectoryLog extends JPanel {
 		}
 		initialized = true;
 
-		boolean filterEnabled = settingsManager.isDirectoryLogFilterEnabled();
+		boolean filterEnabled = settingsManager.getGUISettings().isDirectoryLogFilterEnabled();
 		btnFilter.setSelected(filterEnabled);
 		pnlFilter.setVisible(filterEnabled);
 		btnFilter.addItemListener(new ItemListener() {
 			@Override
 			public void itemStateChanged(ItemEvent e) {
 				pnlFilter.setVisible(btnFilter.isSelected());
-				settingsManager.setDirectoryLogFilterEnabled(btnFilter.isSelected());
+				settingsManager.getGUISettings().setDirectoryLogFilterEnabled(btnFilter.isSelected());
 				settingsManager.writeSettings(true);
 			}
 		});
@@ -315,11 +315,11 @@ public class DirectoryLog extends JPanel {
 	private void reloadLogs() {
 		try {
 			int dirCount = Integer.parseInt(txtDirCount.getText());
-			settingsManager.setDirectoryLogDirCount(dirCount);
+			settingsManager.getGUISettings().setDirectoryLogDirCount(dirCount);
 		} catch (NumberFormatException nfe) {
-			txtDirCount.setText(String.valueOf(settingsManager.getDirectoryLogDirCount()));
+			txtDirCount.setText(String.valueOf(settingsManager.getGUISettings().getDirectoryLogDirCount()));
 		}
-		settingsManager.setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
+		settingsManager.getGUISettings().setDirectoryLogOnlyExisting(chkFilterOnlyExistingDirs.isSelected());
 		settingsManager.writeSettings(true);
 		readLogs();
 	}
@@ -357,7 +357,7 @@ public class DirectoryLog extends JPanel {
 				List<DirectoryLogObject> dirs = logManager.readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
 				if (dirs != null) {
 
-					int maxDirs = settingsManager.getDirectoryLogDirCount();
+					int maxDirs = settingsManager.getGUISettings().getDirectoryLogDirCount();
 
 					int maxSize = dirs.size() < maxDirs ? dirs.size() : maxDirs;
 

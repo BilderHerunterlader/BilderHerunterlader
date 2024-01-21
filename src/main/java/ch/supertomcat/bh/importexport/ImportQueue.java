@@ -67,7 +67,8 @@ public class ImportQueue extends ImportExportBase {
 
 		File file = getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
-			settingsManager.setLastUsedImportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
+			settingsManager.writeSettings(true);
 			// read the file
 			read(file);
 		}

@@ -34,8 +34,8 @@ import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
@@ -79,7 +79,7 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public LogManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
-		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
+		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
 
 		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
 		if (!folder.exists()) {
@@ -141,7 +141,7 @@ public class LogManager implements BHSettingsListener {
 	public int getCurrentLogFileIndexForArray(String[] logFiles) {
 		if (logFiles != null) {
 			for (int i = 0; i < logFiles.length; i++) {
-				if (logFiles[i].equals(settingsManager.getCurrentDownloadLogFile())) {
+				if (logFiles[i].equals(settingsManager.getDownloadsSettings().getCurrentDownloadLogFile())) {
 					return i;
 				}
 			}
@@ -245,7 +245,7 @@ public class LogManager implements BHSettingsListener {
 			 * have enough to do.
 			 */
 
-			int threadCount = settingsManager.getThreadCount();
+			int threadCount = settingsManager.getSettings().getThreadCount();
 
 			if (threadCount < 1) {
 				threadCount = 1;
@@ -581,7 +581,7 @@ public class LogManager implements BHSettingsListener {
 
 	@Override
 	public void settingsChanged() {
-		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getCurrentDownloadLogFile();
+		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
 		if (!logFile.equals(currentLogFile)) {
 			logFile = currentLogFile;
 			for (ILogManagerListener listener : listeners) {

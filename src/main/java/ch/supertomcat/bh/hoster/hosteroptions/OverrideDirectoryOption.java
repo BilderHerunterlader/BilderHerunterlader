@@ -44,28 +44,28 @@ public class OverrideDirectoryOption {
 		this.pathOverrideVal = settingsManager.getSavePath();
 
 		try {
-			pathOverride = settingsManager.getBooleanValue(optionPrefix + ".pathOverride");
+			pathOverride = settingsManager.getBooleanValue(optionPrefix, "pathOverride");
 		} catch (Exception e) {
 			try {
-				settingsManager.setOptionValue(optionPrefix + ".pathOverride", false);
+				settingsManager.setHosterSettingValue(optionPrefix, "pathOverride", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 		try {
-			pathOverrideSubdirsAllowed = settingsManager.getBooleanValue(optionPrefix + ".pathOverrideSubdirsAllowed");
+			pathOverrideSubdirsAllowed = settingsManager.getBooleanValue(optionPrefix, "pathOverrideSubdirsAllowed");
 		} catch (Exception e) {
 			try {
-				settingsManager.setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", true);
+				settingsManager.setHosterSettingValue(optionPrefix, "pathOverrideSubdirsAllowed", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 		try {
-			pathOverrideVal = settingsManager.getStringValue(optionPrefix + ".pathOverrideVal");
+			pathOverrideVal = settingsManager.getStringValue(optionPrefix, "pathOverrideVal");
 		} catch (Exception e) {
 			try {
-				settingsManager.setOptionValue(optionPrefix + ".pathOverrideVal", pathOverrideVal);
+				settingsManager.setHosterSettingValue(optionPrefix, "pathOverrideVal", pathOverrideVal);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -140,17 +140,17 @@ public class OverrideDirectoryOption {
 	 */
 	public void saveOptions() {
 		try {
-			settingsManager.setOptionValue(optionPrefix + ".pathOverride", this.pathOverride);
+			settingsManager.setHosterSettingValue(optionPrefix, "pathOverride", this.pathOverride);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
 		try {
-			settingsManager.setOptionValue(optionPrefix + ".pathOverrideSubdirsAllowed", this.pathOverrideSubdirsAllowed);
+			settingsManager.setHosterSettingValue(optionPrefix, "pathOverrideSubdirsAllowed", this.pathOverrideSubdirsAllowed);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}
 		try {
-			settingsManager.setOptionValue(optionPrefix + ".pathOverrideVal", this.pathOverrideVal);
+			settingsManager.setHosterSettingValue(optionPrefix, "pathOverrideVal", this.pathOverrideVal);
 		} catch (Exception e1) {
 			logger.error(e1.getMessage(), e1);
 		}

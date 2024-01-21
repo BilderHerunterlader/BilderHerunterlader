@@ -91,8 +91,8 @@ public class QueueManager implements IPicListener {
 		this.logManager = logManager;
 		this.settingsManager = settingsManager;
 		this.fileDownloaderFactory = fileDownloaderFactory;
-		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.isBackupDbOnStart(), settingsManager
-				.isDefragDBOnStart(), settingsManager.getDefragMinFilesize());
+		this.queueSQLiteDB = new QueueSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Downloads.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
+				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 		List<Pic> picsFromDB = queueSQLiteDB.getAllEntries();
 		for (Pic pic : picsFromDB) {
 			if (pic.getStatus() != PicState.COMPLETE) {
@@ -129,7 +129,7 @@ public class QueueManager implements IPicListener {
 			public void queueEmpty() {
 				// If the queue is now empty, it is a good time to commit the database
 				saveDatabase();
-				if (!isDownloadsStopped() && settingsManager.isAutoRetryAfterDownloadsComplete()) {
+				if (!isDownloadsStopped() && settingsManager.getDownloadsSettings().isAutoRetryAfterDownloadsComplete()) {
 					startDownload();
 				}
 			}
@@ -233,7 +233,7 @@ public class QueueManager implements IPicListener {
 			};
 			executeInEventQueueThread(r);
 		}
-		if (settingsManager.isAutoStartDownloads()) {
+		if (settingsManager.getDownloadsSettings().isAutoStartDownloads()) {
 			startDownload(pic);
 		}
 	}
@@ -264,7 +264,7 @@ public class QueueManager implements IPicListener {
 			};
 			executeInEventQueueThread(r);
 		}
-		if (settingsManager.isAutoStartDownloads()) {
+		if (settingsManager.getDownloadsSettings().isAutoStartDownloads()) {
 			startDownload(picsAdded);
 		}
 	}
@@ -582,7 +582,7 @@ public class QueueManager implements IPicListener {
 			updatePic(pic);
 		}
 		if (pic.getStatus() == PicState.COMPLETE) {
-			if (settingsManager.isSaveLogs()) {
+			if (settingsManager.getDownloadsSettings().isSaveLogs()) {
 				logManager.addPicToLog(pic);
 			}
 			settingsManager.increaseOverallDownloadedFiles(1);

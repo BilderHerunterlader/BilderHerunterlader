@@ -555,7 +555,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			t.start();
 		} else if (e.getSource() == btnWebsite) {
 			String url;
-			if (settingsManager.getLanguage().equals("de_DE")) {
+			if (settingsManager.getGUISettings().getLanguage().equals("de_DE")) {
 				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=de";
 			} else {
 				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=en";
@@ -571,7 +571,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			}
 		} else if (e.getSource() == btnChanges) {
 			String message = changelogDE;
-			if ("EN".equals(settingsManager.getLanguage())) {
+			if ("EN".equals(settingsManager.getGUISettings().getLanguage())) {
 				message = changelogEN;
 			}
 			message = message.replaceAll("\\\\n", "\n");

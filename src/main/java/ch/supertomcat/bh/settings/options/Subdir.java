@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.settings.options;
 
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.SubDirSetting;
 
 /**
  * The user can define subdirectory were the files are
@@ -8,31 +9,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
  * moved, when the filesize are in the defined range.
  */
 public class Subdir {
-	/**
-	 * Only the lower component of the resolution is checked
-	 */
-	public static final int RESOLUTION_ONLY_LOWER = 0;
-
-	/**
-	 * Only the higher component of the resolution is checked
-	 */
-	public static final int RESOLUTION_ONLY_HIGHER = 1;
-
-	/**
-	 * Only width is checked
-	 */
-	public static final int RESOLUTION_ONLY_WIDTH = 2;
-
-	/**
-	 * Only height is checked
-	 */
-	public static final int RESOLUTION_ONLY_HEIGHT = 3;
-
-	/**
-	 * Both
-	 */
-	public static final int RESOLUTION_BOTH = 4;
-
 	/**
 	 * WIDTH_IS_HIGHER
 	 */
@@ -91,14 +67,11 @@ public class Subdir {
 	/**
 	 * Constructor
 	 * 
-	 * @param subdirName Name of the subdirectory
-	 * @param minSize Min Filesize
-	 * @param maxSize Max Filesize
+	 * @param subDirSetting Sub Dir Setting
 	 */
-	public Subdir(String subdirName, long minSize, long maxSize) {
-		this.subdirName = subdirName;
-		this.minSize = minSize;
-		this.maxSize = maxSize;
+	public Subdir(SubDirSetting subDirSetting) {
+		this(subDirSetting.getName(), subDirSetting.getMin(), subDirSetting.getMax(), subDirSetting.getResMinWidth(), subDirSetting.getResMinHeight(), subDirSetting.getResMaxWidth(), subDirSetting
+				.getResMaxHeight());
 	}
 
 	/**
@@ -347,7 +320,7 @@ public class Subdir {
 			 * if the file is an image, resolution matters, so we have to look
 			 * for the way how to check the resolution.
 			 */
-			switch (settingsManager.getSubdirsResolutionMode()) {
+			switch (settingsManager.getDirectorySettings().getSubDirsResolutionMode()) {
 				case RESOLUTION_ONLY_LOWER:
 					switch (lower) {
 						case WIDTH_IS_LOWER:

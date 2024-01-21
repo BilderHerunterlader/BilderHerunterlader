@@ -491,8 +491,8 @@ public class Queue extends JPanel {
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
-						long overallDownloadedFiles = settingsManager.getOverallDownloadedFiles();
-						String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getOverallDownloadedBytes(), settingsManager.getSizeView());
+						long overallDownloadedFiles = settingsManager.getDownloadsSettings().getOverallDownloadedFiles();
+						String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getDownloadsSettings().getOverallDownloadedBytes(), settingsManager.getSizeView());
 						int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
 						String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), settingsManager.getSizeView());
 						String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getTotalDownloadBitrate());
@@ -1032,8 +1032,8 @@ public class Queue extends JPanel {
 	private void updateStatus() {
 		int openDownloadSlots = downloadQueueManager.getOpenSlots();
 		int connectionCount = downloadQueueManager.getMaxConnectionCount();
-		long overallDownloadedFiles = settingsManager.getOverallDownloadedFiles();
-		String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getOverallDownloadedBytes(), settingsManager.getSizeView());
+		long overallDownloadedFiles = settingsManager.getDownloadsSettings().getOverallDownloadedFiles();
+		String overallDownloadedBytes = UnitFormatUtil.getSizeString(settingsManager.getDownloadsSettings().getOverallDownloadedBytes(), settingsManager.getSizeView());
 		int sessionDownloadedFiles = downloadQueueManager.getSessionDownloadedFiles();
 		String sessionDownloadedBytes = UnitFormatUtil.getSizeString(downloadQueueManager.getSessionDownloadedBytes(), settingsManager.getSizeView());
 		String downloadRate = UnitFormatUtil.getBitrateString(downloadQueueManager.getTotalDownloadBitrate());

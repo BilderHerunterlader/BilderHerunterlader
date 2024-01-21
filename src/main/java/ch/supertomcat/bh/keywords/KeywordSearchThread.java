@@ -14,6 +14,7 @@ import ch.supertomcat.bh.gui.adder.AdderKeywordSelectorFilename;
 import ch.supertomcat.bh.gui.adder.AdderKeywordSelectorTitle;
 import ch.supertomcat.bh.keywords.KeywordMatch.KeywordMatchType;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.KeywordMatchMode;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**
@@ -126,7 +127,7 @@ public class KeywordSearchThread extends Thread {
 		this.localFiles = localFiles;
 		this.keywordManager = keywordManager;
 		this.settingsManager = settingsManager;
-		this.displayKeywordsWhenNoMatches = this.settingsManager.isDisplayKeywordsWhenNoMatches();
+		this.displayKeywordsWhenNoMatches = this.settingsManager.getKeywordsSettings().isDisplayKeywordsWhenNoMatches();
 		this.setName("Keyword-Search-Thread-" + this.getId());
 	}
 
@@ -178,11 +179,11 @@ public class KeywordSearchThread extends Thread {
 		progressBarChanged(0, keywords.size() - 1, 0); // configure progressbar
 		List<KeywordMatch> foundKeywords = new ArrayList<>();
 
-		int keywordMatchMode = settingsManager.getKeywordMatchMode();
+		KeywordMatchMode keywordMatchMode = settingsManager.getKeywordsSettings().getMatchMode();
 		// Check if we have to match only exact
-		boolean exactOnly = keywordMatchMode == KeywordManager.MATCH_ONLY_EXACT;
+		boolean exactOnly = keywordMatchMode == KeywordMatchMode.MATCH_ONLY_EXACT;
 		// Check if we have to do a strict search
-		boolean strict = keywordMatchMode == KeywordManager.MATCH_ALL_STRICT;
+		boolean strict = keywordMatchMode == KeywordMatchMode.MATCH_ALL_STRICT;
 
 		String str = search.toUpperCase(); // Bring the searchstring to UpperCase
 		int loopCount = 0; // to set the value of the progressbar

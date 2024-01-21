@@ -11,6 +11,7 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicProgress;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.ProgressDisplayMode;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 
 /**
@@ -76,14 +77,14 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 				long bytesTotal = progress.getBytesTotal();
 				long bytesDownloaded = progress.getBytesDownloaded();
 
-				int progressView = settingsManager.getProgessView();
-				if (progressView == SettingsManager.NOPROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
+				ProgressDisplayMode progressDisplayMode = settingsManager.getGUISettings().getProgressDisplayMode();
+				if (progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_PERCENT || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_SIZE) {
 					// if the user don't want to see the visual progress, set the value to 0
 					bytesDownloaded = 0;
 				}
 
 				String rateString;
-				if (settingsManager.isDownloadRate()) {
+				if (settingsManager.getGUISettings().isDownloadRate()) {
 					rateString = UnitFormatUtil.getBitrateString(progress.getRate());
 				} else {
 					rateString = "";
@@ -99,9 +100,9 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 
 				String progressString;
 				if (bytesTotal >= bytesDownloaded) {
-					if (progressView == SettingsManager.PROGRESSBAR_PERCENT || progressView == SettingsManager.NOPROGRESSBAR_PERCENT) {
+					if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_PERCENT || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_PERCENT) {
 						progressString = String.format(PROGRESS_PERCENT_STRING_FORMAT, urlIndexString, progress.getPercent(), rateString);
-					} else if (progressView == SettingsManager.PROGRESSBAR_SIZE || progressView == SettingsManager.NOPROGRESSBAR_SIZE) {
+					} else if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_SIZE || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_SIZE) {
 						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
 						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
 					} else {

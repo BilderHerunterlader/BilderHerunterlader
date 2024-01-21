@@ -325,7 +325,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 		pic.setSize(size);
 
-		if (size > 0 && size < settingsManager.getMinFilesize()) {
+		if (size > 0 && size < settingsManager.getDownloadsSettings().getMinFileSize()) {
 			/*
 			 * The user can set in an options, which defines a minimum filesize.
 			 * If the file here is to small
@@ -375,7 +375,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 * And we should make the rate depending on the time, not on the bytes
 				 * read.
 				 */
-				boolean downloadRate = settingsManager.isDownloadRate();
+				boolean downloadRate = settingsManager.getGUISettings().isDownloadRate();
 				// Ok, now start downloading
 				while ((n = in.read(buf)) > 0) {
 					/*
@@ -457,7 +457,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		// If the user doesn't stopped the download
-		boolean downloadFailed = ((size > 0) && (iBW != size)) || (iBW < settingsManager.getMinFilesize());
+		boolean downloadFailed = ((size > 0) && (iBW != size)) || (iBW < settingsManager.getDownloadsSettings().getMinFileSize());
 		if (downloadFailed) {
 			if ((size > 0) && (iBW != size)) {
 				/*
@@ -468,7 +468,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 */
 				failDownload(pic, result, false, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
 				logger.error("Download failed (Too many or to less bytes were downloaded): '{}'", pic.getContainerURL());
-			} else if (iBW < settingsManager.getMinFilesize()) {
+			} else if (iBW < settingsManager.getDownloadsSettings().getMinFileSize()) {
 				/*
 				 * The user can set in an options, which defines a minimum filesize.
 				 * If the file here is to small
@@ -493,7 +493,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * The user can set subdirs for specific filesize-ranges
 		 * So maybe we have to move the file
 		 */
-		if (settingsManager.isSubdirsEnabled()) {
+		if (settingsManager.getDirectorySettings().isSubDirsEnabled()) {
 			handleFileSubDirectory(targetContainer, size);
 		}
 
@@ -573,7 +573,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			// Nothing to do
 		}
 
-		List<Subdir> v = settingsManager.getSubdirs();
+		List<Subdir> v = settingsManager.getSubDirs();
 		for (int i = 0; i < v.size(); i++) {
 			Subdir sdir = v.get(i);
 

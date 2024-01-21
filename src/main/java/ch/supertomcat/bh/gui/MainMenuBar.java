@@ -22,7 +22,7 @@ import javax.swing.KeyStroke;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.gui.settings.Settings;
+import ch.supertomcat.bh.gui.settings.SettingsDialog;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -153,7 +153,7 @@ public class MainMenuBar {
 
 		itemExit.addActionListener(e -> guiEvent.exitApp(false, false));
 
-		itemSettings.addActionListener(e -> new Settings(parentWindow, mainWindowAccess, proxyManger, settingsManager, cookieManager, hostManager));
+		itemSettings.addActionListener(e -> new SettingsDialog(parentWindow, mainWindowAccess, proxyManger, settingsManager, cookieManager, hostManager));
 
 		itemUpdate.addActionListener(e -> {
 			if (downloadQueueManager.isDownloading()) {
@@ -194,7 +194,8 @@ public class MainMenuBar {
 		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFiles);
 		cmbLogFile.setSelectedIndex(currentLogFileIndex);
 		cmbLogFile.addActionListener(e -> {
-			settingsManager.setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
+			settingsManager.getDownloadsSettings().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
+			settingsManager.fireSettingsChanged();
 			settingsManager.writeSettings(true);
 		});
 		cmbLogFile.setMaximumSize(new Dimension(133, 20));

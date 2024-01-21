@@ -89,60 +89,60 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 
 		try {
-			checkContentType = getBooleanOptionValue("Hosts.CheckContentTypeDefaultImages");
+			checkContentType = getBooleanOptionValue("CheckContentTypeDefaultImages");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue("Hosts.CheckContentTypeDefaultImages", false);
+				setBooleanOptionValue("CheckContentTypeDefaultImages", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			allFileTypes = getBooleanOptionValue(NAME + ".allFileTypes");
+			allFileTypes = getBooleanOptionValue("allFileTypes");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".allFileTypes", false);
+				setBooleanOptionValue("allFileTypes", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			images = getBooleanOptionValue(NAME + ".images");
+			images = getBooleanOptionValue("images");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".images", true);
+				setBooleanOptionValue("images", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			video = getBooleanOptionValue(NAME + ".video");
+			video = getBooleanOptionValue("video");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".video", true);
+				setBooleanOptionValue("video", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			audio = getBooleanOptionValue(NAME + ".audio");
+			audio = getBooleanOptionValue("audio");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".audio", true);
+				setBooleanOptionValue("audio", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
 		}
 
 		try {
-			archive = getBooleanOptionValue(NAME + ".archive");
+			archive = getBooleanOptionValue("archive");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue(NAME + ".archive", true);
+				setBooleanOptionValue("archive", true);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -288,32 +288,32 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 			archive = dialog.isArchive();
 
 			try {
-				setBooleanOptionValue("Hosts.CheckContentTypeDefaultImages", checkContentType);
+				setBooleanOptionValue("CheckContentTypeDefaultImages", checkContentType);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 			try {
-				setBooleanOptionValue(NAME + ".allFileTypes", allFileTypes);
+				setBooleanOptionValue("allFileTypes", allFileTypes);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 			try {
-				setBooleanOptionValue(NAME + ".images", images);
+				setBooleanOptionValue("images", images);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 			try {
-				setBooleanOptionValue(NAME + ".video", video);
+				setBooleanOptionValue("video", video);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 			try {
-				setBooleanOptionValue(NAME + ".audio", audio);
+				setBooleanOptionValue("audio", audio);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
 			try {
-				setBooleanOptionValue(NAME + ".archive", archive);
+				setBooleanOptionValue("archive", archive);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
@@ -322,11 +322,11 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	}
 
 	private boolean getBooleanOptionValue(String name) throws Exception {
-		return getSettingsManager().getBooleanValue(name);
+		return getSettingsManager().getBooleanValue(NAME, name);
 	}
 
 	private void setBooleanOptionValue(String name, boolean value) throws Exception {
-		getSettingsManager().setOptionValue(name, value);
+		getSettingsManager().setHosterSettingValue(NAME, name, value);
 	}
 
 	@Override

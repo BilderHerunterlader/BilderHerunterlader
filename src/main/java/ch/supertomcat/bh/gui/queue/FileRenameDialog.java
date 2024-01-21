@@ -183,11 +183,11 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 		this.files = files;
 		this.settingsManager = settingsManager;
 
-		this.txtPrefix = new JTextField(settingsManager.getFilenameChangePrefix(), 20);
-		this.txtAppendix = new JTextField(settingsManager.getFilenameChangeAppendix(), 20);
-		this.cbPrefix = new JCheckBox(Localization.getString("AppendPrefix"), settingsManager.isAppendPrefixFilenameChange());
-		this.cbAppendix = new JCheckBox(Localization.getString("AppendAppendix"), settingsManager.isAppendAppendixFilenameChange());
-		this.cbOriginalFilenames = new JCheckBox(Localization.getString("KeepOriginalFilenames"), settingsManager.isFilenameChangeKeepOriginal());
+		this.txtPrefix = new JTextField(settingsManager.getGUISettings().getFilenameChangePrefix(), 20);
+		this.txtAppendix = new JTextField(settingsManager.getGUISettings().getFilenameChangeAppendix(), 20);
+		this.cbPrefix = new JCheckBox(Localization.getString("AppendPrefix"), settingsManager.getGUISettings().isAppendPrefixFilenameChange());
+		this.cbAppendix = new JCheckBox(Localization.getString("AppendAppendix"), settingsManager.getGUISettings().isAppendAppendixFilenameChange());
+		this.cbOriginalFilenames = new JCheckBox(Localization.getString("KeepOriginalFilenames"), settingsManager.getGUISettings().isFilenameChangeKeepOriginal());
 
 		setTitle(Localization.getString("FilenameInput"));
 
@@ -253,7 +253,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 
 		txtFilename.addItem("");
 		txtFilename.addItem(defaultvalue);
-		List<String> lstAdd = settingsManager.getFilenameChangeHistory();
+		List<String> lstAdd = settingsManager.getGUISettings().getFilenameChangeHistory();
 		for (int i = lstAdd.size() - 1; i >= 0; i--) {
 			txtFilename.addItem(lstAdd.get(i));
 		}
@@ -406,14 +406,14 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 						txtFilename.addItem(f);
 					}
 					txtFilename.setSelectedItem(f);
-					settingsManager.addFilenameChangeHistory(f);
+					settingsManager.getGUISettings().getFilenameChangeHistory().add(f);
 				}
 			}
-			settingsManager.setFilenameChangePrefix(txtPrefix.getText());
-			settingsManager.setFilenameChangeAppendix(txtAppendix.getText());
-			settingsManager.setAppendPrefixFilenameChange(cbPrefix.isSelected());
-			settingsManager.setAppendAppendixFilenameChange(cbAppendix.isSelected());
-			settingsManager.setFilenameChangeKeepOriginal(cbOriginalFilenames.isSelected());
+			settingsManager.getGUISettings().setFilenameChangePrefix(txtPrefix.getText());
+			settingsManager.getGUISettings().setFilenameChangeAppendix(txtAppendix.getText());
+			settingsManager.getGUISettings().setAppendPrefixFilenameChange(cbPrefix.isSelected());
+			settingsManager.getGUISettings().setAppendAppendixFilenameChange(cbAppendix.isSelected());
+			settingsManager.getGUISettings().setFilenameChangeKeepOriginal(cbOriginalFilenames.isSelected());
 			settingsManager.writeSettings(true);
 			this.dispose();
 		}

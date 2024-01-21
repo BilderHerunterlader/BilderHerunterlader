@@ -21,7 +21,7 @@ import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**

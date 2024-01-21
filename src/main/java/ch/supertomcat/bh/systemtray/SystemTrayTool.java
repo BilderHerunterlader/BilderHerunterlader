@@ -36,9 +36,9 @@ import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -248,7 +248,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 			popup.add(itemUpdate);
 			popup.add(itemExit);
 
-			itemClipboard.setState(settingsManager.isCheckClipboard());
+			itemClipboard.setState(settingsManager.getSettings().isCheckClipboard());
 
 			// Create the TrayIcon
 			trayIcon = new TrayIcon(image, getClipboardStateText() + Localization.getString("SystemTrayTool_Sleeping"), popup);
@@ -321,7 +321,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	 */
 	private String getClipboardStateText() {
 		String retval = Localization.getString("ClipboardObserve") + " ";
-		if (settingsManager.isCheckClipboard()) {
+		if (settingsManager.getSettings().isCheckClipboard()) {
 			retval += Localization.getString("On");
 		} else {
 			retval += Localization.getString("Off");
@@ -358,7 +358,9 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	}
 
 	private void actionClipboard() {
-		settingsManager.setCheckClipboard(itemClipboard.getState());
+		settingsManager.getSettings().setCheckClipboard(itemClipboard.getState());
+		settingsManager.fireSettingsChanged();
+		settingsManager.writeSettings(true);
 	}
 
 	private void actionUpdate() {
@@ -430,7 +432,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 
 	@Override
 	public void downloadsComplete(int queue, int openSlots, int maxSlots) {
-		if (trayIcon != null && settingsManager.isDownloadsCompleteNotification()) {
+		if (trayIcon != null && settingsManager.getGUISettings().isDownloadsCompleteNotification()) {
 			String text = queueManager.getQueueSize() + " " + Localization.getString("DownloadsLeftInQueue");
 			trayIcon.displayMessage(Localization.getString("DownloadsComplete"), text, TrayIcon.MessageType.INFO);
 		}
@@ -441,7 +443,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		if (trayIcon != null) {
 			trayIcon.setToolTip(getSystemTrayToolTipText());
 		}
-		itemClipboard.setState(settingsManager.isCheckClipboard());
+		itemClipboard.setState(settingsManager.getSettings().isCheckClipboard());
 	}
 
 	@Override

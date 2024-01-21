@@ -49,7 +49,8 @@ public class ExportQueue extends ImportExportBase {
 	public void exportQueue() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", true);
 		if (file != null) {
-			settingsManager.setLastUsedExportDialogPath(FileUtil.getPathFromFile(file));
+			settingsManager.getDirectorySettings().setLastUsedExportPath(FileUtil.getPathFromFile(file));
+			settingsManager.writeSettings(true);
 			// export the keywords
 			exportQueue(file.getAbsolutePath());
 		}

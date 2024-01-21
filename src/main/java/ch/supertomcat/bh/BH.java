@@ -48,9 +48,10 @@ import ch.supertomcat.bh.queue.DownloadQueueManagerRestrictions;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.MappedLookAndFeelSetting;
 import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.bh.transmitter.TransmitterHTTP;
 import ch.supertomcat.bh.transmitter.TransmitterHelper;
@@ -137,8 +138,10 @@ public abstract class BH {
 
 	/**
 	 * Constructor
+	 * 
+	 * @throws JAXBException
 	 */
-	public BH() {
+	public BH() throws JAXBException {
 		GuiEvent guiEvent = new GuiEvent();
 		guiEvent.addListener(new IGuiEventListener() {
 			@Override
@@ -189,7 +192,7 @@ public abstract class BH {
 		});
 
 		// Read the settings from settings file
-		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "settings.xml");
+		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
 		settingsManager.readSettings();
 		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
@@ -214,18 +217,19 @@ public abstract class BH {
 		/*
 		 * No try to change the look and feel if needed
 		 */
-		if (settingsManager.getLookAndFeel().isAvailable()) {
+		MappedLookAndFeelSetting mappedLookAndFeel = MappedLookAndFeelSetting.getByXMLValue(settingsManager.getGUISettings().getLookAndFeel());
+		if (mappedLookAndFeel.isAvailable()) {
 			try {
-				UIManager.setLookAndFeel(settingsManager.getLookAndFeel().getClassName());
+				UIManager.setLookAndFeel(mappedLookAndFeel.getClassName());
 			} catch (Exception e) {
-				logger.error(e.getMessage(), e);
+				logger.error("Could not set LookAndFeel", e);
 			}
 		}
 
 		// Initialize the localized Strings
 		String language = "en";
 		String country = "EN";
-		if (settingsManager.getLanguage().equals("de_DE")) {
+		if ("de_DE".equals(settingsManager.getGUISettings().getLanguage())) {
 			language = "de";
 			country = "DE";
 		}
@@ -236,7 +240,7 @@ public abstract class BH {
 		CookieManager cookieManager = new CookieManager(settingsManager);
 		LogManager logManager = new LogManager(settingsManager);
 
-		int threadCount = settingsManager.getThreadCount();
+		int threadCount = settingsManager.getSettings().getThreadCount();
 		if (threadCount < 1) {
 			threadCount = 1;
 		} else if (threadCount > 2) {
@@ -361,7 +365,7 @@ public abstract class BH {
 			@Override
 			public void settingsChanged() {
 				initializeTransmitterHTTP(transmitterHelper);
-				if (settingsManager.isCheckClipboard()) {
+				if (settingsManager.getSettings().isCheckClipboard()) {
 					clipboardObserver.init();
 				} else {
 					clipboardObserver.stop();
@@ -374,7 +378,7 @@ public abstract class BH {
 			}
 		});
 
-		if (settingsManager.isUpdates()) {
+		if (settingsManager.getSettings().isCheckForUpdatesOnStart()) {
 			// If the user wants, we check if updates are available
 			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent);
 			updateWindow = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
@@ -481,7 +485,7 @@ public abstract class BH {
 	}
 
 	private synchronized void initializeTransmitterHTTP(TransmitterHelper transmitterHelper) {
-		int port = settingsManager.getWebExtensionPort();
+		int port = settingsManager.getSettings().getWebExtensionPort();
 		if (transmitterHTTP != null) {
 			if (transmitterHTTP.getListeningPort() == port && transmitterHTTP.isAlive()) {
 				/*
@@ -575,18 +579,23 @@ public abstract class BH {
 				executeDeleteUpdates();
 
 				// Good, now let BH really start
-				bh = new BH() {
+				try {
+					bh = new BH() {
 
-					@Override
-					protected void removeShutdownHook() {
-						removeAllShutdownHooks();
-					}
+						@Override
+						protected void removeShutdownHook() {
+							removeAllShutdownHooks();
+						}
 
-					@Override
-					protected void exitNow(boolean restart) {
-						exit(restart);
-					}
-				};
+						@Override
+						protected void exitNow(boolean restart) {
+							exit(restart);
+						}
+					};
+				} catch (JAXBException e) {
+					LoggerFactory.getLogger(BH.class).error("Could not initialize BH", e);
+					return;
+				}
 
 				// Create and register the Shutdown-Thread
 				addDefaultShutdownHook();

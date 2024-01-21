@@ -128,7 +128,7 @@ public class HostManager {
 		long stamp = lock.writeLock();
 		try {
 			Collections.sort(hosts, new Comparator<Host>() {
-				private boolean bRulesBeforeClasses = settingsManager.isRulesBeforeClasses();
+				private boolean bRulesBeforeClasses = settingsManager.getHostsSettings().isRulesBeforeClasses();
 
 				@Override
 				public int compare(Host o1, Host o2) {
@@ -384,7 +384,7 @@ public class HostManager {
 		List<URL> originalUrls = new ArrayList<>(urls);
 		urls.clear();
 
-		int threadCount = settingsManager.getThreadCount();
+		int threadCount = settingsManager.getSettings().getThreadCount();
 
 		if (threadCount < 1) {
 			threadCount = 1;
