@@ -239,8 +239,6 @@
 		<xs:restriction base="xs:string">
 			<xs:enumeration value="PROGRESSBAR_PERCENT" />
 			<xs:enumeration value="PROGRESSBAR_SIZE" />
-			<xs:enumeration value="NO_PROGRESSBAR_PERCENT" />
-			<xs:enumeration value="NO_PROGRESSBAR_SIZE" />
 		</xs:restriction>
 	</xs:simpleType>
 

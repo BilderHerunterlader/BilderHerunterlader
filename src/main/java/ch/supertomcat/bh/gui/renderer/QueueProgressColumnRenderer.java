@@ -77,12 +77,6 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 				long bytesTotal = progress.getBytesTotal();
 				long bytesDownloaded = progress.getBytesDownloaded();
 
-				ProgressDisplayMode progressDisplayMode = settingsManager.getGUISettings().getProgressDisplayMode();
-				if (progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_PERCENT || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_SIZE) {
-					// if the user don't want to see the visual progress, set the value to 0
-					bytesDownloaded = 0;
-				}
-
 				String rateString;
 				if (settingsManager.getGUISettings().isDownloadRate()) {
 					rateString = UnitFormatUtil.getBitrateString(progress.getRate());
@@ -98,11 +92,12 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 					urlIndexString = progress.getCurrentURLIndex() + "/" + urlCount + " ";
 				}
 
+				ProgressDisplayMode progressDisplayMode = settingsManager.getGUISettings().getProgressDisplayMode();
 				String progressString;
 				if (bytesTotal >= bytesDownloaded) {
-					if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_PERCENT || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_PERCENT) {
+					if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_PERCENT) {
 						progressString = String.format(PROGRESS_PERCENT_STRING_FORMAT, urlIndexString, progress.getPercent(), rateString);
-					} else if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_SIZE || progressDisplayMode == ProgressDisplayMode.NO_PROGRESSBAR_SIZE) {
+					} else if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_SIZE) {
 						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
 						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
 					} else {

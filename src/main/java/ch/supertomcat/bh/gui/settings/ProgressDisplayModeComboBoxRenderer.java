@@ -26,12 +26,6 @@ public class ProgressDisplayModeComboBoxRenderer extends BasicComboBoxRenderer {
 				case PROGRESSBAR_SIZE:
 					setText(Localization.getString("ProgressbarSize"));
 					break;
-				case NO_PROGRESSBAR_PERCENT:
-					setText(Localization.getString("NoProgressbarPercent"));
-					break;
-				case NO_PROGRESSBAR_SIZE:
-					setText(Localization.getString("NoProgressbarSize"));
-					break;
 			}
 		}
 		return comp;

@@ -581,16 +581,12 @@ public class OldSettingsConverter {
 			int pv = readIntValue("GUI.Progress", root, -1);
 			switch (pv) {
 				case PROGRESSBAR_PERCENT:
+				case NOPROGRESSBAR_PERCENT:
 					guiSettings.setProgressDisplayMode(ProgressDisplayMode.PROGRESSBAR_PERCENT);
 					break;
 				case PROGRESSBAR_SIZE:
-					guiSettings.setProgressDisplayMode(ProgressDisplayMode.PROGRESSBAR_SIZE);
-					break;
-				case NOPROGRESSBAR_PERCENT:
-					guiSettings.setProgressDisplayMode(ProgressDisplayMode.NO_PROGRESSBAR_PERCENT);
-					break;
 				case NOPROGRESSBAR_SIZE:
-					guiSettings.setProgressDisplayMode(ProgressDisplayMode.NO_PROGRESSBAR_SIZE);
+					guiSettings.setProgressDisplayMode(ProgressDisplayMode.PROGRESSBAR_SIZE);
 					break;
 			}
 

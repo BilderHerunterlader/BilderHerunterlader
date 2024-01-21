@@ -1083,8 +1083,6 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		cmbProgressView.addItem(ProgressDisplayMode.PROGRESSBAR_PERCENT);
 		cmbProgressView.addItem(ProgressDisplayMode.PROGRESSBAR_SIZE);
-		cmbProgressView.addItem(ProgressDisplayMode.NO_PROGRESSBAR_SIZE);
-		cmbProgressView.addItem(ProgressDisplayMode.NO_PROGRESSBAR_SIZE);
 		cmbProgressView.setRenderer(new ProgressDisplayModeComboBoxRenderer());
 
 		cmbKeywordMatchMode.addItem(KeywordMatchMode.MATCH_ONLY_EXACT);
