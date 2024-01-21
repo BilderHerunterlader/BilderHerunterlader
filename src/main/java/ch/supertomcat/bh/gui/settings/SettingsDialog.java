@@ -523,7 +523,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * ComboBox
 	 */
-	private JComboBox<LookAndFeelSetting> cmbLAF = new JComboBox<>();
+	private JComboBox<MappedLookAndFeelSetting> cmbLAF = new JComboBox<>();
 
 	/**
 	 * Label
@@ -1099,7 +1099,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		for (MappedLookAndFeelSetting lookAndFeel : MappedLookAndFeelSetting.values()) {
 			if (lookAndFeel.isAvailable()) {
-				cmbLAF.addItem(lookAndFeel.getXMLValue());
+				cmbLAF.addItem(lookAndFeel);
 			}
 		}
 		cmbLAF.setRenderer(new LookAndFeelComboBoxRenderer());
@@ -1110,6 +1110,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		cmbCookies.addItem(BrowserCookiesMode.BROWSER_OPERA);
 		cmbCookies.addItem(BrowserCookiesMode.BROWSER_PALE_MOON);
 		cmbCookies.addItem(BrowserCookiesMode.BROWSER_OPERA_NEW);
+		cmbCookies.setRenderer(new BrowserCookiesModeComboBoxRenderer());
 		cmbCookies.addItemListener(this);
 
 		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_LOWER);
@@ -1672,7 +1673,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		cmbSizeView.setSelectedItem(guiSettings.getSizeDisplayMode());
 		cmbProgressView.setSelectedItem(guiSettings.getProgressDisplayMode());
 		chkDownloadRate.setSelected(guiSettings.isDownloadRate());
-		cmbLAF.setSelectedItem(guiSettings.getLookAndFeel());
+		cmbLAF.setSelectedItem(MappedLookAndFeelSetting.getByXMLValue(guiSettings.getLookAndFeel()));
 
 		chkAlwaysAddTitle.setSelected(guiSettings.isAlwaysAddTitle());
 
@@ -1958,7 +1959,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		guiSettings.setProgressDisplayMode((ProgressDisplayMode)cmbProgressView.getSelectedItem());
 		guiSettings.setDownloadRate(chkDownloadRate.isSelected());
 
-		LookAndFeelSetting selectedLookAndFeel = (LookAndFeelSetting)cmbLAF.getSelectedItem();
+		MappedLookAndFeelSetting selectedMappedLookAndFeel = (MappedLookAndFeelSetting)cmbLAF.getSelectedItem();
+		LookAndFeelSetting selectedLookAndFeel = selectedMappedLookAndFeel.getXMLValue();
 		boolean lookAndFeelChanged = settingsManager.setLookAndFeel(selectedLookAndFeel);
 
 		guiSettings.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());

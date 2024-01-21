@@ -646,7 +646,8 @@ public class OldSettingsConverter {
 				String strAdderAdd = readStringValue("GUI.adderAdd", root, "");
 				if (strAdderAdd != null) {
 					String[] add = strAdderAdd.split("\\|");
-					if (((add.length == 0) || ((add.length == 1) && (add[0].equals("")))) == false) {
+
+					if (!(add.length == 0 || (add.length == 1 && add[0].isEmpty()))) {
 						for (int i = add.length - 1; i >= 0; i--) {
 							guiSettings.getDownloadSelectionAddStrings().add(add[i]);
 						}

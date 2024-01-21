@@ -15,7 +15,6 @@ import javax.xml.bind.JAXBException;
 import org.apache.logging.log4j.Level;
 import org.xml.sax.SAXException;
 
-import ch.supertomcat.bh.exceptions.OptionException;
 import ch.supertomcat.bh.settings.oldsettingsconverter.OldSettingsConverter;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
@@ -1048,9 +1047,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized boolean getBooleanValue(String host, String key) throws OptionException {
+	public synchronized boolean getBooleanValue(String host, String key) {
 		return getHosterSettingValue(host, key, Boolean.class);
 	}
 
@@ -1061,9 +1059,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized boolean getBooleanValue(String host, String key, boolean defautValue) throws OptionException {
+	public synchronized boolean getBooleanValue(String host, String key, boolean defautValue) {
 		return getHosterSettingValue(host, key, Boolean.class, defautValue);
 	}
 
@@ -1073,9 +1070,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized int getIntValue(String host, String key) throws OptionException {
+	public synchronized int getIntValue(String host, String key) {
 		return getHosterSettingValue(host, key, Integer.class);
 	}
 
@@ -1086,9 +1082,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized int getIntValue(String host, String key, int defautValue) throws OptionException {
+	public synchronized int getIntValue(String host, String key, int defautValue) {
 		return getHosterSettingValue(host, key, Integer.class, defautValue);
 	}
 
@@ -1098,9 +1093,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized String getStringValue(String host, String key) throws OptionException {
+	public synchronized String getStringValue(String host, String key) {
 		return getHosterSettingValue(host, key, String.class);
 	}
 
@@ -1111,9 +1105,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized String getStringValue(String host, String key, String defautValue) throws OptionException {
+	public synchronized String getStringValue(String host, String key, String defautValue) {
 		return getHosterSettingValue(host, key, String.class, defautValue);
 	}
 
@@ -1123,9 +1116,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized long getLongValue(String host, String key) throws OptionException {
+	public synchronized long getLongValue(String host, String key) {
 		return getHosterSettingValue(host, key, Long.class);
 	}
 
@@ -1136,9 +1128,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized long getLongValue(String host, String key, long defautValue) throws OptionException {
+	public synchronized long getLongValue(String host, String key, long defautValue) {
 		return getHosterSettingValue(host, key, Long.class, defautValue);
 	}
 
@@ -1148,9 +1139,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized byte getByteValue(String host, String key) throws OptionException {
+	public synchronized byte getByteValue(String host, String key) {
 		return getHosterSettingValue(host, key, Byte.class);
 	}
 
@@ -1161,9 +1151,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized byte getByteValue(String host, String key, byte defautValue) throws OptionException {
+	public synchronized byte getByteValue(String host, String key, byte defautValue) {
 		return getHosterSettingValue(host, key, Byte.class, defautValue);
 	}
 
@@ -1173,9 +1162,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized short getShortValue(String host, String key) throws OptionException {
+	public synchronized short getShortValue(String host, String key) {
 		return getHosterSettingValue(host, key, Short.class);
 	}
 
@@ -1186,9 +1174,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized short getShortValue(String host, String key, short defautValue) throws OptionException {
+	public synchronized short getShortValue(String host, String key, short defautValue) {
 		return getHosterSettingValue(host, key, Short.class, defautValue);
 	}
 
@@ -1198,9 +1185,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized float getFloatValue(String host, String key) throws OptionException {
+	public synchronized float getFloatValue(String host, String key) {
 		return getHosterSettingValue(host, key, Float.class);
 	}
 
@@ -1211,9 +1197,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized float getFloatValue(String host, String key, float defautValue) throws OptionException {
+	public synchronized float getFloatValue(String host, String key, float defautValue) {
 		return getHosterSettingValue(host, key, Float.class, defautValue);
 	}
 
@@ -1223,9 +1208,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param host Host
 	 * @param key Key
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized double getDoubleValue(String host, String key) throws OptionException {
+	public synchronized double getDoubleValue(String host, String key) {
 		return getHosterSettingValue(host, key, Double.class);
 	}
 
@@ -1236,9 +1220,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @param defautValue Default Value
 	 * @return Wert
-	 * @throws OptionException
 	 */
-	public synchronized double getDoubleValue(String host, String key, double defautValue) throws OptionException {
+	public synchronized double getDoubleValue(String host, String key, double defautValue) {
 		return getHosterSettingValue(host, key, Double.class, defautValue);
 	}
 

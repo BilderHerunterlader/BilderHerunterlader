@@ -65,9 +65,6 @@
 		<downloadRate />
 		<lookAndFeel />
 		<alwaysAddTitle />
-		<downloadSelectionAddStrings />
-		<targetDirChangeHistory />
-		<filenameChangeHistory />
 		<filenameChangePrefix />
 		<appendPrefixFilenameChange />
 		<filenameChangeAppendix />
