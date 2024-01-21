@@ -76,7 +76,7 @@
 		<directoryLogOnlyExisting />
 		<downloadPreviews />
 		<previewSize />
-		<mainWindow name="MainWindow" save="false">
+		<mainWindow name="MainWindow" save="true">
 			<width />
 			<height />
 			<x />
