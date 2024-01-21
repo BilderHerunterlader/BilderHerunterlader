@@ -826,9 +826,9 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		if (hostDeactivation == null) {
 			hostDeactivation = new HostDeactivationSetting();
 			hostDeactivation.setValue(name);
-			hostDeactivation.setDeactivated(deactivated);
 			settings.getHostsSettings().getDeactivations().add(hostDeactivation);
 		}
+		hostDeactivation.setDeactivated(deactivated);
 	}
 
 	/**
