@@ -856,74 +856,24 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 
 	/**
 	 * Get data type for value
-	 * TODO Move to SettingsUtil
 	 * 
 	 * @param <E> Value Type
 	 * @param value Value
 	 * @return Data Type
 	 */
 	private <E> String getHostSettingValueDataType(E value) {
-		if (value == null) {
-			return null;
-		}
-
-		@SuppressWarnings("unchecked")
-		Class<E> valueType = (Class<E>)value.getClass();
-
-		if (valueType == Boolean.class) {
-			return "boolean";
-		} else if (valueType == Byte.class) {
-			return "byte";
-		} else if (valueType == Double.class) {
-			return "double";
-		} else if (valueType == Float.class) {
-			return "float";
-		} else if (valueType == Integer.class) {
-			return "int";
-		} else if (valueType == Long.class) {
-			return "long";
-		} else if (valueType == Short.class) {
-			return "short";
-		} else if (valueType == String.class) {
-			return "string";
-		}
-		return null;
+		return SettingsUtil.getValueDataType(value);
 	}
 
 	/**
 	 * Get value as String
-	 * TODO Move to SettingsUtil
 	 * 
 	 * @param <E> Value Type
 	 * @param value Value
 	 * @return Value as String
 	 */
 	private <E> String getHostSettingValueAsString(E value) {
-		if (value == null) {
-			return null;
-		}
-
-		@SuppressWarnings("unchecked")
-		Class<E> valueType = (Class<E>)value.getClass();
-
-		if (valueType == Boolean.class) {
-			return String.valueOf((boolean)value);
-		} else if (valueType == Byte.class) {
-			return String.valueOf((byte)value);
-		} else if (valueType == Double.class) {
-			return String.valueOf((double)value);
-		} else if (valueType == Float.class) {
-			return String.valueOf((float)value);
-		} else if (valueType == Integer.class) {
-			return String.valueOf((int)value);
-		} else if (valueType == Long.class) {
-			return String.valueOf((long)value);
-		} else if (valueType == Short.class) {
-			return String.valueOf((short)value);
-		} else if (valueType == String.class) {
-			return (String)value;
-		}
-		return null;
+		return SettingsUtil.getValueAsString(value);
 	}
 
 	/**
