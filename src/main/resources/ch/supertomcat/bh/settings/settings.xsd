@@ -371,13 +371,14 @@
 	
 	<!-- Custom Setting -->
 	<xs:complexType name="CustomSetting">
-		<xs:sequence>
+		<xs:simpleContent>
 			<!-- Required Value -->
-			<xs:element name="value" type="xs:string" />
-		</xs:sequence>
-		<!-- Required Setting Name -->
-		<xs:attribute name="name" type="xs:string" use="required" />
-		<!-- Required Data Type -->
-		<xs:attribute name="dataType" type="xs:string" use="required" />
+			<xs:extension base="xs:string">
+				<!-- Required Setting Name -->
+				<xs:attribute name="name" type="xs:string" use="required" />
+				<!-- Required Data Type -->
+				<xs:attribute name="dataType" type="xs:string" use="required" />
+			</xs:extension>
+		</xs:simpleContent>
 	</xs:complexType>
 </xs:schema>

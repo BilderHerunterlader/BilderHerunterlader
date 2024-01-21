@@ -89,10 +89,10 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 
 		try {
-			checkContentType = getBooleanOptionValue("CheckContentTypeDefaultImages");
+			checkContentType = getBooleanOptionValue("checkContentTypeDefaultImages");
 		} catch (Exception e) {
 			try {
-				setBooleanOptionValue("CheckContentTypeDefaultImages", false);
+				setBooleanOptionValue("checkContentTypeDefaultImages", false);
 			} catch (Exception e1) {
 				logger.error(e1.getMessage(), e1);
 			}
@@ -288,7 +288,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 			archive = dialog.isArchive();
 
 			try {
-				setBooleanOptionValue("CheckContentTypeDefaultImages", checkContentType);
+				setBooleanOptionValue("checkContentTypeDefaultImages", checkContentType);
 			} catch (Exception ex) {
 				logger.error(ex.getMessage(), ex);
 			}
