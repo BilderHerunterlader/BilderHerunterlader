@@ -328,6 +328,16 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		}
 	}
 
+	private void convertToXMLRegexReplaceSettings(RegexReplacePipeline regexReplacePipeline, List<RegexReplaceSetting> xmlRegexList) {
+		xmlRegexList.clear();
+		for (RegexReplace regexp : regexReplacePipeline.getRegexps()) {
+			RegexReplaceSetting regexReplaceSetting = new RegexReplaceSetting();
+			regexReplaceSetting.setPattern(regexp.getSearch());
+			regexReplaceSetting.setReplacement(regexp.getReplace());
+			xmlRegexList.add(regexReplaceSetting);
+		}
+	}
+
 	/**
 	 * Returns the regexReplacePipelinePageTitle
 	 * 
@@ -338,12 +348,26 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	}
 
 	/**
+	 * Apply Regex Replace Pipeline for Page Titles to XML Settings
+	 */
+	public void applyRegexReplacePipelinePageTitleToXMLSettings() {
+		convertToXMLRegexReplaceSettings(regexReplacePipelinePageTitle, settings.getGuiSettings().getRegexReplacesPageTitle());
+	}
+
+	/**
 	 * Returns the regexReplacePipelineFilename
 	 * 
 	 * @return regexReplacePipelineFilename
 	 */
 	public RegexReplacePipeline getRegexReplacePipelineFilename() {
 		return regexReplacePipelineFilename;
+	}
+
+	/**
+	 * Apply Regex Replace Pipeline for Filenames to XML Settings
+	 */
+	public void applyRegexReplacePipelineFilenameToXMLSettings() {
+		convertToXMLRegexReplaceSettings(regexReplacePipelineFilename, settings.getDownloadSettings().getRegexReplacesFilename());
 	}
 
 	/**
@@ -450,6 +474,20 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 */
 	public void setSubdirs(List<Subdir> subDirs) {
 		this.subDirs = subDirs;
+
+		List<SubDirSetting> xmlSubDirSettings = settings.getDirectorySettings().getSubDirSettings();
+		xmlSubDirSettings.clear();
+		for (Subdir subDir : subDirs) {
+			SubDirSetting subDirSetting = new SubDirSetting();
+			subDirSetting.setName(subDir.getSubdirName());
+			subDirSetting.setMin(subDir.getMinSize());
+			subDirSetting.setMax(subDir.getMaxSize());
+			subDirSetting.setResMinWidth(subDir.getMinWidth());
+			subDirSetting.setResMinHeight(subDir.getMinHeight());
+			subDirSetting.setResMaxWidth(subDir.getMaxWidth());
+			subDirSetting.setResMaxHeight(subDir.getMaxHeight());
+			xmlSubDirSettings.add(subDirSetting);
+		}
 	}
 
 	/**

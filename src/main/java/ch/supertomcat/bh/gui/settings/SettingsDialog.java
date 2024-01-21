@@ -1963,6 +1963,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		guiSettings.setAlwaysAddTitle(chkAlwaysAddTitle.isSelected());
 
+		settingsManager.applyRegexReplacePipelinePageTitleToXMLSettings();
+
 		guiSettings.setDownloadsCompleteNotification(chkDownloadsCompleteNotification.isSelected());
 
 		guiSettings.setDownloadPreviews(chkDownloadPreviews.isSelected());
@@ -2000,6 +2002,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		}
 		downloadSettings.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
 		downloadSettings.setAllowedFilenameCharacters((AllowedFilenameCharacters)cmbAllowedFilenameChars.getSelectedItem());
+
+		settingsManager.applyRegexReplacePipelineFilenameToXMLSettings();
 
 		settings.setCheckForUpdatesOnStart(chkUpdates.isSelected());
 
