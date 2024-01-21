@@ -260,7 +260,11 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	}
 
 	private void applyDynamicDefaultSettings() {
-		settings.getDirectorySettings().setSavePath(ApplicationProperties.getProperty("SettingsPath"));
+		if (portableSavePath != null) {
+			settings.getDirectorySettings().setSavePath(portableSavePath);
+		} else {
+			settings.getDirectorySettings().setSavePath(ApplicationProperties.getProperty("SettingsPath"));
+		}
 
 		int availableProcessors = Runtime.getRuntime().availableProcessors();
 		settings.setThreadCount(availableProcessors);
@@ -443,9 +447,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @return Save Path
 	 */
 	public String getSavePath() {
-		if (portableSavePath != null) {
-			return portableSavePath;
-		}
 		return settings.getDirectorySettings().getSavePath();
 	}
 
