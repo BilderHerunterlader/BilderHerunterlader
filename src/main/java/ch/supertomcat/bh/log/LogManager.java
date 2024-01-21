@@ -17,7 +17,9 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
@@ -499,6 +501,7 @@ public class LogManager implements BHSettingsListener {
 			String line;
 			File fDir = null;
 			long bytesRead = 0;
+			Map<File, Boolean> folderExistsMap = new HashMap<>();
 			while ((line = br.readLine()) != null) {
 				bytesRead += line.getBytes().length;
 				String[] arr = line.split("\t");
@@ -518,7 +521,15 @@ public class LogManager implements BHSettingsListener {
 							 * Wo only need to check if the directory exists
 							 * when the directory is not in the list already
 							 */
-							boolean exists = fDir.exists() && fDir.isDirectory();
+
+							Boolean cachedExists = folderExistsMap.get(fDir);
+							boolean exists;
+							if (cachedExists != null) {
+								exists = cachedExists;
+							} else {
+								exists = fDir.exists() && fDir.isDirectory();
+								folderExistsMap.put(fDir, exists);
+							}
 							fDir = null;
 							if (onlyExistingDirectories && !exists) {
 								if (size > 0) {
