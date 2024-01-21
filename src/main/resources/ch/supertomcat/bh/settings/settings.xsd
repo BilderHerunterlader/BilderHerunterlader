@@ -67,9 +67,7 @@
 			<xs:element name="lastUsedExportPath" type="xs:string" nillable="true" />
 			
 			<!-- Automatic Download Directory Recognition -->
-			<!-- TODO Not used anymore? not present in settings dialog -->
 			<xs:element name="autoTargetDir" type="xs:boolean" default="false" />
-			<!-- TODO Not used anymore? not present in settings dialog -->
 			<xs:element name="autoTargetDirMode" type="AutoTargetDirMode" default="BY_TITLE" />
 			
 			<xs:element name="subDirsEnabled" type="xs:boolean" default="false" />

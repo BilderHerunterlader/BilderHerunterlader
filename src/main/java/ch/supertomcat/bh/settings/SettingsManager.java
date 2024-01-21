@@ -182,9 +182,11 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				return false;
 			}
 
+			boolean converted = false;
 			if (oldSettingsConverter != null && oldSettingsConverter.checkOldSettingsFileExists()) {
 				oldSettingsConverter.convertSettings(settings);
 				checkSettings();
+				converted = true;
 			}
 
 			try {
@@ -194,6 +196,9 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				applySubDirs();
 				applyHostDeactivations();
 				settingsChanged();
+				if (converted) {
+					writeSettings(true);
+				}
 				return true;
 			} catch (Exception e) {
 				logger.error("Could not read default settings file", e);
@@ -270,9 +275,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		}
 	}
 
-	/**
-	 * TODO Implement and use in read and change of settigns
-	 */
 	private void applyRegexPipelines() {
 		regexReplacePipelinePageTitle = new RegexReplacePipeline("regexReplacePageTitle", getRegexReplaces(settings.getGuiSettings().getRegexReplacesPageTitle(), "regexReplacePageTitle"));
 		regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename", getRegexReplaces(settings.getDownloadSettings().getRegexReplacesFilename(), "regexReplaceFilename"));
@@ -316,8 +318,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	public synchronized boolean writeSettings(boolean noShutdown) {
 		try (FileOutputStream out = new FileOutputStream(settingsFile)) {
 			writeSettingsFile(this.settings, out, false);
-			updateHosterSettingsMap();
-			settingsChanged();
 			if (noShutdown) {
 				backupSettingsFile();
 			}
@@ -749,8 +749,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	}
 
 	/**
-	 * TODO Rename to getSizeDisplayMode
-	 * 
 	 * @return the sizeView
 	 */
 	public int getSizeView() {
