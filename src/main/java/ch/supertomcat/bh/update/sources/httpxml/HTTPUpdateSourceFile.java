@@ -12,7 +12,7 @@ import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.settings.ProxyManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.update.UpdateException;
 import ch.supertomcat.bh.update.UpdateIOException;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;

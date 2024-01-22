@@ -13,8 +13,8 @@ import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.exceptions.HostHttpIOException;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.update.UpdateException;
 import ch.supertomcat.bh.update.UpdateIOException;
 import ch.supertomcat.bh.update.UpdateSource;

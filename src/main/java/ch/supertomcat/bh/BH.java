@@ -29,7 +29,9 @@ import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
+import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.FileDownloaderFactory;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
 import ch.supertomcat.bh.gui.Icons;
@@ -47,9 +49,7 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.DownloadQueueManagerRestrictions;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.MappedLookAndFeelSetting;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
@@ -135,6 +135,11 @@ public abstract class BH {
 	 * Host Manager
 	 */
 	private HostManager hostManager;
+
+	/**
+	 * Cookie Manager
+	 */
+	private CookieManager cookieManager;
 
 	/**
 	 * Constructor
@@ -237,7 +242,7 @@ public abstract class BH {
 
 		// Initalized too fast as it would be worth to execute parallel
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
-		CookieManager cookieManager = new CookieManager(settingsManager);
+		cookieManager = new CookieManager(settingsManager);
 		LogManager logManager = new LogManager(settingsManager);
 
 		int threadCount = settingsManager.getSettings().getThreadCount();
@@ -470,6 +475,8 @@ public abstract class BH {
 					queueManager.closeDatabase();
 				}
 				keywordManager.closeDatabase();
+
+				cookieManager.closeDatabase();
 			}
 
 			if (stt != null) {

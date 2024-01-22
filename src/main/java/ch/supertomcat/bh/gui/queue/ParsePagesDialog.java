@@ -19,14 +19,14 @@ import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportURL;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;

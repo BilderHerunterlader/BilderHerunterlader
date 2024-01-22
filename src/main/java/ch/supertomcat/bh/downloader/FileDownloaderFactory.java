@@ -1,11 +1,10 @@
 package ch.supertomcat.bh.downloader;
 
+import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.impl.HTTPFileDownloader;
 import ch.supertomcat.bh.downloader.impl.LocalFileDownloader;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**

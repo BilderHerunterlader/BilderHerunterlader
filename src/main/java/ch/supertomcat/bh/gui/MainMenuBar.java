@@ -22,6 +22,8 @@ import javax.swing.KeyStroke;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.settings.SettingsDialog;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -29,8 +31,6 @@ import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;

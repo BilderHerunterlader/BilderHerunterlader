@@ -5,6 +5,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.adder.AdderPanel;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -14,7 +15,6 @@ import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.pic.URLList;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 

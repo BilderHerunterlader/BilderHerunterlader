@@ -24,6 +24,8 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.BH;
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
@@ -32,8 +34,6 @@ import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
 import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.sources.httpxml.UpdatesXmlIO;
 import ch.supertomcat.bh.update.sources.httpxml.xml.UpdateData;

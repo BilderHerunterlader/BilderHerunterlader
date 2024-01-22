@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
@@ -35,8 +37,6 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.update.UpdateManager;

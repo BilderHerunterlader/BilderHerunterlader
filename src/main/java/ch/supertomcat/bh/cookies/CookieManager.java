@@ -1,19 +1,26 @@
-package ch.supertomcat.bh.settings;
+package ch.supertomcat.bh.cookies;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.Cookie;
 import org.apache.hc.client5.http.cookie.CookieIdentityComparator;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.cookie.BasicClientCookie;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.database.sqlite.CookiesSQLiteDB;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
 import ch.supertomcat.bh.settings.xml.BrowserCookiesSetting;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
+import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookie;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
 import ch.supertomcat.supertomcatutils.http.cookies.firefox.FirefoxCookieStrategy;
@@ -31,9 +38,24 @@ import ch.supertomcat.supertomcatutils.http.cookies.palemoon.PaleMoonCookies;
  */
 public class CookieManager {
 	/**
+	 * Logger for this class
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
+
+	/**
+	 * Cookies Database
+	 */
+	private final CookiesSQLiteDB cookiesSQLiteDB;
+
+	/**
+	 * Cookie Store
+	 */
+	private final CookieStore cookieStore = new BasicCookieStore();
 
 	/**
 	 * Constructor
@@ -42,6 +64,40 @@ public class CookieManager {
 	 */
 	public CookieManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
+		this.cookiesSQLiteDB = new CookiesSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Cookies.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
+				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
+
+		List<BHCookie> cookiesFromDB = cookiesSQLiteDB.getAllEntries();
+		for (BHCookie bhCookie : cookiesFromDB) {
+			cookieStore.addCookie(bhCookie.getCookie());
+		}
+	}
+
+	/**
+	 * Returns the cookieStore
+	 * 
+	 * @return cookieStore
+	 */
+	public CookieStore getCookieStore() {
+		return cookieStore;
+	}
+
+	/**
+	 * Save cookies to database
+	 */
+	private void saveDatabase() {
+		cookiesSQLiteDB.deleteAllEntries();
+		List<BHCookie> bhCookies = cookieStore.getCookies().stream().filter(Cookie::isPersistent).map(BHCookie::new).collect(Collectors.toList());
+		cookiesSQLiteDB.insertEntries(bhCookies);
+	}
+
+	/**
+	 * Saves and closes the database
+	 */
+	public void closeDatabase() {
+		saveDatabase();
+		logger.info("Closing Cookies Database");
+		cookiesSQLiteDB.closeAllDatabaseConnections();
 	}
 
 	/**

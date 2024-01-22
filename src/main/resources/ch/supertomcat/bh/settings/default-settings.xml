@@ -43,6 +43,7 @@
 			<cookieFile />
 			<cookieFileFixed />
 		</browserCookiesPaleMoon>
+		<cookieDatabase />
 	</connectionSettings>
 	
 	<guiSettings>

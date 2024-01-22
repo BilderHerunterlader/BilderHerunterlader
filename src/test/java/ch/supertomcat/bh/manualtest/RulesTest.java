@@ -15,6 +15,8 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.BH;
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
@@ -27,8 +29,6 @@ import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;

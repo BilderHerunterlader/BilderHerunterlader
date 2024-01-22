@@ -75,6 +75,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.queue.FileRenameDialog;
@@ -99,7 +100,6 @@ import ch.supertomcat.bh.preview.DownloadPreviewRunnable;
 import ch.supertomcat.bh.preview.PreviewCache;
 import ch.supertomcat.bh.preview.PreviewCache.PreviewCacheListener;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.AutoTargetDirMode;
 import ch.supertomcat.bh.settings.xml.WindowSettings;

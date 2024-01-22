@@ -39,9 +39,9 @@ import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.importexport.ImportIradaTsv;
 import ch.supertomcat.bh.importexport.Tsv;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;

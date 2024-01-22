@@ -27,6 +27,8 @@ import org.apache.hc.core5.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostIOException;
@@ -34,8 +36,6 @@ import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
 import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;

@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.settings;
+package ch.supertomcat.bh.downloader;
 
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
@@ -17,6 +17,8 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
+import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.xml.ProxyMode;

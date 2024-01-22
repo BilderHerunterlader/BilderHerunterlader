@@ -52,15 +52,15 @@ import javax.swing.filechooser.FileFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.cookies.CookieManager;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.LookAndFeelComboBoxRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
-import ch.supertomcat.bh.settings.CookieManager;
 import ch.supertomcat.bh.settings.MappedLookAndFeelSetting;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.AllowedFilenameCharacters;
@@ -479,6 +479,11 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	 * Button
 	 */
 	private JButton btnCookiesPaleMoon = new JButton("...");
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox cbCookieDatabase = new JCheckBox(Localization.getString("CookieDatabase"), false);
 
 	/**
 	 * ButtonGroup
@@ -1360,6 +1365,9 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, pnlCookiesPaleMoon, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, cbCookieDatabase, pnlConnection);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblDefaultUserAgent, pnlConnection);
 		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, txtDefaultUserAgent, pnlConnection);
@@ -1675,6 +1683,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		cbCookiesPaleMoonFixed.setSelected(palemoonBrowserCookiesSetting.isCookieFileFixed());
 		txtCookiesPaleMoon.setText(cookieManager.getCookieFileForPaleMoon());
 
+		cbCookieDatabase.setSelected(connectionSettings.isCookieDatabase());
+
 		GUISettings guiSettings = settings.getGuiSettings();
 
 		String lang = guiSettings.getLanguage();
@@ -1960,6 +1970,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		BrowserCookiesSetting palemoonBrowserCookiesSetting = connectionSettings.getBrowserCookiesPaleMoon();
 		palemoonBrowserCookiesSetting.setCookieFileFixed(cbCookiesPaleMoonFixed.isSelected());
 		palemoonBrowserCookiesSetting.setCookieFile(txtCookiesPaleMoon.getText());
+
+		connectionSettings.setCookieDatabase(cbCookieDatabase.isSelected());
 
 		GUISettings guiSettings = settings.getGuiSettings();
 

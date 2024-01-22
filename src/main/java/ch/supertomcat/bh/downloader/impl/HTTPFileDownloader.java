@@ -20,13 +20,16 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ConnectionClosedException;
 import org.apache.hc.core5.http.message.StatusLine;
 
+import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.Hoster;
@@ -36,8 +39,6 @@ import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicProgress;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
-import ch.supertomcat.bh.settings.CookieManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
@@ -96,14 +97,18 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * there is no way to know if a cookie was actually added. So it would probably be inefficient like that. But maybe the cookies could be stored from
 		 * time to time. Or only when BH exits, probably the most efficient way.
 		 */
-		BasicCookieStore cookieStore;
+		CookieStore cookieStore;
 		/*
 		 * If cookies from Browser are not used, then we can use a shared cookie store for all downloads. If cookies from browser is enabled then use a new
 		 * instance, because the purpose is to use current cookies from browser, but it will only fill cookies, which do not exist yet, so for this to work as
 		 * intended, we need to use a new and empty cookie store.
 		 */
 		if (settingsManager.getConnectionSettings().getBrowserCookiesMode() == BrowserCookiesMode.NO_COOKIES) {
-			cookieStore = sharedCookieStore;
+			if (settingsManager.getConnectionSettings().isCookieDatabase()) {
+				cookieStore = cookieManager.getCookieStore();
+			} else {
+				cookieStore = sharedCookieStore;
+			}
 		} else {
 			cookieStore = new BasicCookieStore();
 		}
@@ -196,7 +201,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * @return True if download was successful, false otherwise
 	 */
 	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL, int currentURL, int urlCount,
-			HttpClientContext context, BasicCookieStore cookieStore) {
+			HttpClientContext context, CookieStore cookieStore) {
 		TargetContainer targetContainer = new TargetContainer(pic, firstURL, correctedFilename);
 
 		/*

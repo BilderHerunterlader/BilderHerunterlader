@@ -3,12 +3,12 @@ package ch.supertomcat.bh.importexport.base;
 import java.awt.Component;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
+import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.settings.ProxyManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 
 /**
