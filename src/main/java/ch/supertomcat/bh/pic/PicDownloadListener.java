@@ -135,10 +135,10 @@ public class PicDownloadListener implements IDownloadListener {
 		}
 		if (HTTPUtil.isURL(encodedContainerURL)) {
 			logger.info("Downloading: {}", containerURL);
-			downloader = fileDownloaderFactory.createHTTPFileDownloader();
+			downloader = fileDownloaderFactory.getSharedHttpFileDownloader();
 		} else {
 			logger.info("Sorting: {}", containerURL);
-			downloader = fileDownloaderFactory.createLocalFileDownloader();
+			downloader = fileDownloaderFactory.getSharedLocalFileDownloader();
 		}
 		try {
 			downloader.downloadFile(pic);

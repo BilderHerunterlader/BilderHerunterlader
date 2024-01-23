@@ -37,6 +37,16 @@ public class FileDownloaderFactory {
 	private final HostManager hostManager;
 
 	/**
+	 * Shared HTTP File Downloader
+	 */
+	private final HTTPFileDownloader sharedHttpFileDownloader;
+
+	/**
+	 * Shared Local File Downloader
+	 */
+	private final LocalFileDownloader sharedLocalFileDownloader;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param downloadQueueManager Download Queue Manager
@@ -51,6 +61,9 @@ public class FileDownloaderFactory {
 		this.settingsManager = settingsManager;
 		this.cookieManager = cookieManager;
 		this.hostManager = hostManager;
+
+		sharedHttpFileDownloader = new HTTPFileDownloader(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
+		sharedLocalFileDownloader = new LocalFileDownloader(downloadQueueManager, settingsManager, hostManager);
 	}
 
 	/**
@@ -69,5 +82,23 @@ public class FileDownloaderFactory {
 	 */
 	public FileDownloader createLocalFileDownloader() {
 		return new LocalFileDownloader(downloadQueueManager, settingsManager, hostManager);
+	}
+
+	/**
+	 * Returns the sharedHttpFileDownloader
+	 * 
+	 * @return sharedHttpFileDownloader
+	 */
+	public HTTPFileDownloader getSharedHttpFileDownloader() {
+		return sharedHttpFileDownloader;
+	}
+
+	/**
+	 * Returns the sharedLocalFileDownloader
+	 * 
+	 * @return sharedLocalFileDownloader
+	 */
+	public LocalFileDownloader getSharedLocalFileDownloader() {
+		return sharedLocalFileDownloader;
 	}
 }
