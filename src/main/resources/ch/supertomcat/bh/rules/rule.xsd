@@ -21,6 +21,8 @@
 				
 				<xs:element name="sendCookies" type="xs:boolean" />
 				
+				<xs:element name="userAgent" type="xs:string" default="" />
+				
 				<xs:element name="pipes" type="URLPipeline" minOccurs="0" maxOccurs="unbounded" />
 				
 				<xs:element name="failuresPipes" type="FailuresPipeline" minOccurs="0" maxOccurs="unbounded" />

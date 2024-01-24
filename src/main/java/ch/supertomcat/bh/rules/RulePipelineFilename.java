@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.rules;
 
 import ch.supertomcat.bh.exceptions.HostException;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
@@ -42,7 +43,8 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 		RuleDownloadContainerPageSupplier<RuleHtmlCode> htmlCodeDownloadSupplier = () -> {
 			String url = ruleContext.getContainerURL();
 			String referrer = ruleContext.getReferrer();
-			String downloadedHtmlCode = ruleContext.downloadContainerPage(url, referrer, null);
+			DownloadContainerPageOptions downloadContainerPageOptions = ruleContext.createDefaultDownloadContainerPageOptions(false);
+			String downloadedHtmlCode = ruleContext.downloadContainerPage(url, referrer, downloadContainerPageOptions);
 			return new RuleHtmlCode(downloadedHtmlCode, url, referrer);
 		};
 		return getCorrectedFilename(ruleContext.getContainerURL(), ruleContext.getPipelineURL(), ruleContext.getThumbURL(), ruleContext.getPipelineResult(), ruleContext

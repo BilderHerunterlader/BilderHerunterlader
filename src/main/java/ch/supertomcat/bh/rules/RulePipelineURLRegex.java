@@ -72,9 +72,9 @@ public class RulePipelineURLRegex extends RuleURLPipeline<URLRegexPipeline> {
 	@Override
 	public String downloadContainerPage(RuleContext ruleContext, int step) throws HostException {
 		if (definition.getMode() == URLRegexPipelineMode.CONTAINER_PAGE_SOURCECODE) {
-			boolean sendCookies = definition.isSendCookies();
 			String pipelineURL = ruleContext.getPipelineURL();
-			String htmlCode = ruleContext.downloadContainerPage(pipelineURL, ruleContext.getPipelineReferrer(), new DownloadContainerPageOptions(sendCookies, true));
+			DownloadContainerPageOptions downloadContainerPageOptions = ruleContext.createDefaultDownloadContainerPageOptions(true);
+			String htmlCode = ruleContext.downloadContainerPage(pipelineURL, ruleContext.getPipelineReferrer(), downloadContainerPageOptions);
 			if (logger.isDebugEnabled()) {
 				logger.debug("{} -> {} -> Download Container-Page done -> Result: {}", ruleContext.getRuleName(), pipelineURL, htmlCode);
 			} else {

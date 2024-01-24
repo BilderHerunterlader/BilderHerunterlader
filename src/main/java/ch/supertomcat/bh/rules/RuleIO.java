@@ -69,7 +69,6 @@ public class RuleIO {
 		unmarshallerValidated.setSchema(schema);
 
 		marshaller = jaxbContext.createMarshaller();
-		marshaller.setSchema(schema);
 		marshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 	}
 
@@ -82,7 +81,9 @@ public class RuleIO {
 	 * @throws JAXBException
 	 */
 	public RuleDefinition readRule(String file) throws IOException, JAXBException {
-		return readRuleNewFormat(file);
+		RuleDefinition ruleDefinition = readRuleNewFormat(file);
+		applyDefinitionUpdate(ruleDefinition);
+		return ruleDefinition;
 	}
 
 	/**
@@ -129,6 +130,18 @@ public class RuleIO {
 			synchronized (unmarshaller) {
 				return unmarshaller.unmarshal(new StreamSource(in), RuleDefinition.class).getValue();
 			}
+		}
+	}
+
+	/**
+	 * If the rule format changed, then there might be some values to set after the rule was read from the file. This method should set everything, which is
+	 * necessary.
+	 * 
+	 * @param ruleDefinition Rule Definition
+	 */
+	private void applyDefinitionUpdate(RuleDefinition ruleDefinition) {
+		if (ruleDefinition.getUserAgent() == null) {
+			ruleDefinition.setUserAgent("");
 		}
 	}
 

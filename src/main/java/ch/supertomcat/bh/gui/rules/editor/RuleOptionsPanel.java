@@ -31,6 +31,16 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 	private JCheckBox chkSendCookies = new JCheckBox(Localization.getString("RulePipelineSendCookies"), true);
 
 	/**
+	 * Label
+	 */
+	private JLabel lblUserAgent = new JLabel(Localization.getString("UserAgent"));
+
+	/**
+	 * TextField
+	 */
+	private JTextField txtUserAgent = new JTextField(80);
+
+	/**
 	 * ComboBox
 	 */
 	private JComboBox<DuplicateRemoveMode> cbDuplicateRemoveMode = new JComboBox<>();
@@ -106,7 +116,8 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 		txtCustomReferrer.setText(rule.getCustomReferrer());
 		txtCustomReferrerDownload.setText(rule.getDownloadCustomReferrer());
 
-		chkSendCookies.setSelected(this.rule.isSendCookies());
+		chkSendCookies.setSelected(rule.isSendCookies());
+		txtUserAgent.setText(rule.getUserAgent());
 
 		Map<DuplicateRemoveMode, String> duplicateRemoveModeLocalizationStrings = new HashMap<>();
 		duplicateRemoveModeLocalizationStrings.put(DuplicateRemoveMode.DEFAULT, "DuplicatesBHDefault");
@@ -157,6 +168,11 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, chkSendCookies, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblUserAgent, this);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, txtUserAgent, this);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblDuplicateRemoveMode, this);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbDuplicateRemoveMode, this);
@@ -199,6 +215,7 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 	@Override
 	public boolean apply() {
 		rule.setSendCookies(chkSendCookies.isSelected());
+		rule.setUserAgent(txtUserAgent.getText());
 		rule.setReferrerMode((ReferrerMode)cbReferrerMode.getSelectedItem());
 		rule.setDownloadReferrerMode((ReferrerMode)cbReferrerModeDownload.getSelectedItem());
 		rule.setCustomReferrer(txtCustomReferrer.getText());
@@ -210,6 +227,7 @@ public class RuleOptionsPanel extends JPanel implements RuleEditorPart {
 	@Override
 	public void redirectEnabled(boolean enabled) {
 		chkSendCookies.setEnabled(!enabled);
+		txtUserAgent.setEnabled(!enabled);
 
 		cbDuplicateRemoveMode.setEnabled(!enabled);
 		lblDuplicateRemoveMode.setEnabled(!enabled);

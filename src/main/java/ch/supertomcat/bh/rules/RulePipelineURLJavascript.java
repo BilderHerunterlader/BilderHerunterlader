@@ -15,6 +15,7 @@ import org.mozilla.javascript.ScriptableObject;
 
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
@@ -213,7 +214,8 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		 */
 		@SuppressWarnings("unused")
 		public String downloadContainerPage(String url, String referrer) throws HostException {
-			return ruleContext.downloadContainerPage(url, referrer, null);
+			DownloadContainerPageOptions downloadContainerPageOptions = ruleContext.createDefaultDownloadContainerPageOptions(false);
+			return ruleContext.downloadContainerPage(url, referrer, downloadContainerPageOptions);
 		}
 
 		@Override

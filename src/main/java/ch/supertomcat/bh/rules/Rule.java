@@ -274,6 +274,10 @@ public class Rule extends Hoster {
 		}
 
 		upo.addInfo(URLParseObject.SEND_COOKIES, definition.isSendCookies());
+		String userAgent = definition.getUserAgent();
+		if (userAgent != null && !userAgent.isEmpty()) {
+			upo.addInfo(URLParseObject.USE_USER_AGENT, userAgent);
+		}
 		upo.addInfo(URLParseObject.REDUCE_PATH_LENGTH, definition.isReducePathLength());
 		upo.addInfo(URLParseObject.REDUCE_FILENAME_LENGTH, definition.isReduceFilenameLength());
 

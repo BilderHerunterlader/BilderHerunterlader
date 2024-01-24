@@ -493,4 +493,18 @@ public class RuleContext {
 		return downloadContainerPageFunction.downloadContainerPage(url, referrer, options);
 	}
 
+	/**
+	 * Create Default Download Container Page Options
+	 * 
+	 * @param checkStatusCode True if status code should be checked, false otherwise
+	 * @return Default Download Container Page Options
+	 */
+	public DownloadContainerPageOptions createDefaultDownloadContainerPageOptions(boolean checkStatusCode) {
+		DownloadContainerPageOptions defaultOptions = new DownloadContainerPageOptions(definition.isSendCookies(), checkStatusCode);
+		String userAgent = definition.getUserAgent();
+		if (userAgent != null && !userAgent.isEmpty()) {
+			defaultOptions.putRequestConfig(DownloadContainerPageOptions.USER_AGENT, userAgent);
+		}
+		return defaultOptions;
+	}
 }
