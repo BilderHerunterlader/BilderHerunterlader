@@ -2062,7 +2062,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		settings.setThreadCount(sldThreadCount.getValue());
 
-		settings.setLogLevel((LogLevelSetting)cmbLogLevel.getSelectedItem());
+		settingsManager.setLogLevel((LogLevelSetting)cmbLogLevel.getSelectedItem());
 
 		HostsSettings hostsSettings = settings.getHostsSettings();
 

@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -109,9 +110,9 @@ public final class ImageExtract {
 			RequestConfig.Builder requestConfigBuilder = proxyManager.getDefaultRequestConfigBuilder();
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
-			method.setHeader("User-Agent", settingsManager.getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 			if (referrer.length() > 0) {
-				method.setHeader("Referer", referrer);
+				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 
 			BasicCookieStore cookieStore = new BasicCookieStore();

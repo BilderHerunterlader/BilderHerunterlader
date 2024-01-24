@@ -13,6 +13,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -114,7 +115,7 @@ public class ImportURL {
 		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
 			HttpGet method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", settingsManager.getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 
 			BasicCookieStore cookieStore = new BasicCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
@@ -132,7 +133,7 @@ public class ImportURL {
 				// Get the InputStream
 				try (@SuppressWarnings("resource")
 				InputStream in = response.getEntity().getContent()) {
-					if ("text/plain".equals(response.getFirstHeader("Content-Type").getValue())) {
+					if ("text/plain".equals(response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue())) {
 						logger.debug("PlainText detected: Using ImportLinkList");
 						linkListImporter.read(new BufferedReader(new InputStreamReader(in)));
 					} else {

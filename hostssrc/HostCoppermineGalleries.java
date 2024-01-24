@@ -23,6 +23,7 @@ import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
@@ -153,7 +154,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			HttpGet method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, getSettingsManager().getUserAgent());
 
 			getCookieManager().fillCookies(url, cookieStore);
 
@@ -230,7 +231,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			// Verbindung oeffnen
 			HttpGet method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, getSettingsManager().getUserAgent());
 
 			getCookieManager().fillCookies(url, cookieStore);
 

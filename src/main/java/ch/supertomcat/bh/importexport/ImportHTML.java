@@ -15,6 +15,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.w3c.dom.Document;
@@ -142,7 +143,7 @@ public class ImportHTML extends AdderImportBase {
 		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
 			// Open connection
 			HttpGet method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", settingsManager.getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 
 			BasicCookieStore cookieStore = new BasicCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();

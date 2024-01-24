@@ -12,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.apache.hc.core5.http.Header;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.HttpResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -383,7 +384,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @return Filename from content-disposition or null if not found
 	 */
 	protected String getContentDispositionFilename(HttpResponse response) {
-		Header contentDisposition = response.getFirstHeader("content-disposition");
+		Header contentDisposition = response.getFirstHeader(HttpHeaders.CONTENT_DISPOSITION);
 		if (contentDisposition == null) {
 			return null;
 		}

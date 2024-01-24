@@ -25,6 +25,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.ClassicHttpResponse;
 import org.apache.hc.core5.http.ConnectionClosedException;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.cookies.CookieManager;
@@ -231,12 +232,12 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			if (result.checkExistInfo(URLParseObject.USE_USER_AGENT, String.class)) {
 				userAgent = (String)result.getInfo(URLParseObject.USE_USER_AGENT);
 			}
-			method.setHeader("User-Agent", userAgent);
+			method.setHeader(HttpHeaders.USER_AGENT, userAgent);
 			if (result.checkExistInfo(URLParseObject.USE_REFERRER, String.class)) {
 				referrer = (String)result.getInfo(URLParseObject.USE_REFERRER);
 			}
 			if (referrer.length() > 0) {
-				method.setHeader("Referer", referrer);
+				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 			boolean sendCookies = true;
 			if (result.checkExistInfo(URLParseObject.SEND_COOKIES, Boolean.class)) {
@@ -245,7 +246,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			boolean specificCookies = false;
 			if (result.checkExistInfo(URLParseObject.USE_COOKIES, String.class)) {
 				String cookiesToUse = (String)result.getInfo(URLParseObject.USE_COOKIES);
-				method.setHeader("Cookie", cookiesToUse);
+				method.setHeader(HttpHeaders.COOKIE, cookiesToUse);
 				specificCookies = true;
 			}
 			if (sendCookies && !specificCookies) {
@@ -393,6 +394,13 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				byte[] buf = new byte[8192]; // The buffer
 				int iBWs = 0; // the amount of bytes read since last download rate calculation
 				int nReads = 0;
+				int nReadsMax;
+				if (size > 0 && size > buf.length) {
+					int halfPercentBytes = (int)(0.5f * size / 100);
+					nReadsMax = halfPercentBytes / buf.length;
+				} else {
+					nReadsMax = 12;
+				}
 				long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
 				picProgress.setBytesDownloaded(0);
 				pic.progressUpdated();
@@ -436,7 +444,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
 					out.flush();
 					nReads++;
-					if (nReads > 12) {
+					if (nReads > nReadsMax) {
 						nReads = 0;
 						// change the progressbar
 						picProgress.setBytesDownloaded(iBW);
@@ -469,6 +477,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				stopDownload(pic);
 				// Delete the file
 				deleteFile(targetContainer);
+				method.abort();
+				abortedFlag.set(true);
 				return false;
 			}
 		}

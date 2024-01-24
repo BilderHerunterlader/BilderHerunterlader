@@ -11,6 +11,7 @@ import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -238,7 +239,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		String encodedURL = HTTPUtil.encodeURL(url);
 		try (CloseableHttpClient client = getProxyManager().getHTTPClient()) {
 			HttpHead method = new HttpHead(encodedURL);
-			method.setHeader("User-Agent", getSettingsManager().getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, getSettingsManager().getUserAgent());
 
 			BasicCookieStore cookieStore = new BasicCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
@@ -253,7 +254,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 				}
 
 				// Abfrage des MIME Types
-				return response.getFirstHeader("Content-Type").getValue();
+				return response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue();
 			});
 		} catch (Exception e) {
 			throw new HostException("Could not request header for URL: " + url, e);

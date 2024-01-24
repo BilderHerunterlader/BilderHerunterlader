@@ -35,6 +35,7 @@ import javax.swing.filechooser.FileFilter;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -296,7 +297,7 @@ public class IradaTsvDialog extends JDialog {
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(txtURL.getText());
 			HttpGet method = new HttpGet(encodedURL);
-			method.setHeader("User-Agent", settingsManager.getUserAgent());
+			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 
 			client.execute(method, response -> {
 				StatusLine statusLine = new StatusLine(response);

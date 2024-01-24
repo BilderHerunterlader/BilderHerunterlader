@@ -20,6 +20,7 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.HttpEntity;
+import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.hc.core5.http.protocol.HttpContext;
@@ -443,12 +444,12 @@ public abstract class Hoster {
 			method.setConfig(requestConfigBuilder.build());
 			String userAgentConfig = options != null ? options.getRequestConfig(DownloadContainerPageOptions.USER_AGENT) : null;
 			if (userAgentConfig != null) {
-				method.setHeader("User-Agent", userAgentConfig);
+				method.setHeader(HttpHeaders.USER_AGENT, userAgentConfig);
 			} else {
-				method.setHeader("User-Agent", settingsManager.getUserAgent());
+				method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 			}
 			if (referrer != null && !referrer.isEmpty()) {
-				method.setHeader("Referer", referrer);
+				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 
 			CookieStore cookieStore;
