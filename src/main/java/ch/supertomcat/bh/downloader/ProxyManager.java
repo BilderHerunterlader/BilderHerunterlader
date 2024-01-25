@@ -10,13 +10,16 @@ import org.apache.hc.client5.http.impl.DefaultHttpRequestRetryStrategy;
 import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClientBuilder;
+import org.apache.hc.client5.http.impl.io.ManagedHttpClientConnectionFactory;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManager;
 import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuilder;
 import org.apache.hc.core5.http.HttpHost;
+import org.apache.hc.core5.http.config.Http1Config;
 import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
+import ch.supertomcat.bh.downloader.impl.HTTPFileDownloader;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
@@ -29,6 +32,11 @@ import ch.supertomcat.bh.settings.xml.ProxySettings;
  * in the hole program the proxysettings can be used.
  */
 public class ProxyManager {
+	/**
+	 * Buffer Size (Should be set to the same as in {@link HTTPFileDownloader}
+	 */
+	private static final int BUFFER_SIZE = 65536;
+
 	/**
 	 * Mode
 	 */
@@ -79,10 +87,18 @@ public class ProxyManager {
 		// Get the configuration
 		readFromSettings();
 
+		/*
+		 * Custom Socket and Connection config to fix slow uploads. By default apache httpclient only uses 8192 byte frames for sending, which makes uploads
+		 * slow.
+		 */
+		Http1Config http1Config = Http1Config.custom().setBufferSize(BUFFER_SIZE).setChunkSizeHint(BUFFER_SIZE).build();
+		ManagedHttpClientConnectionFactory connectionFactory = ManagedHttpClientConnectionFactory.builder().http1Config(http1Config).build();
+
 		PoolingHttpClientConnectionManagerBuilder conManagerBuilder = PoolingHttpClientConnectionManagerBuilder.create();
-		conManagerBuilder.setMaxConnTotal(60);
+		conManagerBuilder.setMaxConnTotal(120);
 		conManagerBuilder.setMaxConnPerRoute(30);
-		conManagerBuilder.setDefaultSocketConfig(SocketConfig.custom().setSndBufSize(65536).build());
+		conManagerBuilder.setDefaultSocketConfig(SocketConfig.custom().setSndBufSize(BUFFER_SIZE).setRcvBufSize(BUFFER_SIZE).build());
+		conManagerBuilder.setConnectionFactory(connectionFactory);
 
 		conManagerBuilder.setDefaultConnectionConfig(createConnectionConfig());
 

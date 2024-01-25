@@ -56,6 +56,11 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
  */
 public class HTTPFileDownloader extends FileDownloaderBase {
 	/**
+	 * Buffer Size (Should be set to the same as in {@link ProxyManager}
+	 */
+	private static final int BUFFER_SIZE = 65536;
+
+	/**
 	 * Shared Cookie Store
 	 */
 	private static final BasicCookieStore sharedCookieStore = new BasicCookieStore();
@@ -379,7 +384,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		picProgress.setBytesTotal(size);
 		pic.progressUpdated();
 
-		long iBW = 0; // the amount of bytes we read since started downloading
+		long totalBytesRead = 0; // the amount of bytes we read since started downloading
 
 		// Now get the inputstream and outputstream
 		try (@SuppressWarnings("resource")
@@ -390,17 +395,23 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			 */
 			try (FileOutputStream out = new FileOutputStream(targetContainer.getTarget())) {
 				// Read some bytes to a buffer and write them to the outputstream
-				int n; // the amount of bytes where were read per loop course
-				byte[] buf = new byte[8192]; // The buffer
-				int iBWs = 0; // the amount of bytes read since last download rate calculation
-				int nReads = 0;
-				int nReadsMax;
-				if (size > 0 && size > buf.length) {
-					int halfPercentBytes = (int)(0.5f * size / 100);
-					nReadsMax = halfPercentBytes / buf.length;
+				int bytesRead; // the amount of bytes where were read per loop course
+				byte[] buffer = new byte[BUFFER_SIZE]; // The buffer
+
+				int maxBytesUntilProgressUpdate = 100 * 1024;
+				int maxReadCountUntilProgressUpdate;
+				if (maxBytesUntilProgressUpdate >= BUFFER_SIZE) {
+					maxReadCountUntilProgressUpdate = Math.floorDiv(maxBytesUntilProgressUpdate, BUFFER_SIZE);
+					if (maxReadCountUntilProgressUpdate < 1) {
+						maxReadCountUntilProgressUpdate = 1;
+					}
 				} else {
-					nReadsMax = 12;
+					maxReadCountUntilProgressUpdate = 1;
 				}
+
+				int readCountSinceLastProgressUpdate = 0;
+				int bytesReadSinceLastDownloadRateCalculation = 0; // the amount of bytes read since last download rate calculation
+
 				long timeStarted = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // current timestamp
 				picProgress.setBytesDownloaded(0);
 				pic.progressUpdated();
@@ -416,7 +427,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 */
 				boolean downloadRate = settingsManager.getGUISettings().isDownloadRate();
 				// Ok, now start downloading
-				while ((n = in.read(buf)) > 0) {
+				while ((bytesRead = in.read(buffer)) > 0) {
 					/*
 					 * Old:
 					 * I commented this out, because when downloading from rapidshare
@@ -439,15 +450,15 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						logger.info("Aborting download: exit download loop");
 						break;
 					}
-					iBW += n;
-					iBWs += n;
-					out.write(buf, 0, n); // Write the bytes in the buffer to the outputstream
+					totalBytesRead += bytesRead;
+					bytesReadSinceLastDownloadRateCalculation += bytesRead;
+					out.write(buffer, 0, bytesRead); // Write the bytes in the buffer to the outputstream
 					out.flush();
-					nReads++;
-					if (nReads > nReadsMax) {
-						nReads = 0;
+					readCountSinceLastProgressUpdate++;
+					if (readCountSinceLastProgressUpdate > maxReadCountUntilProgressUpdate) {
+						readCountSinceLastProgressUpdate = 0;
 						// change the progressbar
-						picProgress.setBytesDownloaded(iBW);
+						picProgress.setBytesDownloaded(totalBytesRead);
 						picProgress.setUrlCount(urlCount);
 						picProgress.setCurrentURLIndex(currentURL);
 						pic.progressUpdated();
@@ -456,7 +467,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						// the flag is set to true, so we recalculate the download rate
 						long now = TimeUnit.MILLISECONDS.convert(System.nanoTime(), TimeUnit.NANOSECONDS); // get current timestamp
 						// get the string for the rate
-						double downloadBitrate = UnitFormatUtil.getBitrate(iBWs, size, timeStarted, now);
+						double downloadBitrate = UnitFormatUtil.getBitrate(bytesReadSinceLastDownloadRateCalculation, size, timeStarted, now);
 						picProgress.setRate(downloadBitrate);
 
 						/*
@@ -464,7 +475,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 						 * just an average over all the time
 						 */
 						timeStarted = now; // set this variable to current timestamp
-						iBWs = 0; // set bytes read since last calculation to 0
+						bytesReadSinceLastDownloadRateCalculation = 0; // set bytes read since last calculation to 0
 						pic.rateRecalculated();
 					}
 				}
@@ -498,9 +509,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		// If the user doesn't stopped the download
-		boolean downloadFailed = ((size > 0) && (iBW != size)) || (iBW < settingsManager.getDownloadsSettings().getMinFileSize());
+		boolean downloadFailed = ((size > 0) && (totalBytesRead != size)) || (totalBytesRead < settingsManager.getDownloadsSettings().getMinFileSize());
 		if (downloadFailed) {
-			if ((size > 0) && (iBW != size)) {
+			if ((size > 0) && (totalBytesRead != size)) {
 				/*
 				 * if we got a filesize, but the filesize does
 				 * not equals the bytes we read, we didn't read
@@ -509,7 +520,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 */
 				failDownload(pic, result, false, Localization.getString("ErrorFilesizeNotMatchBytesRead"));
 				logger.error("Download failed (Too many or to less bytes were downloaded): '{}'", pic.getContainerURL());
-			} else if (iBW < settingsManager.getDownloadsSettings().getMinFileSize()) {
+			} else if (totalBytesRead < settingsManager.getDownloadsSettings().getMinFileSize()) {
 				/*
 				 * The user can set in an options, which defines a minimum filesize.
 				 * If the file here is to small
@@ -528,7 +539,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		/*
 		 * If we get here, everything is fine
 		 */
-		pic.setSize(iBW);
+		pic.setSize(totalBytesRead);
 
 		/*
 		 * The user can set subdirs for specific filesize-ranges
