@@ -373,7 +373,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * Label
 	 */
-	private JLabel lblCookies = new JLabel(Localization.getString("Cookies"));
+	private JLabel lblCookies = new JLabel(Localization.getString("CookieFromBrowser"));
 
 	/**
 	 * ComboBox
@@ -484,6 +484,11 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	 * CheckBox
 	 */
 	private JCheckBox cbCookieDatabase = new JCheckBox(Localization.getString("CookieDatabase"), false);
+
+	/**
+	 * Button
+	 */
+	private JButton btnDeleteAllCookies = new JButton(Localization.getString("DeleteAllCookiesInDatabase"));
 
 	/**
 	 * ButtonGroup
@@ -1180,6 +1185,14 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		btnCookiesPaleMoon.addActionListener(this);
 		cbCookiesPaleMoonFixed.addItemListener(this);
 
+		btnDeleteAllCookies.addActionListener(e -> {
+			int retval = JOptionPane.showConfirmDialog(this, Localization.getString("ReallyDeleteAllCookies"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (retval == JOptionPane.NO_OPTION) {
+				return;
+			}
+			cookieManager.deleteAllCookiesInDatabase();
+		});
+
 		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ASCII_ONLY);
 		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ASCII_UMLAUT);
 		cmbAllowedFilenameChars.addItem(AllowedFilenameCharacters.ALL);
@@ -1366,6 +1379,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, cbCookieDatabase, pnlConnection);
+		gbc = gblt.getGBC(1, i, 3, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, btnDeleteAllCookies, pnlConnection);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblConnection, gbc, lblDefaultUserAgent, pnlConnection);

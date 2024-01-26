@@ -53,9 +53,14 @@ public class CookieManager {
 	private final CookiesSQLiteDB cookiesSQLiteDB;
 
 	/**
-	 * Cookie Store
+	 * Cookie Store with cookies from Database
 	 */
-	private final CookieStore cookieStore = new BasicCookieStore();
+	private final CookieStore databaseCookieStore = new BasicCookieStore();
+
+	/**
+	 * Shared Cookie Store without cookies from database
+	 */
+	private final BasicCookieStore sharedCookieStore = new BasicCookieStore();
 
 	/**
 	 * Constructor
@@ -69,7 +74,7 @@ public class CookieManager {
 
 		List<BHCookie> cookiesFromDB = cookiesSQLiteDB.getAllEntries();
 		for (BHCookie bhCookie : cookiesFromDB) {
-			cookieStore.addCookie(bhCookie.getCookie());
+			databaseCookieStore.addCookie(bhCookie.getCookie());
 		}
 	}
 
@@ -79,7 +84,27 @@ public class CookieManager {
 	 * @return cookieStore
 	 */
 	public CookieStore getCookieStore() {
-		return cookieStore;
+		/*
+		 * If cookies from Browser are not used, then we can use a shared cookie store for all downloads. If cookies from browser is enabled then use a new
+		 * instance, because the purpose is to use current cookies from browser, but it will only fill cookies, which do not exist yet, so for this to work as
+		 * intended, we need to use a new and empty cookie store.
+		 */
+		if (settingsManager.getConnectionSettings().getBrowserCookiesMode() == BrowserCookiesMode.NO_COOKIES) {
+			if (settingsManager.getConnectionSettings().isCookieDatabase()) {
+				return databaseCookieStore;
+			} else {
+				return sharedCookieStore;
+			}
+		} else {
+			return new BasicCookieStore();
+		}
+	}
+
+	/**
+	 * Delete all cookies in database (Note: This method does not delete any cookies in the cookie store)
+	 */
+	public void deleteAllCookiesInDatabase() {
+		cookiesSQLiteDB.deleteAllEntries();
 	}
 
 	/**
@@ -87,7 +112,7 @@ public class CookieManager {
 	 */
 	private void saveDatabase() {
 		cookiesSQLiteDB.deleteAllEntries();
-		List<BHCookie> bhCookies = cookieStore.getCookies().stream().filter(Cookie::isPersistent).map(BHCookie::new).collect(Collectors.toList());
+		List<BHCookie> bhCookies = databaseCookieStore.getCookies().stream().filter(Cookie::isPersistent).map(BHCookie::new).collect(Collectors.toList());
 		cookiesSQLiteDB.insertEntries(bhCookies);
 	}
 
@@ -101,14 +126,26 @@ public class CookieManager {
 	}
 
 	/**
-	 * Fill cookies to cookie store. Already existing cookies in the store will not be overwritten.
+	 * Fill cookies from browser to cookie store. Already existing cookies in the store will not be overwritten.
 	 * 
 	 * @param url URL
 	 * @param cookieStore Cookie Store
 	 */
 	public void fillCookies(String url, CookieStore cookieStore) {
-		List<Cookie> cookiesInStore = cookieStore.getCookies();
+		if (cookieStore == databaseCookieStore || cookieStore == sharedCookieStore) {
+			/*
+			 * Prevent cookies from browser to be filled into database cookie store or shared cookie store. This could happen if the setting if cookies from
+			 * browser should be used is changed during running downloads.
+			 */
+			return;
+		}
+
 		List<BasicClientCookie> cookiesToFill = getBrowserCookies(url);
+		if (cookiesToFill.isEmpty()) {
+			return;
+		}
+
+		List<Cookie> cookiesInStore = cookieStore.getCookies();
 		Predicate<Cookie> cookieAlreadyExistsPredicate = cookieToFill -> cookiesInStore.stream().anyMatch(cookieInStore -> CookieIdentityComparator.INSTANCE.compare(cookieToFill, cookieInStore) == 0);
 		cookiesToFill.removeIf(cookieAlreadyExistsPredicate);
 		for (BasicClientCookie cookie : cookiesToFill) {

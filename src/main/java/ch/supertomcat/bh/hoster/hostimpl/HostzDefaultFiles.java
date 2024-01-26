@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpHead;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -241,7 +241,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 			HttpHead method = new HttpHead(encodedURL);
 			method.setHeader(HttpHeaders.USER_AGENT, getSettingsManager().getUserAgent());
 
-			BasicCookieStore cookieStore = new BasicCookieStore();
+			CookieStore cookieStore = getCookieManager().getCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
 			getCookieManager().fillCookies(url, cookieStore);
 

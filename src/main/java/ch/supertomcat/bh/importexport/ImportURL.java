@@ -10,7 +10,7 @@ import javax.swing.JOptionPane;
 
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -117,7 +117,7 @@ public class ImportURL {
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
 
-			BasicCookieStore cookieStore = new BasicCookieStore();
+			CookieStore cookieStore = cookieManager.getCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
 			cookieManager.fillCookies(url, cookieStore);
 

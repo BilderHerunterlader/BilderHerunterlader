@@ -19,7 +19,6 @@ import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
@@ -42,7 +41,6 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.options.Subdir;
-import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
@@ -59,11 +57,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 * Buffer Size (Should be set to the same as in {@link ProxyManager}
 	 */
 	private static final int BUFFER_SIZE = 65536;
-
-	/**
-	 * Shared Cookie Store
-	 */
-	private static final BasicCookieStore sharedCookieStore = new BasicCookieStore();
 
 	/**
 	 * Proxy Manager
@@ -92,32 +85,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 	@Override
 	public void downloadFile(Pic pic) throws HostException {
-		/*
-		 * TODO Maybe the shared BasicCookieStore would have to be extended,
-		 * just to know a global store is used and this way by instanceof check it could be prevented to load cookies from browser into that store (this could
-		 * happen if the setting was changed, when download are running). We could
-		 * check here how the setting is and fill either global cookiestore or a new one into the context.
-		 * 
-		 * TODO Maybe it would even make sense to store cookies (only persitent cookies) to an sqlite database, like browsers do. Not sure how this could be
-		 * implemented in a good way. BasicCookieStore could be extended and it would be possible to store cookies to a file, when was was added or deleted. But
-		 * there is no way to know if a cookie was actually added. So it would probably be inefficient like that. But maybe the cookies could be stored from
-		 * time to time. Or only when BH exits, probably the most efficient way.
-		 */
-		CookieStore cookieStore;
-		/*
-		 * If cookies from Browser are not used, then we can use a shared cookie store for all downloads. If cookies from browser is enabled then use a new
-		 * instance, because the purpose is to use current cookies from browser, but it will only fill cookies, which do not exist yet, so for this to work as
-		 * intended, we need to use a new and empty cookie store.
-		 */
-		if (settingsManager.getConnectionSettings().getBrowserCookiesMode() == BrowserCookiesMode.NO_COOKIES) {
-			if (settingsManager.getConnectionSettings().isCookieDatabase()) {
-				cookieStore = cookieManager.getCookieStore();
-			} else {
-				cookieStore = sharedCookieStore;
-			}
-		} else {
-			cookieStore = new BasicCookieStore();
-		}
+		CookieStore cookieStore = cookieManager.getCookieStore();
 		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
 
 		URLParseObject upo = createURLParseObject(pic);

@@ -124,7 +124,7 @@
 			<xs:element name="browserCookiesFirefox" type="BrowserCookiesSetting" />
 			<xs:element name="browserCookiesPaleMoon" type="BrowserCookiesSetting" />
 			
-			<xs:element name="cookieDatabase" type="xs:boolean" default="false" />
+			<xs:element name="cookieDatabase" type="xs:boolean" default="true" />
 		</xs:sequence>
 	</xs:complexType>
 

@@ -10,7 +10,7 @@ import java.util.List;
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.config.RequestConfig;
-import org.apache.hc.client5.http.cookie.BasicCookieStore;
+import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.core5.http.HttpHeaders;
@@ -115,7 +115,7 @@ public final class ImageExtract {
 				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 
-			BasicCookieStore cookieStore = new BasicCookieStore();
+			CookieStore cookieStore = cookieManager.getCookieStore();
 			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
 			cookieManager.fillCookies(url, cookieStore);
 
