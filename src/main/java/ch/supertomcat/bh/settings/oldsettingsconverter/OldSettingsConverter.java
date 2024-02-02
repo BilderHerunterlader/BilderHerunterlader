@@ -439,33 +439,26 @@ public class OldSettingsConverter {
 			proxySettings.setAuth(proxyauth);
 
 			// Cookies
-			boolean cookiesFromBrowserEnabled;
 			int cfb = readIntValue("Connection.cookiesFromBrowser", root, -1);
 			switch (cfb) {
 				case BROWSER_IE:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.BROWSER_IE);
-					cookiesFromBrowserEnabled = true;
 					break;
 				case BROWSER_FIREFOX:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.BROWSER_FIREFOX);
-					cookiesFromBrowserEnabled = true;
 					break;
 				case BROWSER_OPERA:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.BROWSER_OPERA);
-					cookiesFromBrowserEnabled = true;
 					break;
 				case BROWSER_PALE_MOON:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.BROWSER_PALE_MOON);
-					cookiesFromBrowserEnabled = true;
 					break;
 				case BROWSER_OPERA_NEW:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.BROWSER_OPERA_NEW);
-					cookiesFromBrowserEnabled = true;
 					break;
 				case BROWSER_NO_COOKIES:
 				default:
 					connectionSettings.setBrowserCookiesMode(BrowserCookiesMode.NO_COOKIES);
-					cookiesFromBrowserEnabled = false;
 					break;
 			}
 
@@ -493,11 +486,7 @@ public class OldSettingsConverter {
 			palemoonBrowserCookiesSetting.setCookieFile(cookieFilePaleMoon);
 			palemoonBrowserCookiesSetting.setCookieFileFixed(cookieFilePaleMoonFixed);
 
-			if (cookiesFromBrowserEnabled) {
-				connectionSettings.setCookieDatabase(false);
-			} else {
-				connectionSettings.setCookieDatabase(true);
-			}
+			connectionSettings.setCookieDatabase(true);
 
 			// User-Agent
 			String userAgent = readStringValue("Connection.userAgent", root, connectionSettings.getUserAgent());
