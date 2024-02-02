@@ -11,7 +11,7 @@ import java.util.ArrayList;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
-import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.base.AdderImportBase;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -139,7 +139,7 @@ public class ImportLinkList extends AdderImportBase {
 
 			if (urls.size() > 0) {
 				// Open Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+				AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init();
 			}
 

@@ -21,7 +21,7 @@ import javax.swing.KeyStroke;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.downloader.ProxyManager;
-import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.log.LogManager;
@@ -203,7 +203,7 @@ public class DownloadAddDialog extends JDialog {
 						urls.add(urlToAdd);
 					}
 
-					AdderPanel adderpnl = new AdderPanel(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
+					AdderWindow adderpnl = new AdderWindow(getOwner(), new URLList(Localization.getString("Unkown") + ": " + Localization.getString("Title"), Localization.getString("Unkown") + ": "
 							+ Localization.getString("Referrer"), urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 					adderpnl.init();
 				}

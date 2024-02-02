@@ -27,7 +27,7 @@ import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
-import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.linkextract.ImageExtract;
 import ch.supertomcat.bh.hoster.linkextract.LinkExtract;
@@ -108,7 +108,7 @@ public class ImportHTML extends AdderImportBase {
 				}
 
 				// Open the Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+				AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init(); // We need to do this!
 				adderpnl = null;
 
@@ -204,7 +204,7 @@ public class ImportHTML extends AdderImportBase {
 		}
 
 		// Open the Dialog
-		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+		AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
 	}
 
@@ -224,7 +224,7 @@ public class ImportHTML extends AdderImportBase {
 		}
 
 		// Open the Dialog
-		AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+		AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 		adderpnl.init(); // We need to do this!
 	}
 

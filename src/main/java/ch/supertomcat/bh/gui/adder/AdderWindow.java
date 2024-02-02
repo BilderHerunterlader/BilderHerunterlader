@@ -124,7 +124,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 /**
  * Panel for selecting files to download
  */
-public class AdderPanel extends JFrame implements ActionListener {
+public class AdderWindow extends JFrame implements ActionListener {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -549,7 +549,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager, SettingsManager settingsManager,
+	public AdderWindow(Component parent, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager, SettingsManager settingsManager,
 			HostManager hostManager, ClipboardObserver clipboardObserver) {
 		this(parent, false, urlList, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 	}
@@ -568,7 +568,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 	 * @param hostManager Host Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public AdderPanel(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
+	public AdderWindow(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
 			SettingsManager settingsManager, HostManager hostManager, ClipboardObserver clipboardObserver) {
 		super(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("DownloadSelection"));
 		this.localFiles = localFiles;
@@ -2099,7 +2099,7 @@ public class AdderPanel extends JFrame implements ActionListener {
 
 			if (urls.isEmpty()) {
 				toFront();
-				JOptionPane.showMessageDialog(AdderPanel.this, Localization.getString("NoPicsFound"), "Error", JOptionPane.ERROR_MESSAGE);
+				JOptionPane.showMessageDialog(AdderWindow.this, Localization.getString("NoPicsFound"), "Error", JOptionPane.ERROR_MESSAGE);
 				dispose();
 				return;
 			}

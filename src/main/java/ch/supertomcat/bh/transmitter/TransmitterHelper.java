@@ -16,7 +16,7 @@ import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.MainWindowAccess;
-import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.importexport.ImportLinkList;
 import ch.supertomcat.bh.importexport.ImportURL;
@@ -286,7 +286,7 @@ public class TransmitterHelper {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog
-				AdderPanel adderpnl = new AdderPanel(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+				AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init();
 				logger.info("Handled Connection successfully");
 			}

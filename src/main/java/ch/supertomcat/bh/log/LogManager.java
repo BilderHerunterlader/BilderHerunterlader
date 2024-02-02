@@ -31,7 +31,7 @@ import java.util.regex.Pattern;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import ch.supertomcat.bh.gui.adder.AdderPanel;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
@@ -157,7 +157,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param urls Container URLs
 	 * @param ap AdderPanel
 	 */
-	public synchronized void searchBlacklist(List<URL> urls, AdderPanel ap) {
+	public synchronized void searchBlacklist(List<URL> urls, AdderWindow ap) {
 		File file = new File(blacklistFile);
 		if (!file.exists()) {
 			return;
@@ -211,7 +211,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param urls Container URLs
 	 * @param ap AdderPanel
 	 */
-	public synchronized void searchLogs(List<URL> urls, AdderPanel ap) {
+	public synchronized void searchLogs(List<URL> urls, AdderWindow ap) {
 		File file = new File(logFile);
 		if (!file.exists()) {
 			return;

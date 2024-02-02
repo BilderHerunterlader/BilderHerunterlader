@@ -35,7 +35,7 @@ import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
 import ch.supertomcat.bh.gui.Icons;
-import ch.supertomcat.bh.gui.Main;
+import ch.supertomcat.bh.gui.MainWindow;
 import ch.supertomcat.bh.gui.update.UpdateListener;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -83,7 +83,7 @@ public abstract class BH {
 	/**
 	 * Main-Window
 	 */
-	private Main main;
+	private MainWindow main;
 
 	/**
 	 * Udpate-Window
@@ -294,7 +294,7 @@ public abstract class BH {
 		executor.shutdown();
 
 		ClipboardObserver clipboardObserver = new ClipboardObserver(settingsManager);
-		main = new Main(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, proxyManager, cookieManager, hostManager, clipboardObserver, guiEvent);
+		main = new MainWindow(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, proxyManager, cookieManager, hostManager, clipboardObserver, guiEvent);
 		if (SystemTrayTool.isTraySupported()) {
 			/*
 			 * We can only use the SystemTray on Java 1.6 or above and the user wants this

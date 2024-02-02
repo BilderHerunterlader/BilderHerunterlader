@@ -57,7 +57,7 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 /**
  * Main-Window
  */
-public class Main extends JFrame implements ChangeListener, ComponentListener, WindowListener, KeywordManagerListener, MouseListener, MainWindowAccess {
+public class MainWindow extends JFrame implements ChangeListener, ComponentListener, WindowListener, KeywordManagerListener, MouseListener, MainWindowAccess {
 	/**
 	 * UID
 	 */
@@ -152,7 +152,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	 * @param clipboardObserver Clipboard Observer
 	 * @param guiEvent GUI Event
 	 */
-	public Main(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager, ProxyManager proxyManger,
+	public MainWindow(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager, ProxyManager proxyManger,
 			CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
 		this.settingsManager = settingsManager;
 		this.guiEvent = guiEvent;
@@ -196,7 +196,7 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 								String referrer = Localization.getString("Unkown");
 								byte[] stringBytes = sbData.toString().getBytes();
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
-								new ImportHTML(Main.this, Main.this, logManager, queueManager, keywordManager, proxyManger, settingsManager, hostManager, cookieManager, clipboardObserver)
+								new ImportHTML(MainWindow.this, MainWindow.this, logManager, queueManager, keywordManager, proxyManger, settingsManager, hostManager, cookieManager, clipboardObserver)
 										.importHTML(bais, referrer, title);
 								br.close();
 								e.dropComplete(true);
@@ -262,17 +262,17 @@ public class Main extends JFrame implements ChangeListener, ComponentListener, W
 	@Override
 	public void componentMoved(ComponentEvent e) {
 		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		mainWindowSettings.setX(Main.this.getX());
-		mainWindowSettings.setY(Main.this.getY());
+		mainWindowSettings.setX(MainWindow.this.getX());
+		mainWindowSettings.setY(MainWindow.this.getY());
 		settingsManager.writeSettings(true);
 	}
 
 	@Override
 	public void componentResized(ComponentEvent e) {
 		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		mainWindowSettings.setWidth(Main.this.getWidth());
-		mainWindowSettings.setHeight(Main.this.getHeight());
-		mainWindowSettings.setState(Main.this.getExtendedState());
+		mainWindowSettings.setWidth(MainWindow.this.getWidth());
+		mainWindowSettings.setHeight(MainWindow.this.getHeight());
+		mainWindowSettings.setState(MainWindow.this.getExtendedState());
 		settingsManager.writeSettings(true);
 	}
 
