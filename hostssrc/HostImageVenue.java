@@ -20,13 +20,13 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.6
+ * @version 4.7
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.6";
+	public static final String VERSION = "4.7";
 
 	/**
 	 * Name dieser Klasse
@@ -70,13 +70,13 @@ public class HostImageVenue extends Host implements IHoster {
 
 		urlAlternativePattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/ME[0-9A-Z]+$");
 		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?full=1\"", "");
-		regexAlternativeImage2 = new RuleRegExp("<img src=\"(.+?)\"", "$1");
+		regexAlternativeImage2 = new RuleRegExp("(?s)<img src=\"(.+?)\".+?(?:id=\"main-image\"|alt=\".+?\")", "$1");
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
 		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
 
 		urlAlternative2Pattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/view/[a-z]\\?i=(.+?)&h=img[0-9]+&l=loc[0-9]+$");
 
-		regexAlternativeFilename = new RuleRegExp("<img src=\".+?\" alt=\"(.+?)\"", "$1");
+		regexAlternativeFilename = new RuleRegExp("(?s)<img src=\".+?\".+?alt=\"(.+?)\"", "$1");
 		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
 		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
 

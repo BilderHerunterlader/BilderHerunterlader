@@ -58,6 +58,7 @@ class RulesTest {
 		}
 
 		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
+		settingsManager.readSettings();
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);
 		hostManager = new HostManager(null, new RestrictionAccess() {
