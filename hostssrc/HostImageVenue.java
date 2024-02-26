@@ -70,13 +70,13 @@ public class HostImageVenue extends Host implements IHoster {
 
 		urlAlternativePattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/ME[0-9A-Z]+$");
 		regexAlternativeImage1 = new RuleRegExp("<a href=\".+?full=1\"", "");
-		regexAlternativeImage2 = new RuleRegExp("(?s)<img src=\"(.+?)\".+?(?:id=\"main-image\"|alt=\".+?\")", "$1");
+		regexAlternativeImage2 = new RuleRegExp("(?s)<img src=\"([^\"]+)\" (?:id=\"main-image\")?[^>]+alt=\".+?\"", "$1");
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
 		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
 
 		urlAlternative2Pattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/view/[a-z]\\?i=(.+?)&h=img[0-9]+&l=loc[0-9]+$");
 
-		regexAlternativeFilename = new RuleRegExp("(?s)<img src=\".+?\".+?alt=\"(.+?)\"", "$1");
+		regexAlternativeFilename = new RuleRegExp("(?s)<img src=\"[^\"]+\" (?:id=\"main-image\")?[^>]+alt=\"(.+?)\"", "$1");
 		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
 		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
 
