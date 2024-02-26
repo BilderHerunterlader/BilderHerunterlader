@@ -12,6 +12,8 @@ import ch.supertomcat.bh.exceptions.HostFileNotExistException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
+import ch.supertomcat.bh.hoster.containerpage.ContainerPage;
+import ch.supertomcat.bh.hoster.containerpage.DownloadContainerPageOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.RuleRegExp;
@@ -59,6 +61,8 @@ public class HostImageVenue extends Host implements IHoster {
 
 	private RuleRegExp regexContinue = new RuleRegExp();
 
+	private RuleRegExp regexImageNotExist = new RuleRegExp();
+
 	/**
 	 * Konstruktor
 	 */
@@ -74,13 +78,15 @@ public class HostImageVenue extends Host implements IHoster {
 		pipeAlternativeImage.addRegExp(regexAlternativeImage1);
 		pipeAlternativeImage.addRegExp(regexAlternativeImage2);
 
-		urlAlternative2Pattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/view/[a-z]\\?i=(.+?)&h=img[0-9]+&l=loc[0-9]+$");
+		urlAlternative2Pattern = Pattern.compile("^https?://(?:www\\.)?imagevenue\\.com/view/[a-z]/?\\?i=(.+?)&h=img[0-9]+(?:&l=loc[0-9]+)?$");
 
 		regexAlternativeFilename = new RuleRegExp("(?s)<img src=\"[^\"]+\" (?:id=\"main-image\")?[^>]+alt=\"(.+?)\"", "$1");
 		pipeAlternativeFilename.addRegExp(regexAlternativeImage1);
 		pipeAlternativeFilename.addRegExp(regexAlternativeFilename);
 
 		regexContinue.setSearch("Continue to (?:your image|ImageVenue)");
+
+		regexImageNotExist.setSearch("^https?://cdno-data.imagevenue.com/no_image.jpg$");
 	}
 
 	@Override
@@ -148,6 +154,8 @@ public class HostImageVenue extends Host implements IHoster {
 
 			String parsedURL = pipeAlternativeImage.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
 			if (!parsedURL.isEmpty()) {
+				checkImageExists(parsedURL, url, client, context);
+
 				upo.setDirectLink(parsedURL);
 				String filename = pipeAlternativeFilename.getURL(upo.getContainerURL(), upo.getThumbURL(), page, upo.getPic());
 				if (!filename.isEmpty()) {
@@ -158,6 +166,21 @@ public class HostImageVenue extends Host implements IHoster {
 			throw new HostFileNotExistException(NAME + ": Container-Page: " + e.getMessage());
 		} catch (Exception e) {
 			throw new HostIOException(NAME + ": Container-Page: " + e.getMessage(), e);
+		}
+	}
+
+	private void checkImageExists(String url, String referrer, CloseableHttpClient client, HttpClientContext context) throws HostFileNotExistException {
+		try {
+			DownloadContainerPageOptions options = new DownloadContainerPageOptions(true, false, "HEAD");
+			ContainerPage result = downloadContainerPageEx(url, referrer, options, client, context);
+			String redirectedURL = result.getRedirectedURL();
+			if (redirectedURL != null && regexImageNotExist.doPageSourcecodeSearch(redirectedURL, 0) == 0) {
+				throw new HostFileNotExistException("This image does not exist on this server");
+			}
+		} catch (HostFileNotExistException e) {
+			throw e;
+		} catch (Exception e) {
+			logger.error("{}: Container-Page: Could not check if image does exist: {}", NAME, url);
 		}
 	}
 

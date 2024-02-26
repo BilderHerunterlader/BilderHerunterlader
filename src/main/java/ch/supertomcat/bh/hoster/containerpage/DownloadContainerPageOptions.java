@@ -57,6 +57,17 @@ public class DownloadContainerPageOptions {
 	 * @param sendCookies Send Cookies
 	 * @param checkStatusCode Check Status Code
 	 * @param httpMethod HTTP Method or null
+	 */
+	public DownloadContainerPageOptions(boolean sendCookies, boolean checkStatusCode, String httpMethod) {
+		this(sendCookies, checkStatusCode, httpMethod, Collections.emptyList());
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param sendCookies Send Cookies
+	 * @param checkStatusCode Check Status Code
+	 * @param httpMethod HTTP Method or null
 	 * @param postData Data for HTTP Post or empty List
 	 */
 	public DownloadContainerPageOptions(boolean sendCookies, boolean checkStatusCode, String httpMethod, List<NameValuePair> postData) {

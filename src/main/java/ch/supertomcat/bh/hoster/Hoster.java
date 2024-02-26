@@ -9,8 +9,8 @@ import javax.swing.JFrame;
 
 import org.apache.hc.client5.http.ContextBuilder;
 import org.apache.hc.client5.http.classic.methods.HttpGet;
+import org.apache.hc.client5.http.classic.methods.HttpHead;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequest;
 import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
 import org.apache.hc.client5.http.config.RequestConfig;
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
@@ -19,6 +19,7 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
+import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
@@ -435,6 +436,8 @@ public abstract class Hoster {
 					postMethod.setEntity(new UrlEncodedFormEntity(options.getPostData(), StandardCharsets.UTF_8));
 				}
 				method = postMethod;
+			} else if (options != null && "HEAD".equals(options.getHttpMethod())) {
+				method = new HttpHead(encodedURL);
 			} else {
 				method = new HttpGet(encodedURL);
 			}
@@ -521,9 +524,9 @@ public abstract class Hoster {
 			List<URI> redirectedLocationsURIList = redirectedLocations.getAll();
 			if (!redirectedLocationsURIList.isEmpty()) {
 				Object redirectedRequest = context.getAttribute(HttpCoreContext.HTTP_REQUEST);
-				if (redirectedRequest instanceof HttpUriRequest) {
+				if (redirectedRequest instanceof ClassicHttpRequest) {
 					try {
-						URI redirectedURI = ((HttpUriRequest)redirectedRequest).getUri();
+						URI redirectedURI = ((ClassicHttpRequest)redirectedRequest).getUri();
 						if (redirectedURI.isAbsolute()) {
 							redirectedURL = redirectedURI.toString();
 						} else {
