@@ -489,8 +489,10 @@ public class OldSettingsConverter {
 			connectionSettings.setCookieDatabase(true);
 
 			// User-Agent
-			String userAgent = readStringValue("Connection.userAgent", root, connectionSettings.getUserAgent());
-			connectionSettings.setUserAgent(userAgent);
+			String userAgent = readStringValue("Connection.userAgent", root, null);
+			if (userAgent != null && !userAgent.isEmpty()) {
+				logger.warn("Old userAgent defined, but will not be converted to new settings: {}", userAgent);
+			}
 
 			/* GUI */
 			GUISettings guiSettings = settings.getGuiSettings();
