@@ -10,8 +10,8 @@
 		<authors>
 			<author name="bilderherunterlader" email="bilderherunterlader@gmail.com"/>
 		</authors>
-		<url>http://bihe.berlios.de/page/?loc=bilderherunterlader</url>
-		<javaversion>1.7</javaversion>
+		<url>https://bilderherunterlader.sourceforge.net/page/?loc=bilderherunterlader</url>
+		<javaversion>11.0</javaversion>
 	</info>
 	
 	<guiprefs width="640" height="480" resizable="yes"/>
@@ -44,11 +44,12 @@
 		<pack name="BilderHerunterladerCore" required="yes" id="package.base">
 			<description>Program-files</description>
 			<fileset dir="../.." targetdir="$INSTALL_PATH">
+				<include name="BH.exe" />
 				<include name="BH.jar" />
 				<include name="license.txt" />
 				<include name="directories.properties.example" />
 				<include name="HostzDefaultImages.txt.example" />
-				<include name="ChangelogVersion4.txt" />
+				<include name="CHANGELOG.md" />
 			</fileset>
 			<file src="BilderHerunterlader-256.png" targetdir="$INSTALL_PATH" />
 			<file src="../../BHIcon.ico" targetdir="$INSTALL_PATH" />

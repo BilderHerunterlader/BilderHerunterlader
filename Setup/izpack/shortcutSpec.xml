@@ -12,27 +12,13 @@
 		applications="no"
 		startMenu="no"
 		startup="no"
-		target="$INSTALL_PATH\BH.jar"
+		target="$INSTALL_PATH\BH.exe"
 		commandLine=""
 		workingDirectory="$INSTALL_PATH\"
 		description="BilderHerunterlader"
 		iconFile="$INSTALL_PATH\BHIcon.ico">
 	</shortcut>
-	
-	<shortcut
-		name="BilderHerunterlader_Java9"
-		programGroup="yes"
-		desktop="no"
-		applications="no"
-		startMenu="no"
-		startup="no"
-		target="&quot;%ProgramData%\Oracle\Java\javapath\javaw.exe&quot;"
-		commandLine="--add-modules ALL-SYSTEM -jar &quot;$INSTALL_PATH\BH.jar&quot;"
-		workingDirectory="$INSTALL_PATH\"
-		description="BilderHerunterlader_Java9"
-		iconFile="$INSTALL_PATH\BHIcon.ico">
-	</shortcut>
-	
+
 	<shortcut
 		name="Uninstall BilderHerunterlader"
 		programGroup="yes"

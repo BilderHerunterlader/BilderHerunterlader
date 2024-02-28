@@ -19,22 +19,7 @@
 		Categories="Application;Network"
 		description="BilderHerunterlader">
 	</shortcut>
-	
-	<shortcut
-		name="BilderHerunterlader_Java9"
-		programGroup="yes"
-		desktop="yes"
-		target="java"
-		commandLine="--add-modules ALL-SYSTEM -jar &quot;$INSTALL_PATH/BH.jar&quot;"
-		iconFile="$INSTALL_PATH/BilderHerunterlader-256.png"
-		workingDirectory="$INSTALL_PATH"
-		type="Application"
-		applications="no"
-		encoding="UTF-8"
-		Categories="Application;Network"
-		description="BilderHerunterlader_Java9">
-	</shortcut>
-	
+
 	<shortcut
 		name="Uninstall BilderHerunterlader"
 		programGroup="yes"

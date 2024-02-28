@@ -1,4 +1,4 @@
-;--------------------------------
+﻿;--------------------------------
 ;Include Modern UI
 	
 	!include "MUI.nsh"
@@ -18,7 +18,7 @@
 	!define PROGRAM_VERSION "TemplateY" ;Version
 	!define PROGRAM_STARTMENU_DIR "BilderHerunterlader"
 	!define PROGRAM_SHORTCUT_NAME "BilderHerunterlader"
-	!define PROGRAM_EXECUTABLE "BH.jar"
+	!define PROGRAM_EXECUTABLE "BH.exe"
 	!define PROGRAM_ICON "BHIcon.ico"
 	Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
 	OutFile "${PROGRAM_NAME}TemplateXSetup.exe"
@@ -97,6 +97,7 @@ Section !$(SecMainName) SecMain
 	
 	;Install files
 	SetOverwrite on
+	File "..\BH.exe"
 	File "..\BH.jar"
 	File "..\license.txt"
 	File "..\BHIcon.ico"
@@ -139,13 +140,11 @@ Section $(SecStartMenuName) SecStartMenu
 		CreateDirectory "$SMPROGRAMS\$StartMenuFolder"
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\Uninstall.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\Uninstall.exe" 0
 		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${PROGRAM_SHORTCUT_NAME}.lnk" "$INSTDIR\${PROGRAM_EXECUTABLE}" "" "$INSTDIR\${PROGRAM_ICON}" 0
-		CreateShortCut "$SMPROGRAMS\$StartMenuFolder\${PROGRAM_SHORTCUT_NAME}_Java9.lnk" "$\"%ProgramData%\Oracle\Java\javapath\javaw.exe$\"" "--add-modules ALL-SYSTEM -jar $\"$INSTDIR\${PROGRAM_EXECUTABLE}$\"" "$INSTDIR\${PROGRAM_ICON}" 0
 	!insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
 Section /o $(SecDesktopIconName) SecDesktopIcon
 	CreateShortCut "$DESKTOP\${PROGRAM_SHORTCUT_NAME}.lnk" "$INSTDIR\${PROGRAM_EXECUTABLE}" "" "$INSTDIR\${PROGRAM_ICON}" 0
-	CreateShortCut "$DESKTOP\${PROGRAM_SHORTCUT_NAME}_Java9.lnk" "$\"%ProgramData%\Oracle\Java\javapath\javaw.exe$\"" "--add-modules ALL-SYSTEM -jar $\"$INSTDIR\${PROGRAM_EXECUTABLE}$\"" "$INSTDIR\${PROGRAM_ICON}" 0
 SectionEnd
 
 ;--------------------------------
@@ -172,6 +171,7 @@ Section "Uninstall"
 	
 	;Delete Files and Folders in Installation-Directory
 	Delete "$INSTDIR\${PROGRAM_EXECUTABLE}"
+	Delete "$INSTDIR\BH.jar"
 	Delete "$INSTDIR\log4j.xml"
 	Delete "$INSTDIR\license.txt"
 	Delete "$INSTDIR\BHIcon.ico"
