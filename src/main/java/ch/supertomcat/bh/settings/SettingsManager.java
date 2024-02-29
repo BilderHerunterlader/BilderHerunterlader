@@ -249,6 +249,14 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		if (!mappedLookAndFeelSetting.isAvailable()) {
 			settings.getGuiSettings().setLookAndFeel(LookAndFeelSetting.LAF_DEFAULT);
 		}
+
+		if (settings.getDownloadSettings().isReduceFilenameLength() == null) {
+			settings.getDownloadSettings().setReduceFilenameLength(true);
+		}
+
+		if (settings.getDownloadSettings().isReducePathLength() == null) {
+			settings.getDownloadSettings().setReducePathLength(true);
+		}
 	}
 
 	private boolean checkIntValue(int min, int max, int value) {

@@ -34,6 +34,11 @@ public class DefaultSettingsTest {
 		assertNotNull(settings.getKeywordsSettings());
 		assertNotNull(settings.getLogLevel());
 		assertNotNull(settings.getHosterSettings());
+
+		assertNotNull(settings.getDownloadSettings().isReduceFilenameLength());
+		assertNotNull(settings.getDownloadSettings().isReducePathLength());
+		assertTrue(settings.getDownloadSettings().isReduceFilenameLength());
+		assertTrue(settings.getDownloadSettings().isReducePathLength());
 	}
 
 	private Settings loadSettingsFile(String resourceFile) throws IOException, SAXException, JAXBException {
