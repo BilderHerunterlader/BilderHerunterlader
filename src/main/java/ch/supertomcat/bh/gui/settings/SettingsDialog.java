@@ -598,6 +598,26 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * Label
 	 */
+	private JLabel lblReduceFilenameLength = new JLabel(Localization.getString("Filename"));
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox chkReduceFilenameLength = new JCheckBox(Localization.getString("ReduceFilenameLength"), true);
+
+	/**
+	 * Label
+	 */
+	private JLabel lblReducePathLength = new JLabel(Localization.getString("Folder"));
+
+	/**
+	 * CheckBox
+	 */
+	private JCheckBox chkReducePathLength = new JCheckBox(Localization.getString("ReducePathLength"), true);
+
+	/**
+	 * Label
+	 */
 	private JLabel lblLogLevel = new JLabel("Log-Level");
 
 	/**
@@ -1496,6 +1516,16 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, cmbAllowedFilenameChars, pnlDownload);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblReduceFilenameLength, pnlDownload);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, chkReduceFilenameLength, pnlDownload);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblReducePathLength, pnlDownload);
+		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, chkReducePathLength, pnlDownload);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, lblMaxFailedCount, pnlDownload);
 		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblDownload, gbc, pnlMaxFailedCount, pnlDownload);
@@ -1741,6 +1771,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtMinFilesize.setText(String.valueOf(downloadSettings.getMinFileSize()));
 		chkAutoRetryAfterDownloadsComplete.setSelected(downloadSettings.isAutoRetryAfterDownloadsComplete());
 		cmbAllowedFilenameChars.setSelectedItem(downloadSettings.getAllowedFilenameCharacters());
+		chkReduceFilenameLength.setSelected(downloadSettings.isReduceFilenameLength());
+		chkReducePathLength.setSelected(downloadSettings.isReducePathLength());
 
 		chkUpdates.setSelected(settings.isCheckForUpdatesOnStart());
 
@@ -2048,6 +2080,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		}
 		downloadSettings.setAutoRetryAfterDownloadsComplete(chkAutoRetryAfterDownloadsComplete.isSelected());
 		downloadSettings.setAllowedFilenameCharacters((AllowedFilenameCharacters)cmbAllowedFilenameChars.getSelectedItem());
+		downloadSettings.setReduceFilenameLength(chkReduceFilenameLength.isSelected());
+		downloadSettings.setReducePathLength(chkReducePathLength.isSelected());
 
 		settingsManager.applyRegexReplacePipelineFilenameToXMLSettings();
 

@@ -94,7 +94,7 @@ public class KeywordCellEditorComponent extends JPanel {
 	public String getPath() {
 		String newPath = txtPath.getText();
 		newPath = BHUtil.filterPath(newPath, settingsManager);
-		newPath = FileUtil.reducePathLength(newPath);
+		newPath = BHUtil.reducePathLength(newPath, settingsManager);
 		return newPath;
 	}
 

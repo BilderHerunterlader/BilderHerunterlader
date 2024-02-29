@@ -68,6 +68,34 @@ public final class BHUtil {
 	}
 
 	/**
+	 * Method to reduce length of filename, because paths in Windows Explorer can only be have 255 chars.
+	 * 
+	 * @param filename Filename
+	 * @param settingsManager Settings Manager
+	 * @return Reduced Filename
+	 */
+	public static String reduceFilenameLength(String filename, SettingsManager settingsManager) {
+		if (settingsManager.getDownloadsSettings().isReduceFilenameLength()) {
+			return FileUtil.reduceFilenameLength(filename);
+		}
+		return filename;
+	}
+
+	/**
+	 * Method to reduce length of path (without filename), because paths in Windows Explorer can only be have 255 chars.
+	 * 
+	 * @param folder Path without Filename
+	 * @param settingsManager Settings Manager
+	 * @return Reduced Path
+	 */
+	public static String reducePathLength(String folder, SettingsManager settingsManager) {
+		if (settingsManager.getDownloadsSettings().isReducePathLength()) {
+			return FileUtil.reducePathLength(folder);
+		}
+		return folder;
+	}
+
+	/**
 	 * Returns the encoding by using UniversalDetector which reads the InputStream
 	 * to detect the encoding. If the encoding could not be detected an empty String
 	 * is returned.

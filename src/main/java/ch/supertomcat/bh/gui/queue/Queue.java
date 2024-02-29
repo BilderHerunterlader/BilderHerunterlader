@@ -848,7 +848,7 @@ public class Queue extends JPanel {
 				for (int i = 0; i < s.length; i++) {
 					String newPath = input;
 					newPath = BHUtil.filterPath(newPath, settingsManager);
-					newPath = FileUtil.reducePathLength(newPath);
+					newPath = BHUtil.reducePathLength(newPath, settingsManager);
 
 					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
 					if (pic != null) {

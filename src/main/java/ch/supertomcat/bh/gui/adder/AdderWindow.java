@@ -1485,7 +1485,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 					input += FileUtil.FILE_SEPERATOR;
 				}
 				input = BHUtil.filterPath(input, settingsManager);
-				input = FileUtil.reducePathLength(input);
+				input = BHUtil.reducePathLength(input, settingsManager);
 				int folderIndex = getIndexForFolder(input);
 				if (folderIndex < 0) {
 					txtTargetDir.addItem(input);
@@ -1770,7 +1770,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		String newPath = sbNewPath.toString();
 		newPath = BHUtil.filterPath(newPath, settingsManager);
-		newPath = FileUtil.reducePathLength(newPath);
+		newPath = BHUtil.reducePathLength(newPath, settingsManager);
 
 		int pathColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
 		model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
@@ -1784,7 +1784,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 			String oldPath = (String)model.getValueAt(rowModelIndex, pathColumnModelIndex);
 			String newPath = oldPath + BHUtil.filterFilename(value, settingsManager) + FileUtil.FILE_SEPERATOR;
 			newPath = BHUtil.filterPath(newPath, settingsManager);
-			newPath = FileUtil.reducePathLength(newPath);
+			newPath = BHUtil.reducePathLength(newPath, settingsManager);
 			model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
 		}
 		model.setFireTableCellUpdatedEnabled(true);
@@ -1952,7 +1952,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 				String newPath = BHUtil.filterPath(input, settingsManager);
-				newPath = FileUtil.reducePathLength(newPath);
+				newPath = BHUtil.reducePathLength(newPath, settingsManager);
 				model.setValueAt(newPath, modelIndex, folderColumnModelIndex);
 				model.setValueAt(false, modelIndex, folderOverrideColumnModelIndex);
 			}

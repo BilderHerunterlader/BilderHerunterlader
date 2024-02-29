@@ -344,7 +344,9 @@
 			<xs:element name="autoRetryAfterDownloadsComplete" type="xs:boolean" default="false" />
 			
 			<xs:element name="allowedFilenameCharacters" type="AllowedFilenameCharacters" default="ALL" />
-			
+			<xs:element name="reduceFilenameLength" type="xs:boolean" default="true" />
+			<xs:element name="reducePathLength" type="xs:boolean" default="true" />
+
 			<!-- Regex Replacements used on Filename after download URL und Filename were determined -->
 			<xs:element name="regexReplacesFilename" type="RegexReplaceSetting" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>

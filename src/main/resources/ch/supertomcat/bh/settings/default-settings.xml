@@ -107,6 +107,8 @@
 		<minFileSize />
 		<autoRetryAfterDownloadsComplete />
 		<allowedFilenameCharacters />
+		<reduceFilenameLength />
+		<reducePathLength />
 	</downloadSettings>
 	
 	<keywordsSettings>

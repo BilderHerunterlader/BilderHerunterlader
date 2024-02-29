@@ -125,7 +125,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		// And replace the %20 in the filename, if there are any
 		String targetFilename = BHUtil.filterPath(pic.getTargetFilename().replace("%20", " "), settingsManager);
 		if (bReduceFilenameLength) {
-			targetFilename = FileUtil.reduceFilenameLength(targetFilename);
+			targetFilename = BHUtil.reduceFilenameLength(targetFilename, settingsManager);
 		}
 		pic.setTargetFilename(targetFilename);
 
@@ -145,7 +145,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				// And replace the %20 in the filename, if there are any
 				currentTargetFilename = BHUtil.filterPath(currentTargetFilename.replace("%20", " "), settingsManager);
 				if (bReduceFilenameLength) {
-					currentTargetFilename = FileUtil.reduceFilenameLength(currentTargetFilename);
+					currentTargetFilename = BHUtil.reduceFilenameLength(currentTargetFilename, settingsManager);
 				}
 			}
 
@@ -656,7 +656,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			bReducePathLength = (Boolean)result.getInfo(URLParseObject.REDUCE_PATH_LENGTH);
 		}
 		if (bReducePathLength) {
-			targetPath = FileUtil.reducePathLength(targetPath);
+			targetPath = BHUtil.reducePathLength(targetPath, settingsManager);
 		}
 
 		pic.setTargetPath(targetPath);
