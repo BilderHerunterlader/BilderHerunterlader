@@ -599,8 +599,9 @@ public abstract class BH {
 							exit(restart);
 						}
 					};
-				} catch (JAXBException e) {
+				} catch (Exception e) {
 					LoggerFactory.getLogger(BH.class).error("Could not initialize BH", e);
+					System.exit(1);
 					return;
 				}
 
