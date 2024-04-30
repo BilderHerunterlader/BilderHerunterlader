@@ -32,6 +32,11 @@ public class UpdatesXmlIO {
 	private final Unmarshaller unmarshaller;
 
 	/**
+	 * Unmarshaller
+	 */
+	private final Unmarshaller unmarshallerValidated;
+
+	/**
 	 * Marshaller
 	 */
 	private final Marshaller marshaller;
@@ -53,8 +58,10 @@ public class UpdatesXmlIO {
 			schema = sf.newSchema(schemaSource);
 		}
 
+		unmarshallerValidated = jaxbContext.createUnmarshaller();
+		unmarshallerValidated.setSchema(schema);
+
 		unmarshaller = jaxbContext.createUnmarshaller();
-		unmarshaller.setSchema(schema);
 
 		marshaller = jaxbContext.createMarshaller();
 		marshaller.setSchema(schema);
@@ -65,13 +72,14 @@ public class UpdatesXmlIO {
 	 * Read updates from XML file
 	 * 
 	 * @param file XML File
+	 * @param validate True if XSD validation should be done, false otherwise
 	 * @return Updates
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public Updates readUpdates(String file) throws IOException, JAXBException {
+	public Updates readUpdates(String file, boolean validate) throws IOException, JAXBException {
 		try (FileInputStream in = new FileInputStream(file)) {
-			return readUpdates(in);
+			return readUpdates(in, validate);
 		}
 	}
 
@@ -79,12 +87,19 @@ public class UpdatesXmlIO {
 	 * Read updates from XML file
 	 * 
 	 * @param in Input Stream
+	 * @param validate True if XSD validation should be done, false otherwise
 	 * @return Updates
 	 * @throws JAXBException
 	 */
-	public Updates readUpdates(InputStream in) throws JAXBException {
-		synchronized (unmarshaller) {
-			return unmarshaller.unmarshal(new StreamSource(in), Updates.class).getValue();
+	public Updates readUpdates(InputStream in, boolean validate) throws JAXBException {
+		if (validate) {
+			synchronized (unmarshallerValidated) {
+				return unmarshallerValidated.unmarshal(new StreamSource(in), Updates.class).getValue();
+			}
+		} else {
+			synchronized (unmarshaller) {
+				return unmarshaller.unmarshal(new StreamSource(in), Updates.class).getValue();
+			}
 		}
 	}
 
