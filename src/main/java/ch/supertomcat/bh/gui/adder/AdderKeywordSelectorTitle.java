@@ -165,7 +165,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 		TableUtil.setVisibleRowCount(table, 20);
 
-		int selectedIndex = 0;
+		int selectedModelIndex = -1;
 
 		List<Keyword> additionalKeywordsFiltered;
 		if (additionalKeywords != null) {
@@ -187,9 +187,9 @@ public class AdderKeywordSelectorTitle extends JDialog {
 
 				if (matchType == KeywordMatchType.MATCHED_EXACT) {
 					exactMatch = true;
-					selectedIndex = count;
+					selectedModelIndex = count;
 				} else if (!exactMatch && matchType == KeywordMatchType.MATCHED_ALL_KEYWORDS) {
-					selectedIndex = count;
+					selectedModelIndex = count;
 				}
 
 				if (additionalKeywordsFiltered.contains(keyword)) {
@@ -225,10 +225,15 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		sorter.sort();
 		filterTable();
 
-		selectedIndex = table.convertRowIndexToView(selectedIndex);
+		int selectedViewIndex = -1;
+		if (selectedModelIndex > -1) {
+			selectedViewIndex = table.convertRowIndexToView(selectedModelIndex);
+		} else if (table.getRowCount() > 0) {
+			selectedViewIndex = 0;
+		}
 
-		if (table.getRowCount() > 0 && selectedIndex < table.getRowCount()) {
-			table.setRowSelectionInterval(selectedIndex, selectedIndex);
+		if (selectedViewIndex > -1 && selectedViewIndex < table.getRowCount()) {
+			table.setRowSelectionInterval(selectedViewIndex, selectedViewIndex);
 		}
 
 		pnlFilter.setLayout(new GridLayout(2, 3, 2, 2));
@@ -322,8 +327,8 @@ public class AdderKeywordSelectorTitle extends JDialog {
 		pack();
 		setLocationRelativeTo(owner);
 
-		if (table.getRowCount() > 0 && selectedIndex < table.getRowCount()) {
-			table.scrollRectToVisible(table.getCellRect(selectedIndex, table.convertColumnIndexToView(titleColumnModelIndex), true));
+		if (selectedViewIndex > -1 && selectedViewIndex < table.getRowCount()) {
+			table.scrollRectToVisible(table.getCellRect(selectedViewIndex, table.convertColumnIndexToView(titleColumnModelIndex), true));
 		}
 
 		// Enter and Escape (before setVisible(true)!)
