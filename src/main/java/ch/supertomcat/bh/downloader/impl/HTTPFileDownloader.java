@@ -176,6 +176,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 	 */
 	private boolean executeFileDownload(Pic pic, String url, String correctedFilename, URLParseObject result, String referrer, boolean firstURL, boolean lastURL, int currentURL, int urlCount,
 			HttpClientContext context, CookieStore cookieStore) {
+		logger.info("Downloading File: {}", url);
 		TargetContainer targetContainer = new TargetContainer(pic, firstURL, correctedFilename);
 
 		/*
