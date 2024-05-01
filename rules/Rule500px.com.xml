@@ -10,6 +10,7 @@
     <downloadCustomReferrer></downloadCustomReferrer>
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
+    <userAgent></userAgent>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="https?://500px\.com/photo/([0-9]+)(?:/.+)?" replacement="https://api.500px.com/v1/photos?ids=$1&amp;image_size%5B%5D=2048&amp;include_states=1&amp;expanded_user_info=true&amp;include_tags=true&amp;include_geo=true&amp;is_following=true&amp;include_equipment_info=true&amp;include_licensing=true&amp;include_releases=true&amp;liked_by=1&amp;include_vendor_photos=true"/>
     </pipes>

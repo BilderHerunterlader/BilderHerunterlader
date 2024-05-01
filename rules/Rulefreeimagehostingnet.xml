@@ -10,6 +10,7 @@
     <downloadCustomReferrer></downloadCustomReferrer>
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
+    <userAgent></userAgent>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_OR_THUMBNAIL_URL" urlMode="CONTAINER_URL" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="(https?://.*?)freeimagehosting\.net/image\.php\?(.+)" replacement="$1freeimagehosting.net/uploads/$2"/>
     </pipes>

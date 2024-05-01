@@ -10,6 +10,7 @@
     <downloadCustomReferrer></downloadCustomReferrer>
     <duplicateRemoveMode>DEFAULT</duplicateRemoveMode>
     <sendCookies>true</sendCookies>
+    <userAgent></userAgent>
     <pipes xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="URLRegexPipeline" mode="CONTAINER_PAGE_SOURCECODE" waitBeforeExecute="0" urlDecodeResult="false" sendCookies="true">
         <regexp pattern="(?:&lt;img id=&quot;main-image&quot; src=&quot;(https?:).+?&quot;.+?data-full=&quot;(//.+?)&quot;|&lt;a.+?href=&quot;(.+?)\?dl=1&quot;)" replacement="$1$2$3"/>
     </pipes>
