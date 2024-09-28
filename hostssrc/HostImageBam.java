@@ -18,7 +18,6 @@ import ch.supertomcat.bh.exceptions.HostImageUrlNotFoundException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
-import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -26,13 +25,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 /**
  * Host class for ImageBam
  * 
- * @version 4.5
+ * @version 4.6
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.5";
+	public static final String VERSION = "4.6";
 
 	/**
 	 * Name dieser Klasse
@@ -91,7 +90,10 @@ public class HostImageBam extends Host implements IHoster {
 		regexFilename2.setSearch("(?i)<img src=\"(.+?)\".+?alt=\"(.+?)\".+?class=\"main-image");
 		regexFilename2.setReplace("$2");
 
-		addRestriction(new DownloadRestriction("imagebam.com", 6));
+		/*
+		 * TODO Outcommented for now to test if the limit is not needed anymore. If no problems emerge, the outcommented line can be removed.
+		 */
+		// addRestriction(new DownloadRestriction("imagebam.com", 6));
 	}
 
 	@Override
