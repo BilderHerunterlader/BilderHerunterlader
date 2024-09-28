@@ -1,11 +1,11 @@
 {
 	"manifest_version": 2,
 	"name": "BilderHerunterlader",
-	"version": "4.8",
+	"version": "4.9",
 	"description": "Download files with BilderHerunterlader / Dateien mit BilderHerunterlader herunterladen",
 	"homepage_url": "http://bilderherunterlader.sourceforge.net/page/?loc=bilderherunterlader/bh4",
 	"default_locale": "en",
-	"applications": {
+	"browser_specific_settings": {
 		"gecko": {
 			"id": "bilderherunterlader@gmail.com",
 			"update_url": "https://www.dropbox.com/s/ct8cc1ddksshqz7/updates.json?dl=1"

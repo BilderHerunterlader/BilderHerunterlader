@@ -1,6 +1,6 @@
 ﻿{bh_release_version file=$bhUpdatesXMLFile}
 {assign var="ffversion" value="4.8"}
-{assign var="ff57version" value="4.7"}
+{assign var="ff57version" value="4.9"}
 {assign var="smversion" value="4.8"}
 {assign var="operaversion" value="6"}
 {assign var="ieversion" value="9.0"}
@@ -52,7 +52,7 @@ Mit der Tastenkombination Shift + B wird die Funktion direkt aufgerufen.
 <b><i>Version {$ff57version}:
 Nur für Firefox 57.0 oder höher
 Benötigt BH 4.6.0 oder höher</i></b>
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterladerwebext-{$ff57version}-an%2Bfx.xpi/download">Firefox - WebExtension installieren</a>
+<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterladerwebext-{$ff57version}-fx.xpi/download">Firefox - WebExtension installieren</a>
 
 Verwendung:
 Auf einer Webseite mit Bildern: Rechtsklick -> BilderHerunterlader -> Dateien mit BH herunterladen
