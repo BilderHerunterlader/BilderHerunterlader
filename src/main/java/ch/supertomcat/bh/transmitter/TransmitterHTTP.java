@@ -75,6 +75,9 @@ public class TransmitterHTTP extends NanoHTTPD {
 
 		Charset encoding = StandardCharsets.ISO_8859_1;
 		String contentType = session.getHeaders().get("Content-Type");
+		if (contentType == null) {
+			contentType = session.getHeaders().get("content-type");
+		}
 		if (contentType != null) {
 			Matcher matcher = CONTENT_TYPE_PATTERN.matcher(contentType);
 			if (matcher.find()) {
