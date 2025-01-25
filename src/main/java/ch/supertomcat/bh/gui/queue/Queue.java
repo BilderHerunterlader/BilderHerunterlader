@@ -591,6 +591,7 @@ public class Queue extends JPanel {
 	 */
 	private void actionStart() {
 		Thread t = new Thread(queueManager::startDownload);
+		t.setName("StartDownloadThread-" + t.getId());
 		t.start();
 	}
 
@@ -599,6 +600,7 @@ public class Queue extends JPanel {
 	 */
 	private void actionStop() {
 		Thread t = new Thread(queueManager::stopDownload);
+		t.setName("StopDownloadThread-" + t.getId());
 		t.start();
 	}
 
@@ -824,6 +826,7 @@ public class Queue extends JPanel {
 				new ExportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager).exportQueue();
 			}
 		});
+		t.setName("ExportQueueThread-" + t.getId());
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
 	}
@@ -943,6 +946,7 @@ public class Queue extends JPanel {
 							.importLocalFiles(files, folder.getName());
 				}
 			});
+			t.setName("QueueSortThread-" + t.getId());
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
 		}
