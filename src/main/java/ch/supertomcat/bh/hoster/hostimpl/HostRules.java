@@ -8,8 +8,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import javax.xml.bind.JAXBException;
-
 import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.exceptions.HostException;
@@ -24,6 +22,7 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleIO;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Host-Class for Rules

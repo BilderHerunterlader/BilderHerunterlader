@@ -1,8 +1,7 @@
 package ch.supertomcat.bh;
 
-import javax.xml.bind.JAXBException;
-
 import ch.supertomcat.bh.settings.SettingsManager;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Class which handels the settings

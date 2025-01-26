@@ -14,8 +14,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,6 +39,7 @@ import ch.supertomcat.bh.update.sources.httpxml.xml.Updates;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
+import jakarta.xml.bind.JAXBException;
 
 @SuppressWarnings("javadoc")
 public class UpdateUpdatesXMLTest {

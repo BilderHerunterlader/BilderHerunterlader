@@ -22,6 +22,7 @@ import org.apache.hc.client5.http.protocol.RedirectLocations;
 import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.hc.core5.http.protocol.HttpContext;
@@ -518,12 +519,13 @@ public abstract class Hoster {
 	 */
 	protected String getRedirectedURL(HttpContext context) {
 		String redirectedURL = null;
-		HttpClientContext clientContext = HttpClientContext.adapt(context);
+		HttpClientContext clientContext = HttpClientContext.castOrCreate(context);
 		RedirectLocations redirectedLocations = clientContext.getRedirectLocations();
 		if (redirectedLocations != null) {
 			List<URI> redirectedLocationsURIList = redirectedLocations.getAll();
 			if (!redirectedLocationsURIList.isEmpty()) {
-				Object redirectedRequest = context.getAttribute(HttpCoreContext.HTTP_REQUEST);
+				HttpCoreContext coreContext = HttpCoreContext.castOrCreate(context);
+				HttpRequest redirectedRequest = coreContext.getRequest();
 				if (redirectedRequest instanceof ClassicHttpRequest) {
 					try {
 						URI redirectedURI = ((ClassicHttpRequest)redirectedRequest).getUri();

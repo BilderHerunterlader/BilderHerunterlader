@@ -10,7 +10,6 @@ import java.util.Map;
 
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
-import javax.xml.bind.JAXBException;
 
 import org.apache.logging.log4j.Level;
 import org.xml.sax.SAXException;
@@ -40,6 +39,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 import ch.supertomcat.supertomcatutils.settings.SettingsManagerBase;
 import ch.supertomcat.supertomcatutils.settings.SettingsUtil;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Class which handels the settings

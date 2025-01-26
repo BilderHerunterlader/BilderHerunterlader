@@ -7,8 +7,6 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import javax.xml.bind.JAXBException;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
@@ -33,6 +31,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
+import jakarta.xml.bind.JAXBException;
 
 class RulesTest {
 	private static HostManager hostManager;

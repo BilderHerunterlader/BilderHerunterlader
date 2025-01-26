@@ -1,6 +1,8 @@
 package ch.supertomcat.bh;
 
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
+import java.awt.Rectangle;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -17,11 +19,11 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
-import javax.xml.bind.JAXBException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +54,7 @@ import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.MappedLookAndFeelSetting;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.bh.transmitter.TransmitterHTTP;
 import ch.supertomcat.bh.transmitter.TransmitterHelper;
@@ -65,6 +68,7 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.queue.QueueTask;
 import ch.supertomcat.supertomcatutils.queue.QueueTaskFactory;
 import fi.iki.elonen.NanoHTTPD;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Class which contains the main-Method
@@ -144,9 +148,11 @@ public abstract class BH {
 	/**
 	 * Constructor
 	 * 
+	 * @param applyWindowScalingFunction Apply Window Scaling Function
+	 * 
 	 * @throws JAXBException
 	 */
-	public BH() throws JAXBException {
+	public BH(Consumer<Rectangle> applyWindowScalingFunction) throws JAXBException {
 		GuiEvent guiEvent = new GuiEvent();
 		guiEvent.addListener(new IGuiEventListener() {
 			@Override
@@ -230,6 +236,15 @@ public abstract class BH {
 				logger.error("Could not set LookAndFeel", e);
 			}
 		}
+
+		Rectangle windowScalingBounds;
+		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+		if (mainWindowSettings.isSave() && mainWindowSettings.getWidth() > 0 && mainWindowSettings.getHeight() > 0) {
+			windowScalingBounds = new Rectangle(mainWindowSettings.getX(), mainWindowSettings.getY(), mainWindowSettings.getWidth(), mainWindowSettings.getHeight());
+		} else {
+			windowScalingBounds = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+		}
+		applyWindowScalingFunction.accept(windowScalingBounds);
 
 		// Initialize the localized Strings
 		String language = "en";
@@ -587,7 +602,7 @@ public abstract class BH {
 
 				// Good, now let BH really start
 				try {
-					bh = new BH() {
+					bh = new BH(this::applyWindowScalingIfNeeded) {
 
 						@Override
 						protected void removeShutdownHook() {
