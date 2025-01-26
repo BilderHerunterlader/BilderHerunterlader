@@ -1587,7 +1587,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, lblThreadCount, pnlOther);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
+		gbc = gblt.getGBC(1, i, 1, 1, 1.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, sldThreadCount, pnlOther);
 		gbc = gblt.getGBC(2, i, 1, 1, 0.0, 0.0, GridBagConstraints.CENTER);
 		GridBagLayoutUtil.addItemToPanel(gblOther, gbc, txtThreadCount, pnlOther);
