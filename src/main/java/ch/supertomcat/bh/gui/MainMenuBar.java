@@ -2,6 +2,7 @@ package ch.supertomcat.bh.gui;
 
 import java.awt.Desktop;
 import java.awt.Dimension;
+import java.awt.GraphicsDevice;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
@@ -37,6 +38,7 @@ import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.gui.PositionUtil;
 
 /**
  * Main Menu Bar
@@ -198,7 +200,14 @@ public class MainMenuBar {
 			settingsManager.fireSettingsChanged();
 			settingsManager.writeSettings(true);
 		});
-		cmbLogFile.setMaximumSize(new Dimension(133, 20));
+
+		GraphicsDevice screenDevice = PositionUtil.getScreenDeviceOfComponent(parentWindow);
+		double widowScaling = PositionUtil.getWindowScaling(screenDevice);
+		if (PositionUtil.checkWindowScalingNeeded(widowScaling)) {
+			cmbLogFile.setMaximumSize(new Dimension((int)(133 * widowScaling), (int)(20 * widowScaling)));
+		} else {
+			cmbLogFile.setMaximumSize(new Dimension(133, 20));
+		}
 		cmbLogFile.setFocusable(false);
 		if (logFiles.length == 1) {
 			lblLogFile.setVisible(false);
