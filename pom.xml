@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.bilderherunterlader</groupId>
 		<artifactId>supertomcatroot</artifactId>
-		<version>1.0.4</version>
+		<version>1.0.5</version>
 	</parent>
 	
 	<groupId>ch.supertomcat</groupId>
@@ -61,6 +61,7 @@
 		<dependency>
 			<groupId>org.ehcache</groupId>
 			<artifactId>ehcache</artifactId>
+			<classifier>jakarta</classifier>
 		</dependency>
 		<dependency>
 			<groupId>org.mozilla</groupId>
@@ -81,7 +82,7 @@
 		<dependency>
 			<groupId>com.github.bilderherunterlader</groupId>
 			<artifactId>supertomcatutils</artifactId>
-			<version>1.0.33</version>
+			<version>1.0.34</version>
 		</dependency>
 		<dependency>
 			<groupId>org.freedesktop.tango</groupId>
