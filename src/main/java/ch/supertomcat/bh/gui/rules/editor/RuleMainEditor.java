@@ -19,7 +19,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.KeyStroke;
 
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
 import ch.supertomcat.bh.gui.rules.editor.failures.RulePipesFailuresPanel;
 import ch.supertomcat.bh.gui.rules.editor.filename.RulePipelineFilenameDownloadSelectionPanel;
@@ -28,6 +27,7 @@ import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipesPanel;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
 /**

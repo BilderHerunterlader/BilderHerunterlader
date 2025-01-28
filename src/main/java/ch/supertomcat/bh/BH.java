@@ -31,9 +31,9 @@ import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.downloader.ProxyManager;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindow;
 import ch.supertomcat.bh.gui.update.UpdateListener;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
@@ -205,7 +205,7 @@ public abstract class BH {
 			// Display a frame, so that BH already shows up in the taskbar and can be switched to. Otherwise the user might not see that there was a dialog open
 			JFrame frame = null;
 			try {
-				frame = ApplicationUtil.createInvisibleFrame("BH", Icons.getBHImage("BH.png"));
+				frame = ApplicationUtil.createInvisibleFrame("BH", BHIcons.getBHMultiResImage("BH.png"));
 				int ret = JOptionPane.showOptionDialog(frame, "Choose a language", "Language", JOptionPane.YES_OPTION, JOptionPane.QUESTION_MESSAGE, null, options, options[0]);
 				if (ret == 0) {
 					settingsManager.setLanguage("en_EN");

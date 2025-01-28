@@ -35,8 +35,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.GuiEvent;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.renderer.UpdateActionColumnRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.keywords.KeywordManager;
@@ -52,6 +52,7 @@ import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
@@ -230,7 +231,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		this.hostManager = hostManager;
 		this.guiEvent = guiEvent;
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		setIconImage(Icons.getBHImage("BH.png"));
+		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
 		addWindowListener(this);
 
 		setModal(true);

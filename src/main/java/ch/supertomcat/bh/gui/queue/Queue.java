@@ -49,7 +49,7 @@ import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.BHGUIConstants;
-import ch.supertomcat.bh.gui.Icons;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.QueueColorRowRenderer;
 import ch.supertomcat.bh.gui.renderer.QueueProgressColumnRenderer;
@@ -68,6 +68,7 @@ import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
@@ -132,7 +133,7 @@ public class Queue extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnSortFiles = new JButton(Localization.getString("SortFiles"), Icons.getBHIcon("actions/data-transfer.png", 16));
+	private JButton btnSortFiles = new JButton(Localization.getString("SortFiles"), BHIcons.getBHIcon("actions/data-transfer.png", 16));
 
 	/**
 	 * Button

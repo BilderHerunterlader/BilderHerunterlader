@@ -19,9 +19,9 @@ import javax.swing.JTextField;
 import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
 
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.rules.editor.urlpipe.RulePipelineURLPanelBase;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import de.sciss.syntaxpane.DefaultSyntaxKit;
 

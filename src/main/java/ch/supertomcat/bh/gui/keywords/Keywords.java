@@ -43,7 +43,6 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.table.TableRowSorter;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.KeywordsStringColorRowRenderer;
 import ch.supertomcat.bh.importexport.ExportKeywords;
@@ -51,6 +50,7 @@ import ch.supertomcat.bh.importexport.ImportKeywords;
 import ch.supertomcat.bh.keywords.Keyword;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;

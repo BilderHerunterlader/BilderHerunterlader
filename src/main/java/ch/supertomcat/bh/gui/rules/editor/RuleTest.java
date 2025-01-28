@@ -22,7 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.exceptions.HostException;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.rules.Rule;
@@ -31,6 +30,7 @@ import ch.supertomcat.bh.rules.RulePipelineURLRegex;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfo;
 import ch.supertomcat.bh.rules.xml.URLMode;
 import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;

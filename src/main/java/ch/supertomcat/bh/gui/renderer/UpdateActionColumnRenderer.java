@@ -9,8 +9,9 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import ch.supertomcat.bh.gui.Icons;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.update.containers.UpdateObject;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 
 /**
  * Renderer to display icons for the update action type
@@ -37,7 +38,7 @@ public class UpdateActionColumnRenderer extends DefaultTableCellRenderer impleme
 			label.setHorizontalAlignment(SwingConstants.CENTER);
 			switch (action) {
 				case ACTION_NONE:
-					label.setIcon(Icons.getBHIcon("Dummy16.png"));
+					label.setIcon(BHIcons.getBHIcon("Dummy16.png"));
 					break;
 				case ACTION_NEW:
 					label.setIcon(Icons.getTangoIcon("actions/list-add.png", 16));
@@ -49,7 +50,7 @@ public class UpdateActionColumnRenderer extends DefaultTableCellRenderer impleme
 					label.setIcon(Icons.getTangoIcon("actions/list-remove.png", 16));
 					break;
 				default:
-					label.setIcon(Icons.getBHIcon("Dummy16.png"));
+					label.setIcon(BHIcons.getBHIcon("Dummy16.png"));
 					break;
 			}
 		}

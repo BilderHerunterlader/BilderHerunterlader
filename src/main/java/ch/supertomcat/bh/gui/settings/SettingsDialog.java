@@ -55,7 +55,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.BHGUIConstants;
-import ch.supertomcat.bh.gui.Icons;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.LookAndFeelComboBoxRenderer;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -80,6 +80,7 @@ import ch.supertomcat.bh.settings.xml.ProxyMode;
 import ch.supertomcat.bh.settings.xml.Settings;
 import ch.supertomcat.bh.settings.xml.SizeDisplayMode;
 import ch.supertomcat.bh.settings.xml.SubdirsResolutionMode;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
@@ -1019,7 +1020,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		this.hostManager = hostManager;
 		setTitle(Localization.getString("Settings"));
 		setModal(true);
-		setIconImage(Icons.getBHImage("BH.png"));
+		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		setLayout(gbl);
 
@@ -1105,12 +1106,12 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		tp.setFocusable(false);
 		tp.setTabPlacement(SwingConstants.TOP);
-		tp.addTab(Localization.getString("SettingsGUI"), Icons.getTangoIcon("apps/preferences-system-windows.png", 22), spGUI);
-		tp.addTab(Localization.getString("SettingsConnection"), Icons.getTangoIcon("status/network-idle.png", 22), spConnection);
-		tp.addTab(Localization.getString("SettingsPaths"), Icons.getTangoIcon("places/folder.png", 22), spPaths);
-		tp.addTab(Localization.getString("SettingsKeywords"), Icons.getTangoIcon("emblems/emblem-favorite.png", 22), spKeywords);
-		tp.addTab(Localization.getString("SettingsDownload"), Icons.getTangoIcon("actions/go-down.png", 22), spDownload);
-		tp.addTab(Localization.getString("SettingsOther"), Icons.getTangoIcon("categories/preferences-system.png", 22), spOther);
+		tp.addTab(Localization.getString("SettingsGUI"), Icons.getTangoMultiResIcon("apps/preferences-system-windows.png", 22), spGUI);
+		tp.addTab(Localization.getString("SettingsConnection"), Icons.getTangoMultiResIcon("status/network-idle.png", 22), spConnection);
+		tp.addTab(Localization.getString("SettingsPaths"), Icons.getTangoMultiResIcon("places/folder.png", 22), spPaths);
+		tp.addTab(Localization.getString("SettingsKeywords"), Icons.getTangoMultiResIcon("emblems/emblem-favorite.png", 22), spKeywords);
+		tp.addTab(Localization.getString("SettingsDownload"), Icons.getTangoMultiResIcon("actions/go-down.png", 22), spDownload);
+		tp.addTab(Localization.getString("SettingsOther"), Icons.getTangoMultiResIcon("categories/preferences-system.png", 22), spOther);
 
 		buttonGroup.add(rbNoProxy);
 		buttonGroup.add(rbHTTP);

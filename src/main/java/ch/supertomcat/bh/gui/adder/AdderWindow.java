@@ -77,7 +77,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.gui.BHGUIConstants;
-import ch.supertomcat.bh.gui.Icons;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.queue.FileRenameDialog;
 import ch.supertomcat.bh.gui.queue.PathRenameDialog;
 import ch.supertomcat.bh.gui.renderer.AdderColorRowRenderer;
@@ -105,6 +105,7 @@ import ch.supertomcat.bh.settings.xml.AutoTargetDirMode;
 import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
@@ -582,7 +583,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 		this.clipboardObserver = clipboardObserver;
 
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setIconImage(Icons.getBHImage("BH.png"));
+		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
 		setLayout(gbl);
 
 		addWindowListener(new WindowAdapter() {
@@ -596,7 +597,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		int configuredPreviewHeight = settingsManager.getGUISettings().getPreviewSize();
 		previewHeight = Integer.max(MINIMUM_PREVIEW_HEIGHT, configuredPreviewHeight);
-		imgDummy = ImageUtil.generatePreviewImage(Icons.getBHImage("Dummy.png", 16), -1, previewHeight);
+		imgDummy = ImageUtil.generatePreviewImage(BHIcons.getBHImage("Dummy.png", 16), -1, previewHeight);
 		iconDummy = new ImageIcon(imgDummy);
 
 		jsp.getVerticalScrollBar().addAdjustmentListener(new PreviewsAdjustmentListener());

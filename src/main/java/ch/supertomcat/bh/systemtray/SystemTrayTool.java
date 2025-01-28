@@ -22,8 +22,8 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
+import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.GuiEvent;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.queue.DownloadAddDialog;
 import ch.supertomcat.bh.gui.queue.ParsePagesDialog;
@@ -116,7 +116,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 	/**
 	 * Tray-Icon-Image
 	 */
-	private Image image = Icons.getBHImage("BH.png");
+	private Image image = BHIcons.getBHMultiResImage("BH.png");
 
 	/**
 	 * Tray-Icon

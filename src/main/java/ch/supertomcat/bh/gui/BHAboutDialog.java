@@ -7,6 +7,7 @@ import javax.swing.JButton;
 
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.dialog.about.AboutDialog;
 
@@ -23,7 +24,7 @@ public class BHAboutDialog extends AboutDialog {
 	 * @param settingsManager Settings Manager
 	 */
 	public BHAboutDialog(Window owner, SettingsManager settingsManager) {
-		super(owner, Localization.getString("About"), Icons.getBHImage("BH.png"));
+		super(owner, Localization.getString("About"), BHIcons.getBHMultiResImage("BH.png"));
 
 		setVisible(true);
 	}

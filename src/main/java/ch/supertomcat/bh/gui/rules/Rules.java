@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.gui.BHGUIConstants;
-import ch.supertomcat.bh.gui.Icons;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.gui.renderer.RulesColorRowRenderer;
 import ch.supertomcat.bh.gui.rules.editor.RuleMainEditor;
@@ -43,6 +42,7 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleIO;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;

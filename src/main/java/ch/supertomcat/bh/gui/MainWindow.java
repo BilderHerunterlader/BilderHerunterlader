@@ -51,6 +51,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
@@ -152,8 +153,8 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	 * @param clipboardObserver Clipboard Observer
 	 * @param guiEvent GUI Event
 	 */
-	public MainWindow(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager, ProxyManager proxyManger,
-			CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
+	public MainWindow(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
+			ProxyManager proxyManger, CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
 		this.settingsManager = settingsManager;
 		this.guiEvent = guiEvent;
 		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, guiEvent);
@@ -163,16 +164,16 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 		this.keywords = new Keywords(this, this, keywordManager, settingsManager);
 		this.hosts = new HosterPanel(hostManager, downloadQueueManager, settingsManager);
 		this.rules = new Rules(this, this, downloadQueueManager, settingsManager, hostManager);
-		setIconImage(Icons.getBHImage("BH.png"));
+		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		tab.setFocusable(false);
-		tab.addTab(Localization.getString("Queue"), Icons.getTangoIcon("actions/go-down.png", 22), queue);
-		tab.addTab(Localization.getString("Log"), Icons.getTangoIcon("mimetypes/text-x-generic.png", 22), log);
-		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoIcon("mimetypes/text-x-generic.png", 22), directoryLog);
-		tab.addTab(Localization.getString("Keywords"), Icons.getTangoIcon("emblems/emblem-favorite.png", 22), keywords);
-		tab.addTab(Localization.getString("Rules"), Icons.getBHIcon("actions/approval.png", 22), rules);
-		tab.addTab(Localization.getString("HosterPlugins"), Icons.getBHIcon("actions/approval.png", 22), hosts);
+		tab.addTab(Localization.getString("Queue"), Icons.getTangoMultiResIcon("actions/go-down.png", 22), queue);
+		tab.addTab(Localization.getString("Log"), Icons.getTangoMultiResIcon("mimetypes/text-x-generic.png", 22), log);
+		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoMultiResIcon("mimetypes/text-x-generic.png", 22), directoryLog);
+		tab.addTab(Localization.getString("Keywords"), Icons.getTangoMultiResIcon("emblems/emblem-favorite.png", 22), keywords);
+		tab.addTab(Localization.getString("Rules"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), rules);
+		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), hosts);
 
 		DropTargetAdapter dtl = new DropTargetAdapter() {
 			@Override
@@ -214,7 +215,7 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 		setJMenuBar(mainMenuBar.getJMenuBar());
 
-		lblProgress.setIcon(Icons.getBHIcon("Dummy.png", 16));
+		lblProgress.setIcon(BHIcons.getBHIcon("Dummy.png", 16));
 
 		pnlMessage.setLayout(new BorderLayout());
 		pnlMessage.add(lblMessage, BorderLayout.WEST);
@@ -330,14 +331,14 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	@Override
 	public synchronized void addProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.addProgressObserver(progress);
-		lblProgress.setIcon(Icons.getBHIcon("animations/process-working.gif", 16));
+		lblProgress.setIcon(BHIcons.getBHIcon("animations/process-working.gif", 16));
 	}
 
 	@Override
 	public synchronized void removeProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.removeProgressObserver(progress);
 		if (mainProgressPopup.getProgressObserverCount() == 0) {
-			lblProgress.setIcon(Icons.getBHIcon("Dummy.png", 16));
+			lblProgress.setIcon(BHIcons.getBHIcon("Dummy.png", 16));
 		}
 	}
 
