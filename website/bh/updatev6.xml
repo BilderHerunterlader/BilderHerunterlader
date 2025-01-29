@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="5.1.2">
+	<setuprelease version="5.2.0">
 		<description>
-			<mainDE>- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</mainDE>
-			<mainEN>- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</mainEN>
+			<mainDE>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainDE>
+			<mainEN>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainEN>
 		</description>
 	</setuprelease>
-	<main version="5.1.2" src="https://www.dropbox.com/scl/fi/bmc5szfvyckigwcnlkvfq/BH-5.1.2.zip?rlkey=c1f4e525uqghh1wn47l2etp49&amp;dl=1" filename="BH-5.1.2.zip" name="BilderHerunterlader" />
+	<main version="5.2.0" src="https://www.dropbox.com/scl/fi/qwkas7smhuo49tt2kuhu9/BH-5.2.0.zip?rlkey=6st3vp3nble0g1mzqf3snk0q8&amp;dl=1" filename="BH-5.2.0.zip" name="BilderHerunterlader" />
 	<description>
-		<mainDE>- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</mainDE>
-		<mainEN>- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</mainEN>
+		<mainDE>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainDE>
+		<mainEN>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainEN>
 	</description>
 	<redirects />
 	<hoster>
@@ -147,6 +147,8 @@
 		<changes version="5.0.0" lng="de"></changes>
 		<changes version="5.0.0" lng="en"></changes>
 		-->
+		<changes version="5.2.0" lng="de">- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</changes>
+		<changes version="5.2.0" lng="en">- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</changes>
 		<changes version="5.1.2" lng="de">- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</changes>
 		<changes version="5.1.2" lng="en">- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</changes>
 		<changes version="5.1.1" lng="de">- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</changes>
