@@ -19,14 +19,13 @@ import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
 import org.apache.hc.client5.http.protocol.RedirectLocations;
-import org.apache.hc.core5.http.ClassicHttpRequest;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.HttpHeaders;
+import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.HttpRequest;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.apache.hc.core5.http.protocol.HttpContext;
-import org.apache.hc.core5.http.protocol.HttpCoreContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -524,22 +523,17 @@ public abstract class Hoster {
 		if (redirectedLocations != null) {
 			List<URI> redirectedLocationsURIList = redirectedLocations.getAll();
 			if (!redirectedLocationsURIList.isEmpty()) {
-				HttpCoreContext coreContext = HttpCoreContext.castOrCreate(context);
-				HttpRequest redirectedRequest = coreContext.getRequest();
-				if (redirectedRequest instanceof ClassicHttpRequest) {
-					try {
-						URI redirectedURI = ((ClassicHttpRequest)redirectedRequest).getUri();
-						if (redirectedURI.isAbsolute()) {
-							redirectedURL = redirectedURI.toString();
-						} else {
-							/*
-							 * TODO Implement with httpclient5. Same code as for Version 4 does not work anymore.
-							 */
-							logger.error("Could not determine redirect URI, because it is not absolute: {}", redirectedURI);
-						}
-					} catch (URISyntaxException e) {
-						logger.error("Could not determine redirection", e);
+				HttpRequest redirectedRequest = clientContext.getRequest();
+				try {
+					URI redirectedURI = redirectedRequest.getUri();
+					if (redirectedURI.isAbsolute()) {
+						redirectedURL = redirectedURI.toString();
+					} else {
+						HttpHost redirectedHttpHost = clientContext.getHttpRoute().getTargetHost();
+						redirectedURL = redirectedHttpHost.toURI() + redirectedURI;
 					}
+				} catch (URISyntaxException e) {
+					logger.error("Could not determine redirection", e);
 				}
 			}
 		}

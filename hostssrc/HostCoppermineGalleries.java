@@ -168,7 +168,8 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				}
 
 				// Inputstream oeffnen
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					Tidy tidy = new Tidy();
 					tidy.setShowWarnings(false);
 					tidy.setShowErrors(0);
@@ -245,7 +246,8 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 				}
 
 				// Inputstream oeffnen
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					Tidy tidy = new Tidy();
 					tidy.setShowWarnings(false);
 					tidy.setShowErrors(0);

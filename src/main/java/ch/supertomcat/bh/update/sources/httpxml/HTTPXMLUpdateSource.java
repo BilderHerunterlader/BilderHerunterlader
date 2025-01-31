@@ -66,7 +66,8 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 				}
 
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					SAXBuilder b = new SAXBuilder();
 					try {
 						return b.build(in);

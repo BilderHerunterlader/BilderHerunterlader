@@ -178,7 +178,8 @@ public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IH
 				}
 
 				// Inputstream oeffnen
-				try (InputStream in = response.getEntity().getContent()) {
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent()) {
 					Tidy tidy = new Tidy();
 					tidy.setShowWarnings(false);
 					tidy.setShowErrors(0);

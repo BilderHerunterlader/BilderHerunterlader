@@ -192,7 +192,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		}
 
 		AtomicBoolean abortedFlag = new AtomicBoolean(false);
-		try (CloseableHttpClient client = nonMultiThreadedHttpClient ? proxyManager.getNonMultithreadedHTTPClient() : proxyManager.getHTTPClient()) {
+		try (@SuppressWarnings("resource")
+		CloseableHttpClient client = nonMultiThreadedHttpClient ? proxyManager.getNonMultithreadedHTTPClient() : proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(url);
 
 			HttpUriRequest method;
