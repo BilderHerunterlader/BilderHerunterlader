@@ -591,101 +591,89 @@ public class Queue extends JPanel {
 	 * Start
 	 */
 	private void actionStart() {
-		Thread t = new Thread(queueManager::startDownload);
-		t.setName("StartDownloadThread-" + t.getId());
-		t.start();
+		executeInNewThread("StartDownloadThread-", queueManager::startDownload);
 	}
 
 	/**
 	 * Stop
 	 */
 	private void actionStop() {
-		Thread t = new Thread(queueManager::stopDownload);
-		t.setName("StopDownloadThread-" + t.getId());
-		t.start();
+		executeInNewThread("StopDownloadThread-", queueManager::stopDownload);
 	}
 
 	/**
 	 * CopyURLs
 	 */
 	private void actionCopyURLs() {
-		StringJoiner content = new StringJoiner("\n");
-		synchronized (queueManager.getSyncObject()) {
-			for (int selectedRow : jtQueue.getSelectedRows()) {
-				content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
+		executeInNewThread("QueueCopyURLsThread-", () -> {
+			StringJoiner content = new StringJoiner("\n");
+			synchronized (queueManager.getSyncObject()) {
+				for (int selectedRow : jtQueue.getSelectedRows()) {
+					content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
+				}
 			}
-		}
-		if (content.length() > 0) {
-			clipboardObserver.setClipboardContent(content.toString());
-		}
+			if (content.length() > 0) {
+				clipboardObserver.setClipboardContent(content.toString());
+			}
+		});
 	}
 
 	/**
 	 * OpenURLs
 	 */
 	private void actionOpenURLs() {
-		final List<String> urls = new ArrayList<>();
-		synchronized (queueManager.getSyncObject()) {
-			for (int selectedRow : jtQueue.getSelectedRows()) {
-				urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
+		executeInNewThread("QueueOpenURLsThread-", () -> {
+			final List<String> urls = new ArrayList<>();
+			synchronized (queueManager.getSyncObject()) {
+				for (int selectedRow : jtQueue.getSelectedRows()) {
+					urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
+				}
 			}
-		}
 
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				for (String url : urls) {
-					if (Desktop.isDesktopSupported()) {
-						try {
-							Desktop.getDesktop().browse(new URI(url));
-						} catch (IOException | URISyntaxException e) {
-							logger.error("Could not open URL: {}", url, e);
-						}
-					} else {
-						logger.error("Could not open URL, because Desktop is not supported: {}", url);
+			for (String url : urls) {
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop.getDesktop().browse(new URI(url));
+					} catch (IOException | URISyntaxException e) {
+						logger.error("Could not open URL: {}", url, e);
 					}
+				} else {
+					logger.error("Could not open URL, because Desktop is not supported: {}", url);
 				}
 			}
 		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
 	}
 
 	/**
 	 * OpenThreadURLs
 	 */
 	private void actionOpenThreadURLs() {
-		final List<String> urls = new ArrayList<>();
-		synchronized (queueManager.getSyncObject()) {
-			for (int selectedRow : jtQueue.getSelectedRows()) {
-				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
-				if (pic != null) {
-					String url = pic.getThreadURL();
-					if (!url.isEmpty()) {
-						urls.add(url);
+		executeInNewThread("QueueOpenThreadURLsThread-", () -> {
+			final List<String> urls = new ArrayList<>();
+			synchronized (queueManager.getSyncObject()) {
+				for (int selectedRow : jtQueue.getSelectedRows()) {
+					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
+					if (pic != null) {
+						String url = pic.getThreadURL();
+						if (!url.isEmpty()) {
+							urls.add(url);
+						}
 					}
 				}
 			}
-		}
 
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				for (String url : urls) {
-					if (Desktop.isDesktopSupported()) {
-						try {
-							Desktop.getDesktop().browse(new URI(url));
-						} catch (IOException | URISyntaxException e) {
-							logger.error("Could not open URL: {}", url, e);
-						}
-					} else {
-						logger.error("Could not open URL, because Desktop is not supported: {}", url);
+			for (String url : urls) {
+				if (Desktop.isDesktopSupported()) {
+					try {
+						Desktop.getDesktop().browse(new URI(url));
+					} catch (IOException | URISyntaxException e) {
+						logger.error("Could not open URL: {}", url, e);
 					}
+				} else {
+					logger.error("Could not open URL, because Desktop is not supported: {}", url);
 				}
 			}
 		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
 	}
 
 	/**
@@ -700,117 +688,83 @@ public class Queue extends JPanel {
 
 		disableComponents();
 
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				try {
-					ProgressObserver pg = new ProgressObserver();
-					mainWindowAccess.addProgressObserver(pg);
-					pg.progressModeChanged(true);
-					pg.progressChanged(Localization.getString("DeleteEntries"));
-					synchronized (queueManager.getSyncObject()) {
-						int[] selectedRows = jtQueue.getSelectedRows();
-						int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
+		executeInNewThread("QueueDeleteThread-", () -> {
+			try {
+				ProgressObserver pg = new ProgressObserver();
+				mainWindowAccess.addProgressObserver(pg);
+				pg.progressModeChanged(true);
+				pg.progressChanged(Localization.getString("DeleteEntries"));
+				synchronized (queueManager.getSyncObject()) {
+					int[] selectedRows = jtQueue.getSelectedRows();
+					int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
 
-						// Convert first removed row index, before removing any rows
-						int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
+					// Convert first removed row index, before removing any rows
+					int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
 
-						queueManager.removePics(selectedModelRows);
+					queueManager.removePics(selectedModelRows);
 
-						int rowCount = jtQueue.getRowCount();
-						int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
-						if (firstRemovedRowViewIndex < rowCount) {
-							jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
-						} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
-							jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
-						}
+					int rowCount = jtQueue.getRowCount();
+					int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
+					if (firstRemovedRowViewIndex < rowCount) {
+						jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
+					} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
+						jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
 					}
-					mainWindowAccess.removeProgressObserver(pg);
-					mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
-				} finally {
-					EventQueue.invokeLater(new Runnable() {
-						@Override
-						public void run() {
-							enableComponents();
-						}
-					});
 				}
+				mainWindowAccess.removeProgressObserver(pg);
+				mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
+			} finally {
+				EventQueue.invokeLater(new Runnable() {
+					@Override
+					public void run() {
+						enableComponents();
+					}
+				});
 			}
 		});
-		t.setName("QueueDeleteThread-" + t.getId());
-		t.start();
 	}
 
 	/**
 	 * ImportHTML
 	 */
 	private void actionImportHTML() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				new ImportHTML(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver).importHTML();
-			}
-		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+		executeInNewThread("QueueImportHTMLThread-", () -> new ImportHTML(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver)
+				.importHTML());
 	}
 
 	/**
 	 * ImportTextfile
 	 */
 	private void actionImportTextfile() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				new ImportLinkList(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver).importLinkList();
-			}
-		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+		executeInNewThread("QueueImportTextFileThread-", () -> new ImportLinkList(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
+				.importLinkList());
 	}
 
 	/**
 	 * ImportLinks
 	 */
 	private void actionImportLinks() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				DownloadAddDialog dlg = new DownloadAddDialog(parentWindow, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
-				dlg.setVisible(true);
-			}
+		executeInNewThread("QueueImportLinksThread-", () -> {
+			DownloadAddDialog dlg = new DownloadAddDialog(parentWindow, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
+			dlg.setVisible(true);
 		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
 	}
 
 	/**
 	 * ParseLinks
 	 */
 	private void actionParseLinks() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				ParsePagesDialog dlg = new ParsePagesDialog(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
-				dlg.setVisible(true);
-			}
+		executeInNewThread("QueueParseLinksThread-", () -> {
+			ParsePagesDialog dlg = new ParsePagesDialog(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, cookieManager, clipboardObserver);
+			dlg.setVisible(true);
 		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
 	}
 
 	/**
 	 * ImportQueue
 	 */
 	private void actionImportQueue() {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				new ImportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager, hostManager).importQueue();
-			}
-		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+		executeInNewThread("QueueImportQueueThread-", () -> new ImportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager, hostManager).importQueue());
 	}
 
 	/**
@@ -821,15 +775,8 @@ public class Queue extends JPanel {
 			JOptionPane.showMessageDialog(parentWindow, Localization.getString("ExportWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 			return;
 		}
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				new ExportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager).exportQueue();
-			}
-		});
-		t.setName("ExportQueueThread-" + t.getId());
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+
+		executeInNewThread("QueueExportQueueThread-", () -> new ExportQueue(parentWindow, mainWindowAccess, queueManager, settingsManager).exportQueue());
 	}
 
 	/**
@@ -936,20 +883,14 @@ public class Queue extends JPanel {
 	private void actionSort() {
 		final File folder = FileDialogUtil.showFolderOpenDialog(parentWindow, settingsManager.getSavePath(), null);
 		if (folder != null) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					File[] files = folder.listFiles();
-					if (files == null) {
-						return;
-					}
-					new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
-							.importLocalFiles(files, folder.getName());
+			executeInNewThread("QueueSortThread-", () -> {
+				File[] files = folder.listFiles();
+				if (files == null) {
+					return;
 				}
+				new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
+						.importLocalFiles(files, folder.getName());
 			});
-			t.setName("QueueSortThread-" + t.getId());
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
 		}
 	}
 
@@ -1085,5 +1026,17 @@ public class Queue extends JPanel {
 			return;
 		}
 		TableUtil.applyColWidths(jtQueue, settingsManager.getColWidthsQueue());
+	}
+
+	/**
+	 * Execute task in new Thread
+	 * 
+	 * @param threadNamePrefix Thread Name Prefix
+	 * @param task Task
+	 */
+	private void executeInNewThread(String threadNamePrefix, Runnable task) {
+		Thread t = new Thread(task);
+		t.setName(threadNamePrefix + t.getId());
+		t.start();
 	}
 }
