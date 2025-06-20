@@ -199,6 +199,7 @@ public abstract class BH {
 		// Read the settings from settings file
 		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
 		settingsManager.readSettings();
+		// TODO Display an error dialog, when readSettings returns false and only continue if true was returned
 		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
 			String[] options = { "English", "Deutsch" };

@@ -169,6 +169,9 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				return true;
 			} catch (Exception e) {
 				logger.error("Could not read settings file: {}", settingsFile.getAbsolutePath(), e);
+				/*
+				 * TODO Maybe read default settings file in this case or backup file? Or let the user decide what to do?
+				 */
 				return false;
 			}
 		} else {
