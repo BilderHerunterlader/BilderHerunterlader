@@ -25,13 +25,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 /**
  * Host class for ImageBam
  * 
- * @version 4.6
+ * @version 4.7
  */
 public class HostImageBam extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.6";
+	public static final String VERSION = "4.7";
 
 	/**
 	 * Name dieser Klasse
@@ -188,6 +188,13 @@ public class HostImageBam extends Host implements IHoster {
 				cookie.setPath("/");
 				cookie.setExpiryDate(Instant.now().plusMillis(6 * 60 * 60 * 1000L));
 				context.getCookieStore().addCookie(cookie);
+
+				BasicClientCookie cookie2 = new BasicClientCookie("sfw_inter", "1");
+				cookie2.setDomain(HTTPUtil.getDomainFromURL(upo.getContainerURL()));
+				cookie2.setPath("/");
+				cookie2.setExpiryDate(Instant.now().plusMillis(6 * 60 * 60 * 1000L));
+				context.getCookieStore().addCookie(cookie2);
+
 				downloadURL = parseURL(upo, context);
 			}
 
