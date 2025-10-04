@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="5.2.0">
+	<setuprelease version="5.3.0">
 		<description>
-			<mainDE>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainDE>
-			<mainEN>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainEN>
+			<mainDE>- Fixed redirect URL detection, when URL is relative\n- Bug Fixed: Deadlock, when copy or open URL menu items are used, while downloads are running\n- Updated libraries</mainDE>
+			<mainEN>- Fixed redirect URL detection, when URL is relative\n- Bug Fixed: Deadlock, when copy or open URL menu items are used, while downloads are running\n- Updated libraries</mainEN>
 		</description>
 	</setuprelease>
-	<main version="5.2.0" src="https://www.dropbox.com/scl/fi/qwkas7smhuo49tt2kuhu9/BH-5.2.0.zip?rlkey=6st3vp3nble0g1mzqf3snk0q8&amp;dl=1" filename="BH-5.2.0.zip" name="BilderHerunterlader" />
+	<main version="5.3.0" src="https://www.dropbox.com/scl/fi/2u1tb8efbns6szwekuwbf/BH-5.3.0.zip?rlkey=y3o7m45i61s3yoiws7ktcm7hf&amp;dl=1" filename="BH-5.3.0.zip" name="BilderHerunterlader" />
 	<description>
 		<mainDE>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainDE>
 		<mainEN>- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</mainEN>
@@ -147,6 +147,8 @@
 		<changes version="5.0.0" lng="de"></changes>
 		<changes version="5.0.0" lng="en"></changes>
 		-->
+		<changes version="5.3.0" lng="de">- Fixed redirect URL detection, when URL is relative\n- Bug Fixed: Deadlock, when copy or open URL menu items are used, while downloads are running\n- Updated libraries</changes>
+		<changes version="5.3.0" lng="en">- Fixed redirect URL detection, when URL is relative\n- Bug Fixed: Deadlock, when copy or open URL menu items are used, while downloads are running\n- Updated libraries</changes>
 		<changes version="5.2.0" lng="de">- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</changes>
 		<changes version="5.2.0" lng="en">- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</changes>
 		<changes version="5.1.2" lng="de">- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</changes>
