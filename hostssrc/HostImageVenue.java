@@ -22,13 +22,13 @@ import ch.supertomcat.bh.rules.xml.URLRegexPipelineMode;
 /**
  * Host class for ImageVenue
  * 
- * @version 4.7
+ * @version 4.8
  */
 public class HostImageVenue extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.7";
+	public static final String VERSION = "4.8";
 
 	/**
 	 * Name dieser Klasse

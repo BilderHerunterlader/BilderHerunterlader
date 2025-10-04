@@ -1036,7 +1036,7 @@ public class Queue extends JPanel {
 	 */
 	private void executeInNewThread(String threadNamePrefix, Runnable task) {
 		Thread t = new Thread(task);
-		t.setName(threadNamePrefix + t.getId());
+		t.setName(threadNamePrefix + t.threadId());
 		t.start();
 	}
 }

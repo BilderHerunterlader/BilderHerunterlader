@@ -63,7 +63,7 @@ public class ClipboardObserver implements ClipboardOwner {
 		}
 		clipboardObserverRunnable = new ClipboardObserverRunnable();
 		clipboardObserverThread = new Thread(clipboardObserverRunnable);
-		clipboardObserverThread.setName("ClipboardObserverThread-" + clipboardObserverThread.getId());
+		clipboardObserverThread.setName("ClipboardObserverThread-" + clipboardObserverThread.threadId());
 		clipboardObserverThread.setDaemon(true);
 		clipboardObserverThread.start();
 	}

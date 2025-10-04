@@ -604,7 +604,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 					}
 				}
 			});
-			t.setName("DeleteKeywordsThread-" + t.getId());
+			t.setName("DeleteKeywordsThread-" + t.threadId());
 			t.start();
 		} else if (e.getSource() == btnEdit) {
 			if (jtKeywords.getSelectedRowCount() < 1) {

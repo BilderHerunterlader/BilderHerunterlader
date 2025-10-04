@@ -541,7 +541,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 					checkForUpdates();
 				}
 			});
-			t.setName("UpdateWindow-Check-Thread-" + t.getId());
+			t.setName("UpdateWindow-Check-Thread-" + t.threadId());
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
 		} else if (e.getSource() == btnUpdate) {
@@ -551,7 +551,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 					startUpdate();
 				}
 			});
-			t.setName("UpdateWindow-Thread-" + t.getId());
+			t.setName("UpdateWindow-Thread-" + t.threadId());
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
 		} else if (e.getSource() == btnWebsite) {

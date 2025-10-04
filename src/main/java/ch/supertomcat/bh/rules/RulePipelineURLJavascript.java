@@ -88,7 +88,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 		});
 		try {
 			// Prepare log functions
-			String javascriptContextProvidedFunctions = JAVASCRIPT_PROVIDED_FUNCTIONS.replace("$SOURCE", "{" + this.getClass().getName() + ";Thread:" + Thread.currentThread().getId() + "}");
+			String javascriptContextProvidedFunctions = JAVASCRIPT_PROVIDED_FUNCTIONS.replace("$SOURCE", "{" + this.getClass().getName() + ";Thread:" + Thread.currentThread().threadId() + "}");
 
 			// Initialize standard objects
 			ScriptableObject scope = context.initStandardObjects();

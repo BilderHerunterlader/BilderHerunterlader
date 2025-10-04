@@ -253,46 +253,46 @@ public abstract class BH {
 			threadCount = 2;
 		}
 
-		ExecutorService executor = Executors.newFixedThreadPool(threadCount);
+		try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
 
-		List<Callable<Object>> tasks = new ArrayList<>();
-		tasks.add(Executors.callable(new Runnable() {
-			@Override
-			public void run() {
-				DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
-				try {
-					hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
-				} catch (IOException | SAXException | JAXBException e) {
-					logger.error("Could not initialize HostManager", e);
-					JOptionPane.showMessageDialog(null, "Could not initialize HostManager", "Error", JOptionPane.ERROR_MESSAGE);
-					System.exit(1);
-					return;
-				}
-				QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<>() {
-					@Override
-					public QueueTask<PicDownloadListener, PicDownloadResult> createTaskCallable(PicDownloadListener task) {
-						return new PicQueueTask(task);
+			List<Callable<Object>> tasks = new ArrayList<>();
+			tasks.add(Executors.callable(new Runnable() {
+				@Override
+				public void run() {
+					DownloadQueueManagerRestrictions restrictions = new DownloadQueueManagerRestrictions();
+					try {
+						hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
+					} catch (IOException | SAXException | JAXBException e) {
+						logger.error("Could not initialize HostManager", e);
+						JOptionPane.showMessageDialog(null, "Could not initialize HostManager", "Error", JOptionPane.ERROR_MESSAGE);
+						System.exit(1);
+						return;
 					}
-				};
-				downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager, queueTaskFactory);
-				FileDownloaderFactory fileDownloaderFactory = new FileDownloaderFactory(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
-				queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, hostManager, fileDownloaderFactory);
-			}
-		}));
-		tasks.add(Executors.callable(new Runnable() {
-			@Override
-			public void run() {
-				keywordManager = new KeywordManager(settingsManager);
-			}
-		}));
+					QueueTaskFactory<PicDownloadListener, PicDownloadResult> queueTaskFactory = new QueueTaskFactory<>() {
+						@Override
+						public QueueTask<PicDownloadListener, PicDownloadResult> createTaskCallable(PicDownloadListener task) {
+							return new PicQueueTask(task);
+						}
+					};
+					downloadQueueManager = new DownloadQueueManager(restrictions, settingsManager, queueTaskFactory);
+					FileDownloaderFactory fileDownloaderFactory = new FileDownloaderFactory(downloadQueueManager, proxyManager, settingsManager, cookieManager, hostManager);
+					queueManager = new QueueManager(downloadQueueManager, logManager, settingsManager, hostManager, fileDownloaderFactory);
+				}
+			}));
+			tasks.add(Executors.callable(new Runnable() {
+				@Override
+				public void run() {
+					keywordManager = new KeywordManager(settingsManager);
+				}
+			}));
 
-		// Wait for all threads to complete
-		try {
-			executor.invokeAll(tasks);
-		} catch (InterruptedException e) {
-			logger.error(e.getMessage(), e);
+			// Wait for all threads to complete
+			try {
+				executor.invokeAll(tasks);
+			} catch (InterruptedException e) {
+				logger.error(e.getMessage(), e);
+			}
 		}
-		executor.shutdown();
 
 		ClipboardObserver clipboardObserver = new ClipboardObserver(settingsManager);
 		main = new MainWindow(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, proxyManager, cookieManager, hostManager, clipboardObserver, guiEvent);

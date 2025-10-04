@@ -70,7 +70,7 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 	public void checkURLs() {
 		if (!running) {
 			Thread t = new Thread(this);
-			t.setName("URL-Check-Thread-" + t.getId());
+			t.setName("URL-Check-Thread-" + t.threadId());
 			t.setPriority(Thread.MIN_PRIORITY);
 			t.start();
 		}

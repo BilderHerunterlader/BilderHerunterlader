@@ -32,18 +32,19 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.RuleRegExp;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Host class for Photo Sharing Galleries (Recursive)
  * 
- * @version 3.3
+ * @version 3.4
  */
 public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURLAdder, IHosterOptions {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.3";
+	public static final String VERSION = "3.4";
 
 	/**
 	 * Name dieser Klasse
@@ -169,7 +170,7 @@ public class HostPhotoSharingGallery extends Host implements IHoster, IHosterURL
 		java.net.URL completeURL = null;
 		String rootFolder = "";
 		try {
-			completeURL = new java.net.URL(url.getURL());
+			completeURL = HTTPUtil.parseURL(url.getURL());
 			rootFolder = completeURL.getHost() + "_" + completeURL.getPath();
 			int lastSlash = rootFolder.lastIndexOf("/");
 			if (lastSlash > 0) {

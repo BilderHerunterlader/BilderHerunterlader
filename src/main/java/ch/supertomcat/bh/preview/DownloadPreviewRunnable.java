@@ -66,10 +66,8 @@ public class DownloadPreviewRunnable implements Runnable {
 
 	@Override
 	public void run() {
-		ExecutorService threadPool = Executors.newFixedThreadPool(6);
-		CompletionService<PreviewDownloader.DownloadedPreview> completionService = new ExecutorCompletionService<>(threadPool);
-
-		try {
+		try (ExecutorService threadPool = Executors.newFixedThreadPool(6)) {
+			CompletionService<PreviewDownloader.DownloadedPreview> completionService = new ExecutorCompletionService<>(threadPool);
 			int scheduledTaskCount = 0;
 			for (int i = 0; i < urls.size(); i++) {
 				URL url = urls.get(i);
@@ -87,6 +85,7 @@ public class DownloadPreviewRunnable implements Runnable {
 					final PreviewDownloader.DownloadedPreview downloadedPreview = future.get();
 
 					if (stop) {
+						threadPool.shutdownNow();
 						break;
 					}
 
@@ -102,6 +101,7 @@ public class DownloadPreviewRunnable implements Runnable {
 				}
 
 				if (stop) {
+					threadPool.shutdownNow();
 					break;
 				}
 			}
@@ -109,7 +109,6 @@ public class DownloadPreviewRunnable implements Runnable {
 			logger.error("Preview Download Task was rejected", e);
 		} finally {
 			previewCache.notifyAllPreviewsAdded();
-			threadPool.shutdownNow();
 			System.gc();
 		}
 	}

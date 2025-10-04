@@ -48,13 +48,13 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Host class for Coppermine Galleries (Recursive)
  * 
- * @version 4.6
+ * @version 4.7
  */
 public class HostCoppermineGalleries extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "4.6";
+	public static final String VERSION = "4.7";
 
 	/**
 	 * Name dieser Klasse
@@ -315,7 +315,7 @@ public class HostCoppermineGalleries extends Host implements IHoster, IHosterOpt
 			java.net.URL completeURL = null;
 			String rootFolder = "";
 			try {
-				completeURL = new java.net.URL(url);
+				completeURL = HTTPUtil.parseURL(url);
 				rootFolder = completeURL.getHost() + "_" + completeURL.getPath();
 				int lastSlash = rootFolder.lastIndexOf("/");
 				if (lastSlash > 0) {

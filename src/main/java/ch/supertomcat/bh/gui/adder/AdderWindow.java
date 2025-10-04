@@ -1065,7 +1065,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 		if (settingsManager.getGUISettings().isDownloadPreviews()) {
 			previewRunnable = new DownloadPreviewRunnable(previewCache, previewHeight, clearedUpURLs);
 			Thread previewThread = new Thread(previewRunnable);
-			previewThread.setName("Preview-Download-Wait" + previewThread.getId());
+			previewThread.setName("Preview-Download-Wait" + previewThread.threadId());
 			previewThread.start();
 		}
 

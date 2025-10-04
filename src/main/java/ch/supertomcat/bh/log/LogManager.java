@@ -118,10 +118,7 @@ public class LogManager implements BHSettingsListener {
 			@Override
 			public boolean accept(File pathname) {
 				String filename = pathname.getName();
-				if ((filename.startsWith("BH-logs")) && (filename.endsWith(".txt")) && filename.equals("BH-logs.txt") == false) {
-					return true;
-				}
-				return false;
+				return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals("BH-logs.txt");
 			}
 		});
 		if (logFiles != null) {
@@ -217,8 +214,6 @@ public class LogManager implements BHSettingsListener {
 			return;
 		}
 
-		ExecutorService threadPool = null;
-
 		boolean updateProgress = ap != null;
 
 		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
@@ -258,22 +253,47 @@ public class LogManager implements BHSettingsListener {
 			}
 
 			CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
-			threadPool = Executors.newFixedThreadPool(threadCount);
+			try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
 
-			List<String> currentRows = new ArrayList<>();
+				List<String> currentRows = new ArrayList<>();
 
-			SearchLogThread[] slt = new SearchLogThread[threadCount];
-			for (int t = 0; t < threadCount; t++) {
-				slt[t] = new SearchLogThread(urls, t, threadCount, currentRows, barrier);
-			}
+				SearchLogThread[] slt = new SearchLogThread[threadCount];
+				for (int t = 0; t < threadCount; t++) {
+					slt[t] = new SearchLogThread(urls, t, threadCount, currentRows, barrier);
+				}
 
-			int rowsToRead = 1000;
+				int rowsToRead = 1000;
 
-			String row = null;
-			while ((row = br.readLine()) != null) {
-				currentRows.add(row);
+				String row = null;
+				while ((row = br.readLine()) != null) {
+					currentRows.add(row);
 
-				if (currentRows.size() >= rowsToRead) {
+					if (currentRows.size() >= rowsToRead) {
+						/*
+						 * Start all threads (runnables)
+						 */
+						for (int t = 0; t < threadCount; t++) {
+							threadPool.execute(slt[t]);
+						}
+						/*
+						 * Wait for all threads (runnables) to complete
+						 */
+						try {
+							barrier.await();
+						} catch (InterruptedException | BrokenBarrierException e) {
+							logger.error(e.getMessage(), e);
+						}
+
+						currentRows.clear();
+
+						if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
+							ap.setPGValue(nextPercentValue);
+							nextPercentValue++;
+						}
+					}
+				}
+
+				if (!currentRows.isEmpty()) {
 					/*
 					 * Start all threads (runnables)
 					 */
@@ -285,47 +305,18 @@ public class LogManager implements BHSettingsListener {
 					 */
 					try {
 						barrier.await();
-					} catch (InterruptedException e) {
-						logger.error(e.getMessage(), e);
-					} catch (BrokenBarrierException e) {
-						logger.error(e.getMessage(), e);
+					} catch (InterruptedException | BrokenBarrierException e) {
+						logger.error("Could not await barrier", e);
 					}
-
-					currentRows.clear();
 
 					if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
 						ap.setPGValue(nextPercentValue);
-						nextPercentValue++;
 					}
-				}
-			}
-
-			if (!currentRows.isEmpty()) {
-				/*
-				 * Start all threads (runnables)
-				 */
-				for (int t = 0; t < threadCount; t++) {
-					threadPool.execute(slt[t]);
-				}
-				/*
-				 * Wait for all threads (runnables) to complete
-				 */
-				try {
-					barrier.await();
-				} catch (InterruptedException | BrokenBarrierException e) {
-					logger.error("Could not await barrier", e);
-				}
-
-				if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
-					ap.setPGValue(nextPercentValue);
 				}
 			}
 		} catch (IOException e) {
 			logger.error("Could not search for already downloaded files", e);
 		} finally {
-			if (threadPool != null) {
-				threadPool.shutdown();
-			}
 			if (updateProgress) {
 				ap.setPGEnabled(false);
 			}

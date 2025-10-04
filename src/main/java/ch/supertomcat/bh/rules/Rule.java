@@ -106,10 +106,10 @@ public class Rule extends Hoster {
 
 		pipelines.clear();
 		for (URLPipeline pipeDefinition : definition.getPipes()) {
-			if (pipeDefinition instanceof URLRegexPipeline) {
-				pipelines.add(new RulePipelineURLRegex((URLRegexPipeline)pipeDefinition));
-			} else if (pipeDefinition instanceof URLJavascriptPipeline) {
-				pipelines.add(new RulePipelineURLJavascript((URLJavascriptPipeline)pipeDefinition));
+			if (pipeDefinition instanceof URLRegexPipeline urlRegexPipeline) {
+				pipelines.add(new RulePipelineURLRegex(urlRegexPipeline));
+			} else if (pipeDefinition instanceof URLJavascriptPipeline urlJavascriptPipeline) {
+				pipelines.add(new RulePipelineURLJavascript(urlJavascriptPipeline));
 			}
 		}
 

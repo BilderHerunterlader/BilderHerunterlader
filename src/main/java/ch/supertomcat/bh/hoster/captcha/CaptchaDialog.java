@@ -7,7 +7,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.net.URL;
 
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -20,6 +19,7 @@ import javax.swing.JTextField;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.exceptions.HostIOException;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * Klasse for Catpcha-Dialogs
@@ -76,7 +76,7 @@ public class CaptchaDialog extends JDialog {
 
 		BufferedImage imgCaptcha = null;
 		try {
-			imgCaptcha = ImageIO.read(new URL(captchaURL));
+			imgCaptcha = ImageIO.read(HTTPUtil.parseURL(captchaURL));
 			if (imgCaptcha == null) {
 				throw new HostIOException("Could not download Captcha-Image");
 			}

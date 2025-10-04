@@ -84,10 +84,10 @@ public class HosterPanel extends JPanel {
 					boolean b = (Boolean)model.getValueAt(firstChangedRow, 4);
 
 					Object hostValue = model.getValueAt(firstChangedRow, 0);
-					if (hostValue instanceof IRedirect) {
-						((IRedirect)hostValue).setEnabled(b);
-					} else if (hostValue instanceof Host) {
-						((Host)hostValue).setEnabled(b);
+					if (hostValue instanceof IRedirect redirect) {
+						redirect.setEnabled(b);
+					} else if (hostValue instanceof Host host) {
+						host.setEnabled(b);
 					} else if (hostValue == null) {
 						logger.error("Unknown class type in column 0: null");
 					} else {
@@ -105,14 +105,17 @@ public class HosterPanel extends JPanel {
 		jtHoster.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -122,6 +125,7 @@ public class HosterPanel extends JPanel {
 
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 		});
 		jtHoster.getTableHeader().setReorderingAllowed(false);

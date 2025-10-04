@@ -48,7 +48,7 @@ public class HostManager {
 	/**
 	 * Singleton
 	 */
-	private static HostManager instance = null;
+	private static boolean alreadyInstanced = false;
 
 	/**
 	 * Hostsclasses
@@ -115,10 +115,12 @@ public class HostManager {
 		// Now we have a unsorted array, so we have to sort it
 		reInitHosterList();
 
-		if (instance != null) {
-			throw new IllegalStateException("HostManager already instanced");
+		synchronized (HostManager.class) {
+			if (alreadyInstanced) {
+				throw new IllegalStateException("HostManager already instanced");
+			}
+			alreadyInstanced = true;
 		}
-		instance = this;
 	}
 
 	/**
@@ -306,8 +308,7 @@ public class HostManager {
 
 					bOK.set(true);
 
-					if (host instanceof IHosterURLAdder) {
-						IHosterURLAdder ihua = (IHosterURLAdder)host;
+					if (host instanceof IHosterURLAdder ihua) {
 						try {
 							List<URL> additionalURLs = ihua.isFromThisHoster(urlObject, bOK, progress);
 							if (additionalURLs != null && !additionalURLs.isEmpty()) {
@@ -395,61 +396,59 @@ public class HostManager {
 		}
 
 		CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
-		ExecutorService threadPool = Executors.newFixedThreadPool(threadCount);
+		try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
 
-		AtomicBoolean bContains = new AtomicBoolean(false);
+			AtomicBoolean bContains = new AtomicBoolean(false);
 
-		RemoveDuplicatesRunnable[] rdt = new RemoveDuplicatesRunnable[threadCount];
-		for (int t = 0; t < threadCount; t++) {
-			rdt[t] = new RemoveDuplicatesRunnable(originalUrls, t, threadCount, bContains, 0, barrier);
-		}
-
-		if (progress != null) {
-			progress.progressChanged(true);
-			progress.progressChanged(0, originalUrls.size(), 0);
-			progress.progressChanged(Localization.getString("RemovingDuplicates") + "...");
-		}
-
-		int val = 0;
-
-		for (int i = 0; i < originalUrls.size(); i++) {
-			// Reset Value
-			bContains.set(false);
-
-			/*
-			 * Start all threads (runnables)
-			 */
+			RemoveDuplicatesRunnable[] rdt = new RemoveDuplicatesRunnable[threadCount];
 			for (int t = 0; t < threadCount; t++) {
-				rdt[t].setCurrentRow(i);
-				threadPool.execute(rdt[t]);
-			}
-			/*
-			 * Wait for all threads (runnables) to complete
-			 */
-			try {
-				barrier.await();
-			} catch (InterruptedException e) {
-				logger.error(e.getMessage(), e);
-			} catch (BrokenBarrierException e) {
-				logger.error(e.getMessage(), e);
+				rdt[t] = new RemoveDuplicatesRunnable(originalUrls, t, threadCount, bContains, 0, barrier);
 			}
 
-			if (!bContains.get()) {
-				// Add the current URL to the result-Array
-				urls.add(originalUrls.get(i));
-			} else {
-				// Remove the current URL from the original array
-				originalUrls.remove(i);
-				i--;
-			}
-			val++;
 			if (progress != null) {
-				progress.progressChanged(val);
+				progress.progressChanged(true);
+				progress.progressChanged(0, originalUrls.size(), 0);
+				progress.progressChanged(Localization.getString("RemovingDuplicates") + "...");
+			}
+
+			int val = 0;
+
+			for (int i = 0; i < originalUrls.size(); i++) {
+				// Reset Value
+				bContains.set(false);
+
+				/*
+				 * Start all threads (runnables)
+				 */
+				for (int t = 0; t < threadCount; t++) {
+					rdt[t].setCurrentRow(i);
+					threadPool.execute(rdt[t]);
+				}
+				/*
+				 * Wait for all threads (runnables) to complete
+				 */
+				try {
+					barrier.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					logger.error(e.getMessage(), e);
+				}
+
+				if (!bContains.get()) {
+					// Add the current URL to the result-Array
+					urls.add(originalUrls.get(i));
+				} else {
+					// Remove the current URL from the original array
+					originalUrls.remove(i);
+					i--;
+				}
+				val++;
+				if (progress != null) {
+					progress.progressChanged(val);
+				}
+			}
+			if (progress != null) {
+				progress.progressChanged(false);
 			}
 		}
-		if (progress != null) {
-			progress.progressChanged(false);
-		}
-		threadPool.shutdown();
 	}
 }

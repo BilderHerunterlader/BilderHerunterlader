@@ -116,9 +116,7 @@ public class HosterTableModel extends DefaultTableModel implements BHSettingsLis
 	 * @return Option-Panel for host or null if not available
 	 */
 	private JPanel createOptionPanelForHost(Host host) {
-		if (host instanceof IHosterOptions) {
-			IHosterOptions hostOptions = (IHosterOptions)host;
-
+		if (host instanceof IHosterOptions hostOptions) {
 			JButton btn = new JButton(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
 			btn.addActionListener(new ActionListener() {
 				@Override

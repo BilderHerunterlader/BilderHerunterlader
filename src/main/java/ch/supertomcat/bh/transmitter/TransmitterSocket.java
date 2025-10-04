@@ -64,7 +64,7 @@ public class TransmitterSocket implements Runnable {
 					if (!stop && acceptConnections) {
 						// Start new thread, which will read data from the stream
 						TransmitterThread t = new TransmitterThread(socket, transmitterHelper);
-						t.setName("TransmitterReader-" + t.getId());
+						t.setName("TransmitterReader-" + t.threadId());
 						logger.info("Handle connection by thread: {}", t.getName());
 						t.start();
 					} else {

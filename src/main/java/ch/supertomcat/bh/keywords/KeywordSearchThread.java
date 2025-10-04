@@ -128,7 +128,7 @@ public class KeywordSearchThread extends Thread {
 		this.keywordManager = keywordManager;
 		this.settingsManager = settingsManager;
 		this.displayKeywordsWhenNoMatches = this.settingsManager.getKeywordsSettings().isDisplayKeywordsWhenNoMatches();
-		this.setName("Keyword-Search-Thread-" + this.getId());
+		this.setName("Keyword-Search-Thread-" + this.threadId());
 	}
 
 	@Override
