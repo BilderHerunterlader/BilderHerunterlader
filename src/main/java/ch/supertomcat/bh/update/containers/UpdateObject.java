@@ -439,9 +439,7 @@ public class UpdateObject {
 
 		try (FileOutputStream out = new FileOutputStream(deleteUpdateFile, true); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
 			for (int i = 0; i < this.targets.size(); i++) {
-				if (this.action == UpdateActionType.ACTION_REMOVE) {
-					bw.write(this.targets.get(i) + "\n");
-				} else if (this.sources.get(i).isDelete()) {
+				if (this.action == UpdateActionType.ACTION_REMOVE || this.sources.get(i).isDelete()) {
 					bw.write(this.targets.get(i) + "\n");
 				}
 			}

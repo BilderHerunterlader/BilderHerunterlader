@@ -268,12 +268,12 @@ public class TransmitterHelper {
 				}
 			}
 
-			if ((fullList == false) && (file.length() > 0) && (eof)) {
+			if (!fullList && !file.isEmpty() && eof) {
 				// If we recieved only a path to a file, we must read it
 				new ImportLinkList(parentComponent, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
 						.importLinkList(file, true);
 				logger.info("Handled Connection successfully");
-			} else if ((fullList == false) && (url.length() > 0) && (eof)) {
+			} else if (!fullList && !url.isEmpty() && eof) {
 				// If we recieved only a URL which contains all the URLs, we download the URL
 				if (url.matches("^https?://.*/?.*")) {
 					logger.debug("Recieved URL to Download: {}", url);
@@ -282,7 +282,7 @@ public class TransmitterHelper {
 					logger.error("URL did not match URL-Pattern: {}", url);
 				}
 				logger.info("Handled Connection successfully");
-			} else if ((fullList) && !urls.isEmpty() && eof) {
+			} else if (fullList && !urls.isEmpty() && eof) {
 				// If we recieved all the URLs
 				logger.debug("Recieved {} Links", urls.size());
 				// Open the Download-Selection-Dialog

@@ -22,11 +22,6 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 	private final URLList urlList;
 
 	/**
-	 * Checked URLs
-	 */
-	private ArrayList<URL> v = null;
-
-	/**
 	 * ProgressObserver
 	 */
 	private ProgressObserver progress = new ProgressObserver();
@@ -79,7 +74,7 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 	@Override
 	public void run() {
 		running = true;
-		v = new ArrayList<>();
+		List<URL> v = new ArrayList<>();
 		List<URL> urls = urlList.getUrls();
 		if (urls == null || urls.isEmpty()) {
 			// if there are now urls to check
@@ -135,7 +130,6 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 
 		// Let the listeners know that the urls are checked
 		linksChecked(v);
-		v = null;
 		running = false;
 		stop = false;
 	}
@@ -201,17 +195,21 @@ public class HostURLCheckerRunnable implements Runnable, IProgressObserver {
 
 	@Override
 	public void progressChanged(boolean visible) {
+		// Nothing to do
 	}
 
 	@Override
 	public void progressIncreased() {
+		// Nothing to do
 	}
 
 	@Override
 	public void progressModeChanged(boolean indeterminate) {
+		// Nothing to do
 	}
 
 	@Override
 	public void progressCompleted() {
+		// Nothing to do
 	}
 }

@@ -96,8 +96,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		String referrer = result.getContainerURL();
 		Hoster lastHoster = result.getLastHoster();
-		if (lastHoster instanceof Rule) {
-			Rule lastRule = (Rule)lastHoster;
+		if (lastHoster instanceof Rule lastRule) {
 			switch (lastRule.getDefinition().getDownloadReferrerMode()) {
 				case NO_REFERRER:
 					referrer = "";
@@ -211,7 +210,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			if (result.checkExistInfo(URLParseObject.USE_REFERRER, String.class)) {
 				referrer = (String)result.getInfo(URLParseObject.USE_REFERRER);
 			}
-			if (referrer.length() > 0) {
+			if (!referrer.isEmpty()) {
 				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 			boolean sendCookies = true;

@@ -14,7 +14,7 @@ import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
  */
 public class RedirectClassLoader extends HostClassLoaderBase<IRedirect> {
 	private final FileFilter filter = new FileFilter() {
-		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+[$][0-9]+\\.class$");
+		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+[$]\\d+\\.class$");
 
 		@Override
 		public boolean accept(File pathname) {
