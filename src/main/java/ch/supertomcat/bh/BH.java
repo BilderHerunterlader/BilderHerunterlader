@@ -198,8 +198,11 @@ public abstract class BH {
 
 		// Read the settings from settings file
 		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
-		settingsManager.readSettings();
-		// TODO Display an error dialog, when readSettings returns false and only continue if true was returned
+		if (!settingsManager.readSettings()) {
+			System.exit(1);
+			return;
+		}
+
 		if (settingsManager.isLanguageFirstRun()) {
 			// If the application is started at first time, the user must select the language
 			String[] options = { "English", "Deutsch" };
@@ -264,7 +267,7 @@ public abstract class BH {
 						hostManager = new HostManager(main, restrictions, proxyManager, settingsManager, cookieManager);
 					} catch (IOException | SAXException | JAXBException e) {
 						logger.error("Could not initialize HostManager", e);
-						JOptionPane.showMessageDialog(null, "Could not initialize HostManager", "Error", JOptionPane.ERROR_MESSAGE);
+						JOptionPane.showMessageDialog(null, "BH: Could not initialize HostManager", "Error", JOptionPane.ERROR_MESSAGE);
 						System.exit(1);
 						return;
 					}

@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
@@ -169,44 +170,60 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				return true;
 			} catch (Exception e) {
 				logger.error("Could not read settings file: {}", settingsFile.getAbsolutePath(), e);
-				/*
-				 * TODO Maybe read default settings file in this case or backup file? Or let the user decide what to do?
-				 */
-				return false;
+
+				String[] options = { "Replace with default settings", "Exit" };
+				var selectedOption = JOptionPane.showOptionDialog(null, "BH: Could not read settings file: " + settingsFile.getAbsolutePath()
+						+ "\nChoose how to proceed", "Error", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+				if (selectedOption == 0) {
+					return readDefaultSettings(false, true);
+				} else {
+					return false;
+				}
 			}
 		} else {
-			logger.info("Loading Default Settings File");
-			try {
-				this.settings = loadDefaultSettingsFile();
-				applyDynamicDefaultSettings();
-			} catch (Exception e) {
-				logger.error("Could not read default settings file", e);
-				return false;
-			}
+			return readDefaultSettings(true, false);
+		}
+	}
 
-			boolean converted = false;
-			if (oldSettingsConverter != null && oldSettingsConverter.checkOldSettingsFileExists()) {
-				oldSettingsConverter.convertSettings(settings);
-				checkSettings();
-				converted = true;
-				languageFirstRun = false;
-			}
+	/**
+	 * Read default settings
+	 * 
+	 * @param checkConvertOldSettings True if it should be checked for old settings file and convert it, false otherwise
+	 * @param forceWrite True if it should be force to write settings to file, false otherwise
+	 * @return True if successful, false otherwise
+	 */
+	private synchronized boolean readDefaultSettings(boolean checkConvertOldSettings, boolean forceWrite) {
+		logger.info("Loading Default Settings File");
+		try {
+			this.settings = loadDefaultSettingsFile();
+			applyDynamicDefaultSettings();
+		} catch (Exception e) {
+			logger.error("Could not read default settings file", e);
+			return false;
+		}
 
-			try {
-				updateHosterSettingsMap();
-				applyLogLevel();
-				applyRegexPipelines();
-				applySubDirs();
-				applyHostDeactivations();
-				settingsChanged();
-				if (converted) {
-					writeSettings(true);
-				}
-				return true;
-			} catch (Exception e) {
-				logger.error("Could not read default settings file", e);
-				return false;
+		boolean converted = false;
+		if (checkConvertOldSettings && oldSettingsConverter != null && oldSettingsConverter.checkOldSettingsFileExists()) {
+			oldSettingsConverter.convertSettings(settings);
+			checkSettings();
+			converted = true;
+			languageFirstRun = false;
+		}
+
+		try {
+			updateHosterSettingsMap();
+			applyLogLevel();
+			applyRegexPipelines();
+			applySubDirs();
+			applyHostDeactivations();
+			settingsChanged();
+			if (converted || forceWrite) {
+				writeSettings(true);
 			}
+			return true;
+		} catch (Exception e) {
+			logger.error("Could not read default settings file", e);
+			return false;
 		}
 	}
 
