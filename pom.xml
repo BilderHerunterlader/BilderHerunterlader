@@ -160,6 +160,7 @@
 						</manifest>
 						<manifestEntries>
 							<Built-By>${project.name}</Built-By>
+							<Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
 						</manifestEntries>
 					</archive>
 					<outputDirectory>${executableJarPath}</outputDirectory>
