@@ -1,7 +1,8 @@
 package ch.supertomcat.bh.gui;
 
 import java.awt.Window;
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JButton;
 
@@ -53,7 +54,7 @@ public class BHAboutDialog extends AboutDialog {
 	@Override
 	protected void fillApplicationPathsInformation() {
 		super.fillApplicationPathsInformation();
-		File profilePath = new File(ApplicationProperties.getProperty("ProfilePath"));
+		Path profilePath = Paths.get(ApplicationProperties.getProperty("ProfilePath"));
 		pnlProgram.addProgramFolderInformation("Database Path:", ApplicationProperties.getProperty("DatabasePath"), profilePath);
 		pnlProgram.addProgramFolderInformation("Settings Path:", ApplicationProperties.getProperty("SettingsPath"), profilePath);
 		pnlProgram.addProgramFolderInformation("DownloadLog Path:", ApplicationProperties.getProperty("DownloadLogPath"), profilePath);

@@ -1,6 +1,8 @@
 package ch.supertomcat.bh.downloader.impl;
 
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import ch.supertomcat.bh.downloader.FileDownloaderBase;
 import ch.supertomcat.bh.exceptions.HostException;
@@ -31,8 +33,8 @@ public class LocalFileDownloader extends FileDownloaderBase {
 	public void downloadFile(Pic pic) throws HostException {
 		URLParseObject result = parseURL(pic, null);
 
-		File sourceFile = new File(result.getDirectLink());
-		File targetFolder = new File(pic.getTargetPath());
+		Path sourceFile = Paths.get(result.getDirectLink());
+		Path targetFolder = Paths.get(pic.getTargetPath());
 		moveLocalFile(pic, result, sourceFile, targetFolder);
 	}
 
@@ -44,21 +46,21 @@ public class LocalFileDownloader extends FileDownloaderBase {
 	 * @param sourceFile Source File
 	 * @param targetFolder Target Folder
 	 */
-	private void moveLocalFile(Pic pic, URLParseObject result, File sourceFile, File targetFolder) {
-		// Get the filesize
-		pic.setSize(sourceFile.length());
-		pic.getProgress().setBytesDownloaded(0);
-		pic.progressUpdated();
-
-		// Move the file
+	private void moveLocalFile(Pic pic, URLParseObject result, Path sourceFile, Path targetFolder) {
 		try {
-			File fMoved = moveFile(sourceFile, targetFolder);
+			// Get the filesize
+			pic.setSize(Files.size(sourceFile));
+			pic.getProgress().setBytesDownloaded(0);
+			pic.progressUpdated();
+
+			// Move the file
+			Path fMoved = moveFile(sourceFile, targetFolder);
 			if (fMoved == null) {
 				// If the file could not be moved
 				failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeMoved"));
 			} else {
-				pic.setTargetPath(FileUtil.getDirectory(fMoved.getAbsolutePath()));
-				pic.setTargetFilename(fMoved.getName());
+				pic.setTargetPath(FileUtil.getDirectory(fMoved.toAbsolutePath().toString()));
+				pic.setTargetFilename(fMoved.getFileName().toString());
 				pic.targetChanged();
 				completeDownload(pic, pic.getSize());
 			}

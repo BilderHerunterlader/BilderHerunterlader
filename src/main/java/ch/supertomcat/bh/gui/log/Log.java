@@ -5,10 +5,10 @@ import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.util.HashSet;
 
 import javax.swing.BorderFactory;
@@ -177,14 +177,17 @@ public class Log extends JPanel implements ILogManagerListener {
 		jtLog.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -194,6 +197,7 @@ public class Log extends JPanel implements ILogManagerListener {
 
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 		});
 		jtLog.getTableHeader().setReorderingAllowed(false);
@@ -279,7 +283,7 @@ public class Log extends JPanel implements ILogManagerListener {
 			@Override
 			public void run() {
 				int[] s = jtLog.getSelectedRows();
-				StringBuilder content = new StringBuilder("");
+				StringBuilder content = new StringBuilder();
 				for (int i = 0; i < s.length; i++) {
 					content.append((String)model.getValueAt(s[i], 1));
 					if (s.length > 1) {
@@ -293,7 +297,6 @@ public class Log extends JPanel implements ILogManagerListener {
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	/**
@@ -320,7 +323,6 @@ public class Log extends JPanel implements ILogManagerListener {
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	/**
@@ -335,23 +337,22 @@ public class Log extends JPanel implements ILogManagerListener {
 				String file = "";
 				for (int i = 0; i < s.length; i++) {
 					file = (String)model.getValueAt(s[i], 2);
-					file = FileUtil.getPathFromFile(new File(file));
+					file = FileUtil.getPathFromFile(Paths.get(file));
 					dirs.add(file);
 				}
 				for (String dir : dirs) {
-					FileExplorerUtil.openDirectoryInFilemanager(dir);
+					FileExplorerUtil.openDirectory(dir);
 				}
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-		t = null;
 	}
 
 	/**
 	 * @param vals Values
 	 */
-	private void updateIndexAndStatus(long vals[]) {
+	private void updateIndexAndStatus(long[] vals) {
 		if (vals.length != 3) {
 			return;
 		}

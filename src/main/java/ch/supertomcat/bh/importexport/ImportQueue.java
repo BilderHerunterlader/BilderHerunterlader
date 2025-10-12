@@ -23,7 +23,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for import download-queues from textfiles
@@ -67,8 +66,7 @@ public class ImportQueue extends ImportExportBase {
 
 		File file = getTextFileFromFileChooserDialog(".*\\.txt", "Textfiles (.txt)", false);
 		if (file != null) {
-			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
-			settingsManager.writeSettings(true);
+			setLastUsedImportPath(file);
 			// read the file
 			read(file);
 		}

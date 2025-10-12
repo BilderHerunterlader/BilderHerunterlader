@@ -63,6 +63,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JViewport;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -582,7 +583,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 		this.hostManager = hostManager;
 		this.clipboardObserver = clipboardObserver;
 
-		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
 		setLayout(gbl);
 
@@ -1045,7 +1046,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 		for (URL url : urls) {
 			if (url.isBlacklisted()) {
 				continue;
-			} else if (url.isAlreadyDownloaded() == false) {
+			} else if (!url.isAlreadyDownloaded()) {
 				for (Pic pic : queue) {
 					if (pic.getContainerURL().equals(url.getURL())) {
 						url.setAlreadyDownloaded(true);
@@ -1269,10 +1270,9 @@ public class AdderWindow extends JFrame implements ActionListener {
 		int minLastLoaded = lastLoadedPreviewRowEnd - NO_LOAD_ROW_DISTANCE;
 		int maxLastLoaded = lastLoadedPreviewRowEnd + NO_LOAD_ROW_DISTANCE;
 		// If not enough was scrolled, we don't need to load anything
-		if (!force && lastLoadedPreviewRowStart > -1) {
-			if (firstLoadedRowIndex >= minFirstLoaded && firstLoadedRowIndex <= maxFirstLoaded && lastLoadedRowIndex >= minLastLoaded && lastLoadedRowIndex <= maxLastLoaded) {
-				return;
-			}
+		if (!force && lastLoadedPreviewRowStart > -1 && firstLoadedRowIndex >= minFirstLoaded && firstLoadedRowIndex <= maxFirstLoaded && lastLoadedRowIndex >= minLastLoaded
+				&& lastLoadedRowIndex <= maxLastLoaded) {
+			return;
 		}
 
 		lastLoadedPreviewRowStart = firstLoadedRowIndex;
@@ -1283,7 +1283,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		for (int i = 0; i < model.getRowCount(); i++) {
 			Object val = model.getValueAt(i, 9);
-			ImageIcon icon = val instanceof ImageIcon ? (ImageIcon)val : null;
+			ImageIcon icon = val instanceof ImageIcon imageIcon ? imageIcon : null;
 			Image img = icon != null ? icon.getImage() : null;
 			if (i >= firstModelIndex && i <= lastModelIndex) {
 				BufferedImage preview = previewCache.getPreview((String)model.getValueAt(i, 4));
@@ -1711,8 +1711,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 		boolean bPathOverrideSubdirs = false;
 
 		Object hosterObj = model.getValueAt(rowModelIndex, hosterColumnModelIndex);
-		if (hosterObj instanceof IHosterOverrideDirectoryOption) {
-			IHosterOverrideDirectoryOption iOption = (IHosterOverrideDirectoryOption)hosterObj;
+		if (hosterObj instanceof IHosterOverrideDirectoryOption iOption) {
 			OverrideDirectoryOption option = iOption.getOverrideDirectoryOption();
 			bPathOverride = option.isPathOverride();
 			bPathOverrideSubdirs = option.isPathOverrideSubdirsAllowed();
@@ -1899,8 +1898,8 @@ public class AdderWindow extends JFrame implements ActionListener {
 			if (input != null) {
 				int index = Integer.parseInt(input[1]);
 				int step = Integer.parseInt(input[2]);
-				boolean keepOriginal = (input[5].length() > 0);
-				boolean clearFilename = (input[6].length() > 0);
+				boolean keepOriginal = !input[5].isEmpty();
+				boolean clearFilename = !input[6].isEmpty();
 				model.setFireTableCellUpdatedEnabled(false);
 				for (int i = 0; i < selectedRows.length; i++) {
 					int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
@@ -1985,7 +1984,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	 */
 	private synchronized void actionCopyURLs() {
 		int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
-		int selectedRows[] = jtAdder.getSelectedRows();
+		int[] selectedRows = jtAdder.getSelectedRows();
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
@@ -2064,17 +2063,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		return Localization.getString("Links") + ": " + model.getRowCount() + " | " + Localization.getString("LinksSelected") + ": " + selectedLinkCount + " | "
 				+ Localization.getString("LinksAlreadyDownloaded") + ": " + alreadyDownloadedLinksCount;
-	}
-
-	/**
-	 * updateColWidthsToSettingsManager
-	 */
-	private void updateColWidthsToSettingsManager() {
-		if (!settingsManager.isSaveTableColumnSizes()) {
-			return;
-		}
-		settingsManager.setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
-		settingsManager.writeSettings(true);
 	}
 
 	/**
@@ -2170,14 +2158,17 @@ public class AdderWindow extends JFrame implements ActionListener {
 	private class AdderColumnListener implements TableColumnModelListener {
 		@Override
 		public void columnAdded(TableColumnModelEvent e) {
+			// Nothing to do
 		}
 
 		@Override
 		public void columnRemoved(TableColumnModelEvent e) {
+			// Nothing to do
 		}
 
 		@Override
 		public void columnMoved(TableColumnModelEvent e) {
+			// Nothing to do
 		}
 
 		@Override
@@ -2187,6 +2178,18 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		@Override
 		public void columnSelectionChanged(ListSelectionEvent e) {
+			// Nothing to do
+		}
+
+		/**
+		 * updateColWidthsToSettingsManager
+		 */
+		private void updateColWidthsToSettingsManager() {
+			if (!settingsManager.isSaveTableColumnSizes()) {
+				return;
+			}
+			settingsManager.setColWidthsAdder(TableUtil.serializeColWidthSetting(jtAdder));
+			settingsManager.writeSettings(true);
 		}
 	}
 
@@ -2196,6 +2199,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	private class AdderProgressListener implements IProgressObserver {
 		@Override
 		public void progressChanged(boolean visible) {
+			// Nothing to do
 		}
 
 		@Override
@@ -2215,14 +2219,17 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 		@Override
 		public void progressIncreased() {
+			// Nothing to do
 		}
 
 		@Override
 		public void progressModeChanged(boolean indeterminate) {
+			// Nothing to do
 		}
 
 		@Override
 		public void progressCompleted() {
+			// Nothing to do
 		}
 	}
 

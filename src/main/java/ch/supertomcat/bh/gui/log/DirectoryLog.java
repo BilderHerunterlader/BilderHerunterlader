@@ -208,7 +208,7 @@ public class DirectoryLog extends JPanel {
 
 			@Override
 			public void focusLost(FocusEvent e) {
-				if (txtFilter.getText().length() == 0) {
+				if (txtFilter.getText().isEmpty()) {
 					txtFilter.setText("Filter...");
 				}
 			}
@@ -297,14 +297,14 @@ public class DirectoryLog extends JPanel {
 			@Override
 			public void run() {
 				HashSet<String> dirs = new HashSet<>();
-				int s[] = jtLog.getSelectedRows();
+				int[] s = jtLog.getSelectedRows();
 				String file = "";
 				for (int i = 0; i < s.length; i++) {
 					file = (String)model.getValueAt(s[i], 1);
 					dirs.add(file);
 				}
 				for (String dir : dirs) {
-					FileExplorerUtil.openDirectoryInFilemanager(dir);
+					FileExplorerUtil.openDirectory(dir);
 				}
 			}
 		});
@@ -340,7 +340,7 @@ public class DirectoryLog extends JPanel {
 				if (filter.equals("Filter...")) {
 					filter = "";
 				}
-				if (filter.length() > 0) {
+				if (!filter.isEmpty()) {
 					try {
 						pattern = Pattern.compile(filter, Pattern.CASE_INSENSITIVE);
 					} catch (PatternSyntaxException pse) {
@@ -384,6 +384,7 @@ public class DirectoryLog extends JPanel {
 	private class DirectoryLogProgressObserver implements IProgressObserver {
 		@Override
 		public void progressIncreased() {
+			// Nothing to do
 		}
 
 		@Override
@@ -430,10 +431,12 @@ public class DirectoryLog extends JPanel {
 
 		@Override
 		public void progressModeChanged(boolean indeterminate) {
+			// Nothing to do
 		}
 
 		@Override
 		public void progressCompleted() {
+			// Nothing to do
 		}
 	}
 }

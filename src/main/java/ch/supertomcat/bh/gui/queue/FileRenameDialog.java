@@ -193,7 +193,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 
 		setLayout(new BorderLayout());
 
-		if (description.length() > 0) {
+		if (!description.isEmpty()) {
 			lblDescription.setText(description);
 		} else {
 			lblDescription.setText(Localization.getString("RenameDialogDescriptionA") + "\n" + Localization.getString("RenameDialogDescriptionB") + "\n"
@@ -390,7 +390,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 				f = (String)txtFilename.getSelectedItem();
 			}
 
-			if (f.length() > 0) {
+			if (!f.isEmpty()) {
 				boolean available = false;
 				for (int a = 0; a < txtFilename.getItemCount(); a++) {
 					if (txtFilename.getItemAt(a).equals(f)) {

@@ -20,7 +20,6 @@ import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for exporting keywords
@@ -50,8 +49,7 @@ public class ExportKeywords extends ImportExportBase {
 	public void exportKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Textfiles (.txt)", true);
 		if (file != null) {
-			settingsManager.getDirectorySettings().setLastUsedExportPath(FileUtil.getPathFromFile(file));
-			settingsManager.writeSettings(true);
+			setLastUsedExportPath(file);
 			// export the keywords
 			exportKeywords(file.getAbsolutePath());
 		}

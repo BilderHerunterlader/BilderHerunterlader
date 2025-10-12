@@ -178,7 +178,7 @@ public class IradaTsvDialog extends JDialog {
 			public void actionPerformed(ActionEvent e) {
 				File file = FileDialogUtil.showFileOpenDialog(owner, settingsManager.getDirectorySettings().getLastUsedImportPath(), new TsvFileFilter());
 				if (file != null) {
-					settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
+					settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file.toPath()));
 					settingsManager.writeSettings(true);
 					txtFile.setText(file.getAbsolutePath());
 				}

@@ -19,7 +19,6 @@ import org.apache.hc.core5.http.io.SocketConfig;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
-import ch.supertomcat.bh.downloader.impl.HTTPFileDownloader;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
@@ -33,9 +32,9 @@ import ch.supertomcat.bh.settings.xml.ProxySettings;
  */
 public class ProxyManager {
 	/**
-	 * Buffer Size (Should be set to the same as in {@link HTTPFileDownloader}
+	 * Buffer Size
 	 */
-	private static final int BUFFER_SIZE = 65536;
+	public static final int BUFFER_SIZE = 65536;
 
 	/**
 	 * Mode
@@ -179,36 +178,12 @@ public class ProxyManager {
 	}
 
 	/**
-	 * Returns a preconfigured HttpClientBuilder, but without usage of the Mutli Threaded Connection Manager
-	 * I need this, because of some problems on download and import html files.
-	 * 
-	 * @see ch.supertomcat.bh.importexport.ImportHTML#importHTML(String, String, boolean)
-	 * @return HttpClientBuilder
-	 */
-	public HttpClientBuilder getNonMultithreadedHTTPClientBuilder() {
-		HttpClientBuilder clientBuilder = HttpClientBuilder.create();
-		configureHttpClientBuilder(clientBuilder);
-		return clientBuilder;
-	}
-
-	/**
 	 * Returns a preconfigured HttpClient
 	 * 
 	 * @return HttpClient
 	 */
 	public CloseableHttpClient getHTTPClient() {
 		return getHTTPClientBuilder().build();
-	}
-
-	/**
-	 * Returns a preconfigured HttpClient, but without usage of the Mutli Threaded Connection Manager
-	 * I need this, because of some problems on download and import html files.
-	 * 
-	 * @see ch.supertomcat.bh.importexport.ImportHTML#importHTML(String, String, boolean)
-	 * @return HttpClient
-	 */
-	public CloseableHttpClient getNonMultithreadedHTTPClient() {
-		return getNonMultithreadedHTTPClientBuilder().build();
 	}
 
 	/**

@@ -23,7 +23,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for importing keywords from a textfile
@@ -55,8 +54,7 @@ public class ImportKeywords extends ImportExportBase {
 	public void importKeywords() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", false);
 		if (file != null) {
-			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
-			settingsManager.writeSettings(true);
+			setLastUsedImportPath(file);
 			importKeywords(file.getAbsolutePath());
 		}
 	}

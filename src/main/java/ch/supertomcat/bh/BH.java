@@ -496,6 +496,7 @@ public abstract class BH {
 	}
 
 	private synchronized void initializeTransmitterHTTP(TransmitterHelper transmitterHelper) {
+		// TODO Replace by grizzly
 		int port = settingsManager.getSettings().getWebExtensionPort();
 		if (transmitterHTTP != null) {
 			if (transmitterHTTP.getListeningPort() == port && transmitterHTTP.isAlive()) {

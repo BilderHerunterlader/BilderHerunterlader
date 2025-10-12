@@ -24,7 +24,7 @@ public class HosterColorRowRenderer extends DefaultStringColorRowRenderer implem
 		if (isSelected) {
 			cf = table.getSelectionForeground();
 		} else {
-			if (value instanceof Host && ((Host)value).isDeveloper()) {
+			if (value instanceof Host host && host.isDeveloper()) {
 				cf = Color.BLUE;
 			} else if (value instanceof IRedirect) {
 				cf = REDIRECT_COLOR;

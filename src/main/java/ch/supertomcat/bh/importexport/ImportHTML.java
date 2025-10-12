@@ -41,7 +41,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for importing URLs from HTML
@@ -82,8 +81,7 @@ public class ImportHTML extends AdderImportBase {
 			mainWindowAccess.addProgressObserver(pg);
 			pg.progressChanged(-1, -1, -1);
 			pg.progressChanged(Localization.getString("ImportingHTMLFile") + "...");
-			settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file));
-			settingsManager.writeSettings(true);
+			setLastUsedImportPath(file);
 
 			try (FileInputStream in = new FileInputStream(file)) {
 				// Parse the inputstream by tidy
@@ -130,17 +128,7 @@ public class ImportHTML extends AdderImportBase {
 	public void importHTML(String url, String referrer, boolean embeddedImages) {
 		String encodedURL = HTTPUtil.encodeURL(url);
 
-		/*
-		 * A user reported to me, that when BH is running for a while and then
-		 * by this method a new URL is imported, then it doesen't returned any
-		 * URLs. The URL was from a Bulletin-Board. And this only appeared when
-		 * cookies from IE were used. But the cookies were read corretly by BH, and
-		 * also sent (I didn't checked this really). However, the Bulletin-Board did
-		 * not accept the cookies or didn't get them or something else ;-)
-		 * I was able to fix this problem by not using the MultiThreadedHttpConnectionManager.
-		 * So, maybe there is a bug in Jakarta-HttpClient...
-		 */
-		try (CloseableHttpClient client = proxyManager.getNonMultithreadedHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			// Open connection
 			HttpGet method = new HttpGet(encodedURL);
 			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());

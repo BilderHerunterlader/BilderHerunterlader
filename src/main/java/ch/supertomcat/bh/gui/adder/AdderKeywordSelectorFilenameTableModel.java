@@ -26,7 +26,7 @@ public class AdderKeywordSelectorFilenameTableModel extends DefaultTableModel {
 		try {
 			return super.getValueAt(row, column);
 		} catch (ArrayIndexOutOfBoundsException e) {
+			return null;
 		}
-		return null;
 	}
 }

@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Base class for Import or Export classes
@@ -81,5 +82,25 @@ public abstract class ImportExportBase {
 	 */
 	protected EncodingSelectionDialog getEncodingSelectionDialog() {
 		return new EncodingSelectionDialog(parentComponent instanceof Frame ? (Frame)parentComponent : null);
+	}
+
+	/**
+	 * Set last used export path
+	 * 
+	 * @param file File
+	 */
+	protected void setLastUsedExportPath(File file) {
+		settingsManager.getDirectorySettings().setLastUsedExportPath(FileUtil.getPathFromFile(file.toPath()));
+		settingsManager.writeSettings(true);
+	}
+
+	/**
+	 * Set last used export path
+	 * 
+	 * @param file File
+	 */
+	protected void setLastUsedImportPath(File file) {
+		settingsManager.getDirectorySettings().setLastUsedImportPath(FileUtil.getPathFromFile(file.toPath()));
+		settingsManager.writeSettings(true);
 	}
 }

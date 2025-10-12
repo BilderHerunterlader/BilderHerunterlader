@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import org.apache.hc.client5.http.cookie.BasicCookieStore;
 import org.apache.hc.client5.http.cookie.Cookie;
@@ -112,7 +111,7 @@ public class CookieManager {
 	 */
 	private void saveDatabase() {
 		cookiesSQLiteDB.deleteAllEntries();
-		List<BHCookie> bhCookies = databaseCookieStore.getCookies().stream().filter(Cookie::isPersistent).map(BHCookie::new).collect(Collectors.toList());
+		List<BHCookie> bhCookies = databaseCookieStore.getCookies().stream().filter(Cookie::isPersistent).map(BHCookie::new).toList();
 		cookiesSQLiteDB.insertEntries(bhCookies);
 	}
 

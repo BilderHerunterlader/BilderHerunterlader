@@ -47,7 +47,7 @@ public class QueueColorRowRenderer extends DefaultStringColorRowRenderer impleme
 		} else {
 			boolean progressColumn = table.convertColumnIndexToModel(column) == QueueTableModel.PROGRESS_COLUMN_INDEX;
 			Object progressValue = table.getModel().getValueAt(table.convertRowIndexToModel(row), QueueTableModel.PROGRESS_COLUMN_INDEX);
-			if (progressValue instanceof Pic && ((Pic)progressValue).isDeactivated() && (!progressColumn || !FAILED_PIC_STATES.contains(((Pic)progressValue).getStatus()))) {
+			if (progressValue instanceof Pic pic && pic.isDeactivated() && (!progressColumn || !FAILED_PIC_STATES.contains(((Pic)progressValue).getStatus()))) {
 				comp.setForeground(Color.RED);
 			} else {
 				super.prepareForegroundColor(comp, table, value, isSelected, hasFocus, row, column);

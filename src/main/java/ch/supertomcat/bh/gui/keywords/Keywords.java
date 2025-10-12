@@ -274,14 +274,17 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		jtKeywords.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -291,6 +294,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 		});
 		jtKeywords.setRowHeight(TableUtil.calculateRowHeight(jtKeywords, true, true));
@@ -531,6 +535,9 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 					txtRPath.repaint();
 					txtRPath.setToolTipText(filterErrorMessage);
 					break;
+				default:
+					// Nothing to do
+					break;
 			}
 		}
 		RowFilter<KeywordsTableModel, Object> filter = RowFilter.andFilter(filters);
@@ -703,14 +710,17 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override

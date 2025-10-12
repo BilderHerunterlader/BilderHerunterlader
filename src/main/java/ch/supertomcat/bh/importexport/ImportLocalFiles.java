@@ -3,6 +3,7 @@ package ch.supertomcat.bh.importexport;
 import java.awt.Component;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.downloader.ProxyManager;
@@ -53,7 +54,7 @@ public class ImportLocalFiles extends AdderImportBase {
 		if (files == null) {
 			return;
 		}
-		ArrayList<URL> urls = new ArrayList<>();
+		List<URL> urls = new ArrayList<>();
 
 		for (int i = 0; i < files.length; i++) {
 			if (files[i].exists()) {

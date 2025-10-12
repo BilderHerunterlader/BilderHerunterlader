@@ -19,7 +19,6 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for exporting the queue
@@ -49,8 +48,7 @@ public class ExportQueue extends ImportExportBase {
 	public void exportQueue() {
 		File file = getTextFileFromFileChooserDialog(".+\\.txt", "Tab-seperated Textfiles (.txt)", true);
 		if (file != null) {
-			settingsManager.getDirectorySettings().setLastUsedExportPath(FileUtil.getPathFromFile(file));
-			settingsManager.writeSettings(true);
+			setLastUsedExportPath(file);
 			// export the keywords
 			exportQueue(file.getAbsolutePath());
 		}

@@ -1,7 +1,8 @@
 package ch.supertomcat.bh.settings;
 
-import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -155,8 +156,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @return True if successful, false otherwise
 	 */
 	public synchronized boolean readSettings() {
-		if (settingsFile.exists()) {
-			logger.info("Loading Settings File: {}", settingsFile.getAbsolutePath());
+		if (Files.exists(settingsFile)) {
+			logger.info("Loading Settings File: {}", settingsFile);
 			try {
 				this.settings = loadUserSettingsFile();
 				checkSettings();
@@ -169,10 +170,10 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				settingsChanged();
 				return true;
 			} catch (Exception e) {
-				logger.error("Could not read settings file: {}", settingsFile.getAbsolutePath(), e);
+				logger.error("Could not read settings file: {}", settingsFile, e);
 
 				String[] options = { "Replace with default settings", "Exit" };
-				var selectedOption = JOptionPane.showOptionDialog(null, "BH: Could not read settings file: " + settingsFile.getAbsolutePath()
+				var selectedOption = JOptionPane.showOptionDialog(null, "BH: Could not read settings file: " + settingsFile.toAbsolutePath().toString()
 						+ "\nChoose how to proceed", "Error", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
 				if (selectedOption == 0) {
 					return readDefaultSettings(false, true);
@@ -348,14 +349,14 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @return True if successful, false otherwise
 	 */
 	public synchronized boolean writeSettings(boolean noShutdown) {
-		try (FileOutputStream out = new FileOutputStream(settingsFile)) {
+		try (OutputStream out = Files.newOutputStream(settingsFile)) {
 			writeSettingsFile(this.settings, out, false);
 			if (noShutdown) {
 				backupSettingsFile();
 			}
 			return true;
 		} catch (IOException | SAXException | JAXBException e) {
-			logger.error("Could not write settings file: {}", settingsFile.getAbsolutePath(), e);
+			logger.error("Could not write settings file: {}", settingsFile, e);
 			return false;
 		}
 	}

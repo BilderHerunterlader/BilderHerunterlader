@@ -1,10 +1,10 @@
 package ch.supertomcat.bh.downloader;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.StringJoiner;
@@ -313,9 +313,9 @@ public abstract class FileDownloaderBase implements FileDownloader {
 				throw new HostAbortedException("Download was aborted");
 			}
 
-			File targetDirectory = new File(pic.getTargetPath());
+			Path targetDirectory = Paths.get(pic.getTargetPath());
 			try {
-				Files.createDirectories(targetDirectory.toPath());
+				Files.createDirectories(targetDirectory);
 			} catch (IOException e) {
 				// If the directory could not be created
 				failDownload(pic, upo, false, e);
@@ -417,23 +417,23 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * If the file could not be created null is returned
 	 * 
 	 * @param file File
-	 * @param targetFilename Filename
-	 * @param targetPath Path
 	 * @return File
 	 * @throws IOException
 	 */
-	protected static synchronized File createFile(File file, String targetFilename, String targetPath) throws IOException {
-		if (file.exists()) {
+	protected static synchronized Path createFile(Path file) throws IOException {
+		Path fileToCreate = file;
+		if (Files.exists(file)) {
 			// If there is already a file or directory of the same name
 
 			// Get position of the last . in the filename
-			int iext = targetFilename.lastIndexOf(".");
+			String targetFilename = file.getFileName().toString();
+			int extPos = targetFilename.lastIndexOf(".");
 			String ext;
 			String filenameWithoutExt;
 			// Get filename whithout the extension and the extension
-			if (iext > 0) {
-				ext = targetFilename.substring(iext);
-				filenameWithoutExt = targetFilename.substring(0, iext);
+			if (extPos > 0) {
+				ext = targetFilename.substring(extPos);
+				filenameWithoutExt = targetFilename.substring(0, extPos);
 			} else {
 				ext = "";
 				filenameWithoutExt = targetFilename;
@@ -443,27 +443,31 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			 * Loop while the index is lower than 10'000.
 			 * I set this limit to avoid an endless loop.
 			 */
+			boolean foundFileToCreate = false;
 			int i = 1;
 			while (i < 10000) {
 				// add a number (the index)
 				String newFilename = filenameWithoutExt + "-" + i + ext;
-				File tf = new File(targetPath, newFilename);
-				if (!tf.exists()) {
+				Path newFile = file.toAbsolutePath().resolveSibling(newFilename);
+				if (!Files.exists(newFile)) {
+					foundFileToCreate = true;
+					fileToCreate = newFile;
 					// Ok there is no file with this name, so create it!
-					Files.createFile(tf.toPath());
-					return tf; // and return it
+					break;
 				}
 				// There is also a file with this name, so we loop again
 				i++;
 			}
 
-			// We can't create a file, so we return null
-			return null;
-		} else {
-			// There is no file with this name, so we can create it
-			Files.createFile(file.toPath());
-			return file; // and return it
+			if (!foundFileToCreate) {
+				// We can't create a file, so we return null
+				return null;
+			}
 		}
+
+		// There is no file with this name, so we can create it
+		Files.createFile(fileToCreate);
+		return file; // and return it
 	}
 
 	/**
@@ -484,9 +488,9 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @return File
 	 * @throws IOException
 	 */
-	protected synchronized File moveFileToSubdir(String filename, String path, String subdirName) throws IOException {
-		File fOriginal = new File(path, filename);
-		File fTargetPath = new File(path, subdirName);
+	protected synchronized Path moveFileToSubdir(String filename, String path, String subdirName) throws IOException {
+		Path fOriginal = Paths.get(path, filename);
+		Path fTargetPath = Paths.get(path, subdirName);
 		return moveFile(fOriginal, fTargetPath);
 	}
 
@@ -505,8 +509,8 @@ public abstract class FileDownloaderBase implements FileDownloader {
 	 * @return File
 	 * @throws IOException
 	 */
-	protected synchronized File moveFile(File fileToMove, File newPath) throws IOException {
-		if (FileUtil.getDirectory(fileToMove.getAbsolutePath()).equals(newPath.getAbsolutePath())) {
+	protected synchronized Path moveFile(Path fileToMove, Path newPath) throws IOException {
+		if (FileUtil.getDirectory(fileToMove.toAbsolutePath().toString()).equals(newPath.toAbsolutePath().toString())) {
 			return fileToMove;
 		}
 
@@ -514,14 +518,14 @@ public abstract class FileDownloaderBase implements FileDownloader {
 		 * Create the directory if it is not existing
 		 */
 		try {
-			Files.createDirectories(newPath.toPath());
+			Files.createDirectories(newPath);
 		} catch (IOException e) {
 			logger.error("Could not create directory: {}", newPath, e);
 			throw e;
 		}
 
-		String filename = fileToMove.getName();
-		File fMoved = new File(newPath, filename);
+		String filename = fileToMove.getFileName().toString();
+		Path fMoved = newPath.resolve(filename);
 		try {
 			/*
 			 * Create a new file. Here it is the same procedure as above
@@ -530,14 +534,13 @@ public abstract class FileDownloaderBase implements FileDownloader {
 			 * downloading an other download could download to the same file
 			 * or move a file to the same file, as we want to do here!
 			 */
-			File fMovedResult = createFile(fMoved, filename, newPath.getAbsolutePath());
+			Path fMovedResult = createFile(fMoved);
 			if (fMovedResult == null) {
 				logger.error("Could not create file: {}", fMoved);
 				return null;
 			}
 
-			Path targetFile = Files.move(fileToMove.toPath(), fMovedResult.toPath(), StandardCopyOption.REPLACE_EXISTING);
-			return targetFile.toFile();
+			return Files.move(fileToMove, fMovedResult, StandardCopyOption.REPLACE_EXISTING);
 		} catch (IOException e) {
 			logger.error("Could not move file from '{}' to '{}'", fileToMove, fMoved, e);
 			throw e;

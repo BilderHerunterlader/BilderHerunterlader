@@ -25,11 +25,6 @@ public class URLParseObject {
 	public static final String REDUCE_PATH_LENGTH = "ReducePathLength";
 
 	/**
-	 * Flag if non multithreaded httpclient should be used
-	 */
-	public static final String USE_NON_MULTITHREADED_HTTPCLIENT = "useNonMultithreadedHttpClient";
-
-	/**
 	 * Determine which http method to use. Supported values: "POST"
 	 */
 	public static final String USE_METHOD = "useMethod";

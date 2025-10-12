@@ -26,9 +26,7 @@ public class QueueSizeColumnRenderer extends QueueColorRowRenderer implements Ta
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		if (value instanceof Long) {
-			long size = (Long)value;
-
+		if (value instanceof Long size) {
 			String formattedSize;
 			if (size <= 0) {
 				formattedSize = Localization.getString("Unkown");

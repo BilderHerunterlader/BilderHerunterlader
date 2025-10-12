@@ -1,6 +1,5 @@
 package ch.supertomcat.bh.downloader.impl;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -53,11 +52,6 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
  * FileDownloader for HTTP URLs
  */
 public class HTTPFileDownloader extends FileDownloaderBase {
-	/**
-	 * Buffer Size (Should be set to the same as in {@link ProxyManager}
-	 */
-	private static final int BUFFER_SIZE = 65536;
-
 	/**
 	 * Proxy Manager
 	 */
@@ -178,21 +172,8 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		logger.info("Downloading File: {}", url);
 		TargetContainer targetContainer = new TargetContainer(pic, firstURL, correctedFilename);
 
-		/*
-		 * Get a HttpClient
-		 * We have to use this method, because otherwise we
-		 * have to check here if the user uses a proxy. With
-		 * this method we get a configured HttpClient, set to use
-		 * a proxy if needed and set user and password of the proxy.
-		 */
-		boolean nonMultiThreadedHttpClient = false;
-		if (result.checkExistInfo(URLParseObject.USE_NON_MULTITHREADED_HTTPCLIENT, Boolean.class) && Boolean.TRUE.equals(result.getInfo(URLParseObject.USE_NON_MULTITHREADED_HTTPCLIENT))) {
-			nonMultiThreadedHttpClient = true;
-		}
-
 		AtomicBoolean abortedFlag = new AtomicBoolean(false);
-		try (@SuppressWarnings("resource")
-		CloseableHttpClient client = nonMultiThreadedHttpClient ? proxyManager.getNonMultithreadedHTTPClient() : proxyManager.getHTTPClient()) {
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			String encodedURL = HTTPUtil.encodeURL(url);
 
 			HttpUriRequest method;
@@ -290,9 +271,9 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 * because there could already be a file of the same
 		 * name, so get back a new filename or another pathname.
 		 */
-		File fRetval;
+		Path fRetval;
 		try {
-			fRetval = createFile(new File(targetContainer.getTarget()), targetContainer.getCorrectedFilename(), pic.getTargetPath());
+			fRetval = createFile(Paths.get(targetContainer.getTarget()));
 			if (fRetval == null) {
 				// If the file coult not be created
 				failDownload(pic, result, false, Localization.getString("ErrorFileCouldNotBeCreated"));
@@ -311,7 +292,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		/*
 		 * Create file might change the filename, if the file already exsists, so we have to set the filename of the actually created file to target container
 		 */
-		targetContainer.setCorrectedFilename(fRetval.getName());
+		targetContainer.setCorrectedFilename(fRetval.getFileName().toString());
 
 		// Let the listeners know, that the target has changed
 		pic.targetChanged();
@@ -365,12 +346,12 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 			try (FileOutputStream out = new FileOutputStream(targetContainer.getTarget())) {
 				// Read some bytes to a buffer and write them to the outputstream
 				int bytesRead; // the amount of bytes where were read per loop course
-				byte[] buffer = new byte[BUFFER_SIZE]; // The buffer
+				byte[] buffer = new byte[ProxyManager.BUFFER_SIZE]; // The buffer
 
 				int maxBytesUntilProgressUpdate = 100 * 1024;
 				int maxReadCountUntilProgressUpdate;
-				if (maxBytesUntilProgressUpdate >= BUFFER_SIZE) {
-					maxReadCountUntilProgressUpdate = Math.floorDiv(maxBytesUntilProgressUpdate, BUFFER_SIZE);
+				if (maxBytesUntilProgressUpdate >= ProxyManager.BUFFER_SIZE) {
+					maxReadCountUntilProgressUpdate = Math.floorDiv(maxBytesUntilProgressUpdate, ProxyManager.BUFFER_SIZE);
 					if (maxReadCountUntilProgressUpdate < 1) {
 						maxReadCountUntilProgressUpdate = 1;
 					}

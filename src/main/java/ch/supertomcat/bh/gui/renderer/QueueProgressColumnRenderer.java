@@ -66,9 +66,7 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-		if (value instanceof Pic) {
-			Pic pic = (Pic)value;
-
+		if (value instanceof Pic pic) {
 			Component comp;
 			if (pic.getStatus() == PicState.DOWNLOADING && pic.getProgress() != null) {
 				PicProgress progress = pic.getProgress();

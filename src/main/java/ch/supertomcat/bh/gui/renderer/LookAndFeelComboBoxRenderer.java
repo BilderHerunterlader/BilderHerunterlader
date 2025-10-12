@@ -17,14 +17,11 @@ public class LookAndFeelComboBoxRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof MappedLookAndFeelSetting) {
-			MappedLookAndFeelSetting lookAndFeel = (MappedLookAndFeelSetting)value;
-			if (lookAndFeel == MappedLookAndFeelSetting.LAF_DEFAULT) {
-				setText(Localization.getString("LAFDefault"));
-			} else if (lookAndFeel == MappedLookAndFeelSetting.LAF_OS) {
-				setText(Localization.getString("LAFSystem"));
-			} else {
-				setText(lookAndFeel.getDisplayName());
+		if (value instanceof MappedLookAndFeelSetting lookAndFeel) {
+			switch (lookAndFeel) {
+				case MappedLookAndFeelSetting.LAF_DEFAULT -> setText(Localization.getString("LAFDefault"));
+				case MappedLookAndFeelSetting.LAF_OS -> setText(Localization.getString("LAFSystem"));
+				default -> setText(lookAndFeel.getDisplayName());
 			}
 		}
 		return comp;

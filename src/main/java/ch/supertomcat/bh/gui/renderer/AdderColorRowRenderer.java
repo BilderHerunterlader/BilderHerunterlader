@@ -55,8 +55,8 @@ public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
 		this.setOpaque(true);
 		setIcon(null);
 		if (value != null) {
-			if (value instanceof ImageIcon) {
-				setIcon((ImageIcon)value);
+			if (value instanceof ImageIcon imageIcon) {
+				setIcon(imageIcon);
 				setText("");
 				setToolTipText("");
 			} else {

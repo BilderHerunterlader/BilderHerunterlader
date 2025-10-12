@@ -839,7 +839,7 @@ public class Queue extends JPanel {
 	private void actionChangeTargetFilename() {
 		synchronized (queueManager.getSyncObject()) {
 			String defaultvalue = "";
-			int s[] = jtQueue.getSelectedRows();
+			int[] s = jtQueue.getSelectedRows();
 			if (s.length > 0) {
 				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), QueueTableModel.TARGET_COLUMN_INDEX);
 				defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
@@ -847,8 +847,8 @@ public class Queue extends JPanel {
 				if ((input != null)) {
 					int index = Integer.parseInt(input[1]);
 					int step = Integer.parseInt(input[2]);
-					boolean keepOriginal = (input[5].length() > 0);
-					boolean clearFilename = (input[6].length() > 0);
+					boolean keepOriginal = !input[5].isEmpty();
+					boolean clearFilename = !input[6].isEmpty();
 					for (int i = 0; i < s.length; i++) {
 						int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
 						String out = "";

@@ -22,17 +22,17 @@ public class UpdateActionColumnRenderer extends DefaultTableCellRenderer impleme
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		UpdateObject.UpdateActionType action = UpdateObject.UpdateActionType.ACTION_NONE;
-		if (value instanceof UpdateObject.UpdateActionType) {
-			action = (UpdateObject.UpdateActionType)value;
+		if (value instanceof UpdateObject.UpdateActionType updateActionType) {
+			action = updateActionType;
 		}
 		Component comp = null;
-		if (value instanceof JLabel) {
-			comp = (JLabel)value;
+		if (value instanceof JLabel lbl) {
+			comp = lbl;
 		} else {
 			comp = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 		}
-		if (comp instanceof JLabel) {
-			JLabel label = (JLabel)comp;
+		if (comp instanceof JLabel lbl) {
+			JLabel label = lbl;
 			label.setText("");
 			label.setOpaque(true);
 			label.setHorizontalAlignment(SwingConstants.CENTER);
