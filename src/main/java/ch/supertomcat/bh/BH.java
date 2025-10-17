@@ -63,7 +63,6 @@ import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.queue.QueueTask;
 import ch.supertomcat.supertomcatutils.queue.QueueTaskFactory;
-import fi.iki.elonen.NanoHTTPD;
 import jakarta.xml.bind.JAXBException;
 
 /**
@@ -457,7 +456,7 @@ public abstract class BH {
 				if (transmitterHTTP != null) {
 					logger.info("Stop TransmitterHTTP");
 					transmitterHTTP.setAcceptConnections(false);
-					transmitterHTTP.stop();
+					transmitterHTTP.shutdownNow();
 					transmitterHTTP = null;
 				}
 
@@ -496,21 +495,20 @@ public abstract class BH {
 	}
 
 	private synchronized void initializeTransmitterHTTP(TransmitterHelper transmitterHelper) {
-		// TODO Replace by grizzly
 		int port = settingsManager.getSettings().getWebExtensionPort();
 		if (transmitterHTTP != null) {
-			if (transmitterHTTP.getListeningPort() == port && transmitterHTTP.isAlive()) {
+			if (transmitterHTTP.getPort() == port && transmitterHTTP.isStarted()) {
 				/*
 				 * Transmitter is already open for the correct port and still alive, so nothing to do
 				 */
 				return;
 			}
-			transmitterHTTP.stop();
+			transmitterHTTP.shutdownNow();
 			transmitterHTTP = null;
 		}
 		transmitterHTTP = new TransmitterHTTP(port, transmitterHelper);
 		try {
-			transmitterHTTP.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
+			transmitterHTTP.start();
 		} catch (IOException e) {
 			logger.error("Could not start HTTP Server", e);
 		}
