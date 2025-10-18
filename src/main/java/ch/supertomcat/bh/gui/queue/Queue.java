@@ -133,7 +133,7 @@ public class Queue extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnSortFiles = new JButton(Localization.getString("SortFiles"), BHIcons.getBHIcon("actions/data-transfer.png", 16));
+	private JButton btnSortFiles = new JButton(Localization.getString("SortFiles"), BHIcons.getBHSVGIcon("actions/data-transfer.svg", 16));
 
 	/**
 	 * Button

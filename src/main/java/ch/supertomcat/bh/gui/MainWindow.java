@@ -17,19 +17,25 @@ import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.util.StringJoiner;
 
+import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
+import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.kitfox.svg.SVGException;
+import com.kitfox.svg.app.beans.SVGIcon;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
@@ -117,6 +123,25 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	private JLabel lblProgress = new JLabel("");
 
+	private final ImageIcon progressLoadingIcon = BHIcons.getBHSVGIcon("animations/process-working.svg", 16);
+
+	private final ImageIcon emptyProgressLoadingIcon = BHIcons.getBHIcon("Dummy.png", 16);
+
+	private long lblProgressTimerStartTime;
+
+	private Timer lblProgressTimer = new Timer(750 / 45, e -> {
+		if (progressLoadingIcon instanceof SVGIcon svgIcon) {
+			try {
+				long diff = (System.nanoTime() - lblProgressTimerStartTime) / 1000000;
+				svgIcon.getSvgUniverse().setCurTime((diff % 750) / 750d);
+				svgIcon.getSvgUniverse().updateTime();
+				lblProgress.repaint();
+			} catch (SVGException ex) {
+				// Do not log exception
+			}
+		}
+	});
+
 	private String windowTitlePrefix = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - ";
 	private String windowTitleSuffix = " (" + ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION) + ")";
 
@@ -173,8 +198,8 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 		tab.addTab(Localization.getString("Log"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), log);
 		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), directoryLog);
 		tab.addTab(Localization.getString("Keywords"), Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 22), keywords);
-		tab.addTab(Localization.getString("Rules"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), rules);
-		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), hosts);
+		tab.addTab(Localization.getString("Rules"), BHIcons.getBHSVGIcon("actions/approval.svg", 22), rules);
+		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHSVGIcon("actions/approval.svg", 22), hosts);
 
 		DropTargetAdapter dtl = new DropTargetAdapter() {
 			@Override
@@ -186,17 +211,17 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 						if (flavors[i].isFlavorTextType()) {
 							e.acceptDrop(e.getDropAction());
 							Object td = tr.getTransferData(flavors[i]);
-							if (td instanceof InputStreamReader) {
+							if (td instanceof InputStreamReader reader) {
 								@SuppressWarnings("resource")
-								BufferedReader br = new BufferedReader((InputStreamReader)td);
+								BufferedReader br = new BufferedReader(reader);
 								String line;
-								StringBuilder sbData = new StringBuilder();
+								StringJoiner sjData = new StringJoiner("\n");
 								while ((line = br.readLine()) != null) {
-									sbData.append(line + "\n");
+									sjData.add(line);
 								}
 								String title = Localization.getString("Unkown");
 								String referrer = Localization.getString("Unkown");
-								byte[] stringBytes = sbData.toString().getBytes();
+								byte[] stringBytes = sjData.toString().getBytes();
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
 								new ImportHTML(MainWindow.this, MainWindow.this, logManager, queueManager, keywordManager, proxyManger, settingsManager, hostManager, cookieManager, clipboardObserver)
 										.importHTML(bais, referrer, title);
@@ -216,7 +241,7 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 		setJMenuBar(mainMenuBar.getJMenuBar());
 
-		lblProgress.setIcon(BHIcons.getBHIcon("Dummy.png", 16));
+		lblProgress.setIcon(emptyProgressLoadingIcon);
 
 		pnlMessage.setLayout(new BorderLayout());
 		pnlMessage.add(lblMessage, BorderLayout.WEST);
@@ -259,6 +284,7 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	@Override
 	public void componentHidden(ComponentEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -280,14 +306,17 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	@Override
 	public void componentShown(ComponentEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -305,18 +334,22 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowOpened(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -332,14 +365,16 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	@Override
 	public synchronized void addProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.addProgressObserver(progress);
-		lblProgress.setIcon(BHIcons.getBHIcon("animations/process-working.gif", 16));
+		lblProgress.setIcon(progressLoadingIcon);
+		lblProgressTimer.start();
 	}
 
 	@Override
 	public synchronized void removeProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.removeProgressObserver(progress);
 		if (mainProgressPopup.getProgressObserverCount() == 0) {
-			lblProgress.setIcon(BHIcons.getBHIcon("Dummy.png", 16));
+			lblProgressTimer.stop();
+			lblProgress.setIcon(emptyProgressLoadingIcon);
 		}
 	}
 
@@ -355,20 +390,22 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	@Override
 	public void mouseClicked(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
-		if (e.getSource() instanceof JComponent) {
-			JComponent comp = (JComponent)e.getSource();
+		if (e.getSource() instanceof JComponent comp) {
 			Dimension d = mainProgressPopup.getPreferredSize();
 			int w = d.width;
 			int h = d.height;

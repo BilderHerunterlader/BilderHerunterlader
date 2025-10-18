@@ -57,7 +57,7 @@ public final class BHIcons {
 	 * @return ImageIcon
 	 */
 	public static ImageIcon getBHSVGIcon(String resource, int size) {
-		return ch.supertomcat.supertomcatutils.gui.Icons.getIcon(String.format(BH_ICON_SVG_RESOURCE_FORMAT, size, size, resource));
+		return ch.supertomcat.supertomcatutils.gui.Icons.getSVGIcon(String.format(BH_ICON_SVG_RESOURCE_FORMAT, resource), size);
 	}
 
 	/**
