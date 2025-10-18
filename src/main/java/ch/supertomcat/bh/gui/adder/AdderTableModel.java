@@ -1,7 +1,5 @@
 package ch.supertomcat.bh.gui.adder;
 
-import java.util.Vector;
-
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -9,11 +7,6 @@ import javax.swing.table.DefaultTableModel;
  */
 public class AdderTableModel extends DefaultTableModel {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * bFireTableCellUpdated
-	 */
-	private boolean fireTableCellUpdatedEnabled = true;
 
 	/**
 	 * Constructor
@@ -68,48 +61,5 @@ public class AdderTableModel extends DefaultTableModel {
 			default:
 				return super.getColumnClass(columnIndex);
 		}
-	}
-
-	@Override
-	public void setValueAt(Object aValue, int row, int column) {
-		/*
-		 * I had to override this method, because the one from the superclass
-		 * always calls fireTableCellUpdated, which slows the AdderPanel down if
-		 * a huge number of links are in the table
-		 * 
-		 * So classes that use this model can now set if fireTableCellUpdated is
-		 * fired or not by the bFireTableCellUpdated-Flag
-		 * 
-		 * So if there are changes needed on many rows, it might be better to
-		 * set the flag to false and execute the changes then. But do not forget,
-		 * that you have to fire fireTableChanged after that!
-		 * And after the changes you should change the flag again to true, so that
-		 * changes that are made by the user directly on the table are recognized!
-		 * 
-		 * Be aware that this model is not Thread-Safe!
-		 */
-		Vector<Object> rowVector = dataVector.elementAt(row);
-		rowVector.setElementAt(aValue, column);
-		if (fireTableCellUpdatedEnabled) {
-			fireTableCellUpdated(row, column);
-		}
-	}
-
-	/**
-	 * Returns the fireTableCellUpdatedEnabled
-	 * 
-	 * @return fireTableCellUpdatedEnabled
-	 */
-	public boolean isFireTableCellUpdatedEnabled() {
-		return fireTableCellUpdatedEnabled;
-	}
-
-	/**
-	 * Sets the fireTableCellUpdatedEnabled
-	 * 
-	 * @param fireTableCellUpdatedEnabled fireTableCellUpdatedEnabled
-	 */
-	public void setFireTableCellUpdatedEnabled(boolean fireTableCellUpdatedEnabled) {
-		this.fireTableCellUpdatedEnabled = fireTableCellUpdatedEnabled;
 	}
 }

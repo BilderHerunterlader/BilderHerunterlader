@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 
+import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -18,6 +19,14 @@ import ch.supertomcat.supertomcatutils.gui.Icons;
  */
 public class UpdateActionColumnRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
+
+	private static final ImageIcon ACTION_NONE_ICON = BHIcons.getBHIcon("Dummy16.png");
+
+	private static final ImageIcon ACTION_NEW_ICON = Icons.getTangoIcon("actions/list-add.png", 16);
+
+	private static final ImageIcon ACTION_UPDATE_ICON = Icons.getTangoIcon("apps/system-software-update.png", 16);
+
+	private static final ImageIcon ACTION_REMOVE_ICON = Icons.getTangoIcon("actions/list-remove.png", 16);
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
@@ -37,20 +46,18 @@ public class UpdateActionColumnRenderer extends DefaultTableCellRenderer impleme
 			label.setOpaque(true);
 			label.setHorizontalAlignment(SwingConstants.CENTER);
 			switch (action) {
-				case ACTION_NONE:
-					label.setIcon(BHIcons.getBHIcon("Dummy16.png"));
-					break;
 				case ACTION_NEW:
-					label.setIcon(Icons.getTangoIcon("actions/list-add.png", 16));
+					label.setIcon(ACTION_NEW_ICON);
 					break;
 				case ACTION_UPDATE:
-					label.setIcon(Icons.getTangoIcon("apps/system-software-update.png", 16));
+					label.setIcon(ACTION_UPDATE_ICON);
 					break;
 				case ACTION_REMOVE:
-					label.setIcon(Icons.getTangoIcon("actions/list-remove.png", 16));
+					label.setIcon(ACTION_REMOVE_ICON);
 					break;
+				case ACTION_NONE:
 				default:
-					label.setIcon(BHIcons.getBHIcon("Dummy16.png"));
+					label.setIcon(ACTION_NONE_ICON);
 					break;
 			}
 		}

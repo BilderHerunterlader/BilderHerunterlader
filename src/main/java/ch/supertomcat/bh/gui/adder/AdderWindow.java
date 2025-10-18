@@ -1550,15 +1550,12 @@ public class AdderWindow extends JFrame implements ActionListener {
 					keywordManager.addKeyword(keyword);
 				}
 
-				model.setFireTableCellUpdatedEnabled(false);
 				int[] selectedRows = jtAdder.getSelectedRows();
 				int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 				for (int x = 0; x < selectedRows.length; x++) {
 					model.setValueAt(keyword, jtAdder.convertRowIndexToModel(selectedRows[x]), keywordColumnModelIndex);
 					updatePathColumn(selectedRows[x]);
 				}
-				model.setFireTableCellUpdatedEnabled(true);
-				model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 			}
 		} else if (e.getSource() == menuItemChangeTargetfilename) {
 			actionChangeTargetFilename();
@@ -1636,7 +1633,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 		// Update keyword and selected column
 		int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
 		int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
-		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			int modelIndex = jtAdder.convertRowIndexToModel(i);
 			if (rbFilename.isSelected()) {
@@ -1670,8 +1666,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 			}
 			updatePathColumn(i);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 
 		kst.removeKeywordSearchThreadListener(keywordSearchThreadListener);
 		kst = null;
@@ -1681,22 +1675,16 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 	private void clearAllKeywords() {
 		int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
-		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			model.setValueAt(null, i, keywordColumnModelIndex);
 			updatePathColumn(i);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 	}
 
 	private void updateAllPathColumns() {
-		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			updatePathColumn(i);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 	}
 
 	private void updatePathColumn(int rowIndex) {
@@ -1776,7 +1764,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 	private void addToPaths(String value) {
 		int pathColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
-		model.setFireTableCellUpdatedEnabled(false);
 		for (int i = 0; i < jtAdder.getRowCount(); i++) {
 			int rowModelIndex = jtAdder.convertRowIndexToModel(i);
 			String oldPath = (String)model.getValueAt(rowModelIndex, pathColumnModelIndex);
@@ -1785,8 +1772,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 			newPath = BHUtil.reducePathLength(newPath, settingsManager);
 			model.setValueAt(newPath, rowModelIndex, pathColumnModelIndex);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 	}
 
 	private void importIrada() {
@@ -1799,7 +1784,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 			int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
 			int lastModifiedColumnModelIndex = jtAdder.getColumn("LastModified").getModelIndex();
 
-			model.setFireTableCellUpdatedEnabled(false);
 			for (Tsv tsv : result) {
 				int correspondingRowModelIndex = -1;
 
@@ -1841,8 +1825,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 				}
 				model.setValueAt(tsv.lastModified(), correspondingRowModelIndex, lastModifiedColumnModelIndex);
 			}
-			model.setFireTableCellUpdatedEnabled(true);
-			model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 		}
 	}
 
@@ -1857,28 +1839,22 @@ public class AdderWindow extends JFrame implements ActionListener {
 	private void setSelection(boolean selectValue, boolean onlySelectedRows) {
 		int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
 		int[] selectedRows = jtAdder.getSelectedRows();
-		model.setFireTableCellUpdatedEnabled(false);
 		int rowCount = onlySelectedRows ? selectedRows.length : jtAdder.getRowCount();
 		for (int i = 0; i < rowCount; i++) {
 			int modelIndex = jtAdder.convertRowIndexToModel(onlySelectedRows ? selectedRows[i] : i);
 			model.setValueAt(selectValue, modelIndex, selectionColumnModelIndex);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 	}
 
 	private void invertSelection(boolean onlySelectedRows) {
 		int selectionColumnModelIndex = jtAdder.getColumn("Selection").getModelIndex();
 		int[] selectedRows = jtAdder.getSelectedRows();
-		model.setFireTableCellUpdatedEnabled(false);
 		int rowCount = onlySelectedRows ? selectedRows.length : jtAdder.getRowCount();
 		for (int i = 0; i < rowCount; i++) {
 			int modelIndex = jtAdder.convertRowIndexToModel(onlySelectedRows ? selectedRows[i] : i);
 			boolean currentValue = (boolean)model.getValueAt(modelIndex, selectionColumnModelIndex);
 			model.setValueAt(!currentValue, modelIndex, selectionColumnModelIndex);
 		}
-		model.setFireTableCellUpdatedEnabled(true);
-		model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 	}
 
 	/**
@@ -1898,7 +1874,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 				int step = Integer.parseInt(input[2]);
 				boolean keepOriginal = !input[5].isEmpty();
 				boolean clearFilename = !input[6].isEmpty();
-				model.setFireTableCellUpdatedEnabled(false);
 				for (int i = 0; i < selectedRows.length; i++) {
 					int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 
@@ -1923,8 +1898,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 					}
 					index += step;
 				}
-				model.setFireTableCellUpdatedEnabled(true);
-				model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 			}
 		}
 	}
@@ -1946,7 +1919,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 			if (!input.endsWith("/") && !input.endsWith("\\")) {
 				input += FileUtil.FILE_SEPERATOR;
 			}
-			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 				String newPath = BHUtil.filterPath(input, settingsManager);
@@ -1954,8 +1926,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 				model.setValueAt(newPath, modelIndex, folderColumnModelIndex);
 				model.setValueAt(false, modelIndex, folderOverrideColumnModelIndex);
 			}
-			model.setFireTableCellUpdatedEnabled(true);
-			model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 		}
 	}
 
@@ -1967,12 +1937,10 @@ public class AdderWindow extends JFrame implements ActionListener {
 		if (file != null) {
 			String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 			int[] selectedRows = jtAdder.getSelectedRows();
-			model.setFireTableCellUpdatedEnabled(false);
 			for (int i = 0; i < selectedRows.length; i++) {
 				int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 				model.setValueAt(folder, modelIndex, 3);
 			}
-			model.setFireTableCellUpdatedEnabled(true);
 			model.fireTableRowsUpdated(0, model.getRowCount() - 1);
 		}
 	}
