@@ -4,15 +4,15 @@ import java.awt.Color;
 import java.awt.Component;
 
 import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableModel;
 
 /**
  * AdderColorRowRenderer
  */
-public class AdderColorRowRenderer extends JLabel implements TableCellRenderer {
+public class AdderColorRowRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
 
 	private static final Color KEYWORD_FOUND_COLOR = new Color(0x006400);
