@@ -19,6 +19,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.BrowserCookiesMode;
 import ch.supertomcat.bh.settings.xml.BrowserCookiesSetting;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookie;
 import ch.supertomcat.supertomcatutils.http.cookies.BrowserCookies;
@@ -68,8 +69,8 @@ public class CookieManager {
 	 */
 	public CookieManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
-		this.cookiesSQLiteDB = new CookiesSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Cookies.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
-				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
+		this.cookiesSQLiteDB = new CookiesSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Cookies.sqlite", settingsManager.getSettings()
+				.isBackupDbOnStart(), settingsManager.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 
 		List<BHCookie> cookiesFromDB = cookiesSQLiteDB.getAllEntries();
 		for (BHCookie bhCookie : cookiesFromDB) {

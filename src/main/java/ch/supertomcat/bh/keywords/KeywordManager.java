@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.database.sqlite.KeywordsSQLiteDB;
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
@@ -38,8 +39,8 @@ public class KeywordManager {
 	 * @param settingsManager Settings Manager
 	 */
 	public KeywordManager(SettingsManager settingsManager) {
-		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty("DatabasePath") + "/BH-Keywords.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
-				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
+		this.keywordsSQLiteDB = new KeywordsSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Keywords.sqlite", settingsManager.getSettings()
+				.isBackupDbOnStart(), settingsManager.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 		List<Keyword> keywordsFromDB = keywordsSQLiteDB.getAllEntries();
 		keywords.addAll(keywordsFromDB);
 	}

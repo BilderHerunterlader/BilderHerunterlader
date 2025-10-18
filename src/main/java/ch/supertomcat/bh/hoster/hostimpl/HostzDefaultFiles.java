@@ -22,6 +22,7 @@ import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
@@ -86,7 +87,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		urlPatternAudio = Pattern.compile(strPatternPrefix + strAudio + "$", Pattern.CASE_INSENSITIVE);
 		urlPatternArchive = Pattern.compile(strPatternPrefix + strArchive + "$", Pattern.CASE_INSENSITIVE);
 
-		File file = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts/HostzDefaultImages.txt");
+		File file = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostzDefaultImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 
 		try {

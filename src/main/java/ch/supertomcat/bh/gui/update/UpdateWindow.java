@@ -50,6 +50,7 @@ import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
@@ -231,7 +232,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 		setModal(true);
 		getContentPane().setLayout(gbl);
-		setTitle(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("Update"));
+		setTitle(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - " + Localization.getString("Update"));
 
 		pnlProgressBar.add(prgUpdate);
 
@@ -344,7 +345,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		List<UpdateObject> updateRedirectPlugins = updateList.getRedirectPluginUpdates();
 
 		// Main
-		if (ApplicationUtil.compareVersions(updateBH.getVersion(), ApplicationProperties.getProperty("ApplicationVersion")) > 0) {
+		if (ApplicationUtil.compareVersions(updateBH.getVersion(), ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION)) > 0) {
 			lblMain.setText(Localization.getString("NewProgramVersion") + " (v" + updateBH.getVersion() + ")");
 			btnWebsite.setVisible(false);
 			btnChanges.setVisible(true);

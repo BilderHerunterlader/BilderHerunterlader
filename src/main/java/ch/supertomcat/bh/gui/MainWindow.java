@@ -50,6 +50,7 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.systemtray.SystemTrayTool;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -116,8 +117,8 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 
 	private JLabel lblProgress = new JLabel("");
 
-	private String windowTitlePrefix = ApplicationProperties.getProperty("ApplicationShortName") + " - ";
-	private String windowTitleSuffix = " (" + ApplicationProperties.getProperty("ApplicationVersion") + ")";
+	private String windowTitlePrefix = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - ";
+	private String windowTitleSuffix = " (" + ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION) + ")";
 
 	/**
 	 * mainMenuBar

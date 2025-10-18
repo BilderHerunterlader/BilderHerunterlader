@@ -7,6 +7,7 @@ import java.nio.file.Paths;
 import javax.swing.JButton;
 
 import ch.supertomcat.bh.settings.SettingsManager;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -54,9 +55,9 @@ public class BHAboutDialog extends AboutDialog {
 	@Override
 	protected void fillApplicationPathsInformation() {
 		super.fillApplicationPathsInformation();
-		Path profilePath = Paths.get(ApplicationProperties.getProperty("ProfilePath"));
-		pnlProgram.addProgramFolderInformation("Database Path:", ApplicationProperties.getProperty("DatabasePath"), profilePath);
-		pnlProgram.addProgramFolderInformation("Settings Path:", ApplicationProperties.getProperty("SettingsPath"), profilePath);
+		Path profilePath = Paths.get(ApplicationProperties.getProperty(ApplicationMain.PROFILE_PATH));
+		pnlProgram.addProgramFolderInformation("Database Path:", ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH), profilePath);
+		pnlProgram.addProgramFolderInformation("Settings Path:", ApplicationProperties.getProperty(ApplicationMain.SETTINGS_PATH), profilePath);
 		pnlProgram.addProgramFolderInformation("DownloadLog Path:", ApplicationProperties.getProperty("DownloadLogPath"), profilePath);
 	}
 }

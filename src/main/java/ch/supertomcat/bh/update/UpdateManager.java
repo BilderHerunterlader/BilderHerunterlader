@@ -14,6 +14,7 @@ import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.update.containers.UpdateList;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -69,7 +70,7 @@ public class UpdateManager {
 	public void startUpdate(UpdateList updateList, Component owner) {
 		fireUpdatesStarted();
 
-		File fDeleteUpdate = new File(ApplicationProperties.getProperty("ApplicationPath") + "delete_update.txt");
+		File fDeleteUpdate = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "delete_update.txt");
 		try {
 			Files.deleteIfExists(fDeleteUpdate.toPath());
 		} catch (IOException e) {
@@ -312,12 +313,12 @@ public class UpdateManager {
 		if (minVersion == null || minVersion.isEmpty()) {
 			iMinVersion = 0;
 		} else {
-			iMinVersion = ApplicationUtil.compareVersions(minVersion, ApplicationProperties.getProperty("ApplicationVersion"));
+			iMinVersion = ApplicationUtil.compareVersions(minVersion, ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION));
 		}
 		if (maxVersion == null || maxVersion.isEmpty()) {
 			iMaxVersion = 0;
 		} else {
-			iMaxVersion = ApplicationUtil.compareVersions(maxVersion, ApplicationProperties.getProperty("ApplicationVersion"));
+			iMaxVersion = ApplicationUtil.compareVersions(maxVersion, ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION));
 		}
 		return (iMinVersion <= 0) && (iMaxVersion >= 0);
 	}

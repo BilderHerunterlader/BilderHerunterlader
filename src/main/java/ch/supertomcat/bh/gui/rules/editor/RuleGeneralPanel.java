@@ -22,6 +22,7 @@ import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
@@ -223,9 +224,9 @@ public class RuleGeneralPanel extends JPanel implements RuleEditorPart {
 			String rulename = txtName.getText();
 			rulename = BHUtil.filterFilename(rulename, settingsManager);
 			String filename = "Rule" + rulename + ".xml";
-			String filePath = ApplicationProperties.getProperty("ApplicationPath") + "rules/" + filename;
+			String filePath = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "rules/" + filename;
 			if (chkDeveloper.isSelected()) {
-				filePath = ApplicationProperties.getProperty("ApplicationPath") + "developerrules/" + filename;
+				filePath = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "developerrules/" + filename;
 			}
 			File file = new File(filePath);
 			if (file.exists()) {

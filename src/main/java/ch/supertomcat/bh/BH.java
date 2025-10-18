@@ -194,7 +194,7 @@ public abstract class BH {
 		});
 
 		// Read the settings from settings file
-		settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
+		settingsManager = new SettingsManager(ApplicationProperties.getProperty(ApplicationMain.SETTINGS_PATH), "BH-settings.xml", "settings.xml");
 		if (!settingsManager.readSettings()) {
 			System.exit(1);
 			return;
@@ -514,7 +514,7 @@ public abstract class BH {
 
 	private static void executeDeleteUpdates() {
 		Logger logger = LoggerFactory.getLogger(BH.class);
-		Path deleteUpdateFile = Paths.get(ApplicationProperties.getProperty("ApplicationPath"), "delete_update.txt");
+		Path deleteUpdateFile = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "delete_update.txt");
 		if (!Files.exists(deleteUpdateFile)) {
 			return;
 		}
@@ -523,7 +523,7 @@ public abstract class BH {
 			while ((line = reader.readLine()) != null) {
 				if (!line.isEmpty()) {
 					String deletePath;
-					String applicationPath = ApplicationProperties.getProperty("ApplicationPath");
+					String applicationPath = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH);
 					if (line.startsWith(applicationPath)) {
 						deletePath = line;
 					} else {

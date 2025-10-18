@@ -9,6 +9,7 @@ import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.classloader.impl.HostClassLoader;
 import ch.supertomcat.bh.hoster.classloader.impl.RedirectClassLoader;
 import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
 /**
@@ -31,10 +32,10 @@ public final class HostClassesLoader {
 
 		HostClassLoader hostClassLoader = new HostClassLoader();
 
-		File folderDeveloperHostClasses = new File(ApplicationProperties.getProperty("ApplicationPath"), "developerhosts");
+		File folderDeveloperHostClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
 		foundHostClasses.addAll(hostClassLoader.findHostClasses(folderDeveloperHostClasses, true));
 
-		File folderHostClasses = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts");
+		File folderHostClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
 		foundHostClasses.addAll(hostClassLoader.findHostClasses(folderHostClasses, false));
 
 		// HostzDefaultFiles has to be added at the end of the array
@@ -54,10 +55,10 @@ public final class HostClassesLoader {
 
 		RedirectClassLoader redirectClassLoader = new RedirectClassLoader();
 
-		File folderDeveloperRedirectClasses = new File(ApplicationProperties.getProperty("ApplicationPath"), "developerhosts");
+		File folderDeveloperRedirectClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
 		foundRedirectClasses.addAll(redirectClassLoader.findHostClasses(folderDeveloperRedirectClasses, true));
 
-		File folderRedirectClasses = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts");
+		File folderRedirectClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
 		foundRedirectClasses.addAll(redirectClassLoader.findHostClasses(folderRedirectClasses, false));
 
 		// Get instances of the classes

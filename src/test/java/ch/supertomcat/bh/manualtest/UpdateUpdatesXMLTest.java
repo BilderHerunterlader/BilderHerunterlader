@@ -36,6 +36,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.sources.httpxml.UpdatesXmlIO;
 import ch.supertomcat.bh.update.sources.httpxml.xml.UpdateData;
 import ch.supertomcat.bh.update.sources.httpxml.xml.Updates;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -57,24 +58,25 @@ public class UpdateUpdatesXMLTest {
 			ApplicationProperties.initProperties(in);
 
 			String jarFilename = ApplicationUtil.getThisApplicationsJarFilename(BH.class);
-			ApplicationProperties.setProperty("JarFilename", jarFilename);
+			ApplicationProperties.setProperty(ApplicationMain.JAR_FILENAME, jarFilename);
 
 			// Geth the program directory
-			String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty("ApplicationShortName") + ".jar");
-			ApplicationProperties.setProperty("ApplicationPath", appPath);
+			String appPath = ApplicationUtil.getThisApplicationsPath(!jarFilename.isEmpty() ? jarFilename : ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + ".jar");
+			ApplicationProperties.setProperty(ApplicationMain.APPLICATION_PATH, appPath);
 
-			String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty("ApplicationShortName") + FileUtil.FILE_SEPERATOR;
-			ApplicationProperties.setProperty("ProfilePath", programUserDir);
-			ApplicationProperties.setProperty("DatabasePath", programUserDir);
-			ApplicationProperties.setProperty("SettingsPath", programUserDir);
+			String programUserDir = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + "." + ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME)
+					+ FileUtil.FILE_SEPERATOR;
+			ApplicationProperties.setProperty(ApplicationMain.PROFILE_PATH, programUserDir);
+			ApplicationProperties.setProperty(ApplicationMain.DATABASE_PATH, programUserDir);
+			ApplicationProperties.setProperty(ApplicationMain.SETTINGS_PATH, programUserDir);
 			ApplicationProperties.setProperty("DownloadLogPath", programUserDir);
-			ApplicationProperties.setProperty("LogsPath", programUserDir);
+			ApplicationProperties.setProperty(ApplicationMain.LOGS_PATH, programUserDir);
 		}
 	}
 
 	@BeforeEach
 	public void beforeTest() throws IOException, SAXException, JAXBException {
-		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty("SettingsPath"), "BH-settings.xml", "settings.xml");
+		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty(ApplicationMain.SETTINGS_PATH), "BH-settings.xml", "settings.xml");
 		settingsManager.readSettings();
 		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);

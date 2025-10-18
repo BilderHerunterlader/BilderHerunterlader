@@ -33,6 +33,7 @@ import ch.supertomcat.bh.settings.xml.RegexReplaceSetting;
 import ch.supertomcat.bh.settings.xml.Settings;
 import ch.supertomcat.bh.settings.xml.SubDirSetting;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -275,7 +276,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		if (portableSavePath != null) {
 			settings.getDirectorySettings().setSavePath(portableSavePath);
 		} else {
-			settings.getDirectorySettings().setSavePath(ApplicationProperties.getProperty("SettingsPath"));
+			settings.getDirectorySettings().setSavePath(ApplicationProperties.getProperty(ApplicationMain.SETTINGS_PATH));
 		}
 
 		int availableProcessors = Runtime.getRuntime().availableProcessors();

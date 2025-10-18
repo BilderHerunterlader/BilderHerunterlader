@@ -105,6 +105,7 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.AutoTargetDirMode;
 import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -179,7 +180,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Prefix for Window Title
 	 */
-	private final String windowTitlePrefix = ApplicationProperties.getProperty("ApplicationShortName") + " - ";
+	private final String windowTitlePrefix = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - ";
 
 	/**
 	 * LayoutManager
@@ -572,7 +573,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	 */
 	public AdderWindow(Component parent, boolean localFiles, URLList urlList, LogManager logManager, QueueManager queueManager, KeywordManager keywordManager, ProxyManager proxyManager,
 			SettingsManager settingsManager, HostManager hostManager, ClipboardObserver clipboardObserver) {
-		super(ApplicationProperties.getProperty("ApplicationShortName") + " - " + Localization.getString("DownloadSelection"));
+		super(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - " + Localization.getString("DownloadSelection"));
 		this.localFiles = localFiles;
 		this.urlList = urlList;
 		this.logManager = logManager;

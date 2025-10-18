@@ -36,6 +36,7 @@ import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -168,7 +169,7 @@ public class MainMenuBar {
 		});
 
 		itemLogFolder.addActionListener(e -> {
-			File logDir = new File(ApplicationProperties.getProperty("LogsPath"));
+			File logDir = new File(ApplicationProperties.getProperty(ApplicationMain.LOGS_PATH));
 			openFolder(logDir);
 		});
 

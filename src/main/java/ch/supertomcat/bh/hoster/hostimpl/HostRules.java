@@ -21,6 +21,7 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.rules.RuleIO;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import jakarta.xml.bind.JAXBException;
 
@@ -81,12 +82,12 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		domains.add("NODOMAINS");
 
 		// DEVELOPER RULES
-		File ruleFolderDeveloper = new File(ApplicationProperties.getProperty("ApplicationPath"), "developerrules");
+		File ruleFolderDeveloper = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerrules");
 		// Do NOT create folder, if it not exists
 		loadRules(ruleFolderDeveloper, true);
 
 		// NORMAL RULES
-		File ruleFolder = new File(ApplicationProperties.getProperty("ApplicationPath"), "rules");
+		File ruleFolder = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "rules");
 		// Create folder, if it not exists
 		if (!ruleFolder.exists()) {
 			try {

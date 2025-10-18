@@ -11,6 +11,7 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
@@ -53,7 +54,7 @@ public class HostSortImages extends Host implements IHoster {
 		// This is the default pattern, allows just images to be sort
 		urlPattern = Pattern.compile("^.*\\.(gif|jpg|jpeg|jpe|png|tif|tiff|webp)$", Pattern.CASE_INSENSITIVE);
 
-		File file = new File(ApplicationProperties.getProperty("ApplicationPath"), "hosts/HostxSortImages.txt");
+		File file = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostxSortImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 	}
 
