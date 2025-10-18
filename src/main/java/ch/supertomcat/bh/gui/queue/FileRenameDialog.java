@@ -92,7 +92,7 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	/**
 	 * Button
 	 */
-	private JButton btnClear = new JButton(Localization.getString("Clear"), Icons.getTangoIcon("actions/edit-clear.png", 16));
+	private JButton btnClear = new JButton(Localization.getString("Clear"), Icons.getTangoSVGIcon("actions/edit-clear.svg", 16));
 
 	/**
 	 * TextField

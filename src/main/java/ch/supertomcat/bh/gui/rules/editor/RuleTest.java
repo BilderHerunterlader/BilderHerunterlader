@@ -142,12 +142,12 @@ public class RuleTest extends JDialog implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnTest = new JButton("Test", Icons.getTangoIcon("apps/utilities-system-monitor.png", 16));
+	private JButton btnTest = new JButton("Test", Icons.getTangoSVGIcon("apps/utilities-system-monitor.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnClose = new JButton("Close", Icons.getTangoIcon("emblems/emblem-unreadable.png", 16));
+	private JButton btnClose = new JButton("Close", Icons.getTangoSVGIcon("emblems/emblem-unreadable.svg", 16));
 
 	/**
 	 * Panel

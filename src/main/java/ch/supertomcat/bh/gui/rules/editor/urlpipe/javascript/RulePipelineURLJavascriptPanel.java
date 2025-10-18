@@ -62,7 +62,7 @@ public class RulePipelineURLJavascriptPanel extends RulePipelineURLPanelBase<URL
 	 */
 	private JTextArea txtNote = new JTextArea();
 
-	private JToggleButton btnHelp = new JToggleButton(Localization.getString("Help"), Icons.getTangoIcon("apps/help-browser.png", 16));
+	private JToggleButton btnHelp = new JToggleButton(Localization.getString("Help"), Icons.getTangoSVGIcon("apps/help-browser.svg", 16));
 
 	private JScrollPane spHelp = null;
 

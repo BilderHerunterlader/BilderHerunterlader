@@ -644,12 +644,12 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * Button
 	 */
-	private JButton btnMaxFailedCountPlus = new JButton("", Icons.getTangoIcon("actions/list-add.png", 16));
+	private JButton btnMaxFailedCountPlus = new JButton("", Icons.getTangoSVGIcon("actions/list-add.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnMaxFailedCountMinus = new JButton("", Icons.getTangoIcon("actions/list-remove.png", 16));
+	private JButton btnMaxFailedCountMinus = new JButton("", Icons.getTangoSVGIcon("actions/list-remove.svg", 16));
 
 	/**
 	 * Label
@@ -764,27 +764,27 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * Button
 	 */
-	private JButton btnSubdirNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JButton btnSubdirNew = new JButton(Localization.getString("New"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSubdirUp = new JButton(Localization.getString("Up"), Icons.getTangoIcon("actions/go-up.png", 16));
+	private JButton btnSubdirUp = new JButton(Localization.getString("Up"), Icons.getTangoSVGIcon("actions/go-up.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSubdirDown = new JButton(Localization.getString("Down"), Icons.getTangoIcon("actions/go-down.png", 16));
+	private JButton btnSubdirDown = new JButton(Localization.getString("Down"), Icons.getTangoSVGIcon("actions/go-down.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSubdirDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	private JButton btnSubdirDelete = new JButton(Localization.getString("Delete"), Icons.getTangoSVGIcon("actions/edit-delete.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSubdirHelp = new JButton(Localization.getString("Help"), Icons.getTangoIcon("apps/help-browser.png", 16));
+	private JButton btnSubdirHelp = new JButton(Localization.getString("Help"), Icons.getTangoSVGIcon("apps/help-browser.svg", 16));
 
 	/**
 	 * PopupMenu
@@ -899,37 +899,37 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemNew = new JMenuItem(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JMenuItem menuItemNew = new JMenuItem(Localization.getString("New"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemDelete = new JMenuItem(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	private JMenuItem menuItemDelete = new JMenuItem(Localization.getString("Delete"), Icons.getTangoSVGIcon("actions/edit-delete.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemUp = new JMenuItem(Localization.getString("Up"), Icons.getTangoIcon("actions/go-up.png", 16));
+	private JMenuItem menuItemUp = new JMenuItem(Localization.getString("Up"), Icons.getTangoSVGIcon("actions/go-up.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemDown = new JMenuItem(Localization.getString("Down"), Icons.getTangoIcon("actions/go-down.png", 16));
+	private JMenuItem menuItemDown = new JMenuItem(Localization.getString("Down"), Icons.getTangoSVGIcon("actions/go-down.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSave = new JButton(Localization.getString("SaveAndApply"), Icons.getTangoIcon("actions/document-save.png", 16));
+	private JButton btnSave = new JButton(Localization.getString("SaveAndApply"), Icons.getTangoSVGIcon("actions/document-save.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnReset = new JButton(Localization.getString("Reset"), Icons.getTangoIcon("actions/edit-undo.png", 16));
+	private JButton btnReset = new JButton(Localization.getString("Reset"), Icons.getTangoSVGIcon("actions/edit-undo.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnCancel = new JButton(Localization.getString("Cancel"), Icons.getTangoIcon("emblems/emblem-unreadable.png", 16));
+	private JButton btnCancel = new JButton(Localization.getString("Cancel"), Icons.getTangoSVGIcon("emblems/emblem-unreadable.svg", 16));
 
 	/**
 	 * GridBagLayout
@@ -1106,12 +1106,12 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		tp.setFocusable(false);
 		tp.setTabPlacement(SwingConstants.TOP);
-		tp.addTab(Localization.getString("SettingsGUI"), Icons.getTangoMultiResIcon("apps/preferences-system-windows.png", 22), spGUI);
-		tp.addTab(Localization.getString("SettingsConnection"), Icons.getTangoMultiResIcon("status/network-idle.png", 22), spConnection);
-		tp.addTab(Localization.getString("SettingsPaths"), Icons.getTangoMultiResIcon("places/folder.png", 22), spPaths);
-		tp.addTab(Localization.getString("SettingsKeywords"), Icons.getTangoMultiResIcon("emblems/emblem-favorite.png", 22), spKeywords);
-		tp.addTab(Localization.getString("SettingsDownload"), Icons.getTangoMultiResIcon("actions/go-down.png", 22), spDownload);
-		tp.addTab(Localization.getString("SettingsOther"), Icons.getTangoMultiResIcon("categories/preferences-system.png", 22), spOther);
+		tp.addTab(Localization.getString("SettingsGUI"), Icons.getTangoSVGIcon("apps/preferences-system-windows.svg", 22), spGUI);
+		tp.addTab(Localization.getString("SettingsConnection"), Icons.getTangoSVGIcon("status/network-idle.svg", 22), spConnection);
+		tp.addTab(Localization.getString("SettingsPaths"), Icons.getTangoSVGIcon("places/folder.svg", 22), spPaths);
+		tp.addTab(Localization.getString("SettingsKeywords"), Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 22), spKeywords);
+		tp.addTab(Localization.getString("SettingsDownload"), Icons.getTangoSVGIcon("actions/go-down.svg", 22), spDownload);
+		tp.addTab(Localization.getString("SettingsOther"), Icons.getTangoSVGIcon("categories/preferences-system.svg", 22), spOther);
 
 		buttonGroup.add(rbNoProxy);
 		buttonGroup.add(rbHTTP);

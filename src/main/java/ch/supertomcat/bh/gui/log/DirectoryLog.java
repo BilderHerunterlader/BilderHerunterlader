@@ -101,12 +101,12 @@ public class DirectoryLog extends JPanel {
 	/**
 	 * btnReload
 	 */
-	private JButton btnReload = new JButton(Localization.getString("Reload"), Icons.getTangoIcon("actions/view-refresh.png", 16));
+	private JButton btnReload = new JButton(Localization.getString("Reload"), Icons.getTangoSVGIcon("actions/view-refresh.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JToggleButton btnFilter = new JToggleButton(Localization.getString("Filter"), Icons.getTangoIcon("actions/edit-find.png", 16), false);
+	private JToggleButton btnFilter = new JToggleButton(Localization.getString("Filter"), Icons.getTangoSVGIcon("actions/edit-find.svg", 16), false);
 
 	/**
 	 * lblFilter
@@ -141,7 +141,7 @@ public class DirectoryLog extends JPanel {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenDirectory = new JMenuItem(Localization.getString("OpenDirectory"), Icons.getTangoIcon("places/folder.png", 16));
+	private JMenuItem menuItemOpenDirectory = new JMenuItem(Localization.getString("OpenDirectory"), Icons.getTangoSVGIcon("places/folder.svg", 16));
 
 	/**
 	 * DefaultStringColorRowRenderer

@@ -11,6 +11,7 @@ import javax.swing.ImageIcon;
 public final class BHIcons {
 	private static final String BH_ICON_RESOURCE_FORMAT = "/" + BHIcons.class.getPackage().getName().replace(".", "/") + "/icons/%s";
 	private static final String BH_ICON_SIZE_RESOURCE_FORMAT = "/" + BHIcons.class.getPackage().getName().replace(".", "/") + "/icons/%dx%d/%s";
+	private static final String BH_ICON_SVG_RESOURCE_FORMAT = "/" + BHIcons.class.getPackage().getName().replace(".", "/") + "/icons/svg/%s";
 
 	private static final int[] BH_ICON_SIZES = { 16, 22, 32, 64, 128, 256 };
 
@@ -36,6 +37,27 @@ public final class BHIcons {
 	 */
 	public static ImageIcon getBHIcon(String resource, int size) {
 		return ch.supertomcat.supertomcatutils.gui.Icons.getIcon(String.format(BH_ICON_SIZE_RESOURCE_FORMAT, size, size, resource));
+	}
+
+	/**
+	 * Returns an ImageIcon for the given resource
+	 * 
+	 * @param resource Resource
+	 * @return ImageIcon
+	 */
+	public static ImageIcon getBHSVGIcon(String resource) {
+		return getBHSVGIcon(resource, -1);
+	}
+
+	/**
+	 * Returns an ImageIcon for the given resource
+	 * 
+	 * @param resource Resource
+	 * @param size Size
+	 * @return ImageIcon
+	 */
+	public static ImageIcon getBHSVGIcon(String resource, int size) {
+		return ch.supertomcat.supertomcatutils.gui.Icons.getIcon(String.format(BH_ICON_SVG_RESOURCE_FORMAT, size, size, resource));
 	}
 
 	/**

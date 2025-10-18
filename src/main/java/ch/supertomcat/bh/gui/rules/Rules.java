@@ -75,22 +75,22 @@ public class Rules extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnSave = new JButton(Localization.getString("Save"), Icons.getTangoIcon("actions/document-save.png", 16));
+	private JButton btnSave = new JButton(Localization.getString("Save"), Icons.getTangoSVGIcon("actions/document-save.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoSVGIcon("actions/edit-delete.svg", 16));
 
 	/**
 	 * Panel

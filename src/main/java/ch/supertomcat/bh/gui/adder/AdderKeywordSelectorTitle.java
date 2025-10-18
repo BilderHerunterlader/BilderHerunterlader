@@ -112,7 +112,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	/**
 	 * Button
 	 */
-	private JButton btnNew = new JButton(Localization.getString("NewKeyword"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JButton btnNew = new JButton(Localization.getString("NewKeyword"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * Button

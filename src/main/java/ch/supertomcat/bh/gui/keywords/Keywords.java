@@ -89,27 +89,27 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	/**
 	 * Button
 	 */
-	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JButton btnNew = new JButton(Localization.getString("New"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JButton btnEdit = new JButton(Localization.getString("Edit"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	private JButton btnDelete = new JButton(Localization.getString("Delete"), Icons.getTangoSVGIcon("actions/edit-delete.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoIcon("actions/document-save-as.png", 16));
+	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoSVGIcon("actions/document-save-as.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnImport = new JButton(Localization.getString("Import"), Icons.getTangoIcon("actions/document-open.png", 16));
+	private JButton btnImport = new JButton(Localization.getString("Import"), Icons.getTangoSVGIcon("actions/document-open.svg", 16));
 
 	/**
 	 * Panel
@@ -124,22 +124,22 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemTitleToKeyword = new JMenuItem(Localization.getString("TitleToKeyword"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemTitleToKeyword = new JMenuItem(Localization.getString("TitleToKeyword"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemTitleToDirectory = new JMenuItem(Localization.getString("TitleToDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemTitleToDirectory = new JMenuItem(Localization.getString("TitleToDirectory"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemTitleToRelativeDirectory = new JMenuItem(Localization.getString("TitleToRelativeDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemTitleToRelativeDirectory = new JMenuItem(Localization.getString("TitleToRelativeDirectory"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemAbsoluteToRelativeDirectory = new JMenuItem(Localization.getString("AbsoluteToRelativeDirectory"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemAbsoluteToRelativeDirectory = new JMenuItem(Localization.getString("AbsoluteToRelativeDirectory"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * Panel

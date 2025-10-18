@@ -63,7 +63,7 @@ public class MainMenuBar {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemExit = new JMenuItem(Localization.getString("Exit"), Icons.getTangoIcon("actions/system-log-out.png", 16));
+	private JMenuItem itemExit = new JMenuItem(Localization.getString("Exit"), Icons.getTangoSVGIcon("actions/system-log-out.svg", 16));
 
 	/**
 	 * Menu
@@ -73,7 +73,7 @@ public class MainMenuBar {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemSettings = new JMenuItem(Localization.getString("Settings"), Icons.getTangoIcon("categories/preferences-system.png", 16));
+	private JMenuItem itemSettings = new JMenuItem(Localization.getString("Settings"), Icons.getTangoSVGIcon("categories/preferences-system.svg", 16));
 
 	/**
 	 * Menu
@@ -83,32 +83,32 @@ public class MainMenuBar {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemUpdate = new JMenuItem(Localization.getString("Update"), Icons.getTangoIcon("apps/system-software-update.png", 16));
+	private JMenuItem itemUpdate = new JMenuItem(Localization.getString("Update"), Icons.getTangoSVGIcon("apps/system-software-update.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemLogFolder = new JMenuItem(Localization.getString("OpenLogFolder"), Icons.getTangoIcon("places/folder.png", 16));
+	private JMenuItem itemLogFolder = new JMenuItem(Localization.getString("OpenLogFolder"), Icons.getTangoSVGIcon("places/folder.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemTutorial = new JMenuItem(Localization.getString("Tutorial"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem itemTutorial = new JMenuItem(Localization.getString("Tutorial"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemReportIssueEMail = new JMenuItem(Localization.getString("ReportIssueEMail"), Icons.getTangoIcon("actions/mail-message-new.png", 16));
+	private JMenuItem itemReportIssueEMail = new JMenuItem(Localization.getString("ReportIssueEMail"), Icons.getTangoSVGIcon("actions/mail-message-new.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemReportIssueGithub = new JMenuItem(Localization.getString("ReportIssueGithub"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem itemReportIssueGithub = new JMenuItem(Localization.getString("ReportIssueGithub"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemAbout = new JMenuItem(Localization.getString("About"), Icons.getTangoIcon("apps/help-browser.png", 16));
+	private JMenuItem itemAbout = new JMenuItem(Localization.getString("About"), Icons.getTangoSVGIcon("apps/help-browser.svg", 16));
 
 	/**
 	 * lblLogFile

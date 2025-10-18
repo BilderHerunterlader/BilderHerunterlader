@@ -84,12 +84,12 @@ public class RuleMainEditor extends JDialog {
 	/**
 	 * Button
 	 */
-	private JButton btnTest = new JButton(Localization.getString("RuleTest"), Icons.getTangoIcon("apps/utilities-system-monitor.png", 16));
+	private JButton btnTest = new JButton(Localization.getString("RuleTest"), Icons.getTangoSVGIcon("apps/utilities-system-monitor.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnApply = new JButton(Localization.getString("Apply"), Icons.getTangoIcon("actions/media-seek-forward.png", 16));
+	private JButton btnApply = new JButton(Localization.getString("Apply"), Icons.getTangoSVGIcon("actions/media-seek-forward.svg", 16));
 
 	/**
 	 * Button

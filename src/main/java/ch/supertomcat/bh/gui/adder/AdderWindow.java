@@ -215,7 +215,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnTitleUpdate = new JButton(Icons.getTangoIcon("actions/view-refresh.png", 16));
+	private JButton btnTitleUpdate = new JButton(Icons.getTangoSVGIcon("actions/view-refresh.svg", 16));
 
 	/**
 	 * Label
@@ -240,12 +240,12 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemTargetBySelection = new JMenuItem(Localization.getString("ByPathSelection"), Icons.getTangoIcon("places/folder.png", 16));
+	private JMenuItem itemTargetBySelection = new JMenuItem(Localization.getString("ByPathSelection"), Icons.getTangoSVGIcon("places/folder.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemTargetByInput = new JMenuItem(Localization.getString("ByPathInput"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem itemTargetByInput = new JMenuItem(Localization.getString("ByPathInput"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * Panel for display options
@@ -255,7 +255,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * btnShowPreviews
 	 */
-	private JToggleButton btnShowPreviews = new JToggleButton(Icons.getTangoIcon("mimetypes/image-x-generic.png", 16));
+	private JToggleButton btnShowPreviews = new JToggleButton(Icons.getTangoSVGIcon("mimetypes/image-x-generic.svg", 16));
 
 	/**
 	 * Dummy Image, which is displayed, when no preview available
@@ -283,7 +283,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	 */
 	private JPanel pnlTargetDirAuto = new JPanel(new FlowLayout(FlowLayout.CENTER));
 
-	private JLabel lblTargetDirAuto = new JLabel(Icons.getTangoIcon("emblems/emblem-favorite.png", 16));
+	private JLabel lblTargetDirAuto = new JLabel(Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 16));
 
 	/**
 	 * Checkbox
@@ -308,12 +308,12 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnSearchAgain = new JButton(Localization.getString("SearchAgain"), Icons.getTangoIcon("actions/system-search.png", 16));
+	private JButton btnSearchAgain = new JButton(Localization.getString("SearchAgain"), Icons.getTangoSVGIcon("actions/system-search.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnNewKeyword = new JButton(Localization.getString("NewKeyword"), Icons.getTangoIcon("actions/document-new.png", 16));
+	private JButton btnNewKeyword = new JButton(Localization.getString("NewKeyword"), Icons.getTangoSVGIcon("actions/document-new.svg", 16));
 
 	/**
 	 * Tablemodel
@@ -373,17 +373,17 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnSelectAll = new JButton("", Icons.getTangoIcon("actions/edit-select-all.png", 16));
+	private JButton btnSelectAll = new JButton("", Icons.getTangoSVGIcon("actions/edit-select-all.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSelectNothing = new JButton("", Icons.getTangoIcon("actions/edit-clear.png", 16));
+	private JButton btnSelectNothing = new JButton("", Icons.getTangoSVGIcon("actions/edit-clear.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnSelectOther = new JButton("", Icons.getTangoIcon("actions/view-refresh.png", 16));
+	private JButton btnSelectOther = new JButton("", Icons.getTangoSVGIcon("actions/view-refresh.svg", 16));
 
 	/**
 	 * Panel
@@ -393,7 +393,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnAddTitle = new JButton(Localization.getString("AddTitle"), Icons.getTangoIcon("actions/list-add.png", 16));
+	private JButton btnAddTitle = new JButton(Localization.getString("AddTitle"), Icons.getTangoSVGIcon("actions/list-add.svg", 16));
 
 	/**
 	 * ComboBox
@@ -403,7 +403,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * Button
 	 */
-	private JButton btnAdd = new JButton("", Icons.getTangoIcon("actions/list-add.png", 16));
+	private JButton btnAdd = new JButton("", Icons.getTangoSVGIcon("actions/list-add.svg", 16));
 
 	/**
 	 * Button
@@ -433,47 +433,47 @@ public class AdderWindow extends JFrame implements ActionListener {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemSelectKeyword = new JMenuItem(Localization.getString("SelectKeyword"), Icons.getTangoIcon("emblems/emblem-favorite.png", 16));
+	private JMenuItem menuItemSelectKeyword = new JMenuItem(Localization.getString("SelectKeyword"), Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetfilename = new JMenuItem(Localization.getString("ChangeTargetFilename"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetfilename = new JMenuItem(Localization.getString("ChangeTargetFilename"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetByInput = new JMenuItem(Localization.getString("ChangeTargetByInput"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetByInput = new JMenuItem(Localization.getString("ChangeTargetByInput"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetBySelection = new JMenuItem(Localization.getString("ChangeTargetBySelection"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetBySelection = new JMenuItem(Localization.getString("ChangeTargetBySelection"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoIcon("actions/edit-copy.png", 16));
+	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoSVGIcon("actions/edit-copy.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemSelect = new JMenuItem(Localization.getString("Select"), Icons.getTangoIcon("actions/edit-select-all.png", 16));
+	private JMenuItem menuItemSelect = new JMenuItem(Localization.getString("Select"), Icons.getTangoSVGIcon("actions/edit-select-all.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemDeselect = new JMenuItem(Localization.getString("Deselect"), Icons.getTangoIcon("actions/edit-clear.png", 16));
+	private JMenuItem menuItemDeselect = new JMenuItem(Localization.getString("Deselect"), Icons.getTangoSVGIcon("actions/edit-clear.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemSelectOther = new JMenuItem(Localization.getString("SelectOther"), Icons.getTangoIcon("actions/view-refresh.png", 16));
+	private JMenuItem menuItemSelectOther = new JMenuItem(Localization.getString("SelectOther"), Icons.getTangoSVGIcon("actions/view-refresh.svg", 16));
 
 	/**
 	 * HostURLCheckerRunnable

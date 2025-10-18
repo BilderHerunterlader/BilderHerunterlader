@@ -169,10 +169,10 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 		setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 
 		tab.setFocusable(false);
-		tab.addTab(Localization.getString("Queue"), Icons.getTangoMultiResIcon("actions/go-down.png", 22), queue);
-		tab.addTab(Localization.getString("Log"), Icons.getTangoMultiResIcon("mimetypes/text-x-generic.png", 22), log);
-		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoMultiResIcon("mimetypes/text-x-generic.png", 22), directoryLog);
-		tab.addTab(Localization.getString("Keywords"), Icons.getTangoMultiResIcon("emblems/emblem-favorite.png", 22), keywords);
+		tab.addTab(Localization.getString("Queue"), Icons.getTangoSVGIcon("actions/go-down.svg", 22), queue);
+		tab.addTab(Localization.getString("Log"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), log);
+		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), directoryLog);
+		tab.addTab(Localization.getString("Keywords"), Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 22), keywords);
 		tab.addTab(Localization.getString("Rules"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), rules);
 		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHMultiResIcon("actions/approval.png", 22), hosts);
 

@@ -113,22 +113,22 @@ public class Queue extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnStart = new JButton(Localization.getString("Start"), Icons.getTangoIcon("actions/media-playback-start.png", 16));
+	private JButton btnStart = new JButton(Localization.getString("Start"), Icons.getTangoSVGIcon("actions/media-playback-start.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnStop = new JButton(Localization.getString("Stop"), Icons.getTangoIcon("actions/media-playback-stop.png", 16));
+	private JButton btnStop = new JButton(Localization.getString("Stop"), Icons.getTangoSVGIcon("actions/media-playback-stop.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JButton btnImportLinks = new JButton(Localization.getString("ImportLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
+	private JButton btnImportLinks = new JButton(Localization.getString("ImportLinks"), Icons.getTangoSVGIcon("emblems/emblem-symbolic-link.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JButton btnParseLinks = new JButton(Localization.getString("ParseLinks"), Icons.getTangoIcon("emblems/emblem-symbolic-link.png", 16));
+	private JButton btnParseLinks = new JButton(Localization.getString("ParseLinks"), Icons.getTangoSVGIcon("emblems/emblem-symbolic-link.svg", 16));
 
 	/**
 	 * Button
@@ -138,7 +138,7 @@ public class Queue extends JPanel {
 	/**
 	 * Button
 	 */
-	private JButton btnImportExport = new JButton(Localization.getString("ImportExport"), Icons.getTangoIcon("actions/document-open.png", 16));
+	private JButton btnImportExport = new JButton(Localization.getString("ImportExport"), Icons.getTangoSVGIcon("actions/document-open.svg", 16));
 
 	/**
 	 * PopupMenu
@@ -148,22 +148,22 @@ public class Queue extends JPanel {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemImportHTML = new JMenuItem(Localization.getString("ImportHTML"), Icons.getTangoIcon("mimetypes/text-html.png", 16));
+	private JMenuItem itemImportHTML = new JMenuItem(Localization.getString("ImportHTML"), Icons.getTangoSVGIcon("mimetypes/text-html.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemImportText = new JMenuItem(Localization.getString("ImportText"), Icons.getTangoIcon("mimetypes/text-x-generic.png", 16));
+	private JMenuItem itemImportText = new JMenuItem(Localization.getString("ImportText"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemImportQueue = new JMenuItem(Localization.getString("QueueImport"), Icons.getTangoIcon("actions/document-open.png", 16));
+	private JMenuItem itemImportQueue = new JMenuItem(Localization.getString("QueueImport"), Icons.getTangoSVGIcon("actions/document-open.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem itemExportQueue = new JMenuItem(Localization.getString("QueueExport"), Icons.getTangoIcon("actions/document-open.png", 16));
+	private JMenuItem itemExportQueue = new JMenuItem(Localization.getString("QueueExport"), Icons.getTangoSVGIcon("actions/document-open.svg", 16));
 
 	/**
 	 * Panel
@@ -188,47 +188,47 @@ public class Queue extends JPanel {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemDelete = new JMenuItem(Localization.getString("Delete"), Icons.getTangoIcon("actions/edit-delete.png", 16));
+	private JMenuItem menuItemDelete = new JMenuItem(Localization.getString("Delete"), Icons.getTangoSVGIcon("actions/edit-delete.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoIcon("actions/edit-copy.png", 16));
+	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoSVGIcon("actions/edit-copy.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenThreadURL = new JMenuItem(Localization.getString("OpenThreadURL"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem menuItemOpenThreadURL = new JMenuItem(Localization.getString("OpenThreadURL"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemActivate = new JMenuItem(Localization.getString("Activate"), Icons.getTangoIcon("actions/media-record.png", 16));
+	private JMenuItem menuItemActivate = new JMenuItem(Localization.getString("Activate"), Icons.getTangoSVGIcon("actions/media-record.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemDeactivate = new JMenuItem(Localization.getString("Deactivate"), Icons.getTangoIcon("emblems/emblem-readonly.png", 16));
+	private JMenuItem menuItemDeactivate = new JMenuItem(Localization.getString("Deactivate"), Icons.getTangoSVGIcon("emblems/emblem-readonly.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetfilename = new JMenuItem(Localization.getString("ChangeTargetFilename"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetfilename = new JMenuItem(Localization.getString("ChangeTargetFilename"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetByInput = new JMenuItem(Localization.getString("ChangeTargetByInput"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetByInput = new JMenuItem(Localization.getString("ChangeTargetByInput"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemChangeTargetBySelection = new JMenuItem(Localization.getString("ChangeTargetBySelection"), Icons.getTangoIcon("apps/accessories-text-editor.png", 16));
+	private JMenuItem menuItemChangeTargetBySelection = new JMenuItem(Localization.getString("ChangeTargetBySelection"), Icons.getTangoSVGIcon("apps/accessories-text-editor.svg", 16));
 
 	/**
 	 * Scrollpane
@@ -681,7 +681,7 @@ public class Queue extends JPanel {
 	 */
 	private void actionDelete() {
 		int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("QueueReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
-				.getTangoIcon("status/dialog-warning.png", 32));
+				.getTangoSVGIcon("status/dialog-warning.svg", 32));
 		if (retval == JOptionPane.NO_OPTION) {
 			return;
 		}

@@ -73,17 +73,17 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoIcon("actions/edit-copy.png", 16));
+	private JMenuItem menuItemCopyURL = new JMenuItem(Localization.getString("CopyURL"), Icons.getTangoSVGIcon("actions/edit-copy.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoIcon("apps/internet-web-browser.png", 16));
+	private JMenuItem menuItemOpenURL = new JMenuItem(Localization.getString("OpenURL"), Icons.getTangoSVGIcon("apps/internet-web-browser.svg", 16));
 
 	/**
 	 * MenuItem
 	 */
-	private JMenuItem menuItemOpenDirectory = new JMenuItem(Localization.getString("OpenDirectory"), Icons.getTangoIcon("places/folder.png", 16));
+	private JMenuItem menuItemOpenDirectory = new JMenuItem(Localization.getString("OpenDirectory"), Icons.getTangoSVGIcon("places/folder.svg", 16));
 
 	/**
 	 * Label
@@ -93,22 +93,22 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * Button
 	 */
-	private JButton btnFirst = new JButton("", Icons.getTangoIcon("actions/go-first.png", 16));
+	private JButton btnFirst = new JButton("", Icons.getTangoSVGIcon("actions/go-first.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnNext = new JButton("", Icons.getTangoIcon("actions/go-next.png", 16));
+	private JButton btnNext = new JButton("", Icons.getTangoSVGIcon("actions/go-next.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnPrevious = new JButton("", Icons.getTangoIcon("actions/go-previous.png", 16));
+	private JButton btnPrevious = new JButton("", Icons.getTangoSVGIcon("actions/go-previous.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnLast = new JButton("", Icons.getTangoIcon("actions/go-last.png", 16));
+	private JButton btnLast = new JButton("", Icons.getTangoSVGIcon("actions/go-last.svg", 16));
 
 	/**
 	 * Panel

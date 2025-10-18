@@ -121,12 +121,12 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	/**
 	 * Button
 	 */
-	private JButton btnCheck = new JButton(Localization.getString("Check"), Icons.getTangoIcon("actions/system-search.png", 16));
+	private JButton btnCheck = new JButton(Localization.getString("Check"), Icons.getTangoSVGIcon("actions/system-search.svg", 16));
 
 	/**
 	 * Button
 	 */
-	private JButton btnUpdate = new JButton(Localization.getString("Update"), Icons.getTangoIcon("status/software-update-available.png", 16));
+	private JButton btnUpdate = new JButton(Localization.getString("Update"), Icons.getTangoSVGIcon("status/software-update-available.svg", 16));
 
 	/**
 	 * Table

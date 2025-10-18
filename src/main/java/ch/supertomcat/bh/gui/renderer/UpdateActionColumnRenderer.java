@@ -10,7 +10,6 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 
-import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.update.containers.UpdateObject;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 
@@ -20,13 +19,13 @@ import ch.supertomcat.supertomcatutils.gui.Icons;
 public class UpdateActionColumnRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
 
-	private static final ImageIcon ACTION_NONE_ICON = BHIcons.getBHIcon("Dummy16.png");
+	private static final ImageIcon ACTION_NONE_ICON = Icons.getApplIcon("dummy.png", 16);
 
-	private static final ImageIcon ACTION_NEW_ICON = Icons.getTangoIcon("actions/list-add.png", 16);
+	private static final ImageIcon ACTION_NEW_ICON = Icons.getTangoSVGIcon("actions/list-add.svg", 16);
 
-	private static final ImageIcon ACTION_UPDATE_ICON = Icons.getTangoIcon("apps/system-software-update.png", 16);
+	private static final ImageIcon ACTION_UPDATE_ICON = Icons.getTangoSVGIcon("apps/system-software-update.svg", 16);
 
-	private static final ImageIcon ACTION_REMOVE_ICON = Icons.getTangoIcon("actions/list-remove.png", 16);
+	private static final ImageIcon ACTION_REMOVE_ICON = Icons.getTangoSVGIcon("actions/list-remove.svg", 16);
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
