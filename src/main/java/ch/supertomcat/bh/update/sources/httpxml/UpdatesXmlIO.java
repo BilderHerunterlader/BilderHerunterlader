@@ -1,11 +1,12 @@
 package ch.supertomcat.bh.update.sources.httpxml;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -113,9 +114,9 @@ public class UpdatesXmlIO {
 	 * @throws JAXBException
 	 */
 	public void writeUpdates(String file, Updates updates) throws IOException, JAXBException {
-		File folder = new File(file).getParentFile();
+		Path folder = Paths.get(file).getParent();
 		if (folder != null) {
-			Files.createDirectories(folder.toPath());
+			Files.createDirectories(folder);
 		}
 
 		try (FileOutputStream out = new FileOutputStream(file)) {

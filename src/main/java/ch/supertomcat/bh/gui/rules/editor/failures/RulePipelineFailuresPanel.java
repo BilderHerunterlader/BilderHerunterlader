@@ -1,8 +1,8 @@
 package ch.supertomcat.bh.gui.rules.editor.failures;
 
 import java.awt.BorderLayout;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
@@ -44,7 +44,7 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 	/**
 	 * Action Edit Function
 	 */
-	private Function<Object[], Object[]> actionEditFunction = x -> editRegexp(x);
+	private UnaryOperator<Object[]> actionEditFunction = x -> editRegexp(x);
 
 	/**
 	 * Table Panel
@@ -93,6 +93,7 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 		pnlTable.getTable().getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -102,14 +103,17 @@ public class RulePipelineFailuresPanel extends JPanel implements RuleEditorPart 
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 		});
 

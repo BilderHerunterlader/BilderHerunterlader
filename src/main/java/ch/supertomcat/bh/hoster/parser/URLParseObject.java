@@ -302,8 +302,8 @@ public class URLParseObject {
 	 */
 	public synchronized Host getLastHost() {
 		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
-			if (hosterStackTrace.get(i) instanceof Host) {
-				return (Host)hosterStackTrace.get(i);
+			if (hosterStackTrace.get(i) instanceof Host host) {
+				return host;
 			}
 		}
 		return null;
@@ -316,8 +316,8 @@ public class URLParseObject {
 	 */
 	public synchronized Rule getLastRule() {
 		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
-			if (hosterStackTrace.get(i) instanceof Rule) {
-				return (Rule)hosterStackTrace.get(i);
+			if (hosterStackTrace.get(i) instanceof Rule rule) {
+				return rule;
 			}
 		}
 		return null;
@@ -346,11 +346,9 @@ public class URLParseObject {
 		sb.append("  Hoster/Rules:\n");
 		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
 			String strHoster = "";
-			if (hosterStackTrace.get(i) instanceof Host) {
-				Host host = (Host)hosterStackTrace.get(i);
+			if (hosterStackTrace.get(i) instanceof Host host) {
 				strHoster = host.getName() + " (" + host.getVersion() + ")";
-			} else if (hosterStackTrace.get(i) instanceof Rule) {
-				Rule rule = (Rule)hosterStackTrace.get(i);
+			} else if (hosterStackTrace.get(i) instanceof Rule rule) {
 				strHoster = rule.getName() + " (" + rule.getVersion() + ")";
 			}
 			sb.append("    " + strHoster + "\n");

@@ -23,6 +23,7 @@ import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.URLJavascriptPipeline;
 import ch.supertomcat.bh.rules.xml.URLPipeline;
 import ch.supertomcat.bh.rules.xml.URLRegexPipeline;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
@@ -252,7 +253,7 @@ public class Rule extends Hoster {
 		String correctedFilename = upo.getCorrectedFilename();
 
 		if (pic != null && pic.getTargetFilename().isEmpty()) {
-			pic.setTargetFilename(RuleUtil.getFilenamePart(pipelineResult));
+			pic.setTargetFilename(HTTPUtil.getFilenameFromURL(pipelineResult, pipelineResult));
 		}
 
 		if (pipelineFilename != null && !pipelineResult.isEmpty() && !pipelineFilename.getRegexps().isEmpty()) {
@@ -266,7 +267,7 @@ public class Rule extends Hoster {
 		 * If filename is still empty, then use filename part of download URL
 		 */
 		if (correctedFilename.isEmpty()) {
-			correctedFilename = RuleUtil.getFilenamePart(pipelineResult);
+			correctedFilename = HTTPUtil.getFilenameFromURL(pipelineResult, pipelineResult);
 		}
 
 		if (pic != null) {
@@ -304,7 +305,7 @@ public class Rule extends Hoster {
 	public String getFilename(String url, RuleTraceInfo ruleTraceInfo) {
 		String retval = url;
 		if (pipelineFilenameDownloadSelection.getDefinition().getMode() == FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART) {
-			retval = RuleUtil.getFilenamePart(url);
+			retval = HTTPUtil.getFilenameFromURL(url, url);
 		}
 		return pipelineFilenameDownloadSelection.getCorrectedFilenameOnDownloadSelection(retval, ruleTraceInfo);
 	}
@@ -450,8 +451,7 @@ public class Rule extends Hoster {
 				return sameURL && url1.getThumb().isEmpty();
 			case CONTAINER_URL_ONLY_REMOVE_WITHOUT_THUMB_THUMBS_ALWAYS_LAST:
 				return sameURL && url1.getThumb().isEmpty();
-			case DEFAULT:
-			case CONTAINER_URL_ONLY:
+			case DEFAULT, CONTAINER_URL_ONLY:
 			default:
 				return sameURL;
 		}

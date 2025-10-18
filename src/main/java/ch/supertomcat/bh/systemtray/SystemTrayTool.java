@@ -334,7 +334,7 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		DownloadQueueManager queue = downloadQueueManager;
 		if (queue.isDownloading()) {
 			String downloadRate = UnitFormatUtil.getBitrateString(queue.getTotalDownloadBitrate());
-			if (downloadRate.length() == 0) {
+			if (downloadRate.isEmpty()) {
 				downloadRate = Localization.getString("NotAvailable");
 			}
 			return getClipboardStateText() + Localization.getString("Queue") + ": " + queue.getQueueSize() + " | " + Localization.getString("FreeSlots") + ": " + queue.getOpenSlots() + "/"

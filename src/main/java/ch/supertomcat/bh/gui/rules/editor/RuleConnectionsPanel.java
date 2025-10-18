@@ -132,7 +132,7 @@ public class RuleConnectionsPanel extends JPanel implements RuleEditorPart {
 
 	private void actionAddDomain() {
 		String domainToAdd = txtMaxConnectionsDomainsAdd.getText();
-		if (domainToAdd.length() == 0) {
+		if (domainToAdd.isEmpty()) {
 			return;
 		}
 		if (!modelMaxConnectionsDomains.contains(domainToAdd)) {

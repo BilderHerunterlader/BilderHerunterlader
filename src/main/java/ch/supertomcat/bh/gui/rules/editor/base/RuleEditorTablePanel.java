@@ -5,6 +5,7 @@ import java.awt.Dimension;
 import java.util.Vector;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -61,7 +62,7 @@ public class RuleEditorTablePanel<T extends DefaultTableModel> extends JPanel {
 	 * @param actionNewSupplier Supplier for action new
 	 * @param actionEditFunction Function for action edit
 	 */
-	public RuleEditorTablePanel(T model, Supplier<Object[]> actionNewSupplier, Function<Object[], Object[]> actionEditFunction) {
+	public RuleEditorTablePanel(T model, Supplier<Object[]> actionNewSupplier, UnaryOperator<Object[]> actionEditFunction) {
 		this.model = model;
 		this.actionNewSupplier = actionNewSupplier;
 		this.actionEditFunction = actionEditFunction;

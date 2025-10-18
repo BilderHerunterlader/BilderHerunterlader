@@ -72,7 +72,7 @@ public class HostClassLoader extends HostClassLoaderBase<Host> {
 
 	@Override
 	protected void initializeLoadedClass(FoundHostClass foundHostClass, Host loadedClass) {
-		if (foundHostClass.isDeveloper()) {
+		if (foundHostClass.developer()) {
 			loadedClass.setDeveloper(true);
 		}
 	}

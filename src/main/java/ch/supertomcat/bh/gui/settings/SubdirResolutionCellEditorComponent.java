@@ -106,10 +106,12 @@ public class SubdirResolutionCellEditorComponent extends JPanel {
 		try {
 			return Integer.parseInt(val);
 		} catch (NumberFormatException nfe) {
+			// Do not log exception
 		}
 		try {
 			return Integer.parseInt(defaultVal);
 		} catch (NumberFormatException nfe) {
+			// Do not log exception
 		}
 		return 0;
 	}

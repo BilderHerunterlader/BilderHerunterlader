@@ -90,22 +90,22 @@ public class ExportKeywords extends ImportExportBase {
 				row = "";
 				Keyword k = it.next();
 				String title = k.getTitle();
-				if (title.length() == 0) {
+				if (title.isEmpty()) {
 					continue;
 				}
 
 				String keywords = k.getKeywords();
-				if (keywords.length() == 0) {
+				if (keywords.isEmpty()) {
 					keywords = "#";
 				}
 
 				String path = k.getDownloadPath();
-				if (path.length() == 0) {
+				if (path.isEmpty()) {
 					path = "#";
 				}
 
 				String rpath = k.getRelativeDownloadPath();
-				if (rpath.length() == 0) {
+				if (rpath.isEmpty()) {
 					rpath = "#";
 				}
 

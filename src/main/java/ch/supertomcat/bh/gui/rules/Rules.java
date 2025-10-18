@@ -154,14 +154,17 @@ public class Rules extends JPanel {
 
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -171,6 +174,7 @@ public class Rules extends JPanel {
 
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 		});
 		jtRules.getTableHeader().setReorderingAllowed(false);

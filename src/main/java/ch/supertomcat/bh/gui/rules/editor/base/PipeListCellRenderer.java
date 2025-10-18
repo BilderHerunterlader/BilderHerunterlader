@@ -19,7 +19,7 @@ public class PipeListCellRenderer extends DefaultListCellRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (comp instanceof JLabel) {
+		if (comp instanceof JLabel label) {
 			String text;
 			if (value instanceof RulePipelineFailuresPanel) {
 				text = "Failure Pipeline";
@@ -30,7 +30,7 @@ public class PipeListCellRenderer extends DefaultListCellRenderer {
 			} else {
 				text = "Pipeline";
 			}
-			((JLabel)comp).setText(text);
+			label.setText(text);
 		}
 		return comp;
 	}

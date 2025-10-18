@@ -2,19 +2,13 @@ package ch.supertomcat.bh.tool;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -75,7 +69,7 @@ public final class BHUtil {
 	 * @return Reduced Filename
 	 */
 	public static String reduceFilenameLength(String filename, SettingsManager settingsManager) {
-		if (settingsManager.getDownloadsSettings().isReduceFilenameLength()) {
+		if (Boolean.TRUE.equals(settingsManager.getDownloadsSettings().isReduceFilenameLength())) {
 			return FileUtil.reduceFilenameLength(filename);
 		}
 		return filename;
@@ -89,7 +83,7 @@ public final class BHUtil {
 	 * @return Reduced Path
 	 */
 	public static String reducePathLength(String folder, SettingsManager settingsManager) {
-		if (settingsManager.getDownloadsSettings().isReducePathLength()) {
+		if (Boolean.TRUE.equals(settingsManager.getDownloadsSettings().isReducePathLength())) {
 			return FileUtil.reducePathLength(folder);
 		}
 		return folder;
@@ -183,64 +177,5 @@ public final class BHUtil {
 		LoggerConfig loggerConfig = config.getLoggerConfig(LogManager.ROOT_LOGGER_NAME);
 		loggerConfig.setLevel(level);
 		loggerContext.updateLoggers(config);
-	}
-
-	/**
-	 * Deletes old backup files
-	 * 
-	 * @param folder Folder
-	 * @param filename Filename
-	 * @param daysToKeepBackup Days to keep backups
-	 */
-	public static void deleteOldBackupFiles(File folder, final String filename, int daysToKeepBackup) {
-		final long now = System.currentTimeMillis();
-		final Calendar cal = Calendar.getInstance();
-		cal.add(Calendar.DATE, -daysToKeepBackup);
-		final Date backupDeleteDate = cal.getTime();
-		final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd--HH-mm-ss-SSS");
-		final long backupDeleteTime = daysToKeepBackup * 24 * 60 * 60 * 1000L;
-
-		// Delete old backup-Files
-		File[] backupFiles = folder.listFiles(new FileFilter() {
-			private final Pattern oldBackupPattern = Pattern.compile("^" + filename + ".bak-([0-9]+)$");
-			private final Pattern backupPattern = Pattern.compile("^" + filename + "-([0-9]{4}-[0-9]{2}-[0-9]{2}--[0-9]{2}-[0-9]{2}-[0-9]{2}-[0-9]{3})$");
-
-			@Override
-			public boolean accept(File pathname) {
-				Matcher matcher = backupPattern.matcher(pathname.getName());
-				if (matcher.matches()) {
-					try {
-						Date backupDate = dateFormat.parse(matcher.group(1));
-						if (backupDate.before(backupDeleteDate)) {
-							return true;
-						}
-					} catch (ParseException e) {
-						logger.error("Could not parse datetime of backup file: {}", pathname.getAbsolutePath(), e);
-					}
-					return false;
-				}
-
-				matcher = oldBackupPattern.matcher(pathname.getName());
-				if (matcher.matches()) {
-					try {
-						long backupTime = Long.parseLong(matcher.group(1));
-						if ((now - backupTime) > backupDeleteTime) {
-							return true;
-						}
-					} catch (NumberFormatException nfe) {
-						logger.error("Could not parse datetime of backup file: {}", pathname.getAbsolutePath(), nfe);
-					}
-					return false;
-				}
-				return false;
-			}
-		});
-		if (backupFiles != null) {
-			for (File oldBackupFile : backupFiles) {
-				if (!oldBackupFile.delete()) {
-					logger.error("Could not delete old backup file: {}", oldBackupFile.getAbsolutePath());
-				}
-			}
-		}
 	}
 }

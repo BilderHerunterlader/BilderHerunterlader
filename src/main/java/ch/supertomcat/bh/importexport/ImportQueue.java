@@ -166,7 +166,6 @@ public class ImportQueue extends ImportExportBase {
 				}
 				queueManager.addPics(picsToAdd);
 				queueManager.saveDatabase();
-				System.gc();
 
 				mainWindowAccess.setMessage(Localization.getString("TextFileImported"));
 			}

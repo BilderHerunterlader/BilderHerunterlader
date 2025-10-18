@@ -109,7 +109,6 @@ public class DownloadPreviewRunnable implements Runnable {
 			logger.error("Preview Download Task was rejected", e);
 		} finally {
 			previewCache.notifyAllPreviewsAdded();
-			System.gc();
 		}
 	}
 }

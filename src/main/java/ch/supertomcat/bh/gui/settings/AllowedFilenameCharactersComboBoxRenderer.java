@@ -17,8 +17,7 @@ public class AllowedFilenameCharactersComboBoxRenderer extends BasicComboBoxRend
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof AllowedFilenameCharacters) {
-			AllowedFilenameCharacters allowedFilenameCharacters = (AllowedFilenameCharacters)value;
+		if (value instanceof AllowedFilenameCharacters allowedFilenameCharacters) {
 			switch (allowedFilenameCharacters) {
 				case ALL:
 					setText(Localization.getString("FilenameAlle"));

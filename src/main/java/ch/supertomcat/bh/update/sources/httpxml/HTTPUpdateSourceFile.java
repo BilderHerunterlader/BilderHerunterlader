@@ -1,10 +1,11 @@
 package ch.supertomcat.bh.update.sources.httpxml;
 
-import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -74,11 +75,11 @@ public class HTTPUpdateSourceFile extends UpdateSourceFile {
 		String encodedURL = HTTPUtil.encodeURL(sourceURL);
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
 			HttpGet method = new HttpGet(encodedURL);
-			File tempTargetFile = new File(target);
+			Path tempTargetFile = Paths.get(target);
 
-			File tempTargetFolder = tempTargetFile.getAbsoluteFile().getParentFile();
+			Path tempTargetFolder = tempTargetFile.toAbsolutePath().getParent();
 			if (tempTargetFolder != null) {
-				Files.createDirectories(tempTargetFolder.toPath());
+				Files.createDirectories(tempTargetFolder);
 			}
 
 			return client.execute(method, response -> {

@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.StringJoiner;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -85,34 +86,22 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 
 			Element changelog = root.getChild("changelog");
 			List<Element> changes = changelog.getChildren();
-			StringBuilder bufferDE = new StringBuilder();
-			StringBuilder bufferEN = new StringBuilder();
+			StringJoiner changeLog = new StringJoiner("\n");
 			Element change = null;
-			String lang = "";
 			String version = "";
 			String description = "";
 			for (int l = 0; l < changes.size(); l++) {
 				change = changes.get(l);
-				lang = change.getAttribute("lng").getValue();
 				version = change.getAttribute("version").getValue();
 				description = change.getValue();
-				if (lang.equals("de")) {
-					if (bufferDE.length() > 0) {
-						bufferDE.append("\n");
-					}
-					bufferDE.append("Version: " + version + "\n");
-					bufferDE.append(description + "\n");
-				} else {
-					if (bufferEN.length() > 0) {
-						bufferEN.append("\n");
-					}
-					bufferEN.append("Version: " + version + "\n");
-					bufferEN.append(description + "\n");
-				}
+
+				changeLog.add("Version: " + version);
+				changeLog.add(description);
 			}
 
-			updateBH.setChangeLog("DE", bufferDE.toString());
-			updateBH.setChangeLog("EN", bufferEN.toString());
+			if (updateBH != null) {
+				updateBH.setChangeLog(changeLog.toString());
+			}
 
 			// Hosts und Rules
 			updateHostPlugins.clear();
@@ -229,11 +218,10 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 		updateObject = new UpdateObject(updateType, updateName, version, sources, minVersion, maxVersion);
 
 		// Add type specific information to the created update object
-		if (updateType == UpdateObject.UpdateType.TYPE_HOST_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_REDIRECT_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_RULE) {
-			if (delete != null) {
-				updateObject.setAction(UpdateObject.UpdateActionType.ACTION_REMOVE);
-				updateObject.setComment(delete);
-			}
+		if (delete != null
+				&& (updateType == UpdateObject.UpdateType.TYPE_HOST_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_REDIRECT_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_RULE)) {
+			updateObject.setAction(UpdateObject.UpdateActionType.ACTION_REMOVE);
+			updateObject.setComment(delete);
 		}
 
 		return updateObject;

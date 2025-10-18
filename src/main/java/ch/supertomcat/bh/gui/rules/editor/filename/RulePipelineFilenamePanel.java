@@ -2,7 +2,7 @@ package ch.supertomcat.bh.gui.rules.editor.filename;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.JCheckBox;
@@ -48,7 +48,7 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Fil
 	public RulePipelineFilenamePanel(RuleDefinition rule, FilenamePipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
-		Map<FilenameMode, String> filenameModeLocalizationStrings = new HashMap<>();
+		Map<FilenameMode, String> filenameModeLocalizationStrings = new EnumMap<>(FilenameMode.class);
 		filenameModeLocalizationStrings.put(FilenameMode.CONTAINER_URL_FILENAME_PART, "filenameContainerUrlFilenamePart");
 		filenameModeLocalizationStrings.put(FilenameMode.CONTAINER_URL, "filenameContainerUrl");
 		filenameModeLocalizationStrings.put(FilenameMode.THUMBNAIL_URL_FILENAME_PART, "filenameThumbnailUrlFilenamePart");
@@ -84,9 +84,7 @@ public class RulePipelineFilenamePanel extends RulePipelineFilenamePanelBase<Fil
 
 		updateCompomentEnabledState();
 
-		chkUseContentDisposition.addItemListener(e -> {
-			updateCompomentEnabledState();
-		});
+		chkUseContentDisposition.addItemListener(e -> updateCompomentEnabledState());
 	}
 
 	@Override

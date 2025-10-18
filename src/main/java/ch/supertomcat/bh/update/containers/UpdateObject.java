@@ -1,35 +1,24 @@
 package ch.supertomcat.bh.update.containers;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.update.UpdateException;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import ch.supertomcat.supertomcatutils.io.ZipUtil;
 
 /**
- * 
+ * Update Object
  */
 public class UpdateObject {
-	/**
-	 * Logger for this class
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
-
 	/**
 	 * Update Action Type enum
 	 */
@@ -123,7 +112,7 @@ public class UpdateObject {
 
 	private boolean deleteFileWritten = false;
 
-	private Map<String, String> changelog = new HashMap<>();
+	private String changelog = "";
 
 	/**
 	 * Constructor
@@ -160,14 +149,13 @@ public class UpdateObject {
 		String targetDirectory = "";
 		switch (this.type) {
 			case TYPE_BH:
-				targetDirectory = ApplicationProperties.getProperty("ApplicationPath");
+				targetDirectory = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH);
 				break;
-			case TYPE_HOST_PLUGIN:
-			case TYPE_REDIRECT_PLUGIN:
-				targetDirectory = ApplicationProperties.getProperty("ApplicationPath") + "hosts/";
+			case TYPE_HOST_PLUGIN, TYPE_REDIRECT_PLUGIN:
+				targetDirectory = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "hosts/";
 				break;
 			case TYPE_RULE:
-				targetDirectory = ApplicationProperties.getProperty("ApplicationPath") + "rules/";
+				targetDirectory = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "rules/";
 				break;
 			default:
 				// nothing to do
@@ -294,22 +282,19 @@ public class UpdateObject {
 	/**
 	 * Sets the changelog for the give language
 	 * 
-	 * @param language Lanuage
-	 * @param changes Changes
+	 * @param changelog Changelog
 	 */
-	public void setChangeLog(String language, String changes) {
-		changelog.put(language, changes);
+	public void setChangeLog(String changelog) {
+		this.changelog = changelog;
 	}
 
 	/**
-	 * Returns the changelog for the given language or null if not avaible
+	 * Returns the changelog
 	 * 
-	 * @param language Language
 	 * @return changelog for the given language or an empty String if not available
 	 */
-	public String getChangeLog(String language) {
-		String changes = changelog.get(language);
-		return changes != null ? changes : "";
+	public String getChangeLog() {
+		return changelog;
 	}
 
 	/**
@@ -388,12 +373,12 @@ public class UpdateObject {
 			for (int i = 0; i < this.targets.size(); i++) {
 				String target = this.targets.get(i);
 
-				File fTempTarget = new File(target);
-				File targetDir = fTempTarget.getAbsoluteFile().getParentFile();
-				boolean extractSuccess = extractZipFile(fTempTarget, targetDir);
-				if (extractSuccess) {
-					fTempTarget.delete();
-				} else {
+				Path fTempTarget = Paths.get(target);
+				Path targetDir = fTempTarget.toAbsolutePath().getParent();
+				try {
+					ZipUtil.extractZipFile(fTempTarget, targetDir);
+					Files.delete(fTempTarget);
+				} catch (IOException e) {
 					return false;
 				}
 			}
@@ -402,51 +387,23 @@ public class UpdateObject {
 		}
 	}
 
-	private synchronized boolean extractZipFile(File file, File targetDir) {
-		try (FileInputStream in = new FileInputStream(file); ZipInputStream zis = new ZipInputStream(in)) {
-			byte[] buffer = new byte[8192];
-			ZipEntry zipEntry;
-			while ((zipEntry = zis.getNextEntry()) != null) {
-				String fileName = zipEntry.getName();
-				File outputFile = new File(targetDir, fileName);
-
-				if (zipEntry.isDirectory()) {
-					Files.createDirectories(outputFile.toPath());
-				} else {
-					try (FileOutputStream out = new FileOutputStream(outputFile)) {
-						int read;
-						while ((read = zis.read(buffer)) != -1) {
-							out.write(buffer, 0, read);
-							out.flush();
-						}
-					}
-				}
-				zis.closeEntry();
-			}
-			return true;
-		} catch (IOException e) {
-			logger.error("Could not extract zip file: {}", file.getAbsolutePath(), e);
-			return false;
-		}
-	}
-
 	private synchronized void writeDeleteFile() throws UpdateException {
 		if (deleteFileWritten) {
 			return;
 		}
 
-		File deleteUpdateFile = new File(ApplicationProperties.getProperty("ApplicationPath"), "delete_update.txt");
+		Path deleteUpdateFile = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "delete_update.txt");
 
-		try (FileOutputStream out = new FileOutputStream(deleteUpdateFile, true); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out))) {
+		try (BufferedWriter writer = Files.newBufferedWriter(deleteUpdateFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			for (int i = 0; i < this.targets.size(); i++) {
 				if (this.action == UpdateActionType.ACTION_REMOVE || this.sources.get(i).isDelete()) {
-					bw.write(this.targets.get(i) + "\n");
+					writer.write(this.targets.get(i) + "\n");
 				}
 			}
-			bw.flush();
+			writer.flush();
 			deleteFileWritten = true;
 		} catch (IOException e) {
-			throw new UpdateException("Could not write delete update file: " + deleteUpdateFile.getAbsolutePath(), e);
+			throw new UpdateException("Could not write delete update file: " + deleteUpdateFile, e);
 		}
 	}
 }

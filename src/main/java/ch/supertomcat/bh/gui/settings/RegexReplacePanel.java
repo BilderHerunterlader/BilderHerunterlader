@@ -108,6 +108,7 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -117,14 +118,17 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 		});
 		table.getTableHeader().setReorderingAllowed(false);
@@ -162,8 +166,8 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(ActionEvent e) {
 		JDialog parent = null;
-		if (this.getTopLevelAncestor() instanceof JDialog) {
-			parent = (JDialog)this.getTopLevelAncestor();
+		if (this.getTopLevelAncestor() instanceof JDialog dialog) {
+			parent = dialog;
 		}
 		if (e.getSource() == btnNew) {
 			RegexReplace rrre = new RegexReplace();
@@ -213,6 +217,7 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	 * Apply
 	 */
 	public void apply() {
+		// Nothing to do
 	}
 
 	/**

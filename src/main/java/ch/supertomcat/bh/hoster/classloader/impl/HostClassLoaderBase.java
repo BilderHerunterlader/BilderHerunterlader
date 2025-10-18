@@ -127,7 +127,7 @@ public abstract class HostClassLoaderBase<T> {
 		List<T> loadedClasses = new ArrayList<>();
 
 		for (FoundHostClass foundHostClass : foundHostClasses) {
-			Class<?> hostClass = foundHostClass.getHostClass();
+			Class<?> hostClass = foundHostClass.hostClass();
 			try {
 				@SuppressWarnings("unchecked")
 				T loadedClass = (T)hostClass.getConstructor().newInstance();

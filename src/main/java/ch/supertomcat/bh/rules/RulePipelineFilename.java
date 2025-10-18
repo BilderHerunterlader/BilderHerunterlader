@@ -10,6 +10,7 @@ import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameReplace;
 import ch.supertomcat.bh.rules.trace.RuleTraceInfoFilenameSearch;
 import ch.supertomcat.bh.rules.xml.FilenameMode;
 import ch.supertomcat.bh.rules.xml.FilenamePipeline;
+import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
  * RulePipeline
@@ -123,7 +124,7 @@ public class RulePipelineFilename extends RulePipeline<FilenamePipeline> {
 
 		if (ruleHtmlCode == null) {
 			if (filenamePartOnly) {
-				String filenamePart = RuleUtil.getFilenamePart(result);
+				String filenamePart = HTTPUtil.getFilenameFromURL(result, result);
 				if (filenamePart.isEmpty()) {
 					return null;
 				}

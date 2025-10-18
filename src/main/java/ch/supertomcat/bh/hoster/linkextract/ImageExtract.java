@@ -111,7 +111,7 @@ public final class ImageExtract {
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
 			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
-			if (referrer.length() > 0) {
+			if (!referrer.isEmpty()) {
 				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 

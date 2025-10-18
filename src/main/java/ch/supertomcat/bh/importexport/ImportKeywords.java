@@ -96,7 +96,7 @@ public class ImportKeywords extends ImportExportBase {
 					String[] line = row.split("\t");
 					if (line.length == 5) {
 						// If there is no title, ignore the whole line!
-						if (line[0].length() == 0) {
+						if (line[0].isEmpty()) {
 							continue;
 						}
 						String title = line[0];

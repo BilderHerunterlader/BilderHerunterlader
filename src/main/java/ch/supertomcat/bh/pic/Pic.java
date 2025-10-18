@@ -88,7 +88,7 @@ public class Pic {
 	/**
 	 * Listener
 	 */
-	private transient List<IPicListener> listeners = new CopyOnWriteArrayList<>();
+	private List<IPicListener> listeners = new CopyOnWriteArrayList<>();
 
 	/**
 	 * Status of the download

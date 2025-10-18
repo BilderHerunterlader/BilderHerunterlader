@@ -2,7 +2,7 @@ package ch.supertomcat.bh.gui.rules.editor.filename;
 
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
-import java.util.HashMap;
+import java.util.EnumMap;
 import java.util.Map;
 
 import javax.swing.JDialog;
@@ -31,7 +31,7 @@ public class RulePipelineFilenameDownloadSelectionPanel extends RulePipelineFile
 	public RulePipelineFilenameDownloadSelectionPanel(RuleDefinition rule, FilenameDownloadSelectionPipeline pipe, JDialog owner, SettingsManager settingsManager) {
 		super(rule, pipe, owner, settingsManager);
 
-		Map<FilenameDownloadSelectionMode, String> filenameModeLocalizationStrings = new HashMap<>();
+		Map<FilenameDownloadSelectionMode, String> filenameModeLocalizationStrings = new EnumMap<>(FilenameDownloadSelectionMode.class);
 		filenameModeLocalizationStrings.put(FilenameDownloadSelectionMode.CONTAINER_URL_FILENAME_PART, "filenameContainerUrlFilenamePart");
 		filenameModeLocalizationStrings.put(FilenameDownloadSelectionMode.CONTAINER_URL, "filenameContainerUrl");
 		LocalizedEnumComboBoxRenderer<FilenameDownloadSelectionMode> filenameModeRenderer = new LocalizedEnumComboBoxRenderer<>(FilenameDownloadSelectionMode.class, filenameModeLocalizationStrings);

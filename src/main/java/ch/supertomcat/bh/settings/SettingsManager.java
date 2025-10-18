@@ -16,7 +16,6 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.logging.log4j.Level;
 import org.xml.sax.SAXException;
 
-import ch.supertomcat.bh.settings.oldsettingsconverter.OldSettingsConverter;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
 import ch.supertomcat.bh.settings.xml.CustomSetting;
@@ -114,18 +113,12 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	private String portableSavePath = null;
 
 	/**
-	 * Old Settings Converter
-	 */
-	private final OldSettingsConverter oldSettingsConverter;
-
-	/**
 	 * Dummy Constructor. ONLY USE FOR UNIT TESTS.
 	 * 
 	 * @throws JAXBException
 	 */
 	protected SettingsManager() throws JAXBException {
 		super(ObjectFactory.class, DEFAULT_SETTINGS_FILE_RESOURCE_PATH, SETTINGS_SCHEMA_FILE_RESOURCE_PATH);
-		this.oldSettingsConverter = null;
 	}
 
 	/**
@@ -138,7 +131,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 */
 	public SettingsManager(String strSettingsFolder, String strSettingsFilename, String oldSettingsFilename) throws JAXBException {
 		super(strSettingsFolder, strSettingsFilename, ObjectFactory.class, DEFAULT_SETTINGS_FILE_RESOURCE_PATH, SETTINGS_SCHEMA_FILE_RESOURCE_PATH);
-		this.oldSettingsConverter = new OldSettingsConverter(strSettingsFolder, oldSettingsFilename);
 
 		// If path for downloads are overridden by directories.properties file, then we need to set the path here
 		String portableDownloadPath = ApplicationProperties.getProperty("DownloadPath");
@@ -176,24 +168,23 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 				var selectedOption = JOptionPane.showOptionDialog(null, "BH: Could not read settings file: " + settingsFile.toAbsolutePath().toString()
 						+ "\nChoose how to proceed", "Error", JOptionPane.YES_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
 				if (selectedOption == 0) {
-					return readDefaultSettings(false, true);
+					return readDefaultSettings(true);
 				} else {
 					return false;
 				}
 			}
 		} else {
-			return readDefaultSettings(true, false);
+			return readDefaultSettings(false);
 		}
 	}
 
 	/**
 	 * Read default settings
 	 * 
-	 * @param checkConvertOldSettings True if it should be checked for old settings file and convert it, false otherwise
 	 * @param forceWrite True if it should be force to write settings to file, false otherwise
 	 * @return True if successful, false otherwise
 	 */
-	private synchronized boolean readDefaultSettings(boolean checkConvertOldSettings, boolean forceWrite) {
+	private synchronized boolean readDefaultSettings(boolean forceWrite) {
 		logger.info("Loading Default Settings File");
 		try {
 			this.settings = loadDefaultSettingsFile();
@@ -203,14 +194,6 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 			return false;
 		}
 
-		boolean converted = false;
-		if (checkConvertOldSettings && oldSettingsConverter != null && oldSettingsConverter.checkOldSettingsFileExists()) {
-			oldSettingsConverter.convertSettings(settings);
-			checkSettings();
-			converted = true;
-			languageFirstRun = false;
-		}
-
 		try {
 			updateHosterSettingsMap();
 			applyLogLevel();
@@ -218,7 +201,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 			applySubDirs();
 			applyHostDeactivations();
 			settingsChanged();
-			if (converted || forceWrite) {
+			if (forceWrite) {
 				writeSettings(true);
 			}
 			return true;

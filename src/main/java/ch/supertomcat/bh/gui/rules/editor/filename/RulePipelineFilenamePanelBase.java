@@ -1,8 +1,8 @@
 package ch.supertomcat.bh.gui.rules.editor.filename;
 
 import java.awt.BorderLayout;
-import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -46,7 +46,7 @@ public abstract class RulePipelineFilenamePanelBase<T extends Pipeline, S extend
 	/**
 	 * Action Edit Function
 	 */
-	protected Function<Object[], Object[]> actionEditFunction = x -> editRegexp(x);
+	protected UnaryOperator<Object[]> actionEditFunction = x -> editRegexp(x);
 
 	/**
 	 * Table Panel
@@ -106,6 +106,7 @@ public abstract class RulePipelineFilenamePanelBase<T extends Pipeline, S extend
 		pnlTable.getTable().getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -115,14 +116,17 @@ public abstract class RulePipelineFilenamePanelBase<T extends Pipeline, S extend
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 		});
 

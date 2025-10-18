@@ -1817,7 +1817,6 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 			if (file != null) {
 				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 				txtStdSavePath.setText(folder);
-				file = null;
 			}
 		} else if (e.getSource() == btnMaxFailedCountPlus) {
 			int val = Integer.parseInt(txtMaxFailedCount.getText());
@@ -1835,10 +1834,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 			FileFilter filter = new FileFilter() {
 				@Override
 				public boolean accept(File f) {
-					if (f.getName().equals("cookies4.dat") || f.isDirectory()) {
-						return true;
-					}
-					return false;
+					return f.getName().equals("cookies4.dat") || f.isDirectory();
 				}
 
 				@Override
@@ -2215,11 +2211,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	@Override
 	public void mouseClicked(MouseEvent e) {
 		if (((e.getSource() == jtSubdirs) || (e.getSource() == spSubdirs)) && (e.getButton() == 3)) {
-			if (jtSubdirs.getSelectedRowCount() > 0) {
-				menuItemDelete.setEnabled(true);
-			} else {
-				menuItemDelete.setEnabled(false);
-			}
+			menuItemDelete.setEnabled(jtSubdirs.getSelectedRowCount() > 0);
 			int w = 0;
 			int h = 0;
 			if (e.getSource() == spSubdirs) {
@@ -2234,18 +2226,22 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 	@Override
 	public void mouseEntered(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseExited(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mousePressed(MouseEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void mouseReleased(MouseEvent e) {
+		// Nothing to do
 	}
 
 	/**
@@ -2271,6 +2267,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -2280,18 +2277,22 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowOpened(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -2302,22 +2303,27 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 	@Override
 	public void windowClosed(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	private int parseTimeoutSetting(JTextField textField, int defaultValue) {

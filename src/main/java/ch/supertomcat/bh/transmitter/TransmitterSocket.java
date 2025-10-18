@@ -1,18 +1,16 @@
 package ch.supertomcat.bh.transmitter;
 
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * This class is a server socket, which accepts connections from browsers
@@ -36,7 +34,7 @@ public class TransmitterSocket implements Runnable {
 	/**
 	 * Stop Flag
 	 */
-	private boolean stop = false;
+	private volatile boolean stop = false;
 
 	/**
 	 * Constructor
@@ -90,15 +88,14 @@ public class TransmitterSocket implements Runnable {
 	 * @param port Port-Number
 	 */
 	private void writePortFile(int port) {
-		String filename = System.getProperty("user.home") + FileUtil.FILE_SEPERATOR + ".BH" + FileUtil.FILE_SEPERATOR + "port.txt";
-		File file = new File(filename);
-		try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file)))) {
+		Path file = Paths.get(System.getProperty("user.home"), ".BH", "port.txt");
+		try (BufferedWriter out = Files.newBufferedWriter(file)) {
 			// Write the port to the file
 			out.write(String.valueOf(port));
 			// Close the file
 			out.flush();
 		} catch (IOException e) {
-			logger.error("Could not write port file: {}", file.getAbsolutePath(), e);
+			logger.error("Could not write port file: {}", file, e);
 		}
 	}
 

@@ -81,7 +81,7 @@ public class UpdateManager {
 		List<UpdateObject> updateHostPlugins = updateList.getHostPluginUpdates();
 		List<UpdateObject> updateRedirectPlugins = updateList.getRedirectPluginUpdates();
 
-		boolean mainUpdate = updateBH.updateRequired();
+		boolean mainUpdate = updateBH != null && updateBH.updateRequired();
 		boolean mainUpdateOK = false;
 		boolean deleteUpdatesAvailable = false;
 
@@ -309,12 +309,12 @@ public class UpdateManager {
 	public static boolean checkMinMaxVersions(String minVersion, String maxVersion) {
 		int iMinVersion;
 		int iMaxVersion;
-		if (minVersion == null || minVersion.length() == 0) {
+		if (minVersion == null || minVersion.isEmpty()) {
 			iMinVersion = 0;
 		} else {
 			iMinVersion = ApplicationUtil.compareVersions(minVersion, ApplicationProperties.getProperty("ApplicationVersion"));
 		}
-		if (maxVersion == null || maxVersion.length() == 0) {
+		if (maxVersion == null || maxVersion.isEmpty()) {
 			iMaxVersion = 0;
 		} else {
 			iMaxVersion = ApplicationUtil.compareVersions(maxVersion, ApplicationProperties.getProperty("ApplicationVersion"));

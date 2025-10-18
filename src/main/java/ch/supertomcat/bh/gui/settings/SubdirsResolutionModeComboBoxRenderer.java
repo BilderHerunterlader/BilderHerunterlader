@@ -17,8 +17,7 @@ public class SubdirsResolutionModeComboBoxRenderer extends BasicComboBoxRenderer
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof SubdirsResolutionMode) {
-			SubdirsResolutionMode subdirsResolutionMode = (SubdirsResolutionMode)value;
+		if (value instanceof SubdirsResolutionMode subdirsResolutionMode) {
 			switch (subdirsResolutionMode) {
 				case RESOLUTION_BOTH:
 					setText(Localization.getString("SubdirResolutionModeBoth"));

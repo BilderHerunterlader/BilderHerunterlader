@@ -1118,8 +1118,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 		}
 
 		urls.clear();
-		urls = null;
-		System.gc();
 
 		this.setTitle(windowTitlePrefix + Localization.getString("DownloadSelection") + " - " + createTableSummaryString());
 
@@ -1233,7 +1231,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 				dispose();
 				queueManager.saveDatabase();
-				System.gc();
 			}
 		});
 		thread.setPriority(Thread.MIN_PRIORITY);
@@ -1807,7 +1804,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 
 				for (int i = 0; i < jtAdder.getRowCount(); i++) {
 					int rowModelIndex = jtAdder.convertRowIndexToModel(i);
-					if (tsv.getContainerURL().equals(model.getValueAt(rowModelIndex, urlColumnModelIndex))) {
+					if (tsv.containerURL().equals(model.getValueAt(rowModelIndex, urlColumnModelIndex))) {
 						correspondingRowModelIndex = rowModelIndex;
 						break;
 					}
@@ -1817,7 +1814,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 					continue;
 				}
 
-				String rPath = tsv.getRelativePath();
+				String rPath = tsv.relativePath();
 				if (rPath.startsWith("\\") || rPath.startsWith("/")) {
 					rPath = rPath.substring(1);
 				}
@@ -1841,7 +1838,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 					model.setValueAt(oFilename, correspondingRowModelIndex, filenameColumnModelIndex);
 					model.setValueAt(true, correspondingRowModelIndex, filenameOverrideColumnModelIndex);
 				}
-				model.setValueAt(tsv.getLastModified(), correspondingRowModelIndex, lastModifiedColumnModelIndex);
+				model.setValueAt(tsv.lastModified(), correspondingRowModelIndex, lastModifiedColumnModelIndex);
 			}
 			model.setFireTableCellUpdatedEnabled(true);
 			model.fireTableRowsUpdated(0, model.getRowCount() - 1);
@@ -2277,9 +2274,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 						loadAndUnloadPreviews(false);
 					}
 					break;
-				case AdjustmentEvent.BLOCK_INCREMENT:
-				case AdjustmentEvent.BLOCK_DECREMENT:
-				case AdjustmentEvent.TRACK:
+				case AdjustmentEvent.BLOCK_INCREMENT, AdjustmentEvent.BLOCK_DECREMENT, AdjustmentEvent.TRACK:
 					// Scrolled multiple rows or Scrollbar dragged
 					unitDecrementCounter = 0;
 					loadAndUnloadPreviews(false);

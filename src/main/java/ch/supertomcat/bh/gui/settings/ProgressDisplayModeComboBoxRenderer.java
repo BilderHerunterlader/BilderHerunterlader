@@ -17,8 +17,7 @@ public class ProgressDisplayModeComboBoxRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof ProgressDisplayMode) {
-			ProgressDisplayMode progressDisplayMode = (ProgressDisplayMode)value;
+		if (value instanceof ProgressDisplayMode progressDisplayMode) {
 			switch (progressDisplayMode) {
 				case PROGRESSBAR_PERCENT:
 					setText(Localization.getString("ProgressbarPercent"));

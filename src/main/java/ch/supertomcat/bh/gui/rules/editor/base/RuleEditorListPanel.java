@@ -2,6 +2,7 @@ package ch.supertomcat.bh.gui.rules.editor.base;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.UnaryOperator;
 
 import javax.swing.DefaultListModel;
 import javax.swing.ListCellRenderer;
@@ -28,7 +29,7 @@ public class RuleEditorListPanel<E, T extends DefaultListModel<E>> extends RuleE
 	 * @param actionEditFunction Function for action edit
 	 * @param renderer Renderer or null
 	 */
-	public RuleEditorListPanel(T model, Supplier<E> actionNewSupplier, Function<E, E> actionEditFunction, ListCellRenderer<? super E> renderer) {
+	public RuleEditorListPanel(T model, Supplier<E> actionNewSupplier, UnaryOperator<E> actionEditFunction, ListCellRenderer<? super E> renderer) {
 		super(model, actionNewSupplier, new RuleEditorDefaultButtonPanel(true), renderer);
 		this.actionEditFunction = actionEditFunction;
 

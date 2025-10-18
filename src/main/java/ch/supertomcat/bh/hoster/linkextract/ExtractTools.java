@@ -14,9 +14,9 @@ import ch.supertomcat.bh.pic.URL;
  * Utility class for link extraction
  */
 public final class ExtractTools {
-	private static final Pattern PATTERN_DOMAIN = Pattern.compile("^(https?://(.*?))/.*$");
+	private static final Pattern PATTERN_DOMAIN = Pattern.compile("^(https?://[^/]+)/.*$");
 
-	private static final Pattern PATTERN_DOMAIN_AND_PATH = Pattern.compile("^(https?://(.*?/){1,}).*$");
+	private static final Pattern PATTERN_DOMAIN_AND_PATH = Pattern.compile("^(https?://(?:[^/]+/)+).*$");
 
 	/**
 	 * Constructor

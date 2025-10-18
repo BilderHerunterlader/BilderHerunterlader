@@ -17,8 +17,7 @@ public class BrowserCookiesModeComboBoxRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof BrowserCookiesMode) {
-			BrowserCookiesMode browserCookiesMode = (BrowserCookiesMode)value;
+		if (value instanceof BrowserCookiesMode browserCookiesMode) {
 			switch (browserCookiesMode) {
 				case NO_COOKIES:
 					setText(Localization.getString("CookiesNo"));

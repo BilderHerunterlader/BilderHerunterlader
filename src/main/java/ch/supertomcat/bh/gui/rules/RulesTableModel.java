@@ -80,7 +80,7 @@ public class RulesTableModel extends DefaultTableModel {
 			}
 
 			RuleURLPipeline<?> firstPipe = rule.getPipelines().get(0);
-			if (firstPipe instanceof RulePipelineURLRegex && ((RulePipelineURLRegex)firstPipe).getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
+			if (firstPipe instanceof RulePipelineURLRegex rulePipelineURLRegex && rulePipelineURLRegex.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL) {
 				return strRedirect + Localization.getString("RuleModeZeroShort") + strPipeCount;
 			} else {
 				return strRedirect + Localization.getString("RuleModeOneShort") + strPipeCount;

@@ -128,7 +128,7 @@ public class RulePipelineURLJavascript extends RuleURLPipeline<URLJavascriptPipe
 			// Read out output properties from javascript
 			String retval = (String)Context.jsToJava(ScriptableObject.getProperty(scope, "directLink"), String.class);
 			String correctedFilename = (String)Context.jsToJava(ScriptableObject.getProperty(scope, "correctedFilename"), String.class);
-			if (correctedFilename.length() > 0) {
+			if (!correctedFilename.isEmpty()) {
 				upo.setCorrectedFilename(correctedFilename);
 			}
 			Iterator<Entry<String, Object>> it = infoMap.getMapOut().entrySet().iterator();

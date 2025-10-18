@@ -461,8 +461,7 @@ public abstract class Hoster {
 				cookieStore = new BasicCookieStore();
 				context = ContextBuilder.create().useCookieStore(cookieStore).build();
 			} else {
-				if (httpContext instanceof HttpClientContext) {
-					HttpClientContext httpClientContext = (HttpClientContext)httpContext;
+				if (httpContext instanceof HttpClientContext httpClientContext) {
 					CookieStore contextCookieStore = httpClientContext.getCookieStore();
 					if (contextCookieStore != null) {
 						cookieStore = contextCookieStore;

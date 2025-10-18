@@ -78,7 +78,7 @@ public final class LinkExtract {
 			for (int i = 0; i < nl.getLength(); i++) {
 				Node n = nl.item(i);
 				String link = getAttributeValueFromNode(n, "href");
-				if (link != null && link.length() > 0) {
+				if (link != null && !link.isEmpty()) {
 					URL extractedURL = new URL(link);
 					if (!link.startsWith("http://") && !link.startsWith("https://")) {
 						// If the link was relative we have to correct that
@@ -143,7 +143,7 @@ public final class LinkExtract {
 			requestConfigBuilder.setMaxRedirects(10);
 			method.setConfig(requestConfigBuilder.build());
 			method.setHeader(HttpHeaders.USER_AGENT, settingsManager.getUserAgent());
-			if (referrer.length() > 0) {
+			if (!referrer.isEmpty()) {
 				method.setHeader(HttpHeaders.REFERER, referrer);
 			}
 

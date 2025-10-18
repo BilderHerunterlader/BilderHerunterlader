@@ -162,14 +162,9 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private UpdateList updateList = null;
 
 	/**
-	 * Changelog DE
+	 * Changelog
 	 */
-	private String changelogDE = "";
-
-	/**
-	 * Changelog EN
-	 */
-	private String changelogEN = "";
+	private String changelog = "";
 
 	/**
 	 * updateRunned
@@ -356,8 +351,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 			btnUpdate.setEnabled(true);
 			retval = true;
 			updateBH.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
-			changelogDE = updateBH.getChangeLog("DE");
-			changelogEN = updateBH.getChangeLog("EN");
+			changelog = updateBH.getChangeLog();
 		} else {
 			lblMain.setText(Localization.getString("NoNewProgramVersion"));
 			updateBH.setAction(UpdateObject.UpdateActionType.ACTION_NONE);
@@ -571,11 +565,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 				logger.error("Could not open URL, because Desktop is not supported: {}", url);
 			}
 		} else if (e.getSource() == btnChanges) {
-			String message = changelogDE;
-			if ("EN".equals(settingsManager.getGUISettings().getLanguage())) {
-				message = changelogEN;
-			}
-			message = message.replaceAll("\\\\n", "\n");
+			String message = changelog.replace("\\n", "\n");
 			UpdateChangesDialog dlg = new UpdateChangesDialog(this, message, Localization.getString("Changes"));
 			dlg.setVisible(true);
 		}
@@ -604,6 +594,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 	@Override
 	public void columnAdded(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -613,18 +604,22 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 	@Override
 	public void columnMoved(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void columnRemoved(TableColumnModelEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void columnSelectionChanged(ListSelectionEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowActivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -634,18 +629,22 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 	@Override
 	public void windowClosing(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowDeiconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
 	public void windowIconified(WindowEvent e) {
+		// Nothing to do
 	}
 
 	@Override
@@ -655,6 +654,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 	@Override
 	public void updatesStarted() {
+		// Nothing to do
 	}
 
 	@Override
@@ -674,8 +674,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		String action = "Unknown Action";
 		String message = "Unknown Message";
 		switch (updateActionType) {
-			case ACTION_NEW:
-			case ACTION_UPDATE:
+			case ACTION_NEW, ACTION_UPDATE:
 				action = Localization.getString("DownloadUpdate");
 				message = source;
 				break;
@@ -691,6 +690,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 
 	@Override
 	public void updateInstallComplete(UpdateType updateType, UpdateActionType updateActionType) {
+		// Nothing to do
 	}
 
 	@Override

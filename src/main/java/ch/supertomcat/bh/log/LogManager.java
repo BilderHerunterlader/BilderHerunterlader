@@ -47,6 +47,8 @@ import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
  * Class for reading and writing log of downloaded URLs
  */
 public class LogManager implements BHSettingsListener {
+	private static final String BH_LOGS_FILENAME = "BH-logs.txt";
+
 	/**
 	 * Date Format
 	 */
@@ -118,18 +120,18 @@ public class LogManager implements BHSettingsListener {
 			@Override
 			public boolean accept(File pathname) {
 				String filename = pathname.getName();
-				return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals("BH-logs.txt");
+				return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
 			}
 		});
 		if (logFiles != null) {
 			String[] logFileNames = new String[logFiles.length + 1];
-			logFileNames[0] = "BH-logs.txt";
+			logFileNames[0] = BH_LOGS_FILENAME;
 			for (int i = 0; i < logFiles.length; i++) {
 				logFileNames[i + 1] = logFiles[i].getName();
 			}
 			return logFileNames;
 		} else {
-			return new String[] { "BH-logs.txt" };
+			return new String[] { BH_LOGS_FILENAME };
 		}
 	}
 

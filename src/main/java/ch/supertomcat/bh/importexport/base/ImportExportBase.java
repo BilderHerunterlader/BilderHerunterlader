@@ -81,7 +81,7 @@ public abstract class ImportExportBase {
 	 * @return Encoding Selection Dialog
 	 */
 	protected EncodingSelectionDialog getEncodingSelectionDialog() {
-		return new EncodingSelectionDialog(parentComponent instanceof Frame ? (Frame)parentComponent : null);
+		return new EncodingSelectionDialog(parentComponent instanceof Frame frame ? frame : null);
 	}
 
 	/**

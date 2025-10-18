@@ -55,7 +55,7 @@ public class URL {
 	/**
 	 * URL of the site which contains this url
 	 */
-	private String ThreadURL = "";
+	private String threadURL = "";
 
 	private boolean httpsURL;
 
@@ -105,7 +105,7 @@ public class URL {
 		// To prevent endless loops we limit the redirects
 		int maxRedirects = 50;
 		int i = 0;
-		String redirectedURL = this.url;
+		String redirectedURL;
 		while (i < maxRedirects) {
 			redirectedURL = hostManager.getRedirectManager().checkURLForRedirect(this);
 			if (this.url.equals(redirectedURL)) {
@@ -198,7 +198,7 @@ public class URL {
 	 * @return threadURL
 	 */
 	public String getThreadURL() {
-		return ThreadURL;
+		return threadURL;
 	}
 
 	/**
@@ -207,8 +207,7 @@ public class URL {
 	 * @param threadURL threadURL
 	 */
 	public void setThreadURL(String threadURL) {
-		threadURL = HTTPUtil.trimURL(threadURL);
-		ThreadURL = threadURL;
+		this.threadURL = HTTPUtil.trimURL(threadURL);
 	}
 
 	/**

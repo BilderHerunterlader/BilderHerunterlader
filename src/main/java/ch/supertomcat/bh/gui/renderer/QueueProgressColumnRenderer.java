@@ -93,14 +93,17 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 				ProgressDisplayMode progressDisplayMode = settingsManager.getGUISettings().getProgressDisplayMode();
 				String progressString;
 				if (bytesTotal >= bytesDownloaded) {
-					if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_PERCENT) {
-						progressString = String.format(PROGRESS_PERCENT_STRING_FORMAT, urlIndexString, progress.getPercent(), rateString);
-					} else if (progressDisplayMode == ProgressDisplayMode.PROGRESSBAR_SIZE) {
-						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
-						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
-					} else {
-						String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
-						progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
+					switch (progressDisplayMode) {
+						case ProgressDisplayMode.PROGRESSBAR_PERCENT -> progressString = String.format(PROGRESS_PERCENT_STRING_FORMAT, urlIndexString, progress.getPercent(), rateString);
+
+						case ProgressDisplayMode.PROGRESSBAR_SIZE -> {
+							String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
+							progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
+						}
+						default -> {
+							String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
+							progressString = String.format(PROGRESS_SIZE_STRING_FORMAT, urlIndexString, sizeString, rateString);
+						}
 					}
 				} else {
 					String sizeString = UnitFormatUtil.getSizeString(bytesDownloaded, settingsManager.getSizeView());
@@ -134,17 +137,13 @@ public class QueueProgressColumnRenderer extends QueueColorRowRenderer implement
 					case COMPLETE:
 						comp.setBackground(COMPLETE_COLOR);
 						break;
-					case FAILED:
-					case FAILED_FILE_NOT_EXIST:
-					case FAILED_FILE_TEMPORARY_OFFLINE:
+					case FAILED, FAILED_FILE_NOT_EXIST, FAILED_FILE_TEMPORARY_OFFLINE:
 						comp.setBackground(FAILED_COLOR);
 						break;
 					case WAITING:
 						comp.setBackground(WAITING_COLOR);
 						break;
-					case ABORTING:
-					case SLEEPING:
-					case DOWNLOADING:
+					case ABORTING, SLEEPING, DOWNLOADING:
 					default:
 						prepareBackgroundColor(comp, table, value, isSelected, hasFocus, row, column);
 						break;

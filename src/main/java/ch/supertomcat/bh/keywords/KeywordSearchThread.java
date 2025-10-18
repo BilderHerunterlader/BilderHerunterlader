@@ -403,13 +403,6 @@ public class KeywordSearchThread extends Thread {
 		}
 
 		/*
-		 * Yes, i know i should not do this, but if we have a lot of URLs,
-		 * then i think it is not the worst idea to let the Garbage Collector know
-		 * that he could reduce the memory usage a bit ;-)
-		 */
-		System.gc();
-
-		/*
 		 * Show the Keyword-Selection-Dialog
 		 * Now the dialog will display a table with one entry per URL.
 		 * And for every URL a JCombobox, with the matches.
@@ -467,9 +460,7 @@ public class KeywordSearchThread extends Thread {
 		// Now we remove some matches
 		for (int i = foundKeywords.size() - 1; i > -1; i--) {
 			KeywordMatchType kindOfMatch = foundKeywords.get(i).getMatchType();
-			if (kindOfMatch == KeywordMatchType.MATCHED_SOME_KEYWORDS) {
-				foundKeywords.remove(i);
-			} else if ((kindOfMatch == KeywordMatchType.MATCHED_ALL_KEYWORDS) && bExact) {
+			if (kindOfMatch == KeywordMatchType.MATCHED_SOME_KEYWORDS || (kindOfMatch == KeywordMatchType.MATCHED_ALL_KEYWORDS && bExact)) {
 				foundKeywords.remove(i);
 			}
 		}

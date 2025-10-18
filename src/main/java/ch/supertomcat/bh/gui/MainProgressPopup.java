@@ -93,14 +93,17 @@ public class MainProgressPopup extends JWindow {
 
 			@Override
 			public void progressIncreased() {
+				// Nothing to do
 			}
 
 			@Override
 			public void progressModeChanged(boolean indeterminate) {
+				// Nothing to do
 			}
 
 			@Override
 			public void progressCompleted() {
+				// Nothing to do
 			}
 		};
 		observerListeners.add(ipo);

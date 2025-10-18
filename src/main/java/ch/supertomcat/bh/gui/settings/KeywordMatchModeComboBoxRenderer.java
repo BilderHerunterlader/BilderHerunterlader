@@ -17,8 +17,7 @@ public class KeywordMatchModeComboBoxRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof KeywordMatchMode) {
-			KeywordMatchMode keywordMatchMode = (KeywordMatchMode)value;
+		if (value instanceof KeywordMatchMode keywordMatchMode) {
 			switch (keywordMatchMode) {
 				case MATCH_ALL:
 					setText(Localization.getString("MatchAll"));

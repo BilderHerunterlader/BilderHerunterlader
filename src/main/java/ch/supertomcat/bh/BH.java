@@ -2,13 +2,11 @@ package ch.supertomcat.bh;
 
 import java.awt.EventQueue;
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
@@ -516,13 +514,13 @@ public abstract class BH {
 
 	private static void executeDeleteUpdates() {
 		Logger logger = LoggerFactory.getLogger(BH.class);
-		File deleteUpdateFile = new File(ApplicationProperties.getProperty("ApplicationPath"), "delete_update.txt");
-		if (!deleteUpdateFile.exists()) {
+		Path deleteUpdateFile = Paths.get(ApplicationProperties.getProperty("ApplicationPath"), "delete_update.txt");
+		if (!Files.exists(deleteUpdateFile)) {
 			return;
 		}
-		try (FileInputStream in = new FileInputStream(deleteUpdateFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+		try (BufferedReader reader = Files.newBufferedReader(deleteUpdateFile)) {
 			String line = null;
-			while ((line = br.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				if (!line.isEmpty()) {
 					String deletePath;
 					String applicationPath = ApplicationProperties.getProperty("ApplicationPath");
@@ -532,27 +530,30 @@ public abstract class BH {
 						deletePath = applicationPath + line;
 					}
 
-					File fDelete = new File(deletePath);
-					if (fDelete.isDirectory()) {
+					Path fDelete = Paths.get(deletePath);
+					if (Files.isDirectory(fDelete)) {
 						deleteDirectory(fDelete);
 					} else {
 						try {
-							Files.deleteIfExists(fDelete.toPath());
+							Files.deleteIfExists(fDelete);
 							logger.info("Delete success: {}", line);
 						} catch (IOException e) {
-							logger.error("Could not delete: {}", fDelete.getAbsolutePath(), e);
+							logger.error("Could not delete: {}", fDelete, e);
 						}
 					}
 				}
 			}
 		} catch (IOException e) {
-			logger.error("Could not read file: {}", deleteUpdateFile.getAbsolutePath(), e);
+			logger.error("Could not read file: {}", deleteUpdateFile, e);
 		}
-		deleteUpdateFile.delete();
+		try {
+			Files.delete(deleteUpdateFile);
+		} catch (IOException e) {
+			logger.error("Could not delete deleteUpdateFile: {}", deleteUpdateFile, e);
+		}
 	}
 
-	private static void deleteDirectory(File dir) throws IOException {
-		Path directory = dir.toPath();
+	private static void deleteDirectory(Path directory) throws IOException {
 		if (Files.exists(directory)) {
 			Files.walkFileTree(directory, new SimpleFileVisitor<Path>() {
 				@Override

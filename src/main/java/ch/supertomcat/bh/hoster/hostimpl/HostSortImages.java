@@ -84,10 +84,7 @@ public class HostSortImages extends Host implements IHoster {
 				return true;
 			}
 		}
-		if (urlPattern.matcher(url).matches()) {
-			return true;
-		}
-		return false;
+		return urlPattern.matcher(url).matches();
 	}
 
 	@Override

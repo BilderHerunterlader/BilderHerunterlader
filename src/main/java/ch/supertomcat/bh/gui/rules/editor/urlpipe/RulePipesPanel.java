@@ -61,10 +61,10 @@ public class RulePipesPanel extends RuleEditorListSelectionPanelBase<RulePipelin
 
 		for (URLPipeline urlPipe : rule.getPipes()) {
 			RulePipelineURLPanelBase<? extends URLPipeline> pipelinePanel;
-			if (urlPipe instanceof URLRegexPipeline) {
-				pipelinePanel = createRegexPipelinePanel(owner, settingsManager, (URLRegexPipeline)urlPipe);
-			} else if (urlPipe instanceof URLJavascriptPipeline) {
-				pipelinePanel = createJavascriptPipelinePanel(owner, (URLJavascriptPipeline)urlPipe);
+			if (urlPipe instanceof URLRegexPipeline urlRegexPipeline) {
+				pipelinePanel = createRegexPipelinePanel(owner, settingsManager, urlRegexPipeline);
+			} else if (urlPipe instanceof URLJavascriptPipeline urlJavaScriptPipeline) {
+				pipelinePanel = createJavascriptPipelinePanel(owner, urlJavaScriptPipeline);
 			} else {
 				throw new RuntimeException("Unsupported URLPipeline Type: " + urlPipe.getClass());
 			}

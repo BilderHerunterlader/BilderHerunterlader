@@ -34,6 +34,7 @@ public class RulePipelineURLRegexTablePanel extends RuleEditorTablePanel<RulePip
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
 			@Override
 			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
@@ -43,14 +44,17 @@ public class RulePipelineURLRegexTablePanel extends RuleEditorTablePanel<RulePip
 
 			@Override
 			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
 			}
 
 			@Override
 			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
 			}
 		});
 

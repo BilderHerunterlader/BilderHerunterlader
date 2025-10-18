@@ -17,8 +17,7 @@ public class SizeDisplayModeComboBoxRenderer extends BasicComboBoxRenderer {
 	@Override
 	public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
 		Component comp = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-		if (value instanceof SizeDisplayMode) {
-			SizeDisplayMode sizeDisplayMode = (SizeDisplayMode)value;
+		if (value instanceof SizeDisplayMode sizeDisplayMode) {
 			switch (sizeDisplayMode) {
 				case AUTO_CHANGE_SIZE:
 					setText(Localization.getString("AutoChangeSize"));
