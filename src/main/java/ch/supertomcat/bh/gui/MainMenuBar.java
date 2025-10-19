@@ -1,13 +1,10 @@
 package ch.supertomcat.bh.gui;
 
-import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Arrays;
 import java.util.OptionalInt;
 
@@ -20,9 +17,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
@@ -38,6 +32,7 @@ import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 
@@ -45,11 +40,6 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
  * Main Menu Bar
  */
 public class MainMenuBar {
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(MainMenuBar.class);
-
 	/**
 	 * MenuBar
 	 */
@@ -169,23 +159,23 @@ public class MainMenuBar {
 		});
 
 		itemLogFolder.addActionListener(e -> {
-			File logDir = new File(ApplicationProperties.getProperty(ApplicationMain.LOGS_PATH));
-			openFolder(logDir);
+			Path logDir = Paths.get(ApplicationProperties.getProperty(ApplicationMain.LOGS_PATH));
+			FileExplorerUtil.openDirectory(logDir);
 		});
 
 		itemTutorial.addActionListener(e -> {
 			String url = ApplicationProperties.getProperty("TutorialURL");
-			openURL(url);
+			FileExplorerUtil.openURL(url);
 		});
 
 		itemReportIssueEMail.addActionListener(e -> {
 			String emailAddress = ApplicationProperties.getProperty("MailAddress");
-			openEMail(emailAddress);
+			FileExplorerUtil.openEMail(emailAddress);
 		});
 
 		itemReportIssueGithub.addActionListener(e -> {
 			String url = ApplicationProperties.getProperty("ReportIssueURL");
-			openURL(url);
+			FileExplorerUtil.openURL(url);
 		});
 
 		itemAbout.addActionListener(e -> new BHAboutDialog(parentWindow, settingsManager));
@@ -231,59 +221,5 @@ public class MainMenuBar {
 	 */
 	public JMenuBar getJMenuBar() {
 		return mb;
-	}
-
-	/**
-	 * Open Folder
-	 * 
-	 * @param dir Directory
-	 */
-	private void openFolder(File dir) {
-		if (Desktop.isDesktopSupported()) {
-			try {
-				Desktop.getDesktop().open(dir);
-			} catch (IOException e1) {
-				logger.error("Could not open Directory: {}", dir.getAbsolutePath(), e1);
-			}
-		} else {
-			logger.error("Could not open folder, because Desktop is not supported: {}", dir);
-		}
-	}
-
-	/**
-	 * Open URL
-	 * 
-	 * @param url URL
-	 */
-	private void openURL(String url) {
-		if (Desktop.isDesktopSupported()) {
-			try {
-				Desktop.getDesktop().browse(new URI(url));
-			} catch (IOException | URISyntaxException ex) {
-				logger.error("Could not open URL: {}", url, ex);
-			}
-		} else {
-			logger.error("Could not open URL, because Desktop is not supported: {}", url);
-		}
-	}
-
-	/**
-	 * Open E-Mail
-	 * 
-	 * @param emailAddress E-Mail Address
-	 */
-	private void openEMail(String emailAddress) {
-		if (Desktop.isDesktopSupported()) {
-			Desktop desktop = Desktop.getDesktop();
-			if (desktop.isSupported(Desktop.Action.MAIL)) {
-				try {
-					desktop.mail(new URI("mailto:" + emailAddress));
-				} catch (URISyntaxException | IOException e) {
-					logger.error("Could not open email: {}", emailAddress, e);
-				}
-			}
-		} else {
-			logger.error("Could not open email, because Desktop is not supported: {}", emailAddress);
-		}
 	}
 }

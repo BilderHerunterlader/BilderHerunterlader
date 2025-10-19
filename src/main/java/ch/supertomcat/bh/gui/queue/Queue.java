@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.gui.queue;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.MouseInfo;
@@ -12,9 +11,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
@@ -42,9 +38,6 @@ import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
@@ -68,6 +61,7 @@ import ch.supertomcat.bh.queue.IDownloadQueueManagerListener;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.tool.BHUtil;
+import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.dialog.FileDialogUtil;
@@ -84,11 +78,6 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  */
 public class Queue extends JPanel {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Logger for this class
-	 */
-	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * TabelModel
@@ -631,15 +620,7 @@ public class Queue extends JPanel {
 			}
 
 			for (String url : urls) {
-				if (Desktop.isDesktopSupported()) {
-					try {
-						Desktop.getDesktop().browse(new URI(url));
-					} catch (IOException | URISyntaxException e) {
-						logger.error("Could not open URL: {}", url, e);
-					}
-				} else {
-					logger.error("Could not open URL, because Desktop is not supported: {}", url);
-				}
+				FileExplorerUtil.openURL(url);
 			}
 		});
 	}
@@ -663,15 +644,7 @@ public class Queue extends JPanel {
 			}
 
 			for (String url : urls) {
-				if (Desktop.isDesktopSupported()) {
-					try {
-						Desktop.getDesktop().browse(new URI(url));
-					} catch (IOException | URISyntaxException e) {
-						logger.error("Could not open URL: {}", url, e);
-					}
-				} else {
-					logger.error("Could not open URL, because Desktop is not supported: {}", url);
-				}
+				FileExplorerUtil.openURL(url);
 			}
 		});
 	}

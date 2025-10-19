@@ -1,13 +1,9 @@
 package ch.supertomcat.bh.gui.log;
 
 import java.awt.BorderLayout;
-import java.awt.Desktop;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Paths;
 import java.util.HashSet;
 
@@ -26,9 +22,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.BHGUIConstants;
@@ -49,11 +42,6 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  */
 public class Log extends JPanel implements ILogManagerListener {
 	private static final long serialVersionUID = 1L;
-
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(Log.class);
 
 	/**
 	 * Table
@@ -309,15 +297,7 @@ public class Log extends JPanel implements ILogManagerListener {
 				int[] s = jtLog.getSelectedRows();
 				for (int i = 0; i < s.length; i++) {
 					String url = (String)model.getValueAt(s[i], 1);
-					if (Desktop.isDesktopSupported()) {
-						try {
-							Desktop.getDesktop().browse(new URI(url));
-						} catch (IOException | URISyntaxException e) {
-							logger.error("Could not open URL: {}", url, e);
-						}
-					} else {
-						logger.error("Could not open URL, because Desktop is not supported: {}", url);
-					}
+					FileExplorerUtil.openURL(url);
 				}
 			}
 		});

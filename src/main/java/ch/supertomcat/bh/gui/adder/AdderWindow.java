@@ -29,8 +29,6 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -107,6 +105,7 @@ import ch.supertomcat.bh.settings.xml.WindowSettings;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
+import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPaste;
@@ -1984,12 +1983,7 @@ public class AdderWindow extends JFrame implements ActionListener {
 					for (int i = 0; i < selectedRows.length; i++) {
 						int modelIndex = jtAdder.convertRowIndexToModel(selectedRows[i]);
 						String url = (String)model.getValueAt(modelIndex, urlColumnModelIndex);
-						try {
-							Desktop.getDesktop().browse(new URI(url));
-						} catch (IOException | URISyntaxException e) {
-							logger.error("Could not open URL: {}", url, e);
-						}
-
+						FileExplorerUtil.openURL(url);
 					}
 				}
 			});
