@@ -1,13 +1,16 @@
 package ch.supertomcat.bh.downloader.impl;
 
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.nio.file.attribute.FileTime;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -338,15 +341,14 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 
 		// Now get the inputstream and outputstream
 		try (@SuppressWarnings("resource")
-		InputStream in = response.getEntity().getContent()) {
+		InputStream in = response.getEntity().getContent(); ReadableByteChannel inChannel = Channels.newChannel(in)) {
 			/*
 			 * We need a separate try block for the output file, because if a download is aborted, we need to delete the file, but this is only possible after
 			 * the OutputStream is closed. And we have to delete the file and set status and so on, before the entity content is closed.
 			 */
-			try (FileOutputStream out = new FileOutputStream(targetContainer.getTarget())) {
+			try (FileChannel out = FileChannel.open(Paths.get(targetContainer.getTarget()), StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
 				// Read some bytes to a buffer and write them to the outputstream
-				int bytesRead; // the amount of bytes where were read per loop course
-				byte[] buffer = new byte[ProxyManager.BUFFER_SIZE]; // The buffer
+				long bytesRead; // the amount of bytes where were read per loop course
 
 				int maxBytesUntilProgressUpdate = 100 * 1024;
 				int maxReadCountUntilProgressUpdate;
@@ -377,7 +379,7 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 				 */
 				boolean downloadRate = settingsManager.getGUISettings().isDownloadRate();
 				// Ok, now start downloading
-				while ((bytesRead = in.read(buffer)) > 0) {
+				while ((bytesRead = out.transferFrom(inChannel, totalBytesRead, ProxyManager.BUFFER_SIZE)) > 0) {
 					/*
 					 * Old:
 					 * I commented this out, because when downloading from rapidshare
@@ -402,8 +404,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 					}
 					totalBytesRead += bytesRead;
 					bytesReadSinceLastDownloadRateCalculation += bytesRead;
-					out.write(buffer, 0, bytesRead); // Write the bytes in the buffer to the outputstream
-					out.flush();
 					readCountSinceLastProgressUpdate++;
 					if (readCountSinceLastProgressUpdate > maxReadCountUntilProgressUpdate) {
 						readCountSinceLastProgressUpdate = 0;
