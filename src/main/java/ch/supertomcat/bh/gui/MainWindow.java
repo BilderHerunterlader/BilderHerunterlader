@@ -19,23 +19,19 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
 import java.util.StringJoiner;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
-import javax.swing.Timer;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.kitfox.svg.SVGException;
-import com.kitfox.svg.app.beans.SVGIcon;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
@@ -61,6 +57,7 @@ import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.svg.jsvg.JSVGAnimatedIconLabel;
 
 /**
  * Main-Window
@@ -121,26 +118,11 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	 */
 	private JPanel pnlMessage = new JPanel();
 
-	private JLabel lblProgress = new JLabel("");
+	private final Icon emptyProgressLoadingIcon = BHIcons.getBHIcon("Dummy.png", 16);
 
-	private final ImageIcon progressLoadingIcon = BHIcons.getBHSVGIcon("animations/process-working.svg", 16);
+	private final Icon progressLoadingIcon = BHIcons.getBHSVGIcon("animations/process-working.svg", 16);
 
-	private final ImageIcon emptyProgressLoadingIcon = BHIcons.getBHIcon("Dummy.png", 16);
-
-	private long lblProgressTimerStartTime;
-
-	private Timer lblProgressTimer = new Timer(750 / 45, e -> {
-		if (progressLoadingIcon instanceof SVGIcon svgIcon) {
-			try {
-				long diff = (System.nanoTime() - lblProgressTimerStartTime) / 1000000;
-				svgIcon.getSvgUniverse().setCurTime((diff % 750) / 750d);
-				svgIcon.getSvgUniverse().updateTime();
-				lblProgress.repaint();
-			} catch (SVGException ex) {
-				// Do not log exception
-			}
-		}
-	});
+	private JSVGAnimatedIconLabel lblProgress = new JSVGAnimatedIconLabel(emptyProgressLoadingIcon);
 
 	private String windowTitlePrefix = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_SHORT_NAME) + " - ";
 	private String windowTitleSuffix = " (" + ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION) + ")";
@@ -366,14 +348,14 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	public synchronized void addProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.addProgressObserver(progress);
 		lblProgress.setIcon(progressLoadingIcon);
-		lblProgressTimer.start();
+		lblProgress.startAnimation();
 	}
 
 	@Override
 	public synchronized void removeProgressObserver(ProgressObserver progress) {
 		mainProgressPopup.removeProgressObserver(progress);
 		if (mainProgressPopup.getProgressObserverCount() == 0) {
-			lblProgressTimer.stop();
+			lblProgress.stopAnimation();
 			lblProgress.setIcon(emptyProgressLoadingIcon);
 		}
 	}

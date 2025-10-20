@@ -3,7 +3,7 @@ package ch.supertomcat.bh.gui.renderer;
 import java.awt.Color;
 import java.awt.Component;
 
-import javax.swing.ImageIcon;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
@@ -19,13 +19,13 @@ import ch.supertomcat.supertomcatutils.gui.Icons;
 public class UpdateActionColumnRenderer extends DefaultTableCellRenderer implements TableCellRenderer {
 	private static final long serialVersionUID = 1L;
 
-	private static final ImageIcon ACTION_NONE_ICON = Icons.getApplIcon("dummy.png", 16);
+	private static final Icon ACTION_NONE_ICON = Icons.getApplIcon("dummy.png", 16);
 
-	private static final ImageIcon ACTION_NEW_ICON = Icons.getTangoSVGIcon("actions/list-add.svg", 16);
+	private static final Icon ACTION_NEW_ICON = Icons.getTangoSVGIcon("actions/list-add.svg", 16);
 
-	private static final ImageIcon ACTION_UPDATE_ICON = Icons.getTangoSVGIcon("apps/system-software-update.svg", 16);
+	private static final Icon ACTION_UPDATE_ICON = Icons.getTangoSVGIcon("apps/system-software-update.svg", 16);
 
-	private static final ImageIcon ACTION_REMOVE_ICON = Icons.getTangoSVGIcon("actions/list-remove.svg", 16);
+	private static final Icon ACTION_REMOVE_ICON = Icons.getTangoSVGIcon("actions/list-remove.svg", 16);
 
 	@Override
 	public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {

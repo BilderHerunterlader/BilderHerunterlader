@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui;
 import java.awt.Image;
 import java.util.stream.IntStream;
 
+import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
 /**
@@ -45,7 +46,7 @@ public final class BHIcons {
 	 * @param resource Resource
 	 * @return ImageIcon
 	 */
-	public static ImageIcon getBHSVGIcon(String resource) {
+	public static Icon getBHSVGIcon(String resource) {
 		return getBHSVGIcon(resource, -1);
 	}
 
@@ -56,7 +57,7 @@ public final class BHIcons {
 	 * @param size Size
 	 * @return ImageIcon
 	 */
-	public static ImageIcon getBHSVGIcon(String resource, int size) {
+	public static Icon getBHSVGIcon(String resource, int size) {
 		return ch.supertomcat.supertomcatutils.gui.Icons.getSVGIcon(String.format(BH_ICON_SVG_RESOURCE_FORMAT, resource), size);
 	}
 
