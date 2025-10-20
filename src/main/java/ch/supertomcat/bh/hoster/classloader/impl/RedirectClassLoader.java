@@ -1,7 +1,7 @@
 package ch.supertomcat.bh.hoster.classloader.impl;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import ch.supertomcat.bh.hoster.IRedirect;
@@ -13,15 +13,11 @@ import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
  * Class for loading Redirect classes
  */
 public class RedirectClassLoader extends HostClassLoaderBase<IRedirect> {
-	private final FileFilter filter = new FileFilter() {
-		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+[$]\\d+\\.class$");
+	private final Pattern nestedClassFilenamePattern = Pattern.compile(".+[$]\\d+\\.class$");
 
-		@Override
-		public boolean accept(File pathname) {
-			// Only load classes where the name begins with "Redirect" and ends with ".class"
-			String filename = pathname.getName();
-			return filename.startsWith("Redirect") && filename.endsWith(".class") && !nestedClassFilenamePattern.matcher(filename).matches();
-		}
+	private final Predicate<Path> filter = x -> {
+		String filename = x.getFileName().toString();
+		return filename.startsWith("Redirect") && filename.endsWith(".class") && !nestedClassFilenamePattern.matcher(filename).matches();
 	};
 
 	/**
@@ -37,12 +33,12 @@ public class RedirectClassLoader extends HostClassLoaderBase<IRedirect> {
 	}
 
 	@Override
-	protected FileFilter getFileFilter() {
+	protected Predicate<Path> getFileFilter() {
 		return filter;
 	}
 
 	@Override
-	protected boolean isClassCorrectlyImplemented(Class<?> foundHostClass, File file) {
+	protected boolean isClassCorrectlyImplemented(Class<?> foundHostClass, Path file) {
 		// Check if the class extends Redirect
 		boolean b1 = hasSuperClass(foundHostClass, Redirect.class.getName());
 		// Check if the class has the IRedirect-Interface implemented
@@ -59,7 +55,7 @@ public class RedirectClassLoader extends HostClassLoaderBase<IRedirect> {
 			return true;
 		} else {
 			logger.error("Redirect-Class {} is not compatible (Extends Redirect: {}, Has IRedirect Interface: {}, All Methods implemented: {}, All IHosterOptions methods implemented: {}): {}", foundHostClass
-					.getName(), b1, b2, b3, b4, file.getAbsolutePath());
+					.getName(), b1, b2, b3, b4, file);
 			return false;
 		}
 	}

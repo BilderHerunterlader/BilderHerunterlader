@@ -1,7 +1,8 @@
 package ch.supertomcat.bh.hoster.hostimpl;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -54,7 +55,7 @@ public class HostSortImages extends Host implements IHoster {
 		// This is the default pattern, allows just images to be sort
 		urlPattern = Pattern.compile("^.*\\.(gif|jpg|jpeg|jpe|png|tif|tiff|webp)$", Pattern.CASE_INSENSITIVE);
 
-		File file = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostxSortImages.txt");
+		Path file = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostxSortImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 	}
 

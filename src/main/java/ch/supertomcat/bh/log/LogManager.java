@@ -2,15 +2,15 @@ package ch.supertomcat.bh.log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileFilter;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,8 +25,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -85,9 +87,13 @@ public class LogManager implements BHSettingsListener {
 		this.settingsManager = settingsManager;
 		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
 
-		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
-		if (!folder.exists()) {
-			folder.mkdirs();
+		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
+		if (!Files.exists(folder)) {
+			try {
+				Files.createDirectories(folder);
+			} catch (IOException e) {
+				logger.error("Could not create directory: {}", folder, e);
+			}
 		}
 
 		settingsManager.addSettingsListener(this);
@@ -114,35 +120,32 @@ public class LogManager implements BHSettingsListener {
 	/**
 	 * @return AvailableLogFileNames
 	 */
-	public String[] getAvailableLogFileNames() {
-		File folder = new File(ApplicationProperties.getProperty("DownloadLogPath"));
-		File[] logFiles = folder.listFiles(new FileFilter() {
-			@Override
-			public boolean accept(File pathname) {
-				String filename = pathname.getName();
-				return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
-			}
-		});
-		if (logFiles != null) {
-			String[] logFileNames = new String[logFiles.length + 1];
-			logFileNames[0] = BH_LOGS_FILENAME;
-			for (int i = 0; i < logFiles.length; i++) {
-				logFileNames[i + 1] = logFiles[i].getName();
-			}
-			return logFileNames;
-		} else {
-			return new String[] { BH_LOGS_FILENAME };
+	public List<String> getAvailableLogFileNames() {
+		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
+
+		Predicate<Path> fileFilter = x -> {
+			String filename = x.getFileName().toString();
+			return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
+		};
+
+		List<String> logFileNames = new ArrayList<>();
+		logFileNames.add(BH_LOGS_FILENAME);
+		try (Stream<Path> stream = Files.list(folder)) {
+			stream.filter(Files::isRegularFile).filter(fileFilter).map(Path::getFileName).map(Path::toString).sorted().forEach(x -> logFileNames.add(x));
+		} catch (IOException e) {
+			logger.error("Could not list logfile names", e);
 		}
+		return logFileNames;
 	}
 
 	/**
 	 * @param logFiles Log Files
 	 * @return Index of current logfile in the array or -1 if not found
 	 */
-	public int getCurrentLogFileIndexForArray(String[] logFiles) {
+	public int getCurrentLogFileIndexForArray(List<String> logFiles) {
 		if (logFiles != null) {
-			for (int i = 0; i < logFiles.length; i++) {
-				if (logFiles[i].equals(settingsManager.getDownloadsSettings().getCurrentDownloadLogFile())) {
+			for (int i = 0; i < logFiles.size(); i++) {
+				if (logFiles.get(i).equals(settingsManager.getDownloadsSettings().getCurrentDownloadLogFile())) {
 					return i;
 				}
 			}
@@ -157,18 +160,18 @@ public class LogManager implements BHSettingsListener {
 	 * @param ap AdderPanel
 	 */
 	public synchronized void searchBlacklist(List<URL> urls, AdderWindow ap) {
-		File file = new File(blacklistFile);
-		if (!file.exists()) {
+		Path file = Paths.get(blacklistFile);
+		if (!Files.exists(file)) {
 			return;
 		}
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
+		try (FileInputStream in = new FileInputStream(blacklistFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
 			@SuppressWarnings("resource")
 			FileChannel fileChannel = in.getChannel();
 
-			long lFile = file.length();
+			long lFile = Files.size(file);
 			long bytesPerPercent = lFile / 100;
 			int nextPercentValue = 1;
 			boolean lAvailable = lFile > 0;
@@ -211,18 +214,18 @@ public class LogManager implements BHSettingsListener {
 	 * @param ap AdderPanel
 	 */
 	public synchronized void searchLogs(List<URL> urls, AdderWindow ap) {
-		File file = new File(logFile);
-		if (!file.exists()) {
+		Path file = Paths.get(logFile);
+		if (!Files.exists(file)) {
 			return;
 		}
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
+		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
 			@SuppressWarnings("resource")
 			FileChannel fileChannel = in.getChannel();
 
-			long lFile = file.length();
+			long lFile = Files.size(file);
 			long bytesPerPercent = lFile / 100;
 			int nextPercentValue = 1;
 			boolean lAvailable = lFile > 0;
@@ -333,8 +336,8 @@ public class LogManager implements BHSettingsListener {
 	 * @return long array: 0 -&gt; currentStart, 1 -&gt; end, 2 -&gt; lineCount
 	 */
 	public synchronized long[] readLogs(long start, LogTableModel model) {
-		File file = new File(logFile);
-		if (!file.exists()) {
+		Path file = Paths.get(logFile);
+		if (!Files.exists(file)) {
 			model.removeAllRows();
 			return new long[] { 1, 0, 0 };
 		}
@@ -345,8 +348,8 @@ public class LogManager implements BHSettingsListener {
 
 		// Count lines
 		long lineCount = 0;
-		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-			while (br.readLine() != null) {
+		try (BufferedReader reader = Files.newBufferedReader(file)) {
+			while (reader.readLine() != null) {
 				lineCount++;
 			}
 		} catch (IOException e) {
@@ -378,10 +381,10 @@ public class LogManager implements BHSettingsListener {
 			model.removeAllRows();
 		}
 
-		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+		try (BufferedReader reader = Files.newBufferedReader(file)) {
 			long lineCounter = 0;
 			String line;
-			while ((line = br.readLine()) != null) {
+			while ((line = reader.readLine()) != null) {
 				if (lineCounter >= start && lineCounter <= end) {
 					String[] arr = line.split("\t");
 					if (arr.length >= 3) {
@@ -422,13 +425,25 @@ public class LogManager implements BHSettingsListener {
 	 * @param pic Pic
 	 */
 	public synchronized void writeLog(Pic pic) {
-		File file = new File(logFile);
-		try (FileOutputStream out = new FileOutputStream(file, true); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, Charset.defaultCharset()))) {
-			bw.write(pic.getDateTimeSimple() + "\t" + pic.getContainerURL() + "\t" + pic.getTarget() + "\t" + pic.getSize() + "\t" + pic.getThreadURL() + "\t" + pic.getDownloadURL() + "\t"
-					+ pic.getThumb() + "\n");
-			bw.flush();
+		Path file = Paths.get(logFile);
+		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.defaultCharset(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+			writer.write(Long.toString(pic.getDateTimeSimple()));
+			writer.write("\t");
+			writer.write(pic.getContainerURL());
+			writer.write("\t");
+			writer.write(pic.getTarget());
+			writer.write("\t");
+			writer.write(Long.toString(pic.getSize()));
+			writer.write("\t");
+			writer.write(pic.getThreadURL());
+			writer.write("\t");
+			writer.write(pic.getDownloadURL());
+			writer.write("\t");
+			writer.write(pic.getThumb());
+			writer.write("\n");
+			writer.flush();
 		} catch (IOException e) {
-			logger.error("Could not write log file: {}", file.getAbsolutePath(), e);
+			logger.error("Could not write log file: {}", file, e);
 		}
 		for (ILogManagerListener listener : listeners) {
 			listener.logChanged();
@@ -441,13 +456,13 @@ public class LogManager implements BHSettingsListener {
 	 * @param url URL
 	 */
 	public synchronized void writeBlacklist(String url) {
-		File file = new File(blacklistFile);
-		try (FileOutputStream out = new FileOutputStream(file, true); BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(out, Charset.defaultCharset()))) {
-			bw.write(url);
-			bw.write("\n");
-			bw.flush();
+		Path file = Paths.get(blacklistFile);
+		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.defaultCharset(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+			writer.write(url);
+			writer.write("\n");
+			writer.flush();
 		} catch (IOException e) {
-			logger.error("Could not write blacklist file: {}", file.getAbsolutePath(), e);
+			logger.error("Could not write blacklist file: {}", file, e);
 		}
 	}
 
@@ -482,27 +497,28 @@ public class LogManager implements BHSettingsListener {
 	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, ProgressObserver progress) {
 		List<DirectoryLogObject> dirs = new ArrayList<>();
 
-		File f = new File(logFile);
-		if (!f.exists()) {
+		Path f = Paths.get(logFile);
+		if (!Files.exists(f)) {
 			return dirs;
 		}
-		long size = f.length();
+
 		progress.progressChanged(0, 100, 0);
 		progress.progressChanged(true);
 
-		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
+		try (BufferedReader reader = Files.newBufferedReader(f, Charset.defaultCharset())) {
+			long size = Files.size(f);
 			String line;
-			File fDir = null;
+			Path fDir = null;
 			long bytesRead = 0;
-			Map<File, Boolean> folderExistsMap = new HashMap<>();
-			while ((line = br.readLine()) != null) {
+			Map<Path, Boolean> folderExistsMap = new HashMap<>();
+			while ((line = reader.readLine()) != null) {
 				bytesRead += line.getBytes().length;
 				String[] arr = line.split("\t");
 				if (arr.length >= 3) {
 					try {
 						// Get the directory
-						fDir = new File(arr[2]).getParentFile();
-						String dir = fDir.getAbsolutePath();
+						fDir = Paths.get(arr[2]).toAbsolutePath().getParent();
+						String dir = fDir.toString();
 
 						// Get the date
 						long dateTime = Long.parseLong(arr[0]);
@@ -520,10 +536,10 @@ public class LogManager implements BHSettingsListener {
 							if (cachedExists != null) {
 								exists = cachedExists;
 							} else {
-								exists = fDir.exists() && fDir.isDirectory();
+								exists = Files.exists(fDir) && Files.isDirectory(fDir);
 								folderExistsMap.put(fDir, exists);
 							}
-							fDir = null;
+
 							if (onlyExistingDirectories && !exists) {
 								if (size > 0) {
 									progress.progressChanged((int)(bytesRead * 100 / size));
@@ -551,7 +567,7 @@ public class LogManager implements BHSettingsListener {
 			}
 			return dirs;
 		} catch (IOException e) {
-			logger.error(e.getMessage(), e);
+			logger.error("Could not read file: {}", f, e);
 			return null;
 		} finally {
 			progress.progressChanged(false);

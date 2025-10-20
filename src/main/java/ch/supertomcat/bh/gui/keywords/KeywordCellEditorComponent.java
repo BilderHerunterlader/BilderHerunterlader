@@ -4,6 +4,9 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -53,8 +56,8 @@ public class KeywordCellEditorComponent extends JPanel {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				String dir = txtPath.getText();
-				File fDir = new File(dir);
-				if (!(fDir.exists() && fDir.isDirectory())) {
+				Path fDir = Paths.get(dir);
+				if (!Files.exists(fDir) && Files.isDirectory(fDir)) {
 					dir = settingsManager.getSavePath();
 				}
 				File file = FileDialogUtil.showFolderOpenDialog(KeywordCellEditorComponent.this, dir, null);

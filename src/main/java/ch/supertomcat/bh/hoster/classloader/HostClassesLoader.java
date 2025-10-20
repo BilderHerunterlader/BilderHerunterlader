@@ -1,6 +1,7 @@
 package ch.supertomcat.bh.hoster.classloader;
 
-import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,10 +33,10 @@ public final class HostClassesLoader {
 
 		HostClassLoader hostClassLoader = new HostClassLoader();
 
-		File folderDeveloperHostClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
+		Path folderDeveloperHostClasses = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
 		foundHostClasses.addAll(hostClassLoader.findHostClasses(folderDeveloperHostClasses, true));
 
-		File folderHostClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
+		Path folderHostClasses = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
 		foundHostClasses.addAll(hostClassLoader.findHostClasses(folderHostClasses, false));
 
 		// HostzDefaultFiles has to be added at the end of the array
@@ -55,10 +56,10 @@ public final class HostClassesLoader {
 
 		RedirectClassLoader redirectClassLoader = new RedirectClassLoader();
 
-		File folderDeveloperRedirectClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
+		Path folderDeveloperRedirectClasses = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerhosts");
 		foundRedirectClasses.addAll(redirectClassLoader.findHostClasses(folderDeveloperRedirectClasses, true));
 
-		File folderRedirectClasses = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
+		Path folderRedirectClasses = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
 		foundRedirectClasses.addAll(redirectClassLoader.findHostClasses(folderRedirectClasses, false));
 
 		// Get instances of the classes

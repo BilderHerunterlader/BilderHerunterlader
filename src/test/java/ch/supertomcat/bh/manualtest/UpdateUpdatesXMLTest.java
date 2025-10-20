@@ -140,7 +140,7 @@ public class UpdateUpdatesXMLTest {
 				continue;
 			}
 
-			UpdateData ruleUpdate = ruleUpdates.get(rule.getFile().getName());
+			UpdateData ruleUpdate = ruleUpdates.get(rule.getFile().getFileName().toString());
 			if (ruleUpdate != null) {
 				if (!ruleUpdate.getVersion().equals(rule.getVersion())) {
 					logger.info("Updated Version of Rule {}: {} -> {}", ruleUpdate.getName(), ruleUpdate.getVersion(), rule.getVersion());
@@ -148,10 +148,10 @@ public class UpdateUpdatesXMLTest {
 				}
 			} else {
 				UpdateData newRuleUpdate = new UpdateData();
-				newRuleUpdate.setName(rule.getFile().getName());
+				newRuleUpdate.setName(rule.getFile().getFileName().toString());
 				newRuleUpdate.setVersion(rule.getVersion());
 				newRuleUpdate.setSrc("TODO");
-				newRuleUpdate.setFilename(rule.getFile().getName());
+				newRuleUpdate.setFilename(rule.getFile().getFileName().toString());
 				updates.getHoster().getHost().add(newRuleUpdate);
 				logger.info("Added Rule {}: {}", newRuleUpdate.getName(), newRuleUpdate.getVersion());
 			}

@@ -99,8 +99,6 @@ public class ImportHTML extends AdderImportBase {
 				ArrayList<URL> urls = new ArrayList<>();
 				LinkExtract.addLinks(file.getAbsolutePath(), null, urls, node);
 
-				file = null;
-
 				if (urls.isEmpty()) {
 					return;
 				}
@@ -108,7 +106,6 @@ public class ImportHTML extends AdderImportBase {
 				// Open the Dialog
 				AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, "", urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init(); // We need to do this!
-				adderpnl = null;
 
 				mainWindowAccess.setMessage(Localization.getString("HTMLFileImported"));
 			} catch (IOException e) {

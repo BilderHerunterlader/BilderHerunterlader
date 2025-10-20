@@ -4,10 +4,12 @@ import java.awt.Component;
 import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
@@ -68,7 +70,7 @@ public class ImportQueue extends ImportExportBase {
 		if (file != null) {
 			setLastUsedImportPath(file);
 			// read the file
-			read(file);
+			read(file.toPath());
 		}
 	}
 
@@ -76,7 +78,7 @@ public class ImportQueue extends ImportExportBase {
 	 * @param strFile File
 	 */
 	public void importQueue(String strFile) {
-		read(new File(strFile));
+		read(Paths.get(strFile));
 	}
 
 	/**
@@ -86,9 +88,9 @@ public class ImportQueue extends ImportExportBase {
 	 * 
 	 * @param file File
 	 */
-	private void read(File file) {
+	private void read(Path file) {
 		ProgressObserver pg = new ProgressObserver();
-		try (FileInputStream fIn = new FileInputStream(file); InputStream in = new BufferedInputStream(fIn)) {
+		try (InputStream fIn = Files.newInputStream(file); InputStream in = new BufferedInputStream(fIn)) {
 			String enc = null;
 			try {
 				enc = BHUtil.getEncodingFromInputStream(in);

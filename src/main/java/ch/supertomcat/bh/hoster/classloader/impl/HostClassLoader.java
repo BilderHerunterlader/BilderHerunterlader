@@ -1,7 +1,7 @@
 package ch.supertomcat.bh.hoster.classloader.impl;
 
-import java.io.File;
-import java.io.FileFilter;
+import java.nio.file.Path;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
 import ch.supertomcat.bh.hoster.Host;
@@ -14,15 +14,11 @@ import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
  * Class for loading Host classes
  */
 public class HostClassLoader extends HostClassLoaderBase<Host> {
-	private final FileFilter filter = new FileFilter() {
-		private final Pattern nestedClassFilenamePattern = Pattern.compile(".+?[$].+?\\.class$");
+	private final Pattern nestedClassFilenamePattern = Pattern.compile(".+?[$].+?\\.class$");
 
-		@Override
-		public boolean accept(File pathname) {
-			// Only load classes where the name begins with "Host" and ends with ".class"
-			String filename = pathname.getName();
-			return filename.startsWith("Host") && filename.endsWith(".class") && !nestedClassFilenamePattern.matcher(filename).matches();
-		}
+	private final Predicate<Path> filter = x -> {
+		String filename = x.getFileName().toString();
+		return filename.startsWith("Host") && filename.endsWith(".class") && !nestedClassFilenamePattern.matcher(filename).matches();
 	};
 
 	/**
@@ -38,12 +34,12 @@ public class HostClassLoader extends HostClassLoaderBase<Host> {
 	}
 
 	@Override
-	protected FileFilter getFileFilter() {
+	protected Predicate<Path> getFileFilter() {
 		return filter;
 	}
 
 	@Override
-	protected boolean isClassCorrectlyImplemented(Class<?> foundHostClass, File file) {
+	protected boolean isClassCorrectlyImplemented(Class<?> foundHostClass, Path file) {
 		// Check if the class extends Host
 		boolean b1 = hasSuperClass(foundHostClass, Host.class.getName());
 		// Check if the class has the IHoster-Interface implemented
@@ -65,7 +61,7 @@ public class HostClassLoader extends HostClassLoaderBase<Host> {
 			return true;
 		} else {
 			logger.error("Host-Class {} is not compatible (Extends Host: {}, Has IHoster Interface: {}, All Methods implemented: {}, All IHosterURLAdder methods implemented: {}, All IHosterOptions methods implemented: {}): {}", foundHostClass
-					.getName(), b1, b2, b3, b4, b5, file.getAbsolutePath());
+					.getName(), b1, b2, b3, b4, b5, file);
 			return false;
 		}
 	}

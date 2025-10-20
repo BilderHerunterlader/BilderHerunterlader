@@ -3,9 +3,9 @@ package ch.supertomcat.bh.gui.rules;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -252,13 +252,11 @@ public class Rules extends JPanel {
 
 					int rowModelIndex = jtRules.convertRowIndexToModel(row);
 					Rule r = (Rule)model.getValueAt(rowModelIndex, 0);
-					File f = r.getFile();
-					if (f.exists()) {
-						try {
-							Files.delete(f.toPath());
-						} catch (IOException ex) {
-							logger.error("Could not delete rule: {}", f.getAbsolutePath(), ex);
-						}
+					Path f = r.getFile();
+					try {
+						Files.deleteIfExists(f);
+					} catch (IOException ex) {
+						logger.error("Could not delete rule: {}", f, ex);
 					}
 					model.removeRow(rowModelIndex);
 					hostManager.getHostRules().removeRule(r);

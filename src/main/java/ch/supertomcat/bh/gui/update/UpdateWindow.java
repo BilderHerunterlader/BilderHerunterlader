@@ -443,7 +443,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		Rule r;
 		while (it.hasNext()) {
 			r = it.next();
-			ruleVersions[ir][0] = r.getFile().getName();
+			ruleVersions[ir][0] = r.getFile().getFileName().toString();
 			ruleVersions[ir][1] = r.getVersion();
 			ir++;
 		}

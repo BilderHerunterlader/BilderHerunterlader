@@ -1,9 +1,11 @@
 package ch.supertomcat.bh.importexport;
 
 import java.awt.Component;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.downloader.ProxyManager;
@@ -50,19 +52,12 @@ public class ImportLocalFiles extends AdderImportBase {
 	 * @param files Files
 	 * @param title Title or null
 	 */
-	public void importLocalFiles(File[] files, String title) {
-		if (files == null) {
+	public void importLocalFiles(List<Path> files, String title) {
+		if (files.isEmpty()) {
 			return;
 		}
-		List<URL> urls = new ArrayList<>();
 
-		for (int i = 0; i < files.length; i++) {
-			if (files[i].exists()) {
-				urls.add(new URL(files[i].getAbsolutePath()));
-			} else {
-				logger.error("File '{}' does not exist. So it can not be sorted.", files[i].getAbsolutePath());
-			}
-		}
+		List<URL> urls = files.stream().filter(Files::exists).map(Path::toAbsolutePath).map(Path::toString).map(URL::new).collect(Collectors.toCollection(ArrayList::new));
 
 		if (title == null) {
 			title = Localization.getString("Unkown") + ": " + Localization.getString("Title");

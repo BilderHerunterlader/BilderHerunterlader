@@ -30,6 +30,8 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -1193,9 +1195,9 @@ public class AdderWindow extends JFrame implements ActionListener {
 							/*
 							 * When sorting files it is possible to mark files to be deleted
 							 */
-							File f = new File(url);
+							Path f = Paths.get(url);
 							try {
-								Files.deleteIfExists(f.toPath());
+								Files.deleteIfExists(f);
 							} catch (IOException e) {
 								logger.error("File could not be deleted: {}", f);
 							}

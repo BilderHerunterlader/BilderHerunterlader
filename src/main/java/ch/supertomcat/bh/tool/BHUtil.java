@@ -1,12 +1,11 @@
 package ch.supertomcat.bh.tool;
 
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -135,15 +134,15 @@ public final class BHUtil {
 	 * @param caseInsensitive True if patterns should be compiled with CASE_INSENSITIVE flag, false otherwise
 	 * @return Patterns
 	 */
-	public static List<Pattern> readPatternsFromTextFile(File file, Charset encoding, boolean caseInsensitive) {
+	public static List<Pattern> readPatternsFromTextFile(Path file, Charset encoding, boolean caseInsensitive) {
 		List<Pattern> patterns = new ArrayList<>();
-		if (!file.exists()) {
+		if (!Files.exists(file)) {
 			return patterns;
 		}
 
-		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in, encoding))) {
+		try (BufferedReader reader = Files.newBufferedReader(file, encoding)) {
 			String row = null;
-			while ((row = br.readLine()) != null) {
+			while ((row = reader.readLine()) != null) {
 				if (row.isEmpty()) {
 					continue;
 				}
@@ -161,7 +160,7 @@ public final class BHUtil {
 				}
 			}
 		} catch (IOException e) {
-			logger.error("Could not load patterns from: {}", file.getAbsolutePath(), e);
+			logger.error("Could not load patterns from: {}", file, e);
 		}
 		return patterns;
 	}

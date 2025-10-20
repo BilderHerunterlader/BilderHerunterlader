@@ -5,7 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
+import java.util.List;
 import java.util.OptionalInt;
 
 import javax.swing.Box;
@@ -180,11 +180,12 @@ public class MainMenuBar {
 
 		itemAbout.addActionListener(e -> new BHAboutDialog(parentWindow, settingsManager));
 
-		String[] logFiles = logManager.getAvailableLogFileNames();
-		for (int i = 0; i < logFiles.length; i++) {
-			cmbLogFile.addItem(logFiles[i]);
+		List<String> logFilenames = logManager.getAvailableLogFileNames();
+		for (String logFilename : logFilenames) {
+			cmbLogFile.addItem(logFilename);
 		}
-		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFiles);
+
+		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFilenames);
 		cmbLogFile.setSelectedIndex(currentLogFileIndex);
 		cmbLogFile.addActionListener(e -> {
 			settingsManager.getDownloadsSettings().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
@@ -192,7 +193,7 @@ public class MainMenuBar {
 			settingsManager.writeSettings(true);
 		});
 
-		OptionalInt logFilesMaxLength = Arrays.stream(logFiles).mapToInt(String::length).max();
+		OptionalInt logFilesMaxLength = logFilenames.stream().mapToInt(String::length).max();
 		if (logFilesMaxLength.isPresent()) {
 			cmbLogFile.setPrototypeDisplayValue("X".repeat(logFilesMaxLength.getAsInt()));
 			Dimension cmbLogFilePreferredSize = cmbLogFile.getPreferredSize();
@@ -202,7 +203,7 @@ public class MainMenuBar {
 		}
 
 		cmbLogFile.setFocusable(false);
-		if (logFiles.length <= 1) {
+		if (logFilenames.size() <= 1) {
 			lblLogFile.setVisible(false);
 			cmbLogFile.setVisible(false);
 		}

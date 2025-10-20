@@ -3,9 +3,11 @@ package ch.supertomcat.bh.importexport;
 import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
@@ -52,7 +54,7 @@ public class ImportLinkList extends AdderImportBase {
 		if (file != null) {
 			setLastUsedImportPath(file);
 			// read the file
-			read(file);
+			read(file.toPath());
 		}
 	}
 
@@ -61,11 +63,15 @@ public class ImportLinkList extends AdderImportBase {
 	 * @param deleteFile Delete File
 	 */
 	public void importLinkList(String strFile, boolean deleteFile) {
-		File file = new File(strFile);
+		Path file = Paths.get(strFile);
 		// read the file
 		boolean ok = read(file);
 		if (ok && deleteFile) {
-			file.delete();
+			try {
+				Files.delete(file);
+			} catch (IOException e) {
+				logger.info("Could not delete imported file: {}", file, e);
+			}
 		}
 	}
 
@@ -75,9 +81,9 @@ public class ImportLinkList extends AdderImportBase {
 	 * @param file File
 	 * @return True if successful, false otherwise
 	 */
-	private boolean read(File file) {
-		try (FileInputStream in = new FileInputStream(file); BufferedReader br = new BufferedReader(new InputStreamReader(in))) {
-			return read(br);
+	private boolean read(Path file) {
+		try (BufferedReader reader = Files.newBufferedReader(file, Charset.defaultCharset())) {
+			return read(reader);
 		} catch (IOException e) {
 			logger.error(e.getMessage(), e);
 			return false;
@@ -135,7 +141,7 @@ public class ImportLinkList extends AdderImportBase {
 				lineCount++;
 			}
 
-			if (urls.size() > 0) {
+			if (!urls.isEmpty()) {
 				// Open Download-Selection-Dialog
 				AdderWindow adderpnl = new AdderWindow(parentComponent, new URLList(title, referrer, urls), logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver);
 				adderpnl.init();

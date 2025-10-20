@@ -1,7 +1,8 @@
 package ch.supertomcat.bh.hoster.hostimpl;
 
-import java.io.File;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -87,7 +88,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		urlPatternAudio = Pattern.compile(strPatternPrefix + strAudio + "$", Pattern.CASE_INSENSITIVE);
 		urlPatternArchive = Pattern.compile(strPatternPrefix + strArchive + "$", Pattern.CASE_INSENSITIVE);
 
-		File file = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostzDefaultImages.txt");
+		Path file = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostzDefaultImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, Charset.defaultCharset(), true));
 
 		try {

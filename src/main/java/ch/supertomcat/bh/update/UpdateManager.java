@@ -1,9 +1,10 @@
 package ch.supertomcat.bh.update;
 
 import java.awt.Component;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -70,9 +71,9 @@ public class UpdateManager {
 	public void startUpdate(UpdateList updateList, Component owner) {
 		fireUpdatesStarted();
 
-		File fDeleteUpdate = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "delete_update.txt");
+		Path fDeleteUpdate = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "delete_update.txt");
 		try {
-			Files.deleteIfExists(fDeleteUpdate.toPath());
+			Files.deleteIfExists(fDeleteUpdate);
 		} catch (IOException e) {
 			logger.error("Could not delete delete_update.txt file", e);
 		}

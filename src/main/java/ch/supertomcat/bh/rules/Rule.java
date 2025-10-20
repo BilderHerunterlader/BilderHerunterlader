@@ -1,6 +1,9 @@
 package ch.supertomcat.bh.rules;
 
-import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -394,8 +397,8 @@ public class Rule extends Hoster {
 	 * 
 	 * @return Path of the XML-File
 	 */
-	public File getFile() {
-		return new File(strFile);
+	public Path getFile() {
+		return Paths.get(strFile).toAbsolutePath();
 	}
 
 	/**
@@ -403,8 +406,8 @@ public class Rule extends Hoster {
 	 * 
 	 * @param file Path of the XML-File
 	 */
-	public void setFile(File file) {
-		this.strFile = file.getAbsolutePath();
+	public void setFile(Path file) {
+		this.strFile = file.toAbsolutePath().toString();
 	}
 
 	/**
@@ -416,8 +419,17 @@ public class Rule extends Hoster {
 		if (strFile.isEmpty()) {
 			return false;
 		}
-		File file = getFile();
-		return file.exists() && file.isFile() && file.length() > 0;
+		Path file = getFile();
+		if (!Files.exists(file) || !Files.isRegularFile(file)) {
+			return false;
+		}
+		try {
+			return Files.size(file) > 0;
+		} catch (IOException e) {
+			logger.error("Could not check file size: {}", file, e);
+			// Return true, because the file exists
+			return true;
+		}
 	}
 
 	@Override

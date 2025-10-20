@@ -11,9 +11,13 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.stream.Stream;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -37,6 +41,9 @@ import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
@@ -78,6 +85,11 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  */
 public class Queue extends JPanel {
 	private static final long serialVersionUID = 1L;
+
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
 	 * TabelModel
@@ -857,12 +869,14 @@ public class Queue extends JPanel {
 		final File folder = FileDialogUtil.showFolderOpenDialog(parentWindow, settingsManager.getSavePath(), null);
 		if (folder != null) {
 			executeInNewThread("QueueSortThread-", () -> {
-				File[] files = folder.listFiles();
-				if (files == null) {
-					return;
+				try (Stream<Path> stream = Files.list(folder.toPath())) {
+					List<Path> files = stream.filter(Files::isRegularFile).toList();
+
+					new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
+							.importLocalFiles(files, folder.getName());
+				} catch (IOException e) {
+					logger.error("Could not list files in directory: {}", folder, e);
 				}
-				new ImportLocalFiles(parentWindow, mainWindowAccess, logManager, queueManager, keywordManager, proxyManager, settingsManager, hostManager, clipboardObserver)
-						.importLocalFiles(files, folder.getName());
 			});
 		}
 	}

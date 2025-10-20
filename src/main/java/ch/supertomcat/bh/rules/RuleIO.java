@@ -1,11 +1,10 @@
 package ch.supertomcat.bh.rules;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 
 import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
@@ -80,7 +79,7 @@ public class RuleIO {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	public RuleDefinition readRule(String file) throws IOException, JAXBException {
+	public RuleDefinition readRule(Path file) throws IOException, JAXBException {
 		RuleDefinition ruleDefinition = readRuleNewFormat(file);
 		applyDefinitionUpdate(ruleDefinition);
 		return ruleDefinition;
@@ -107,8 +106,8 @@ public class RuleIO {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	private RuleDefinition readRuleNewFormat(String file) throws IOException, JAXBException {
-		try (FileInputStream in = new FileInputStream(file)) {
+	private RuleDefinition readRuleNewFormat(Path file) throws IOException, JAXBException {
+		try (InputStream in = Files.newInputStream(file)) {
 			return readRuleNewFormat(in, false);
 		}
 	}
@@ -153,7 +152,7 @@ public class RuleIO {
 	 * @throws JAXBException
 	 */
 	public void writeRule(Rule rule) throws IOException, JAXBException {
-		writeRule(rule.getFile().getAbsolutePath(), rule.getDefinition());
+		writeRule(rule.getFile(), rule.getDefinition());
 	}
 
 	/**
@@ -165,13 +164,13 @@ public class RuleIO {
 	 * @throws IOException
 	 * @throws JAXBException
 	 */
-	private void writeRule(String file, RuleDefinition ruleDefinition) throws IOException, JAXBException {
-		File folder = new File(file).getParentFile();
+	private void writeRule(Path file, RuleDefinition ruleDefinition) throws IOException, JAXBException {
+		Path folder = file.getParent();
 		if (folder != null) {
-			Files.createDirectories(folder.toPath());
+			Files.createDirectories(folder);
 		}
 
-		try (FileOutputStream out = new FileOutputStream(file)) {
+		try (OutputStream out = Files.newOutputStream(file)) {
 			synchronized (marshaller) {
 				marshaller.marshal(ruleDefinition, out);
 			}

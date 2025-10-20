@@ -4,7 +4,9 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -228,13 +230,13 @@ public class RuleGeneralPanel extends JPanel implements RuleEditorPart {
 			if (chkDeveloper.isSelected()) {
 				filePath = ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH) + "developerrules/" + filename;
 			}
-			File file = new File(filePath);
-			if (file.exists()) {
+			Path file = Paths.get(filePath);
+			if (Files.exists(file)) {
 				JOptionPane.showMessageDialog(owner, Localization.getString("PleaseChooseAnotherName"), "Error", JOptionPane.ERROR_MESSAGE);
 				return false;
 			}
 
-			rule.setFile(new File(filePath));
+			rule.setFile(file);
 		}
 
 		definition.setName(txtName.getText());

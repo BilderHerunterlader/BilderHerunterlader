@@ -1,15 +1,16 @@
 package ch.supertomcat.bh.hoster.classloader.impl;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,45 +49,42 @@ public abstract class HostClassLoaderBase<T> {
 	 * @param developer True if developer classes, false otherwise
 	 * @return Found Host-Classes
 	 */
-	public List<FoundHostClass> findHostClasses(File folder, boolean developer) {
+	public List<FoundHostClass> findHostClasses(Path folder, boolean developer) {
 		List<FoundHostClass> foundHostClasses = new ArrayList<>();
-		if (!folder.exists()) {
+		if (!Files.exists(folder)) {
 			return foundHostClasses;
 		}
 
-		FileFilter filter = getFileFilter();
+		Predicate<Path> filter = getFileFilter();
 
-		File[] files = folder.listFiles(filter);
-		if (files == null) {
-			logger.error("Could not list files in folder: {}", folder.getAbsolutePath());
+		List<Path> files;
+		try (Stream<Path> stream = Files.list(folder)) {
+			// Sort the array, because not every operating system will list the files in alphabetical order
+			files = stream.filter(Files::isRegularFile).filter(filter).sorted().toList();
+		} catch (IOException e) {
+			logger.error("Could not list files in folder: {}", folder, e);
 			return foundHostClasses;
 		}
-		// Sort the array, because not every operating system will list the files in alphabetical order
-		Arrays.sort(files);
 
-		try (URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { folder.toURI().toURL() });) {
-			for (File file : files) {
-				String filename = file.getName();
+		try (URLClassLoader classLoader = URLClassLoader.newInstance(new URL[] { folder.toUri().toURL() })) {
+			for (Path file : files) {
+				String filename = file.getFileName().toString();
 				String classname = getClassName(filename);
 				try {
 					// try to load the class
 					Class<?> cl = classLoader.loadClass(classname);
 
-					// Also load inner / nested / anynomous classes
-					File[] nestedClassFiles = folder.listFiles(new FileFilter() {
-						Pattern nestedClassFilenamePattern = Pattern.compile("^" + classname + "[$](.+?)\\.class$");
+					Pattern nestedClassFilenamePattern = Pattern.compile("^" + classname + "[$](.+?)\\.class$");
+					Predicate<Path> nestedClassFilter = x -> nestedClassFilenamePattern.matcher(x.getFileName().toString()).matches();
 
-						@Override
-						public boolean accept(File pathname) {
-							return nestedClassFilenamePattern.matcher(pathname.getName()).matches();
+					// Also load inner / nested / anynomous classes
+					try (Stream<Path> stream = Files.list(folder)) {
+						List<Path> nestedClassFiles = stream.filter(Files::isRegularFile).filter(nestedClassFilter).toList();
+						for (Path nestedClassFile : nestedClassFiles) {
+							classLoader.loadClass(getClassName(nestedClassFile.getFileName().toString()));
 						}
-					});
-					if (nestedClassFiles == null) {
-						logger.error("Could not list files in folder: {}", folder.getAbsolutePath());
-					} else {
-						for (File nestedClassFile : nestedClassFiles) {
-							classLoader.loadClass(getClassName(nestedClassFile.getName()));
-						}
+					} catch (IOException e) {
+						logger.error("Could not list files in folder: {}", folder, e);
 					}
 
 					if (isClassCorrectlyImplemented(cl, file)) {
@@ -94,7 +92,7 @@ public abstract class HostClassLoaderBase<T> {
 						foundHostClasses.add(new FoundHostClass(cl, developer));
 					}
 				} catch (Throwable e) {
-					logger.error("{} {} could not be loaded: {}", classTypeName, classname, file.getAbsolutePath(), e);
+					logger.error("{} {} could not be loaded: {}", classTypeName, classname, file, e);
 				}
 			}
 		} catch (IOException e) {
@@ -115,7 +113,7 @@ public abstract class HostClassLoaderBase<T> {
 	/**
 	 * @return File Filter
 	 */
-	protected abstract FileFilter getFileFilter();
+	protected abstract Predicate<Path> getFileFilter();
 
 	/**
 	 * Load classes (create instances)
@@ -170,7 +168,7 @@ public abstract class HostClassLoaderBase<T> {
 	 * @param file File for logging
 	 * @return True if class is correctly implemented, false otherwise
 	 */
-	protected abstract boolean isClassCorrectlyImplemented(Class<?> foundHostClass, File file);
+	protected abstract boolean isClassCorrectlyImplemented(Class<?> foundHostClass, Path file);
 
 	/**
 	 * @param cl Class

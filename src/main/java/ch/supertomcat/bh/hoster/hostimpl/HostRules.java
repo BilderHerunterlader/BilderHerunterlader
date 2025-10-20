@@ -1,12 +1,13 @@
 package ch.supertomcat.bh.hoster.hostimpl;
 
-import java.io.File;
-import java.io.FileFilter;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import org.xml.sax.SAXException;
 
@@ -40,6 +41,11 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 * Name
 	 */
 	public static final String NAME = "HostRules";
+
+	private static final Predicate<Path> RULE_FILE_FILTER = x -> {
+		String fileName = x.getFileName().toString();
+		return fileName.startsWith("Rule") && fileName.endsWith(".xml");
+	};
 
 	/**
 	 * Domains
@@ -82,16 +88,16 @@ public class HostRules extends Host implements IHoster, IRedirect {
 		domains.add("NODOMAINS");
 
 		// DEVELOPER RULES
-		File ruleFolderDeveloper = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerrules");
+		Path ruleFolderDeveloper = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "developerrules");
 		// Do NOT create folder, if it not exists
 		loadRules(ruleFolderDeveloper, true);
 
 		// NORMAL RULES
-		File ruleFolder = new File(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "rules");
+		Path ruleFolder = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "rules");
 		// Create folder, if it not exists
-		if (!ruleFolder.exists()) {
+		if (!Files.exists(ruleFolder)) {
 			try {
-				Files.createDirectories(ruleFolder.toPath());
+				Files.createDirectories(ruleFolder);
 			} catch (IOException e) {
 				logger.error("Could not create directory: {}", ruleFolder, e);
 			}
@@ -296,8 +302,8 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	 * @param folder Rules Folder
 	 * @param developerRules True if developer rules, false otherwise
 	 */
-	private void loadRules(File folder, boolean developerRules) {
-		if (!folder.exists() || !folder.isDirectory()) {
+	private void loadRules(Path folder, boolean developerRules) {
+		if (!Files.exists(folder) || !Files.isDirectory(folder)) {
 			return;
 		}
 		if (developerRules) {
@@ -306,37 +312,25 @@ public class HostRules extends Host implements IHoster, IRedirect {
 
 		String developerRuleLogText = developerRules ? "Developer" : "";
 
-		File[] subfiles = folder.listFiles(new RuleFileFilter());
-		if (subfiles != null) {
-			Arrays.sort(subfiles);
-			for (File subFile : subfiles) {
-				logger.info("Loading {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath());
-
-				try {
-					RuleDefinition ruleDefinition = ruleIO.readRule(subFile.getAbsolutePath());
-					Rule r = new Rule(subFile.getAbsolutePath(), ruleDefinition, developerRules);
-					rules.add(r);
-					logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getName());
-				} catch (Exception e) {
-					logger.error("Could not load {}Rule: {}", developerRuleLogText, subFile.getAbsolutePath(), e);
-				}
-			}
-		} else {
-			logger.error("Could not list rule files from directoy: {}", folder);
+		List<Path> ruleFiles;
+		try (Stream<Path> stream = Files.list(folder)) {
+			ruleFiles = stream.filter(Files::isRegularFile).filter(RULE_FILE_FILTER).map(Path::toAbsolutePath).sorted().toList();
+		} catch (IOException e) {
+			logger.error("Could not list rule files from directoy: {}", folder, e);
+			return;
 		}
-	}
 
-	/**
-	 * File Filter for Rules
-	 */
-	private static class RuleFileFilter implements FileFilter {
-		@Override
-		public boolean accept(File pathname) {
-			if (!pathname.isFile()) {
-				return false;
+		for (Path ruleFile : ruleFiles) {
+			logger.info("Loading {}Rule: {}", developerRuleLogText, ruleFile);
+
+			try {
+				RuleDefinition ruleDefinition = ruleIO.readRule(ruleFile);
+				Rule r = new Rule(ruleFile.toString(), ruleDefinition, developerRules);
+				rules.add(r);
+				logger.info("{}Rule loaded: {} {} {}", developerRuleLogText, r.getName(), r.getVersion(), r.getFile().getFileName());
+			} catch (Exception e) {
+				logger.error("Could not load {}Rule: {}", developerRuleLogText, ruleFile, e);
 			}
-			String fileName = pathname.getName();
-			return fileName.startsWith("Rule") && fileName.endsWith(".xml");
 		}
 	}
 }
