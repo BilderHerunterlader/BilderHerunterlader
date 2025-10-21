@@ -6,8 +6,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
@@ -46,12 +46,21 @@ import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.io.CountingInputStream;
 
 /**
  * Class for reading and writing log of downloaded URLs
  */
 public class LogManager implements BHSettingsListener {
-	private static final String BH_LOGS_FILENAME = "BH-logs.txt";
+	private static final String BH_LOGS_FILENAME = "BH_logs.txt";
+
+	private static final String OLD_BH_LOGS_FILENAME_PREFIX = "BH-logs";
+
+	private static final String BH_LOGS_FILENAME_PREFIX = "BH_logs";
+
+	private static final String OLD_BH_BLACKLIST_FILENAME = "BH-Blacklist.txt";
+
+	private static final String BH_BLACKLIST_FILENAME = "BH_Blacklist.txt";
 
 	/**
 	 * Date Format
@@ -73,7 +82,7 @@ public class LogManager implements BHSettingsListener {
 	/**
 	 * Path to Text-Blacklist-File
 	 */
-	private String blacklistFile = ApplicationProperties.getProperty("DownloadLogPath") + "BH-Blacklist.txt";
+	private String blacklistFile = ApplicationProperties.getProperty("DownloadLogPath") + BH_BLACKLIST_FILENAME;
 
 	/**
 	 * Settings Manager
@@ -87,7 +96,8 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public LogManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
-		this.logFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
+		this.logFile = ApplicationProperties.getProperty("DownloadLogPath")
+				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
 
 		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
 		if (!Files.exists(folder)) {
@@ -98,7 +108,65 @@ public class LogManager implements BHSettingsListener {
 			}
 		}
 
+		convertOldFiles();
+
 		settingsManager.addSettingsListener(this);
+	}
+
+	/**
+	 * Convert old log files
+	 */
+	private synchronized void convertOldFiles() {
+		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
+
+		Predicate<Path> fileFilter = x -> {
+			String filename = x.getFileName().toString();
+			return (filename.startsWith(OLD_BH_LOGS_FILENAME_PREFIX) && filename.endsWith(".txt")) || OLD_BH_BLACKLIST_FILENAME.equals(filename);
+		};
+
+		try (Stream<Path> stream = Files.list(folder)) {
+			stream.filter(Files::isRegularFile).filter(fileFilter).forEach(this::convertOldFile);
+		} catch (IOException e) {
+			logger.error("Could not list logfile names", e);
+		}
+	}
+
+	/**
+	 * Convert old log file
+	 * 
+	 * @param oldLogFile Old Log File
+	 */
+	private synchronized void convertOldFile(Path oldLogFile) {
+		/*
+		 * The old files were written with native encoding. So they are now converted to always have UTF-8 encoding, so that it's predictable
+		 */
+		String filename = oldLogFile.getFileName().toString();
+		Path newLogFile;
+		if (OLD_BH_BLACKLIST_FILENAME.equals(filename)) {
+			newLogFile = oldLogFile.resolveSibling(BH_BLACKLIST_FILENAME);
+		} else {
+			newLogFile = oldLogFile.resolveSibling(filename.replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX));
+		}
+		logger.info("Convert old file {} to {}", oldLogFile, newLogFile);
+		try (InputStream in = Files.newInputStream(oldLogFile);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))));
+				BufferedWriter writer = Files.newBufferedWriter(newLogFile, StandardCharsets.UTF_8)) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				writer.write(line);
+				writer.write("\n");
+				writer.flush();
+			}
+		} catch (IOException e) {
+			logger.error("Could not convert old log file: {}", oldLogFile, e);
+			return;
+		}
+
+		try {
+			Files.move(oldLogFile, oldLogFile.resolveSibling(oldLogFile.getFileName().toString() + ".bak"));
+		} catch (IOException e) {
+			logger.error("Could not rename old log file: {}", oldLogFile, e);
+		}
 	}
 
 	/**
@@ -127,13 +195,13 @@ public class LogManager implements BHSettingsListener {
 
 		Predicate<Path> fileFilter = x -> {
 			String filename = x.getFileName().toString();
-			return filename.startsWith("BH-logs") && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
+			return filename.startsWith(BH_LOGS_FILENAME_PREFIX) && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
 		};
 
 		List<String> logFileNames = new ArrayList<>();
 		logFileNames.add(BH_LOGS_FILENAME);
 		try (Stream<Path> stream = Files.list(folder)) {
-			stream.filter(Files::isRegularFile).filter(fileFilter).map(Path::getFileName).map(Path::toString).sorted().forEach(x -> logFileNames.add(x));
+			stream.filter(Files::isRegularFile).filter(fileFilter).map(Path::getFileName).map(Path::toString).sorted().forEach(logFileNames::add);
 		} catch (IOException e) {
 			logger.error("Could not list logfile names", e);
 		}
@@ -146,8 +214,9 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public int getCurrentLogFileIndexForArray(List<String> logFiles) {
 		if (logFiles != null) {
+			String currentLogFileName = settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
 			for (int i = 0; i < logFiles.size(); i++) {
-				if (logFiles.get(i).equals(settingsManager.getDownloadsSettings().getCurrentDownloadLogFile())) {
+				if (logFiles.get(i).equals(currentLogFileName) || logFiles.get(i).replace(BH_LOGS_FILENAME_PREFIX, OLD_BH_LOGS_FILENAME_PREFIX).equals(currentLogFileName)) {
 					return i;
 				}
 			}
@@ -169,21 +238,15 @@ public class LogManager implements BHSettingsListener {
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(blacklistFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
-			@SuppressWarnings("resource")
-			FileChannel fileChannel = in.getChannel();
-
+		try (FileInputStream in = new FileInputStream(blacklistFile);
+				CountingInputStream countIn = new CountingInputStream(in);
+				BufferedReader br = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
 			long lFile = Files.size(file);
 			long bytesPerPercent = lFile / 100;
 			int nextPercentValue = 1;
-			boolean lAvailable = lFile > 0;
 
 			if (updateProgress) {
-				if (lAvailable) {
-					ap.setPGEnabled(true, 0, 100, 0);
-				} else {
-					ap.setPGEnabled(true);
-				}
+				ap.setPGEnabled(true, 0, 100, 0);
 				ap.setPGText(Localization.getString("CheckBlacklisted"));
 			}
 
@@ -195,7 +258,7 @@ public class LogManager implements BHSettingsListener {
 					}
 				}
 
-				if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
+				if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
 					ap.setPGValue(nextPercentValue);
 					nextPercentValue++;
 				}
@@ -223,21 +286,15 @@ public class LogManager implements BHSettingsListener {
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
-			@SuppressWarnings("resource")
-			FileChannel fileChannel = in.getChannel();
-
+		try (FileInputStream in = new FileInputStream(logFile);
+				CountingInputStream countIn = new CountingInputStream(in);
+				BufferedReader br = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
 			long lFile = Files.size(file);
 			long bytesPerPercent = lFile / 100;
 			int nextPercentValue = 1;
-			boolean lAvailable = lFile > 0;
 
 			if (updateProgress) {
-				if (lAvailable) {
-					ap.setPGEnabled(true, 0, 100, 0);
-				} else {
-					ap.setPGEnabled(true);
-				}
+				ap.setPGEnabled(true, 0, 100, 0);
 				ap.setPGText(Localization.getString("CheckAlreadyDownloaded"));
 			}
 
@@ -293,7 +350,7 @@ public class LogManager implements BHSettingsListener {
 
 						currentRows.clear();
 
-						if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
+						if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
 							ap.setPGValue(nextPercentValue);
 							nextPercentValue++;
 						}
@@ -316,7 +373,7 @@ public class LogManager implements BHSettingsListener {
 						logger.error("Could not await barrier", e);
 					}
 
-					if (updateProgress && lAvailable && fileChannel.position() >= nextPercentValue * bytesPerPercent) {
+					if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
 						ap.setPGValue(nextPercentValue);
 					}
 				}
@@ -350,7 +407,7 @@ public class LogManager implements BHSettingsListener {
 
 		// Count lines
 		long lineCount = 0;
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
+		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 			while (reader.readLine() != null) {
 				lineCount++;
 			}
@@ -383,7 +440,7 @@ public class LogManager implements BHSettingsListener {
 			model.removeAllRows();
 		}
 
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
+		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
 			long lineCounter = 0;
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -428,7 +485,7 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public synchronized void writeLog(Pic pic) {
 		Path file = Paths.get(logFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			writer.write(Long.toString(pic.getDateTimeSimple()));
 			writer.write("\t");
 			writer.write(pic.getContainerURL());
@@ -459,7 +516,7 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public synchronized void writeBlacklist(String url) {
 		Path file = Paths.get(blacklistFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			writer.write(url);
 			writer.write("\n");
 			writer.flush();
@@ -507,20 +564,21 @@ public class LogManager implements BHSettingsListener {
 		progress.progressChanged(0, 100, 0);
 		progress.progressChanged(true);
 
-		Charset encoding = Charset.forName(System.getProperty("native.encoding"));
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
-			long size = Files.size(file);
+		try (InputStream in = Files.newInputStream(file);
+				CountingInputStream countIn = new CountingInputStream(in);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
+			long lFile = Files.size(file);
+			long bytesPerPercent = lFile / 100;
+			int nextPercentValue = 1;
+
 			String line;
-			Path fDir = null;
-			long bytesRead = 0;
 			Map<Path, Boolean> folderExistsMap = new HashMap<>();
 			while ((line = reader.readLine()) != null) {
-				bytesRead += line.getBytes(encoding).length;
 				String[] arr = line.split("\t");
 				if (arr.length >= 3) {
 					try {
 						// Get the directory
-						fDir = Paths.get(arr[2]).getParent();
+						Path fDir = Paths.get(arr[2]).getParent();
 						String dir = fDir.toString();
 
 						// Get the date
@@ -544,8 +602,9 @@ public class LogManager implements BHSettingsListener {
 							}
 
 							if (onlyExistingDirectories && !exists) {
-								if (size > 0) {
-									progress.progressChanged((int)(bytesRead * 100 / size));
+								if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
+									progress.progressChanged(nextPercentValue);
+									nextPercentValue++;
 								}
 								continue;
 							}
@@ -564,8 +623,10 @@ public class LogManager implements BHSettingsListener {
 						logger.error(nfe.getMessage(), nfe);
 					}
 				}
-				if (size > 0) {
-					progress.progressChanged((int)(bytesRead * 100 / size));
+
+				if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
+					progress.progressChanged(nextPercentValue);
+					nextPercentValue++;
 				}
 			}
 			return dirs;
@@ -604,7 +665,8 @@ public class LogManager implements BHSettingsListener {
 
 	@Override
 	public void settingsChanged() {
-		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath") + settingsManager.getDownloadsSettings().getCurrentDownloadLogFile();
+		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath")
+				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
 		if (!logFile.equals(currentLogFile)) {
 			logFile = currentLogFile;
 			for (ILogManagerListener listener : listeners) {
