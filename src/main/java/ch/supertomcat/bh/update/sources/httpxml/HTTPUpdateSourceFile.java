@@ -22,7 +22,7 @@ import ch.supertomcat.bh.update.containers.UpdateSourceFile;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 
 /**
- * 
+ * HTTP Update Source File
  */
 public class HTTPUpdateSourceFile extends UpdateSourceFile {
 	/**

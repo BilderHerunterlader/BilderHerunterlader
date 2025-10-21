@@ -2,15 +2,15 @@ package ch.supertomcat.bh.update;
 
 import ch.supertomcat.bh.update.containers.UpdateList;
 
-
 /**
- * 
+ * Update Source
  */
 public interface UpdateSource {
 	/**
 	 * Checks for Updates and returns a list of available updates
+	 * 
 	 * @return UpdateList
-	 * @throws UpdateException 
+	 * @throws UpdateException
 	 */
 	public UpdateList checkForUpdates() throws UpdateException;
 }

@@ -1,8 +1,7 @@
 package ch.supertomcat.bh.update;
 
 /**
- * 
- *
+ * Update Exception
  */
 public class UpdateException extends Exception {
 	private static final long serialVersionUID = 1L;

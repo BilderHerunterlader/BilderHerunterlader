@@ -58,7 +58,7 @@ public class PreviewDownloader implements Callable<PreviewDownloader.DownloadedP
 	}
 
 	/**
-	 * 
+	 * Downloaded Preview
 	 */
 	public static class DownloadedPreview {
 		private int index = 0;

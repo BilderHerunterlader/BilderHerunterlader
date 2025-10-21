@@ -12,8 +12,7 @@ import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 
 /**
- * 
- *
+ * Main Progress Popup
  */
 public class MainProgressPopup extends JWindow {
 	/**

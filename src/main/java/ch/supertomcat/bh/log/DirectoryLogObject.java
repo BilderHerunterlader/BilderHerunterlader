@@ -1,8 +1,7 @@
 package ch.supertomcat.bh.log;
 
 /**
- * 
- *
+ * Directory Log Object
  */
 public class DirectoryLogObject {
 	private final String directory;

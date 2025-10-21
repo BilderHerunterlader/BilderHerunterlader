@@ -318,6 +318,8 @@ public class CookieManager {
 	}
 
 	/**
+	 * Cookie Function
+	 * 
 	 * @param <T> Result Type
 	 */
 	@FunctionalInterface

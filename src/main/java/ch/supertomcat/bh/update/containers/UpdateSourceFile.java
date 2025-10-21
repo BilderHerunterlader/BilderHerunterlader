@@ -3,7 +3,7 @@ package ch.supertomcat.bh.update.containers;
 import ch.supertomcat.bh.update.UpdateException;
 
 /**
- * 
+ * Update Source File
  */
 public abstract class UpdateSourceFile {
 	private boolean delete = false;
