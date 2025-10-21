@@ -5,6 +5,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.swing.JOptionPane;
 
@@ -13,6 +15,7 @@ import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.cookie.CookieStore;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.protocol.HttpClientContext;
+import org.apache.hc.core5.http.ContentType;
 import org.apache.hc.core5.http.HttpHeaders;
 import org.apache.hc.core5.http.message.StatusLine;
 import org.slf4j.Logger;
@@ -123,9 +126,12 @@ public class ImportURL {
 				// Get the InputStream
 				try (@SuppressWarnings("resource")
 				InputStream in = response.getEntity().getContent()) {
+					@SuppressWarnings("resource")
+					ContentType contentType = ContentType.parse(response.getEntity().getContentType());
+					Charset encoding = contentType.getCharset(StandardCharsets.UTF_8);
 					if ("text/plain".equals(response.getFirstHeader(HttpHeaders.CONTENT_TYPE).getValue())) {
 						logger.debug("PlainText detected: Using ImportLinkList");
-						linkListImporter.read(new BufferedReader(new InputStreamReader(in)));
+						linkListImporter.read(new BufferedReader(new InputStreamReader(in, encoding)));
 					} else {
 						logger.debug("HTML detected: Using ImportHTML");
 						htmlImporter.importHTML(encodedURL, referrer, embeddedImages, in, response, method);

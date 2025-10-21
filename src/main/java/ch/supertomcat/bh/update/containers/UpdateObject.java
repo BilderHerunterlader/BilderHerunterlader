@@ -2,6 +2,7 @@ package ch.supertomcat.bh.update.containers;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -394,7 +395,7 @@ public class UpdateObject {
 
 		Path deleteUpdateFile = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "delete_update.txt");
 
-		try (BufferedWriter writer = Files.newBufferedWriter(deleteUpdateFile, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(deleteUpdateFile, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			for (int i = 0; i < this.targets.size(); i++) {
 				if (this.action == UpdateActionType.ACTION_REMOVE || this.sources.get(i).isDelete()) {
 					writer.write(this.targets.get(i) + "\n");

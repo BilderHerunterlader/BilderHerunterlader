@@ -17,6 +17,7 @@ import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.StringJoiner;
 
 import javax.swing.Icon;
@@ -203,7 +204,7 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 								}
 								String title = Localization.getString("Unkown");
 								String referrer = Localization.getString("Unkown");
-								byte[] stringBytes = sjData.toString().getBytes();
+								byte[] stringBytes = sjData.toString().getBytes(StandardCharsets.UTF_8);
 								ByteArrayInputStream bais = new ByteArrayInputStream(stringBytes);
 								new ImportHTML(MainWindow.this, MainWindow.this, logManager, queueManager, keywordManager, proxyManger, settingsManager, hostManager, cookieManager, clipboardObserver)
 										.importHTML(bais, referrer, title);

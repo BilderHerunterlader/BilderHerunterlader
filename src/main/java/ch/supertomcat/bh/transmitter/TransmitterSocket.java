@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -89,7 +90,7 @@ public class TransmitterSocket implements Runnable {
 	 */
 	private void writePortFile(int port) {
 		Path file = Paths.get(System.getProperty("user.home"), ".BH", "port.txt");
-		try (BufferedWriter out = Files.newBufferedWriter(file)) {
+		try (BufferedWriter out = Files.newBufferedWriter(file, Charset.forName(System.getProperty("native.encoding")))) {
 			// Write the port to the file
 			out.write(String.valueOf(port));
 			// Close the file

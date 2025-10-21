@@ -3,6 +3,9 @@ package ch.supertomcat.bh;
 import java.awt.EventQueue;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -518,7 +521,7 @@ public abstract class BH {
 		if (!Files.exists(deleteUpdateFile)) {
 			return;
 		}
-		try (BufferedReader reader = Files.newBufferedReader(deleteUpdateFile)) {
+		try (InputStream in = Files.newInputStream(deleteUpdateFile); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
 			String line = null;
 			while ((line = reader.readLine()) != null) {
 				if (!line.isEmpty()) {

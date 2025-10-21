@@ -4,10 +4,12 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.channels.FileChannel;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
@@ -167,7 +169,7 @@ public class LogManager implements BHSettingsListener {
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(blacklistFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
+		try (FileInputStream in = new FileInputStream(blacklistFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
 			@SuppressWarnings("resource")
 			FileChannel fileChannel = in.getChannel();
 
@@ -221,7 +223,7 @@ public class LogManager implements BHSettingsListener {
 
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.defaultCharset()))) {
+		try (FileInputStream in = new FileInputStream(logFile); BufferedReader br = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
 			@SuppressWarnings("resource")
 			FileChannel fileChannel = in.getChannel();
 
@@ -348,7 +350,7 @@ public class LogManager implements BHSettingsListener {
 
 		// Count lines
 		long lineCount = 0;
-		try (BufferedReader reader = Files.newBufferedReader(file)) {
+		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
 			while (reader.readLine() != null) {
 				lineCount++;
 			}
@@ -381,7 +383,7 @@ public class LogManager implements BHSettingsListener {
 			model.removeAllRows();
 		}
 
-		try (BufferedReader reader = Files.newBufferedReader(file)) {
+		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
 			long lineCounter = 0;
 			String line;
 			while ((line = reader.readLine()) != null) {
@@ -426,7 +428,7 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public synchronized void writeLog(Pic pic) {
 		Path file = Paths.get(logFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.defaultCharset(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			writer.write(Long.toString(pic.getDateTimeSimple()));
 			writer.write("\t");
 			writer.write(pic.getContainerURL());
@@ -457,7 +459,7 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public synchronized void writeBlacklist(String url) {
 		Path file = Paths.get(blacklistFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.defaultCharset(), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
+		try (BufferedWriter writer = Files.newBufferedWriter(file, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
 			writer.write(url);
 			writer.write("\n");
 			writer.flush();
@@ -497,27 +499,28 @@ public class LogManager implements BHSettingsListener {
 	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, ProgressObserver progress) {
 		List<DirectoryLogObject> dirs = new ArrayList<>();
 
-		Path f = Paths.get(logFile);
-		if (!Files.exists(f)) {
+		Path file = Paths.get(logFile);
+		if (!Files.exists(file)) {
 			return dirs;
 		}
 
 		progress.progressChanged(0, 100, 0);
 		progress.progressChanged(true);
 
-		try (BufferedReader reader = Files.newBufferedReader(f, Charset.defaultCharset())) {
-			long size = Files.size(f);
+		Charset encoding = Charset.forName(System.getProperty("native.encoding"));
+		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))))) {
+			long size = Files.size(file);
 			String line;
 			Path fDir = null;
 			long bytesRead = 0;
 			Map<Path, Boolean> folderExistsMap = new HashMap<>();
 			while ((line = reader.readLine()) != null) {
-				bytesRead += line.getBytes().length;
+				bytesRead += line.getBytes(encoding).length;
 				String[] arr = line.split("\t");
 				if (arr.length >= 3) {
 					try {
 						// Get the directory
-						fDir = Paths.get(arr[2]).toAbsolutePath().getParent();
+						fDir = Paths.get(arr[2]).getParent();
 						String dir = fDir.toString();
 
 						// Get the date
@@ -557,7 +560,7 @@ public class LogManager implements BHSettingsListener {
 							}
 							dirs.add(new DirectoryLogObject(dir, dateTime, exists));
 						}
-					} catch (NumberFormatException nfe) {
+					} catch (NumberFormatException | InvalidPathException nfe) {
 						logger.error(nfe.getMessage(), nfe);
 					}
 				}
@@ -567,7 +570,7 @@ public class LogManager implements BHSettingsListener {
 			}
 			return dirs;
 		} catch (IOException e) {
-			logger.error("Could not read file: {}", f, e);
+			logger.error("Could not read file: {}", file, e);
 			return null;
 		} finally {
 			progress.progressChanged(false);
