@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.bilderherunterlader</groupId>
 		<artifactId>supertomcatroot</artifactId>
-		<version>1.1.3</version>
+		<version>1.1.4</version>
 	</parent>
 	
 	<groupId>ch.supertomcat</groupId>
@@ -12,14 +12,10 @@
 	<version>5.3.1-SNAPSHOT</version>
 	<name>BilderHerunterlader</name>
 	<description>Download files from file hosts</description>
-	<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
+	<url>https://github.com/BilderHerunterlader/BilderHerunterlader</url>
 	<properties>
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
-		<executableJarPath>${project.basedir}</executableJarPath>
 		<libsPath>${project.basedir}/lib</libsPath>
-		<!-- Jar Filename -->
-		<jar.finalName>BH</jar.finalName>
-		<maven.javadoc.skip>true</maven.javadoc.skip>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -128,7 +124,6 @@
 		</dependency>
 	</dependencies>
 	<build>
-		<finalName>${jar.finalName}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
@@ -145,7 +140,29 @@
 							</sources>
 						</configuration>
 					</execution>
+					<execution>
+						<id>attach-exe</id>
+						<phase>package</phase>
+						<goals>
+							<goal>attach-artifact</goal>
+						</goals>
+						<configuration>
+							<artifacts>
+								<artifact>
+									<file>${project.basedir}/BH.exe</file>
+									<type>exe</type>
+								</artifact>
+							</artifacts>
+						</configuration>
+					</execution>
 				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<configuration>
+					<excludePackageNames>ch.supertomcat.bh.rules.xml:ch.supertomcat.bh.settings.xml:ch.supertomcat.bh.update.sources.httpxml.xml</excludePackageNames>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -163,8 +180,6 @@
 							<Enable-Native-Access>ALL-UNNAMED</Enable-Native-Access>
 						</manifestEntries>
 					</archive>
-					<outputDirectory>${executableJarPath}</outputDirectory>
-					<finalName>${jar.finalName}</finalName>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -196,8 +211,28 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
+						<id>copy-project-jar</id>
+						<phase>package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>${project.groupId}</groupId>
+									<artifactId>${project.artifactId}</artifactId>
+									<version>${project.version}</version>
+									<type>jar</type>
+									<outputDirectory>${project.basedir}</outputDirectory>
+									<destFileName>BH.jar</destFileName>
+								</artifactItem>
+							</artifactItems>
+							<overWriteIfNewer>true</overWriteIfNewer>
+						</configuration>
+					</execution>
+					<execution>
 						<id>copy-dependencies</id>
-						<phase>prepare-package</phase>
+						<phase>package</phase>
 						<goals>
 							<goal>copy-dependencies</goal>
 						</goals>
@@ -210,6 +245,14 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+			</plugin>
 		</plugins>
 	</build>
 	<scm>
@@ -218,14 +261,4 @@
 		<developerConnection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</developerConnection>
 		<tag>HEAD</tag>
 	</scm>
-	<distributionManagement>
-		<repository>
-			<id>bh-maven-repo</id>
-			<url>file://${project.basedir}/../_Maven_Repo</url>
-		</repository>
-		<snapshotRepository>
-			<id>bh-maven-repo</id>
-			<url>file://${project.basedir}/../_Maven_Repo</url>
-		</snapshotRepository>
-	</distributionManagement>
 </project>
