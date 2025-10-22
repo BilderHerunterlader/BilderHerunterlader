@@ -22,6 +22,18 @@ public class DirectoryLogObject {
 	}
 
 	/**
+	 * Constructor
+	 * 
+	 * @param entry LogEntry
+	 * @param exists Exists
+	 */
+	public DirectoryLogObject(LogEntry entry, boolean exists) {
+		this.directory = entry.getTargetPath();
+		this.dateTime = entry.getTimestamp();
+		this.exists = exists;
+	}
+
+	/**
 	 * Returns the directory
 	 * 
 	 * @return directory

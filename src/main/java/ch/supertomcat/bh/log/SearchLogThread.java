@@ -1,14 +1,13 @@
 package ch.supertomcat.bh.log;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.database.sqlite.LogsSQLiteDB;
 import ch.supertomcat.bh.pic.URL;
 
 /**
@@ -28,11 +27,13 @@ public class SearchLogThread implements Runnable {
 
 	private final int threadCount;
 
-	private final List<String> currentRows;
+	private final LogsSQLiteDB database;
 
 	private final CyclicBarrier barrier;
 
-	private final Map<Integer, String> httpsMap = new HashMap<>();
+	private final int urlsToCheck;
+
+	private int start = 0;
 
 	/**
 	 * Constructor
@@ -40,20 +41,22 @@ public class SearchLogThread implements Runnable {
 	 * @param urls URLs
 	 * @param threadNumber Thread-Number
 	 * @param threadCount Thread-Count
-	 * @param currentRows Current Rows
+	 * @param database Database
 	 * @param barrier Barrier
+	 * @param urlsToCheck URLs to check per cycle
 	 */
-	public SearchLogThread(List<URL> urls, int threadNumber, int threadCount, List<String> currentRows, CyclicBarrier barrier) {
+	public SearchLogThread(List<URL> urls, int threadNumber, int threadCount, LogsSQLiteDB database, CyclicBarrier barrier, int urlsToCheck) {
 		this.urls = urls;
 		this.threadNumber = threadNumber;
 		this.threadCount = threadCount;
-		this.currentRows = currentRows;
+		this.database = database;
 		this.barrier = barrier;
+		this.urlsToCheck = urlsToCheck;
 	}
 
 	@Override
 	public void run() {
-		for (int i = threadNumber; i < urls.size(); i += threadCount) {
+		for (int i = start + threadNumber; i < urls.size() && i < start + threadNumber + urlsToCheck; i += threadCount) {
 			URL currentURL = urls.get(i);
 
 			if (currentURL.isAlreadyDownloaded()) {
@@ -62,28 +65,17 @@ public class SearchLogThread implements Runnable {
 			}
 
 			String url = currentURL.getURL();
-			for (int r = 0; r < currentRows.size(); r++) {
-				String alreadyDownloadedURL = currentRows.get(r);
+			String alternativeURL = url;
+			if (currentURL.isHttpsURL()) {
+				alternativeURL = HTTP + url.substring(5);
+			}
 
-				if (alreadyDownloadedURL.contains(url)) {
-					currentURL.setAlreadyDownloaded(true);
-					break;
-				}
-
-				if (currentURL.isHttpsURL()) {
-					String httpsURL = httpsMap.get(i);
-					if (httpsURL == null) {
-						httpsURL = HTTP + url.substring(5);
-						httpsMap.put(i, httpsURL);
-					}
-
-					if (alreadyDownloadedURL.contains(httpsURL)) {
-						currentURL.setAlreadyDownloaded(true);
-						break;
-					}
-				}
+			if (database.checkAlreadyDownloaded(url, alternativeURL)) {
+				currentURL.setAlreadyDownloaded(true);
 			}
 		}
+
+		start += urlsToCheck;
 
 		/*
 		 * Wait for all other threads to complete

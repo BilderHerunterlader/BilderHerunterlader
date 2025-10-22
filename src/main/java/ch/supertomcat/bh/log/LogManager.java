@@ -13,28 +13,25 @@ import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.CyclicBarrier;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Predicate;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
+
+import javax.swing.WindowConstants;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.database.sqlite.LogsSQLiteDB;
 import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
@@ -42,11 +39,12 @@ import ch.supertomcat.bh.pic.URL;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
+import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
-import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
+import ch.supertomcat.supertomcatutils.gui.progress.ProgressWindow;
 import ch.supertomcat.supertomcatutils.io.CountingInputStream;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Class for reading and writing log of downloaded URLs
@@ -90,12 +88,20 @@ public class LogManager implements BHSettingsListener {
 	private final SettingsManager settingsManager;
 
 	/**
+	 * Logs Database
+	 */
+	private final LogsSQLiteDB logsSQLiteDB;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param settingsManager Settings Manager
 	 */
 	public LogManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
+		this.logsSQLiteDB = new LogsSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Logs.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
+				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
+
 		this.logFile = ApplicationProperties.getProperty("DownloadLogPath")
 				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
 
@@ -142,24 +148,92 @@ public class LogManager implements BHSettingsListener {
 		 */
 		String filename = oldLogFile.getFileName().toString();
 		Path newLogFile;
+		boolean blacklist;
 		if (OLD_BH_BLACKLIST_FILENAME.equals(filename)) {
 			newLogFile = oldLogFile.resolveSibling(BH_BLACKLIST_FILENAME);
+			blacklist = true;
 		} else {
 			newLogFile = oldLogFile.resolveSibling(filename.replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX));
+			blacklist = false;
 		}
 		logger.info("Convert old file {} to {}", oldLogFile, newLogFile);
+		ProgressWindow progressWindow = new ProgressWindow("Convert " + oldLogFile, null);
+		progressWindow.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
 		try (InputStream in = Files.newInputStream(oldLogFile);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(in, Charset.forName(System.getProperty("native.encoding"))));
+				CountingInputStream countIn = new CountingInputStream(in);
+				BufferedReader reader = new BufferedReader(new InputStreamReader(countIn, Charset.forName(System.getProperty("native.encoding"))));
 				BufferedWriter writer = Files.newBufferedWriter(newLogFile, StandardCharsets.UTF_8)) {
+			long fileSize = Files.size(oldLogFile);
+			long bytesPerPercent = fileSize / 8192;
+			int nextPercentValue = 1;
 			String line;
+			long lineCounter = 0;
+			List<LogEntry> entries = new ArrayList<>();
 			while ((line = reader.readLine()) != null) {
 				writer.write(line);
 				writer.write("\n");
 				writer.flush();
+
+				if (blacklist) {
+					lineCounter++;
+					if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
+						progressWindow.progressChanged(nextPercentValue);
+						nextPercentValue++;
+					}
+					continue;
+				}
+
+				try {
+					String[] arr = line.split("\t");
+					if (arr.length >= 3) {
+						long timestamp = Long.parseLong(arr[0]);
+						String containerURL = arr[1];
+						String target = arr[2];
+						String targetPath = FileUtil.getDirectory(target);
+						String targetFilename = FileUtil.getFilename(target);
+						long size = 0;
+						if (arr.length >= 4) {
+							size = Long.parseLong(arr[3]);
+						}
+						String threadURL = "";
+						if (arr.length >= 5) {
+							threadURL = arr[4];
+						}
+						String downloadURL = "";
+						if (arr.length >= 6) {
+							downloadURL = arr[5];
+						}
+						String thumbURL = "";
+						if (arr.length >= 7) {
+							thumbURL = arr[6];
+						}
+						LogEntry logEntry = new LogEntry(timestamp, containerURL, threadURL, downloadURL, thumbURL, target, targetPath, targetFilename, size);
+						entries.add(logEntry);
+					}
+				} catch (Exception e) {
+					logger.error("Could not add data from line {} to database: {}", lineCounter, line, e);
+				}
+
+				if (entries.size() >= 1000) {
+					logsSQLiteDB.insertEntries(entries);
+					entries.clear();
+				}
+
+				lineCounter++;
+				if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
+					progressWindow.progressChanged(nextPercentValue);
+					nextPercentValue++;
+				}
+			}
+
+			if (!entries.isEmpty()) {
+				logsSQLiteDB.insertEntries(entries);
 			}
 		} catch (IOException e) {
 			logger.error("Could not convert old log file: {}", oldLogFile, e);
 			return;
+		} finally {
+			progressWindow.dispose();
 		}
 
 		try {
@@ -279,110 +353,62 @@ public class LogManager implements BHSettingsListener {
 	 * @param ap AdderPanel
 	 */
 	public synchronized void searchLogs(List<URL> urls, AdderWindow ap) {
-		Path file = Paths.get(logFile);
-		if (!Files.exists(file)) {
-			return;
-		}
-
 		boolean updateProgress = ap != null;
 
-		try (FileInputStream in = new FileInputStream(logFile);
-				CountingInputStream countIn = new CountingInputStream(in);
-				BufferedReader br = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
-			long lFile = Files.size(file);
-			long bytesPerPercent = lFile / 100;
-			int nextPercentValue = 1;
+		if (updateProgress) {
+			ap.setPGEnabled(true, 0, urls.size(), 0);
+			ap.setPGText(Localization.getString("CheckAlreadyDownloaded"));
+		}
 
-			if (updateProgress) {
-				ap.setPGEnabled(true, 0, 100, 0);
-				ap.setPGText(Localization.getString("CheckAlreadyDownloaded"));
+		/*
+		 * As this method takes a lot of time to complete when there is a big logfile
+		 * and a lot of links to check, we use multiple threads to reduce time.
+		 * 
+		 * We read in first 10000 urls from the logfile, so that the threads
+		 * have enough to do.
+		 */
+
+		int threadCount = settingsManager.getSettings().getThreadCount();
+
+		if (threadCount < 1) {
+			threadCount = 1;
+		}
+
+		if (threadCount > urls.size()) {
+			threadCount = urls.size();
+		}
+
+		int urlsToCheck = 1000;
+		int alreadyChecked = 0;
+
+		CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
+		try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
+			SearchLogThread[] slt = new SearchLogThread[threadCount];
+			for (int t = 0; t < threadCount; t++) {
+				slt[t] = new SearchLogThread(urls, t, threadCount, logsSQLiteDB, barrier, urlsToCheck);
 			}
 
-			/*
-			 * As this method takes a lot of time to complete when there is a big logfile
-			 * and a lot of links to check, we use multiple threads to reduce time.
-			 * 
-			 * We read in first 10000 urls from the logfile, so that the threads
-			 * have enough to do.
-			 */
-
-			int threadCount = settingsManager.getSettings().getThreadCount();
-
-			if (threadCount < 1) {
-				threadCount = 1;
-			}
-
-			if (threadCount > urls.size()) {
-				threadCount = urls.size();
-			}
-
-			CyclicBarrier barrier = new CyclicBarrier(threadCount + 1);
-			try (ExecutorService threadPool = Executors.newFixedThreadPool(threadCount)) {
-
-				List<String> currentRows = new ArrayList<>();
-
-				SearchLogThread[] slt = new SearchLogThread[threadCount];
+			for (int i = 0; i < urls.size(); i += urlsToCheck) {
+				/*
+				 * Start all threads (runnables)
+				 */
 				for (int t = 0; t < threadCount; t++) {
-					slt[t] = new SearchLogThread(urls, t, threadCount, currentRows, barrier);
+					threadPool.execute(slt[t]);
+				}
+				/*
+				 * Wait for all threads (runnables) to complete
+				 */
+				try {
+					barrier.await();
+				} catch (InterruptedException | BrokenBarrierException e) {
+					logger.error(e.getMessage(), e);
 				}
 
-				int rowsToRead = 1000;
+				alreadyChecked += urlsToCheck;
 
-				String row = null;
-				while ((row = br.readLine()) != null) {
-					currentRows.add(row);
-
-					if (currentRows.size() >= rowsToRead) {
-						/*
-						 * Start all threads (runnables)
-						 */
-						for (int t = 0; t < threadCount; t++) {
-							threadPool.execute(slt[t]);
-						}
-						/*
-						 * Wait for all threads (runnables) to complete
-						 */
-						try {
-							barrier.await();
-						} catch (InterruptedException | BrokenBarrierException e) {
-							logger.error(e.getMessage(), e);
-						}
-
-						currentRows.clear();
-
-						if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
-							ap.setPGValue(nextPercentValue);
-							nextPercentValue++;
-						}
-					}
+				if (updateProgress) {
+					ap.setPGValue(alreadyChecked);
 				}
-
-				if (!currentRows.isEmpty()) {
-					/*
-					 * Start all threads (runnables)
-					 */
-					for (int t = 0; t < threadCount; t++) {
-						threadPool.execute(slt[t]);
-					}
-					/*
-					 * Wait for all threads (runnables) to complete
-					 */
-					try {
-						barrier.await();
-					} catch (InterruptedException | BrokenBarrierException e) {
-						logger.error("Could not await barrier", e);
-					}
-
-					if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
-						ap.setPGValue(nextPercentValue);
-					}
-				}
-			}
-		} catch (IOException e) {
-			logger.error("Could not search for already downloaded files", e);
-		} finally {
-			if (updateProgress) {
-				ap.setPGEnabled(false);
 			}
 		}
 	}
@@ -392,89 +418,28 @@ public class LogManager implements BHSettingsListener {
 	 * 
 	 * @param start Index of the line in logfile to start from
 	 * @param model Model
-	 * @return long array: 0 -&gt; currentStart, 1 -&gt; end, 2 -&gt; lineCount
+	 * @return int array: 0 -&gt; currentStart, 1 -&gt; end, 2 -&gt; lineCount
 	 */
-	public synchronized long[] readLogs(long start, LogTableModel model) {
-		Path file = Paths.get(logFile);
-		if (!Files.exists(file)) {
-			model.removeAllRows();
-			return new long[] { 1, 0, 0 };
+	public synchronized int[] readLogs(int start, LogTableModel model) {
+		model.removeAllRows();
+
+		int count = logsSQLiteDB.getEntriesCount();
+		if (count <= 0) {
+			return new int[] { 0, 0, 0 };
 		}
 
-		if (start > 0) {
-			start--;
+		if (start < 0 || start >= count) {
+			// Integer division give count of 100 entries for start
+			start = (count / 100) * 100;
 		}
 
-		// Count lines
-		long lineCount = 0;
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-			while (reader.readLine() != null) {
-				lineCount++;
-			}
-		} catch (IOException e) {
-			logger.error("Could not count log lines in file: {}", logFile, e);
-			return new long[] { 1, 0, 0 };
-		}
-		if (lineCount > 0) {
-			lineCount--;
-		}
+		logsSQLiteDB.fillTableModelWithEntriesRange(start, 100, model, settingsManager, DATE_FORMAT);
 
-		long end;
-		if (start < 0) {
-			end = lineCount;
-			start = end - 99;
-			if (start < 0) {
-				start = 0;
-			}
+		int entriesCount = model.getRowCount();
+		if (entriesCount <= 0) {
+			return new int[] { 0, 0, 0 };
 		} else {
-			end = start + 99;
-			if (end > lineCount) {
-				end = lineCount;
-			}
-			if ((start + 99) > end) {
-				start = (end - 99);
-			}
-		}
-
-		if (lineCount < 100) {
-			model.removeAllRows();
-		}
-
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, StandardCharsets.UTF_8))) {
-			long lineCounter = 0;
-			String line;
-			while ((line = reader.readLine()) != null) {
-				if (lineCounter >= start && lineCounter <= end) {
-					String[] arr = line.split("\t");
-					if (arr.length >= 3) {
-						try {
-							long timestamp = Long.parseLong(arr[0]);
-							LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
-							String strDateTime = dateTime.format(DATE_FORMAT);
-							String containerURL = arr[1];
-							String target = arr[2];
-							String strFilesize;
-							if (arr.length >= 4) {
-								long filesize = Long.parseLong(arr[3]);
-								strFilesize = UnitFormatUtil.getSizeString(filesize, settingsManager.getSizeView());
-							} else {
-								strFilesize = Localization.getString("Unkown");
-							}
-							model.addRow(containerURL, target, strDateTime, strFilesize);
-						} catch (NumberFormatException nfe) {
-							logger.error("Could not parse timestamp or filesize on line: {}", lineCounter, nfe);
-						}
-					}
-				}
-				lineCounter++;
-			}
-			if (start >= 0) {
-				start++;
-			}
-			return new long[] { start, end, lineCount };
-		} catch (IOException e) {
-			logger.error("Could not read log lines in file: {}", logFile, e);
-			return new long[] { 1, 0, 0 };
+			return new int[] { start, start + entriesCount, entriesCount };
 		}
 	}
 
@@ -504,6 +469,9 @@ public class LogManager implements BHSettingsListener {
 		} catch (IOException e) {
 			logger.error("Could not write log file: {}", file, e);
 		}
+
+		logsSQLiteDB.insertEntry(new LogEntry(pic));
+
 		for (ILogManagerListener listener : listeners) {
 			listener.logChanged();
 		}
@@ -526,23 +494,6 @@ public class LogManager implements BHSettingsListener {
 	}
 
 	/**
-	 * Detects if a directory is already in the ArrayList
-	 * 
-	 * @param dir Directory
-	 * @param dateTime Date and Time
-	 * @param dirs Directory-Array
-	 * @return Index of directory log object in list or -1 if not found
-	 */
-	private int isInList(String dir, long dateTime, List<DirectoryLogObject> dirs) {
-		for (int i = dirs.size() - 1; i >= 0; i--) {
-			if (dirs.get(i).getDirectory().equals(dir) && Math.abs(dateTime - dirs.get(i).getDateTime()) <= 86400000) {
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	/**
 	 * Reads the Directory-Log
 	 * 
 	 * If you don't want to specify a pattern for the directories
@@ -550,92 +501,30 @@ public class LogManager implements BHSettingsListener {
 	 * 
 	 * @param pattern Pattern for Dir
 	 * @param onlyExistingDirectories Flag that sets if only existing directories should be added to the list
-	 * @param progress Progress-Observer
+	 * @param max Maximum Entries
 	 * @return Directory-Log
 	 */
-	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, ProgressObserver progress) {
-		List<DirectoryLogObject> dirs = new ArrayList<>();
-
-		Path file = Paths.get(logFile);
-		if (!Files.exists(file)) {
-			return dirs;
+	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, int max) {
+		List<LogEntry> entries = logsSQLiteDB.getDirectlyLogEntries(max);
+		Stream<LogEntry> stream = entries.stream();
+		if (pattern != null) {
+			stream = stream.filter(x -> pattern.matcher(x.getTargetPath()).find());
 		}
-
-		progress.progressChanged(0, 100, 0);
-		progress.progressChanged(true);
-
-		try (InputStream in = Files.newInputStream(file);
-				CountingInputStream countIn = new CountingInputStream(in);
-				BufferedReader reader = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
-			long lFile = Files.size(file);
-			long bytesPerPercent = lFile / 100;
-			int nextPercentValue = 1;
-
-			String line;
-			Map<Path, Boolean> folderExistsMap = new HashMap<>();
-			while ((line = reader.readLine()) != null) {
-				String[] arr = line.split("\t");
-				if (arr.length >= 3) {
-					try {
-						// Get the directory
-						Path fDir = Paths.get(arr[2]).getParent();
-						String dir = fDir.toString();
-
-						// Get the date
-						long dateTime = Long.parseLong(arr[0]);
-						int index = isInList(dir, dateTime, dirs);
-						if (index > -1) {
-							dirs.get(index).setDateTime(dateTime);
-						} else {
-							/*
-							 * Wo only need to check if the directory exists
-							 * when the directory is not in the list already
-							 */
-
-							Boolean cachedExists = folderExistsMap.get(fDir);
-							boolean exists;
-							if (cachedExists != null) {
-								exists = cachedExists;
-							} else {
-								exists = Files.exists(fDir) && Files.isDirectory(fDir);
-								folderExistsMap.put(fDir, exists);
-							}
-
-							if (onlyExistingDirectories && !exists) {
-								if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
-									progress.progressChanged(nextPercentValue);
-									nextPercentValue++;
-								}
-								continue;
-							}
-							/*
-							 * Now we have to check if the pattern matches
-							 */
-							if (pattern != null) {
-								Matcher matcher = pattern.matcher(dir);
-								if (!matcher.find()) {
-									continue;
-								}
-							}
-							dirs.add(new DirectoryLogObject(dir, dateTime, exists));
-						}
-					} catch (NumberFormatException | InvalidPathException nfe) {
-						logger.error(nfe.getMessage(), nfe);
-					}
-				}
-
-				if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
-					progress.progressChanged(nextPercentValue);
-					nextPercentValue++;
-				}
+		Stream<DirectoryLogObject> dirStream = stream.map(x -> {
+			try {
+				// Get the directory
+				Path directory = Paths.get(x.getTargetPath());
+				boolean exists = Files.exists(directory);
+				return new DirectoryLogObject(x, exists);
+			} catch (InvalidPathException nfe) {
+				logger.error(nfe.getMessage(), nfe);
+				return new DirectoryLogObject(x, false);
 			}
-			return dirs;
-		} catch (IOException e) {
-			logger.error("Could not read file: {}", file, e);
-			return null;
-		} finally {
-			progress.progressChanged(false);
+		});
+		if (onlyExistingDirectories) {
+			dirStream = dirStream.filter(DirectoryLogObject::isExists);
 		}
+		return dirStream.toList();
 	}
 
 	/**

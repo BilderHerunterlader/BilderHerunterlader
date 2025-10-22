@@ -34,7 +34,7 @@ public class DirectoryLogTableModel extends DefaultTableModel {
 		data[0] = dateTime;
 		data[1] = directory;
 		data[2] = exists;
-		insertRow(0, data);
+		addRow(data);
 	}
 
 	/**

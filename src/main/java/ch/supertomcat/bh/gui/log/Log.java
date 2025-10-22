@@ -111,7 +111,7 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * Current Start Index (Index of the line in the logfile)
 	 */
-	private long currentStart = 1;
+	private int currentStart = 1;
 
 	/**
 	 * Flag if the last 100 lines of the logfiles are displayed
@@ -196,14 +196,14 @@ public class Log extends JPanel implements ILogManagerListener {
 		add(jsp, BorderLayout.CENTER);
 
 		btnFirst.addActionListener(e -> {
-			updateIndexAndStatus(logManager.readLogs(1, model));
+			updateIndexAndStatus(logManager.readLogs(0, model));
 			last = false;
 		});
 		btnPrevious.addActionListener(e -> {
 			if (currentStart > 100) {
 				updateIndexAndStatus(logManager.readLogs(currentStart - 100, model));
 			} else {
-				updateIndexAndStatus(logManager.readLogs(1, model));
+				updateIndexAndStatus(logManager.readLogs(0, model));
 			}
 			last = false;
 		});
@@ -332,13 +332,13 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * @param vals Values
 	 */
-	private void updateIndexAndStatus(long[] vals) {
+	private void updateIndexAndStatus(int[] vals) {
 		if (vals.length != 3) {
 			return;
 		}
-		long localCurrentStart = vals[0];
-		long end = vals[1];
-		long lineCount = vals[2];
+		int localCurrentStart = vals[0];
+		int end = vals[1];
+		int lineCount = vals[2];
 		this.currentStart = localCurrentStart;
 		if (lineCount == 0) {
 			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowNothing"));
@@ -397,14 +397,6 @@ public class Log extends JPanel implements ILogManagerListener {
 
 	@Override
 	public void currentLogFileChanged() {
-		if (EventQueue.isDispatchThread()) {
-			updateIndexAndStatus(logManager.readLogs(-1, model));
-			last = true;
-		} else {
-			EventQueue.invokeLater(() -> {
-				updateIndexAndStatus(logManager.readLogs(-1, model));
-				last = true;
-			});
-		}
+		// Nothing to do
 	}
 }

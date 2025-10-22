@@ -1,7 +1,6 @@
 package ch.supertomcat.bh.gui.log;
 
 import java.awt.BorderLayout;
-import java.awt.EventQueue;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.ItemEvent;
@@ -44,8 +43,6 @@ import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.gui.progress.IProgressObserver;
-import ch.supertomcat.supertomcatutils.gui.progress.ProgressObserver;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRowRenderer;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
@@ -351,19 +348,13 @@ public class DirectoryLog extends JPanel {
 						pattern = null;
 					}
 				}
-				ProgressObserver progress = new ProgressObserver();
-				DirectoryLogProgressObserver progressListener = new DirectoryLogProgressObserver();
-				progress.addProgressListener(progressListener);
-				List<DirectoryLogObject> dirs = logManager.readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), progress);
+
+				int maxDirs = settingsManager.getGUISettings().getDirectoryLogDirCount();
+				List<DirectoryLogObject> dirs = logManager.readDirectoryLog(pattern, chkFilterOnlyExistingDirs.isSelected(), maxDirs);
 				if (dirs != null) {
-
-					int maxDirs = settingsManager.getGUISettings().getDirectoryLogDirCount();
-
-					int maxSize = dirs.size() < maxDirs ? dirs.size() : maxDirs;
-
-					for (int i = dirs.size() - maxSize; i < dirs.size(); i++) {
-						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(dirs.get(i).getDateTime()), ZoneId.systemDefault());
-						model.addRow(dateTime.format(DATE_FORMAT), dirs.get(i).getDirectory(), dirs.get(i).isExists());
+					for (DirectoryLogObject directorLogEntry : dirs) {
+						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(directorLogEntry.getDateTime()), ZoneId.systemDefault());
+						model.addRow(dateTime.format(DATE_FORMAT), directorLogEntry.getDirectory(), directorLogEntry.isExists());
 					}
 					String status = Localization.getString("OnlyTheLastFilesAreShownDirectoryLog");
 					status = DIR_COUNT_REPLACE_PATTERN.matcher(status).replaceAll(String.valueOf(maxDirs));
@@ -371,72 +362,9 @@ public class DirectoryLog extends JPanel {
 				} else {
 					lblStatus.setText(Localization.getString("DirectoryLogLoadingFailed"));
 				}
-				progress.removeProgressListener(progressListener);
 			}
 		});
 		t.setPriority(Thread.MIN_PRIORITY);
 		t.start();
-	}
-
-	/**
-	 * Progress Observer for reading log
-	 */
-	private class DirectoryLogProgressObserver implements IProgressObserver {
-		@Override
-		public void progressIncreased() {
-			// Nothing to do
-		}
-
-		@Override
-		public void progressChanged(int val) {
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					pgStatus.setValue(val);
-				}
-			});
-		}
-
-		@Override
-		public void progressChanged(int min, int max, int val) {
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					pgStatus.setMinimum(min);
-					pgStatus.setMaximum(max);
-					pgStatus.setValue(val);
-				}
-			});
-		}
-
-		@Override
-		public void progressChanged(String text) {
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					pgStatus.setString(text);
-				}
-			});
-		}
-
-		@Override
-		public void progressChanged(boolean visible) {
-			EventQueue.invokeLater(new Runnable() {
-				@Override
-				public void run() {
-					pgStatus.setVisible(visible);
-				}
-			});
-		}
-
-		@Override
-		public void progressModeChanged(boolean indeterminate) {
-			// Nothing to do
-		}
-
-		@Override
-		public void progressCompleted() {
-			// Nothing to do
-		}
 	}
 }
