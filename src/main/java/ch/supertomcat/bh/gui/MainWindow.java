@@ -10,10 +10,10 @@ import java.awt.dnd.DropTargetAdapter;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStreamReader;
@@ -28,8 +28,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.WindowConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +61,7 @@ import ch.supertomcat.supertomcatutils.gui.svg.jsvg.JSVGAnimatedIconLabel;
 /**
  * Main-Window
  */
-public class MainWindow extends JFrame implements ChangeListener, ComponentListener, WindowListener, KeywordManagerListener, MouseListener, MainWindowAccess {
+public class MainWindow extends JFrame implements MainWindowAccess {
 	/**
 	 * UID
 	 */
@@ -139,16 +137,6 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	private MainProgressPopup mainProgressPopup = new MainProgressPopup();
 
 	/**
-	 * Settings Manager
-	 */
-	private final SettingsManager settingsManager;
-
-	/**
-	 * GUI Event
-	 */
-	private final GuiEvent guiEvent;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param settingsManager Settings Manager
@@ -164,8 +152,6 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	 */
 	public MainWindow(SettingsManager settingsManager, LogManager logManager, QueueManager queueManager, DownloadQueueManager downloadQueueManager, KeywordManager keywordManager,
 			ProxyManager proxyManger, CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
-		this.settingsManager = settingsManager;
-		this.guiEvent = guiEvent;
 		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, guiEvent);
 		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, clipboardObserver);
 		this.log = new Log(logManager, downloadQueueManager, this, settingsManager, clipboardObserver);
@@ -229,15 +215,50 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 		pnlMessage.setLayout(new BorderLayout());
 		pnlMessage.add(lblMessage, BorderLayout.WEST);
 		pnlMessage.add(lblProgress, BorderLayout.EAST);
-		lblProgress.addMouseListener(this);
+		lblProgress.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				if (e.getSource() instanceof JComponent comp) {
+					Dimension d = mainProgressPopup.getPreferredSize();
+					int w = d.width;
+					int h = d.height;
+					if (w < 300) {
+						w = 300;
+					}
+					int x = getX() + getInsets().left + pnlMessage.getX() + comp.getX() + comp.getWidth() - w;
+					int y = getY() + getInsets().top + mainMenuBar.getJMenuBar().getHeight() + pnlMessage.getY() + comp.getY() - h;
+					mainProgressPopup.setBounds(x, y, w, h);
+					mainProgressPopup.setVisible(true);
+				}
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				mainProgressPopup.setVisible(false);
+			}
+		});
 
 		getContentPane().setLayout(new BorderLayout());
 		getContentPane().add(tab, BorderLayout.CENTER);
 		getContentPane().add(pnlMessage, BorderLayout.SOUTH);
 
-		keywordManager.addListener(this);
+		keywordManager.addListener(new KeywordManagerListener() {
 
-		tab.addChangeListener(this);
+			@Override
+			public void keywordsChanged() {
+				keywords.reloadKeywords();
+			}
+		});
+
+		tab.addChangeListener(e -> {
+			String tabTitle = tab.getTitleAt(tab.getSelectedIndex());
+			this.setTitle(windowTitlePrefix + tabTitle + windowTitleSuffix);
+			if (tabTitle.equals(Localization.getString("Log"))) {
+				log.reloadLogs();
+			} else if (tabTitle.equals(Localization.getString("DirectoryLog"))) {
+				directoryLog.init();
+			}
+		});
 		this.setTitle(windowTitlePrefix + Localization.getString("Queue") + windowTitleSuffix);
 
 		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
@@ -250,89 +271,48 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 			setLocationRelativeTo(null);
 		}
 
-		addComponentListener(this);
-		addWindowListener(this);
-	}
-
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		String tabTitle = tab.getTitleAt(tab.getSelectedIndex());
-		this.setTitle(windowTitlePrefix + tabTitle + windowTitleSuffix);
-		if (tabTitle.equals(Localization.getString("Log"))) {
-			log.reloadLogs();
-		} else if (tabTitle.equals(Localization.getString("DirectoryLog"))) {
-			directoryLog.init();
-		}
-	}
-
-	@Override
-	public void componentHidden(ComponentEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void componentMoved(ComponentEvent e) {
-		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		mainWindowSettings.setX(MainWindow.this.getX());
-		mainWindowSettings.setY(MainWindow.this.getY());
-		settingsManager.writeSettings(true);
-	}
-
-	@Override
-	public void componentResized(ComponentEvent e) {
-		WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
-		mainWindowSettings.setWidth(MainWindow.this.getWidth());
-		mainWindowSettings.setHeight(MainWindow.this.getHeight());
-		mainWindowSettings.setState(MainWindow.this.getExtendedState());
-		settingsManager.writeSettings(true);
-	}
-
-	@Override
-	public void componentShown(ComponentEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowClosed(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowClosing(WindowEvent e) {
-		if (!SystemTrayTool.isTraySupported()) {
-			if (JOptionPane.showConfirmDialog(this, Localization.getString("ReallyExit"), Localization.getString("Exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
-				return;
+		addComponentListener(new ComponentListener() {
+			@Override
+			public void componentHidden(ComponentEvent e) {
+				// Nothing to do
 			}
-			// If no systemtray exit application
-			guiEvent.exitApp(false, false);
-		} else {
-			setVisible(false);
-		}
-	}
 
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// Nothing to do
-	}
+			@Override
+			public void componentMoved(ComponentEvent e) {
+				WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+				mainWindowSettings.setX(MainWindow.this.getX());
+				mainWindowSettings.setY(MainWindow.this.getY());
+				settingsManager.writeSettings(true);
+			}
 
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// Nothing to do
-	}
+			@Override
+			public void componentResized(ComponentEvent e) {
+				WindowSettings mainWindowSettings = settingsManager.getGUISettings().getMainWindow();
+				mainWindowSettings.setWidth(MainWindow.this.getWidth());
+				mainWindowSettings.setHeight(MainWindow.this.getHeight());
+				mainWindowSettings.setState(MainWindow.this.getExtendedState());
+				settingsManager.writeSettings(true);
+			}
 
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// Nothing to do
+			@Override
+			public void componentShown(ComponentEvent e) {
+				// Nothing to do
+			}
+		});
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				if (!SystemTrayTool.isTraySupported()) {
+					if (JOptionPane.showConfirmDialog(MainWindow.this, Localization.getString("ReallyExit"), Localization.getString("Exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
+						return;
+					}
+					// If no systemtray exit application
+					guiEvent.exitApp(false, false);
+				} else {
+					setVisible(false);
+				}
+			}
+		});
 	}
 
 	@Override
@@ -362,49 +342,8 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 	}
 
 	@Override
-	public void keywordsChanged() {
-		keywords.reloadKeywords();
-	}
-
-	@Override
 	public void clearKeywordFilters() {
 		keywords.clearFilters();
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		if (e.getSource() instanceof JComponent comp) {
-			Dimension d = mainProgressPopup.getPreferredSize();
-			int w = d.width;
-			int h = d.height;
-			if (w < 300) {
-				w = 300;
-			}
-			int x = this.getX() + this.getInsets().left + pnlMessage.getX() + comp.getX() + comp.getWidth() - w;
-			int y = this.getY() + this.getInsets().top + mainMenuBar.getJMenuBar().getHeight() + pnlMessage.getY() + comp.getY() - h;
-			mainProgressPopup.setBounds(x, y, w, h);
-			mainProgressPopup.setVisible(true);
-		}
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		mainProgressPopup.setVisible(false);
 	}
 
 	@Override

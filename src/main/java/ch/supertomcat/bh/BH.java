@@ -245,8 +245,8 @@ public abstract class BH {
 		Localization.init("ch.supertomcat.bh.BH", language, country);
 
 		// Initalized too fast as it would be worth to execute parallel
-		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		cookieManager = new CookieManager(settingsManager);
+		ProxyManager proxyManager = new ProxyManager(settingsManager, cookieManager);
 		LogManager logManager = new LogManager(settingsManager);
 
 		int threadCount = settingsManager.getSettings().getThreadCount();

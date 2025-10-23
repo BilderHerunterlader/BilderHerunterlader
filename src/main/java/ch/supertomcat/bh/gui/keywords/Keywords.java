@@ -4,12 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.PatternSyntaxException;
@@ -60,7 +58,7 @@ import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultBooleanColorRow
 /**
  * Panel containing the Keywords-Table
  */
-public class Keywords extends JPanel implements ActionListener, MouseListener {
+public class Keywords extends JPanel {
 	/**
 	 * UID
 	 */
@@ -252,6 +250,31 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	private final SettingsManager settingsManager;
 
 	/**
+	 * Mouse Listener
+	 */
+	private final MouseAdapter mouseListener = new MouseAdapter() {
+		@Override
+		public void mousePressed(MouseEvent e) {
+			actionMousePressed(e);
+		}
+
+		@Override
+		public void mouseReleased(MouseEvent e) {
+			actionMousePressed(e);
+		}
+
+		private void actionMousePressed(MouseEvent e) {
+			if (running) {
+				return;
+			}
+
+			if (e.getSource() == jtKeywords && e.isPopupTrigger() && jtKeywords.getSelectedRowCount() > 0) {
+				showTablePopupMenu(e);
+			}
+		}
+	};
+
+	/**
 	 * Constructor
 	 * 
 	 * @param parentWindow Parent Window
@@ -313,12 +336,12 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		JScrollPane jsp = new JScrollPane(jtKeywords);
 		add(jsp, BorderLayout.CENTER);
 
-		btnNew.addActionListener(this);
-		btnEdit.addActionListener(this);
-		btnDelete.addActionListener(this);
+		btnNew.addActionListener(e -> actionNew());
+		btnEdit.addActionListener(e -> actionEdit());
+		btnDelete.addActionListener(e -> actionDelete());
 
-		btnImport.addActionListener(this);
-		btnExport.addActionListener(this);
+		btnImport.addActionListener(e -> actionImport());
+		btnExport.addActionListener(e -> actionExport());
 
 		pnlButtons.add(btnNew);
 		pnlButtons.add(btnEdit);
@@ -375,10 +398,10 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		popupMenu.add(menuItemTitleToDirectory);
 		popupMenu.add(menuItemTitleToRelativeDirectory);
 		popupMenu.add(menuItemAbsoluteToRelativeDirectory);
-		menuItemTitleToKeyword.addActionListener(this);
-		menuItemTitleToDirectory.addActionListener(this);
-		menuItemTitleToRelativeDirectory.addActionListener(this);
-		menuItemAbsoluteToRelativeDirectory.addActionListener(this);
+		menuItemTitleToKeyword.addActionListener(e -> actionTitleToKeyword());
+		menuItemTitleToDirectory.addActionListener(e -> actionTitleToDirectory());
+		menuItemTitleToRelativeDirectory.addActionListener(e -> actionTitleToRelativeDirectory());
+		menuItemAbsoluteToRelativeDirectory.addActionListener(e -> actionAbsoluteToRelativeDirectory());
 
 		List<Keyword> keywords = keywordManager.getKeywords();
 		for (Keyword k : keywords) {
@@ -391,11 +414,11 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		sorter.sort();
 
 		lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
-		jtKeywords.addMouseListener(this);
+		jtKeywords.addMouseListener(mouseListener);
 		jtKeywords.setDefaultRenderer(Object.class, new KeywordsStringColorRowRenderer());
 		jtKeywords.getColumn("RelativPath").setCellRenderer(new DefaultBooleanColorRowRenderer());
 		updateTableSortOrdersFromSettingsManager();
-		jtKeywords.getTableHeader().addMouseListener(this);
+		jtKeywords.getTableHeader().addMouseListener(mouseListener);
 
 		sorter.addRowSorterListener(new RowSorterListener() {
 			@Override
@@ -552,7 +575,7 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 	private void enableComponents(boolean b) {
 		if (!b) {
 			running = true;
-			jtKeywords.removeMouseListener(this);
+			jtKeywords.removeMouseListener(mouseListener);
 		}
 		txtTitle.setEnabled(b);
 		txtKeywords.setEditable(b);
@@ -565,182 +588,184 @@ public class Keywords extends JPanel implements ActionListener, MouseListener {
 		btnExport.setEnabled(b);
 		jtKeywords.setEnabled(b);
 		if (b) {
-			jtKeywords.addMouseListener(this);
+			jtKeywords.addMouseListener(mouseListener);
 			running = false;
 		}
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
+	private void actionNew() {
 		if (running) {
 			return;
 		}
-		if (e.getSource() == btnNew) {
-			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Add"), "", "", settingsManager.getSavePath(), true, "", settingsManager);
-			if (dialog != null) {
-				keywordManager.addKeyword(dialog.getKeyword());
-			}
-		} else if (e.getSource() == btnDelete) {
-			int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
-					.getTangoIcon("status/dialog-warning.png", 32));
-			if (retval == JOptionPane.NO_OPTION) {
-				return;
-			}
-
-			enableComponents(false);
-
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						ProgressObserver pg = new ProgressObserver();
-						mainWindowAccess.addProgressObserver(pg);
-						pg.progressChanged(Localization.getString("DeleteEntries"));
-						pg.progressModeChanged(true);
-
-						int[] selectedRows = jtKeywords.getSelectedRows();
-						int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtKeywords, selectedRows, true);
-
-						keywordManager.removeKeywords(selectedModelRows);
-
-						lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
-						mainWindowAccess.removeProgressObserver(pg);
-						mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
-					} finally {
-						enableComponents(true);
-					}
-				}
-			});
-			t.setName("DeleteKeywordsThread-" + t.threadId());
-			t.start();
-		} else if (e.getSource() == btnEdit) {
-			if (jtKeywords.getSelectedRowCount() < 1) {
-				return;
-			}
-			if (jtKeywords.getSelectedRowCount() > 1) {
-				JOptionPane.showMessageDialog(parentWindow, Localization.getString("NoMultipleRowEdit"), "Edit", JOptionPane.INFORMATION_MESSAGE);
-				return;
-			}
-			int row = jtKeywords.getSelectedRow();
-			row = jtKeywords.convertRowIndexToModel(row);
-			Keyword k = keywordManager.getKeywordByIndex(row);
-			KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k
-					.getRelativeDownloadPath(), settingsManager);
-			if (dialog != null) {
-				k.setTitle(dialog.getKeywordTitle());
-				k.setKeywords(dialog.getKeywords());
-				k.setDownloadPath(dialog.getPath());
-				k.setRelativePath(dialog.isRelativePathSelected());
-				k.setRelativeDownloadPath(dialog.getRelativePath());
-				keywordManager.updateKeyword(k);
-			}
-		} else if (e.getSource() == btnImport) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					enableComponents(false);
-					new ImportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).importKeywords();
-					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
-					enableComponents(true);
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == btnExport) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					enableComponents(false);
-					new ExportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).exportKeywords();
-					enableComponents(true);
-				}
-			});
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == menuItemTitleToKeyword) {
-			enableComponents(false);
-			int[] s = jtKeywords.getSelectedRows();
-			String val = "";
-			for (int i = 0; i < s.length; i++) {
-				val = (String)jtKeywords.getValueAt(s[i], 0);
-				jtKeywords.setValueAt(val, s[i], 1);
-			}
-			enableComponents(true);
-		} else if (e.getSource() == menuItemTitleToDirectory) {
-			enableComponents(false);
-			int[] s = jtKeywords.getSelectedRows();
-			String val = "";
-			String path = settingsManager.getSavePath();
-			for (int i = 0; i < s.length; i++) {
-				val = path + (String)jtKeywords.getValueAt(s[i], 0);
-				jtKeywords.setValueAt(val, s[i], 2);
-			}
-			enableComponents(true);
-		} else if (e.getSource() == menuItemTitleToRelativeDirectory) {
-			enableComponents(false);
-			int[] s = jtKeywords.getSelectedRows();
-			String val = "";
-			for (int i = 0; i < s.length; i++) {
-				val = (String)jtKeywords.getValueAt(s[i], 0);
-				jtKeywords.setValueAt(val, s[i], 3);
-			}
-			enableComponents(true);
-		} else if (e.getSource() == menuItemAbsoluteToRelativeDirectory) {
-			enableComponents(false);
-			int[] s = jtKeywords.getSelectedRows();
-			String val = "";
-			for (int i = 0; i < s.length; i++) {
-				val = (String)jtKeywords.getValueAt(s[i], 2);
-				String dlFolder = settingsManager.getSavePath();
-				int pos = val.indexOf(dlFolder);
-				if (pos == 0) {
-					val = val.substring(dlFolder.length());
-				}
-				val = val.replace(":", "");
-				jtKeywords.setValueAt(val, s[i], 3);
-			}
-			enableComponents(true);
+		KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Add"), "", "", settingsManager.getSavePath(), true, "", settingsManager);
+		if (dialog != null) {
+			keywordManager.addKeyword(dialog.getKeyword());
 		}
+	}
+
+	private void actionDelete() {
+		if (running) {
+			return;
+		}
+		int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
+				.getTangoIcon("status/dialog-warning.png", 32));
+		if (retval == JOptionPane.NO_OPTION) {
+			return;
+		}
+
+		enableComponents(false);
+
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					ProgressObserver pg = new ProgressObserver();
+					mainWindowAccess.addProgressObserver(pg);
+					pg.progressChanged(Localization.getString("DeleteEntries"));
+					pg.progressModeChanged(true);
+
+					int[] selectedRows = jtKeywords.getSelectedRows();
+					int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtKeywords, selectedRows, true);
+
+					keywordManager.removeKeywords(selectedModelRows);
+
+					lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+					mainWindowAccess.removeProgressObserver(pg);
+					mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
+				} finally {
+					enableComponents(true);
+				}
+			}
+		});
+		t.setName("DeleteKeywordsThread-" + t.threadId());
+		t.start();
+	}
+
+	private void actionEdit() {
+		if (running) {
+			return;
+		}
+		if (jtKeywords.getSelectedRowCount() < 1) {
+			return;
+		}
+		if (jtKeywords.getSelectedRowCount() > 1) {
+			JOptionPane.showMessageDialog(parentWindow, Localization.getString("NoMultipleRowEdit"), "Edit", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
+		int row = jtKeywords.getSelectedRow();
+		row = jtKeywords.convertRowIndexToModel(row);
+		Keyword k = keywordManager.getKeywordByIndex(row);
+		KeywordEditDialog dialog = KeywordEditDialog.openKeywordEditDialog(parentWindow, Localization.getString("Edit"), k.getTitle(), k.getKeywords(), k.getDownloadPath(), k.isRelativePath(), k
+				.getRelativeDownloadPath(), settingsManager);
+		if (dialog != null) {
+			k.setTitle(dialog.getKeywordTitle());
+			k.setKeywords(dialog.getKeywords());
+			k.setDownloadPath(dialog.getPath());
+			k.setRelativePath(dialog.isRelativePathSelected());
+			k.setRelativeDownloadPath(dialog.getRelativePath());
+			keywordManager.updateKeyword(k);
+		}
+	}
+
+	private void actionImport() {
+		if (running) {
+			return;
+		}
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				enableComponents(false);
+				new ImportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).importKeywords();
+				lblInfo.setText(Localization.getString("Count") + ": " + jtKeywords.getRowCount());
+				enableComponents(true);
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
+	private void actionExport() {
+		if (running) {
+			return;
+		}
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				enableComponents(false);
+				new ExportKeywords(parentWindow, mainWindowAccess, keywordManager, settingsManager).exportKeywords();
+				enableComponents(true);
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
+	private void actionTitleToKeyword() {
+		if (running) {
+			return;
+		}
+		enableComponents(false);
+		int[] s = jtKeywords.getSelectedRows();
+		String val = "";
+		for (int i = 0; i < s.length; i++) {
+			val = (String)jtKeywords.getValueAt(s[i], 0);
+			jtKeywords.setValueAt(val, s[i], 1);
+		}
+		enableComponents(true);
+	}
+
+	private void actionTitleToDirectory() {
+		if (running) {
+			return;
+		}
+		enableComponents(false);
+		int[] s = jtKeywords.getSelectedRows();
+		String val = "";
+		String path = settingsManager.getSavePath();
+		for (int i = 0; i < s.length; i++) {
+			val = path + (String)jtKeywords.getValueAt(s[i], 0);
+			jtKeywords.setValueAt(val, s[i], 2);
+		}
+		enableComponents(true);
+	}
+
+	private void actionTitleToRelativeDirectory() {
+		if (running) {
+			return;
+		}
+		enableComponents(false);
+		int[] s = jtKeywords.getSelectedRows();
+		String val = "";
+		for (int i = 0; i < s.length; i++) {
+			val = (String)jtKeywords.getValueAt(s[i], 0);
+			jtKeywords.setValueAt(val, s[i], 3);
+		}
+		enableComponents(true);
+	}
+
+	private void actionAbsoluteToRelativeDirectory() {
+		if (running) {
+			return;
+		}
+		enableComponents(false);
+		int[] s = jtKeywords.getSelectedRows();
+		String val = "";
+		for (int i = 0; i < s.length; i++) {
+			val = (String)jtKeywords.getValueAt(s[i], 2);
+			String dlFolder = settingsManager.getSavePath();
+			int pos = val.indexOf(dlFolder);
+			if (pos == 0) {
+				val = val.substring(dlFolder.length());
+			}
+			val = val.replace(":", "");
+			jtKeywords.setValueAt(val, s[i], 3);
+		}
+		enableComponents(true);
 	}
 
 	private void showTablePopupMenu(MouseEvent e) {
 		SwingUtilities.updateComponentTreeUI(popupMenu);
 		popupMenu.show(e.getComponent(), e.getX(), e.getY());
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		if (running) {
-			return;
-		}
-		if (e.getSource() == jtKeywords && e.isPopupTrigger() && jtKeywords.getSelectedRowCount() > 0) {
-			showTablePopupMenu(e);
-		}
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		if (running) {
-			return;
-		}
-		if (e.getSource() == jtKeywords && e.isPopupTrigger() && jtKeywords.getSelectedRowCount() > 0) {
-			showTablePopupMenu(e);
-		}
 	}
 
 	/**

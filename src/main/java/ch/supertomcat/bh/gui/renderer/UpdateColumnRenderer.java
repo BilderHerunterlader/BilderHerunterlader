@@ -35,12 +35,12 @@ public class UpdateColumnRenderer extends DefaultStringColorRowRenderer implemen
 	 */
 	public UpdateColumnRenderer() {
 		setOpaque(true);
-		setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
 	@Override
 	public void prepareValueText(JLabel label, JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
 		if (value instanceof UpdateActionType updateActionType) {
+			setHorizontalAlignment(SwingConstants.CENTER);
 			label.setText("");
 			label.setToolTipText("");
 			switch (updateActionType) {
@@ -59,6 +59,7 @@ public class UpdateColumnRenderer extends DefaultStringColorRowRenderer implemen
 					break;
 			}
 		} else if (value instanceof UpdateType updateType) {
+			setHorizontalAlignment(SwingConstants.LEFT);
 			label.setText(updateType.getName());
 			label.setToolTipText(updateType.getName());
 			switch (updateType) {

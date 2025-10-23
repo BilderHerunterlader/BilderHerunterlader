@@ -377,14 +377,14 @@ public class Queue extends JPanel {
 		jtQueue.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mousePressed(MouseEvent e) {
-				if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
+				if (e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
 					showTablePopupMenu(e);
 				}
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				if (e.getSource() == jtQueue && e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
+				if (e.isPopupTrigger() && jtQueue.getSelectedRowCount() > 0) {
 					showTablePopupMenu(e);
 				}
 			}

@@ -2,8 +2,6 @@ package ch.supertomcat.bh.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.Iterator;
 
 import javax.swing.JButton;
@@ -31,7 +29,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 /**
  * Rule-Pipeline-Panel
  */
-public class RegexReplacePanel extends JPanel implements ActionListener {
+public class RegexReplacePanel extends JPanel {
 	/**
 	 * UID
 	 */
@@ -51,11 +49,6 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	 * TableModel
 	 */
 	private RulePipelineURLRegexTableModel model = new RulePipelineURLRegexTableModel();
-
-	/**
-	 * pipe
-	 */
-	private RegexReplacePipeline pipe = null;
 
 	/**
 	 * Button
@@ -94,8 +87,6 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 	 * @param settingsManager Settings Manager
 	 */
 	public RegexReplacePanel(RegexReplacePipeline pipe, SettingsManager settingsManager) {
-		super();
-		this.pipe = pipe;
 		setLayout(new BorderLayout());
 
 		table = new JTable(model);
@@ -156,20 +147,11 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 		SpringUtilities.makeCompactGrid(pnlButtons, 5, 1, 0, 0, 5, 5);
 		add(pnlButtons, BorderLayout.EAST);
 
-		btnNew.addActionListener(this);
-		btnEdit.addActionListener(this);
-		btnUp.addActionListener(this);
-		btnDown.addActionListener(this);
-		btnDelete.addActionListener(this);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		JDialog parent = null;
-		if (this.getTopLevelAncestor() instanceof JDialog dialog) {
-			parent = dialog;
-		}
-		if (e.getSource() == btnNew) {
+		btnNew.addActionListener(e -> {
+			JDialog parent = null;
+			if (this.getTopLevelAncestor() instanceof JDialog dialog) {
+				parent = dialog;
+			}
 			RegexReplace rrre = new RegexReplace();
 			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
 			if (rme.getCanceled()) {
@@ -177,10 +159,15 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 			}
 			model.addRow(rrre.getSearch(), rrre.getReplace());
 			pipe.addRegExp(rrre);
-		} else if (e.getSource() == btnEdit) {
+		});
+		btnEdit.addActionListener(e -> {
 			int row = table.getSelectedRow();
 			if (row < 0) {
 				return;
+			}
+			JDialog parent = null;
+			if (this.getTopLevelAncestor() instanceof JDialog dialog) {
+				parent = dialog;
 			}
 			RegexReplace rrre = pipe.getRegexp(row);
 			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
@@ -189,28 +176,31 @@ public class RegexReplacePanel extends JPanel implements ActionListener {
 			}
 			model.setValueAt(rrre.getSearch(), row, 0);
 			model.setValueAt(rrre.getReplace(), row, 1);
-		} else if (e.getSource() == btnDelete) {
-			int row = table.getSelectedRow();
-			if (row < 0) {
-				return;
-			}
-			model.removeRow(row);
-			pipe.removeRegExp(row);
-		} else if (e.getSource() == btnUp) {
+		});
+		btnUp.addActionListener(e -> {
 			int row = table.getSelectedRow();
 			if (row > 0) {
 				pipe.swapRegExp(row, row - 1);
 				model.moveRow(row, row, row - 1);
 				table.setRowSelectionInterval(row - 1, row - 1);
 			}
-		} else if (e.getSource() == btnDown) {
+		});
+		btnDown.addActionListener(e -> {
 			int row = table.getSelectedRow();
 			if (row > -1 && row < model.getRowCount() - 1) {
 				pipe.swapRegExp(row, row + 1);
 				model.moveRow(row, row, row + 1);
 				table.setRowSelectionInterval(row + 1, row + 1);
 			}
-		}
+		});
+		btnDelete.addActionListener(e -> {
+			int row = table.getSelectedRow();
+			if (row < 0) {
+				return;
+			}
+			model.removeRow(row);
+			pipe.removeRegExp(row);
+		});
 	}
 
 	/**

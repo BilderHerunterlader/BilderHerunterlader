@@ -3,8 +3,6 @@ package ch.supertomcat.bh.gui.rules.editor;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -38,7 +36,7 @@ import ch.supertomcat.supertomcatutils.gui.layout.GridBagLayoutUtil;
 /**
  * Rule-Test-Dialog
  */
-public class RuleTest extends JDialog implements ActionListener {
+public class RuleTest extends JDialog {
 	/**
 	 * UID
 	 */
@@ -247,73 +245,12 @@ public class RuleTest extends JDialog implements ActionListener {
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtResultFilenameDownloadSelection);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtResultFilename);
 
-		btnTest.addActionListener(this);
-		btnClose.addActionListener(this);
+		btnTest.addActionListener(e -> executeTest());
+		btnClose.addActionListener(e -> dispose());
 		pack();
 		setLocationRelativeTo(owner);
 		setModal(true);
 		txtContainer.requestFocus();
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnClose) {
-			this.dispose();
-		} else if (e.getSource() == btnTest) {
-			txtMessage.setText("");
-			if (!rule.getPipelines().isEmpty() && rule.getPipelines().get(0) instanceof RulePipelineURLRegex) {
-				RulePipelineURLRegex urlRegexPipeline = (RulePipelineURLRegex)rule.getPipelines().get(0);
-				if (urlRegexPipeline.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL && urlRegexPipeline.getDefinition().getUrlMode() == URLMode.THUMBNAIL_URL
-						&& txtThumbnail.getText().isEmpty()) {
-					txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
-					return;
-				}
-			}
-			if (!txtContainer.getText().matches(rule.getDefinition().getUrlPattern())) {
-				txtMessage.setText(Localization.getString("ContainerURLNotMatch"));
-				return;
-			}
-			Pic p = new Pic(txtContainer.getText(), "", "");
-			p.setThumb(txtThumbnail.getText());
-			final URLParseObject upo = new URLParseObject(txtContainer.getText(), txtThumbnail.getText(), p);
-
-			BasicCookieStore cookieStore = new BasicCookieStore();
-			HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
-
-			upo.addInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, cookieStore);
-			upo.addInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, context);
-
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						String[] result = rule.getURLAndFilename(upo, true);
-						txtResultURL.setText(result[0]);
-						txtResultFilename.setText(result[1]);
-					} catch (HostException he) {
-						txtResultURL.setText(he.getMessage());
-						txtResultFilename.setText("");
-						logger.error("Could not get URL and filename", he);
-					}
-
-					RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo(URLParseObject.RULE_TRACE_INFO);
-					String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL(), ruleTraceInfo);
-					txtResultFilenameDownloadSelection.setText(resultFilenameDownloadSelection);
-				}
-			});
-			t.start();
-			try {
-				t.join();
-			} catch (InterruptedException ex) {
-				// Nothing to do
-			}
-
-			setHtmlSourceCode(upo, "PageSourceCodeLast", txtResultPageSourceCodeLast);
-			setHtmlSourceCode(upo, "PageSourceCodeFirst", txtResultPageSourceCodeFirst);
-			setHtmlSourceCode(upo, "PageSourceCodeFromFirstURL", txtResultPageSourceCodeFromFirstURL);
-			setHtmlSourceCode(upo, "PageSourceCodeFilename", txtResultPageSourceCodeFilename);
-			setRuleTraceInfo(upo, txtRuleTraceInfo);
-		}
 	}
 
 	private void setHtmlSourceCode(URLParseObject upo, String upoInfoKey, JTextArea txt) {
@@ -332,5 +269,61 @@ public class RuleTest extends JDialog implements ActionListener {
 		} else {
 			txt.setText("Not Available");
 		}
+	}
+
+	private void executeTest() {
+		txtMessage.setText("");
+		if (!rule.getPipelines().isEmpty() && rule.getPipelines().get(0) instanceof RulePipelineURLRegex) {
+			RulePipelineURLRegex urlRegexPipeline = (RulePipelineURLRegex)rule.getPipelines().get(0);
+			if (urlRegexPipeline.getDefinition().getMode() == URLRegexPipelineMode.CONTAINER_OR_THUMBNAIL_URL && urlRegexPipeline.getDefinition().getUrlMode() == URLMode.THUMBNAIL_URL
+					&& txtThumbnail.getText().isEmpty()) {
+				txtMessage.setText(Localization.getString("ThumbnailURLMissing"));
+				return;
+			}
+		}
+		if (!txtContainer.getText().matches(rule.getDefinition().getUrlPattern())) {
+			txtMessage.setText(Localization.getString("ContainerURLNotMatch"));
+			return;
+		}
+		Pic p = new Pic(txtContainer.getText(), "", "");
+		p.setThumb(txtThumbnail.getText());
+		final URLParseObject upo = new URLParseObject(txtContainer.getText(), txtThumbnail.getText(), p);
+
+		BasicCookieStore cookieStore = new BasicCookieStore();
+		HttpClientContext context = ContextBuilder.create().useCookieStore(cookieStore).build();
+
+		upo.addInfo(URLParseObject.DOWNLOADER_HTTP_COOKIE_STORE, cookieStore);
+		upo.addInfo(URLParseObject.DOWNLOADER_HTTP_CONTEXT, context);
+
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					String[] result = rule.getURLAndFilename(upo, true);
+					txtResultURL.setText(result[0]);
+					txtResultFilename.setText(result[1]);
+				} catch (HostException he) {
+					txtResultURL.setText(he.getMessage());
+					txtResultFilename.setText("");
+					logger.error("Could not get URL and filename", he);
+				}
+
+				RuleTraceInfo ruleTraceInfo = (RuleTraceInfo)upo.getInfo(URLParseObject.RULE_TRACE_INFO);
+				String resultFilenameDownloadSelection = rule.getFilename(upo.getContainerURL(), ruleTraceInfo);
+				txtResultFilenameDownloadSelection.setText(resultFilenameDownloadSelection);
+			}
+		});
+		t.start();
+		try {
+			t.join();
+		} catch (InterruptedException ex) {
+			// Nothing to do
+		}
+
+		setHtmlSourceCode(upo, "PageSourceCodeLast", txtResultPageSourceCodeLast);
+		setHtmlSourceCode(upo, "PageSourceCodeFirst", txtResultPageSourceCodeFirst);
+		setHtmlSourceCode(upo, "PageSourceCodeFromFirstURL", txtResultPageSourceCodeFromFirstURL);
+		setHtmlSourceCode(upo, "PageSourceCodeFilename", txtResultPageSourceCodeFilename);
+		setRuleTraceInfo(upo, txtRuleTraceInfo);
 	}
 }

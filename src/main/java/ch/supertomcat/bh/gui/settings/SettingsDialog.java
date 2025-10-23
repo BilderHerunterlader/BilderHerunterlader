@@ -6,15 +6,11 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
+import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -43,7 +39,6 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
@@ -95,7 +90,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Settings-Panel
  */
-public class SettingsDialog extends JDialog implements ActionListener, ItemListener, ChangeListener, BHSettingsListener, MouseListener, TableColumnModelListener, WindowListener {
+public class SettingsDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -1002,6 +997,21 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	private final Window owner;
 
 	/**
+	 * SettingsListener
+	 */
+	private final BHSettingsListener settingsListener = new BHSettingsListener() {
+		@Override
+		public void settingsChanged() {
+			init();
+		}
+
+		@Override
+		public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
+			// Nothing to do
+		}
+	};
+
+	/**
 	 * Constructor
 	 * 
 	 * @param owner Owner
@@ -1054,10 +1064,30 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		pnlButtons.add(btnSave);
 		pnlButtons.add(btnReset);
 		pnlButtons.add(btnCancel);
-		btnSave.addActionListener(this);
-		btnReset.addActionListener(this);
-		btnCancel.addActionListener(this);
-		btnStdSavePath.addActionListener(this);
+		btnSave.addActionListener(e -> {
+			applySettings();
+			mainWindowAccess.setMessage(Localization.getString("SavingSettings"));
+			boolean b = settingsManager.writeSettings(true);
+			if (b) {
+				mainWindowAccess.setMessage(Localization.getString("SettingsSaved"));
+			} else {
+				mainWindowAccess.setMessage(Localization.getString("SettingsSaveFailed"));
+			}
+			settingsManager.removeSettingsListener(settingsListener);
+			dispose();
+		});
+		btnReset.addActionListener(e -> init());
+		btnCancel.addActionListener(e -> {
+			settingsManager.removeSettingsListener(settingsListener);
+			dispose();
+		});
+		btnStdSavePath.addActionListener(e -> {
+			File file = FileDialogUtil.showFolderSaveDialog(this, txtStdSavePath.getText(), null);
+			if (file != null) {
+				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
+				txtStdSavePath.setText(folder);
+			}
+		});
 
 		sldConnectionCount.setSnapToTicks(true);
 		sldConnectionCount.setMajorTickSpacing(10);
@@ -1066,7 +1096,13 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		sldConnectionCount.setPaintLabels(true);
 		sldConnectionCount.setMinimum(0);
 		sldConnectionCount.setMaximum(50);
-		sldConnectionCount.addChangeListener(this);
+		sldConnectionCount.addChangeListener(e -> {
+			if (sldConnectionCount.getValue() == 0) {
+				sldConnectionCount.setValue(1);
+			} else {
+				txtConnectionCount.setText(String.valueOf(sldConnectionCount.getValue()));
+			}
+		});
 
 		sldConnectionCountPerHost.setSnapToTicks(true);
 		sldConnectionCountPerHost.setMajorTickSpacing(10);
@@ -1075,7 +1111,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		sldConnectionCountPerHost.setPaintLabels(true);
 		sldConnectionCountPerHost.setMinimum(0);
 		sldConnectionCountPerHost.setMaximum(50);
-		sldConnectionCountPerHost.addChangeListener(this);
+		sldConnectionCountPerHost.addChangeListener(e -> txtConnectionCountPerHost.setText(String.valueOf(sldConnectionCountPerHost.getValue())));
 
 		txtConnectionCountPerHost.setToolTipText(Localization.getString("MaxConnectionCountToolTip"));
 		sldConnectionCountPerHost.setToolTipText(Localization.getString("MaxConnectionCountToolTip"));
@@ -1087,12 +1123,12 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		sldThreadCount.setPaintLabels(true);
 		sldThreadCount.setMinimum(1);
 		sldThreadCount.setMaximum(Runtime.getRuntime().availableProcessors());
-		sldThreadCount.addChangeListener(this);
+		sldThreadCount.addChangeListener(e -> txtThreadCount.setText(String.valueOf(sldThreadCount.getValue())));
 
 		pnlLogDays.add(new JLabel(Localization.getString("LogDaysT")));
 
-		btnMaxFailedCountPlus.addActionListener(this);
-		btnMaxFailedCountMinus.addActionListener(this);
+		btnMaxFailedCountPlus.addActionListener(e -> maxFailedPlus());
+		btnMaxFailedCountMinus.addActionListener(e -> maxFailedMinus());
 		txtMaxFailedCount.setEditable(false);
 		txtMaxFailedCount.setColumns(5);
 		pnlMaxFailedCount.add(new JLabel(Localization.getString("MaxFailedCountT1")));
@@ -1153,7 +1189,32 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		cmbCookies.addItem(BrowserCookiesMode.BROWSER_PALE_MOON);
 		cmbCookies.addItem(BrowserCookiesMode.BROWSER_OPERA_NEW);
 		cmbCookies.setRenderer(new BrowserCookiesModeComboBoxRenderer());
-		cmbCookies.addItemListener(this);
+		cmbCookies.addItemListener(e -> {
+			boolean bOpera = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_OPERA);
+			boolean bOperaNew = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_OPERA_NEW);
+			boolean bFirefox = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_FIREFOX);
+			boolean bPaleMoon = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_PALE_MOON);
+			lblCookiesOpera.setVisible(bOpera);
+			cbCookiesOperaFixed.setVisible(bOpera);
+			txtCookiesOpera.setVisible(bOpera);
+			btnCookiesOpera.setVisible(bOpera);
+			pnlCookiesOpera.setVisible(bOpera);
+			lblCookiesOperaNew.setVisible(bOperaNew);
+			cbCookiesOperaNewFixed.setVisible(bOperaNew);
+			txtCookiesOperaNew.setVisible(bOperaNew);
+			btnCookiesOperaNew.setVisible(bOperaNew);
+			pnlCookiesOperaNew.setVisible(bOperaNew);
+			lblCookiesFirefox.setVisible(bFirefox);
+			cbCookiesFirefoxFixed.setVisible(bFirefox);
+			txtCookiesFirefox.setVisible(bFirefox);
+			btnCookiesFirefox.setVisible(bFirefox);
+			pnlCookiesFirefox.setVisible(bFirefox);
+			lblCookiesPaleMoon.setVisible(bPaleMoon);
+			cbCookiesPaleMoonFixed.setVisible(bPaleMoon);
+			txtCookiesPaleMoon.setVisible(bPaleMoon);
+			btnCookiesPaleMoon.setVisible(bPaleMoon);
+			pnlCookiesPaleMoon.setVisible(bPaleMoon);
+		});
 
 		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_LOWER);
 		cmbSubdirsResolutionMode.addItem(SubdirsResolutionMode.RESOLUTION_ONLY_HIGHER);
@@ -1170,8 +1231,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtCookiesOpera.setToolTipText(Localization.getString("CookiesOperaToolTip"));
 		btnCookiesOpera.setToolTipText(Localization.getString("CookiesOperaToolTip"));
 		txtCookiesOpera.setEditable(false);
-		btnCookiesOpera.addActionListener(this);
-		cbCookiesOperaFixed.addItemListener(this);
+		btnCookiesOpera.addActionListener(e -> cookiesOpera());
+		cbCookiesOperaFixed.addItemListener(e -> btnCookiesOpera.setEnabled(cbCookiesOperaFixed.isSelected()));
 
 		pnlCookiesOperaNew.add(cbCookiesOperaNewFixed, BorderLayout.WEST);
 		pnlCookiesOperaNew.add(txtCookiesOperaNew, BorderLayout.CENTER);
@@ -1181,8 +1242,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtCookiesOperaNew.setToolTipText(Localization.getString("CookiesOperaToolTip"));
 		btnCookiesOperaNew.setToolTipText(Localization.getString("CookiesOperaToolTip"));
 		txtCookiesOperaNew.setEditable(false);
-		btnCookiesOperaNew.addActionListener(this);
-		cbCookiesOperaNewFixed.addItemListener(this);
+		btnCookiesOperaNew.addActionListener(e -> cookiesOperaNew());
+		cbCookiesOperaNewFixed.addItemListener(e -> btnCookiesOperaNew.setEnabled(cbCookiesOperaNewFixed.isSelected()));
 
 		pnlCookiesFirefox.add(cbCookiesFirefoxFixed, BorderLayout.WEST);
 		pnlCookiesFirefox.add(txtCookiesFirefox, BorderLayout.CENTER);
@@ -1192,8 +1253,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtCookiesFirefox.setToolTipText(Localization.getString("CookiesFirefoxToolTip"));
 		btnCookiesFirefox.setToolTipText(Localization.getString("CookiesFirefoxToolTip"));
 		txtCookiesFirefox.setEditable(false);
-		btnCookiesFirefox.addActionListener(this);
-		cbCookiesFirefoxFixed.addItemListener(this);
+		btnCookiesFirefox.addActionListener(e -> cookiesFirefox());
+		cbCookiesFirefoxFixed.addItemListener(e -> btnCookiesFirefox.setEnabled(cbCookiesFirefoxFixed.isSelected()));
 
 		pnlCookiesPaleMoon.add(cbCookiesPaleMoonFixed, BorderLayout.WEST);
 		pnlCookiesPaleMoon.add(txtCookiesPaleMoon, BorderLayout.CENTER);
@@ -1203,8 +1264,8 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		txtCookiesPaleMoon.setToolTipText(Localization.getString("CookiesPaleMoonToolTip"));
 		btnCookiesPaleMoon.setToolTipText(Localization.getString("CookiesPaleMoonToolTip"));
 		txtCookiesPaleMoon.setEditable(false);
-		btnCookiesPaleMoon.addActionListener(this);
-		cbCookiesPaleMoonFixed.addItemListener(this);
+		btnCookiesPaleMoon.addActionListener(e -> cookiePaleMoon());
+		cbCookiesPaleMoonFixed.addItemListener(e -> btnCookiesPaleMoon.setEnabled(cbCookiesPaleMoonFixed.isSelected()));
 
 		btnDeleteAllCookies.addActionListener(e -> {
 			int retval = JOptionPane.showConfirmDialog(this, Localization.getString("ReallyDeleteAllCookies"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
@@ -1232,9 +1293,14 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 
 		init();
 
-		rbNoProxy.addChangeListener(this);
-		rbHTTP.addChangeListener(this);
-		cbAuth.addChangeListener(this);
+		rbNoProxy.addChangeListener(e -> proxyModeChanged());
+		rbHTTP.addChangeListener(e -> proxyModeChanged());
+		cbAuth.addChangeListener(e -> {
+			lblProxyUser.setEnabled(cbAuth.isSelected());
+			lblProxyPassword.setEnabled(cbAuth.isSelected());
+			txtProxyUser.setEnabled(cbAuth.isSelected());
+			txtProxyPassword.setEnabled(cbAuth.isSelected());
+		});
 
 		TableUtil.internationalizeColumns(jtSubdirs);
 
@@ -1243,7 +1309,15 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		jtSubdirs.getColumn("SubdirResolutionMinimum").setCellEditor(new SubdirResolutionCellEditor());
 		jtSubdirs.getColumn("SubdirResolutionMaximum").setCellEditor(new SubdirResolutionCellEditor());
 		jtSubdirs.setToolTipText(Localization.getString("SubdirsToolTip"));
-		jtSubdirs.addMouseListener(this);
+		jtSubdirs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == 3) {
+					menuItemDelete.setEnabled(jtSubdirs.getSelectedRowCount() > 0);
+					popupSubdirs.show(jtSubdirs, e.getX(), e.getY());
+				}
+			}
+		});
 		jtSubdirs.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
 		jtSubdirs.getColumn("SubdirMinimum").setCellRenderer(new DefaultNumberColorRowRenderer());
 		jtSubdirs.getColumn("SubdirMaximum").setCellRenderer(new DefaultNumberColorRowRenderer());
@@ -1254,19 +1328,58 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		jtSubdirs.setPreferredScrollableViewportSize(preferredScrollableTableSize);
 		jtSubdirs.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 
-		spSubdirs.addMouseListener(this);
+		spSubdirs.addMouseListener(new MouseAdapter() {
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				if (e.getButton() == 3) {
+					menuItemDelete.setEnabled(jtSubdirs.getSelectedRowCount() > 0);
+					int h = jtSubdirs.getTableHeader().getSize().height;
+					Insets insets = spSubdirs.getInsets();
+					h += insets.top + insets.bottom;
+					int w = insets.left + insets.right;
+
+					popupSubdirs.show(jtSubdirs, e.getX() - w, e.getY() - h);
+				}
+			}
+		});
 		updateColWidthsFromSettingsManager();
-		jtSubdirs.getColumnModel().addColumnModelListener(this);
+		jtSubdirs.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
+			}
+
+		});
 		jtSubdirs.getTableHeader().setReorderingAllowed(false);
 		jtSubdirs.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		popupSubdirs.add(menuItemNew);
 		popupSubdirs.add(menuItemUp);
 		popupSubdirs.add(menuItemDown);
 		popupSubdirs.add(menuItemDelete);
-		menuItemNew.addActionListener(this);
-		menuItemUp.addActionListener(this);
-		menuItemDown.addActionListener(this);
-		menuItemDelete.addActionListener(this);
+		menuItemNew.addActionListener(e -> subdirNew());
+		menuItemUp.addActionListener(e -> subdirUp());
+		menuItemDown.addActionListener(e -> subdirDown());
+		menuItemDelete.addActionListener(e -> subdirDelete());
 
 		pnlSubdirButtons.setLayout(new SpringLayout());
 		pnlSubdirButtons.add(btnSubdirNew);
@@ -1275,11 +1388,12 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		pnlSubdirButtons.add(btnSubdirDelete);
 		pnlSubdirButtons.add(btnSubdirHelp);
 		SpringUtilities.makeCompactGrid(pnlSubdirButtons, 5, 1, 0, 0, 5, 5);
-		btnSubdirNew.addActionListener(this);
-		btnSubdirUp.addActionListener(this);
-		btnSubdirDown.addActionListener(this);
-		btnSubdirDelete.addActionListener(this);
-		btnSubdirHelp.addActionListener(this);
+		btnSubdirNew.addActionListener(e -> subdirNew());
+		btnSubdirUp.addActionListener(e -> subdirUp());
+		btnSubdirDown.addActionListener(e -> subdirDown());
+		btnSubdirDelete.addActionListener(e -> subdirDelete());
+
+		btnSubdirHelp.addActionListener(e -> JOptionPane.showMessageDialog(this, Localization.getString("SubdirHelp"), Localization.getString("Help"), JOptionPane.INFORMATION_MESSAGE));
 
 		pnlRegexReplacePageTitle.setBorder(BorderFactory.createTitledBorder(Localization.getString("RegexReplacePageTitle")));
 
@@ -1613,9 +1727,15 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtSocketTimeout);
 		JTextComponentCopyAndPaste.addCopyAndPasteMouseListener(txtConnectionRequestTimeout);
 
-		addWindowListener(this);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				settingsManager.removeSettingsListener(settingsListener);
+				dispose();
+			}
+		});
 
-		settingsManager.addSettingsListener(this);
+		settingsManager.addSettingsListener(settingsListener);
 
 		pack();
 		setLocationRelativeTo(owner);
@@ -1794,131 +1914,122 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		chkRulesBefore.setSelected(hostsSettings.isRulesBeforeClasses());
 	}
 
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnSave) {
-			applySettings();
-			mainWindowAccess.setMessage(Localization.getString("SavingSettings"));
-			boolean b = settingsManager.writeSettings(true);
-			if (b) {
-				mainWindowAccess.setMessage(Localization.getString("SettingsSaved"));
-			} else {
-				mainWindowAccess.setMessage(Localization.getString("SettingsSaveFailed"));
-			}
-			settingsManager.removeSettingsListener(this);
-			this.dispose();
-		} else if (e.getSource() == btnReset) {
-			init();
-		} else if (e.getSource() == btnCancel) {
-			settingsManager.removeSettingsListener(this);
-			this.dispose();
-		} else if (e.getSource() == btnStdSavePath) {
-			File file = FileDialogUtil.showFolderSaveDialog(this, txtStdSavePath.getText(), null);
-			if (file != null) {
-				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-				txtStdSavePath.setText(folder);
-			}
-		} else if (e.getSource() == btnMaxFailedCountPlus) {
-			int val = Integer.parseInt(txtMaxFailedCount.getText());
-			if (val < 20) {
-				val += 1;
-				txtMaxFailedCount.setText(String.valueOf(val));
-			}
-		} else if (e.getSource() == btnMaxFailedCountMinus) {
-			int val = Integer.parseInt(txtMaxFailedCount.getText());
-			if (val > 0) {
-				val -= 1;
-				txtMaxFailedCount.setText(String.valueOf(val));
-			}
-		} else if (e.getSource() == btnCookiesOpera) {
-			FileFilter filter = new FileFilter() {
-				@Override
-				public boolean accept(File f) {
-					return f.getName().equals("cookies4.dat") || f.isDirectory();
-				}
+	private void maxFailedPlus() {
+		int val = Integer.parseInt(txtMaxFailedCount.getText());
+		if (val < 20) {
+			val += 1;
+			txtMaxFailedCount.setText(String.valueOf(val));
+		}
+	}
 
-				@Override
-				public String getDescription() {
-					return "cookies4.dat";
-				}
-			};
-			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOpera.getText(), filter);
-			if (file != null) {
-				String strFile = file.getAbsolutePath();
-				txtCookiesOpera.setText(strFile);
-			}
-		} else if (e.getSource() == btnCookiesOperaNew) {
-			FileFilter filter = new FileFilter() {
-				@Override
-				public boolean accept(File f) {
-					return f.getName().equals("Cookies") || f.isDirectory();
-				}
+	private void maxFailedMinus() {
+		int val = Integer.parseInt(txtMaxFailedCount.getText());
+		if (val > 0) {
+			val -= 1;
+			txtMaxFailedCount.setText(String.valueOf(val));
+		}
+	}
 
-				@Override
-				public String getDescription() {
-					return "Cookies";
-				}
-			};
-			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOperaNew.getText(), filter);
-			if (file != null) {
-				String strFile = file.getAbsolutePath();
-				txtCookiesOperaNew.setText(strFile);
+	private void cookiesOpera() {
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.getName().equals("cookies4.dat") || f.isDirectory();
 			}
-		} else if (e.getSource() == btnCookiesFirefox) {
-			FileFilter filter = new FileFilter() {
-				@Override
-				public boolean accept(File f) {
-					return f.getName().equals("cookies.txt") || f.getName().equals("cookies.sqlite") || f.isDirectory();
-				}
 
-				@Override
-				public String getDescription() {
-					return "cookies.txt, cookies.sqlite";
-				}
-			};
-			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesFirefox.getText(), filter);
-			if (file != null) {
-				String strFile = file.getAbsolutePath();
-				txtCookiesFirefox.setText(strFile);
+			@Override
+			public String getDescription() {
+				return "cookies4.dat";
 			}
-		} else if (e.getSource() == btnCookiesPaleMoon) {
-			FileFilter filter = new FileFilter() {
-				@Override
-				public boolean accept(File f) {
-					return f.getName().equals("cookies.sqlite") || f.isDirectory();
-				}
+		};
+		File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOpera.getText(), filter);
+		if (file != null) {
+			String strFile = file.getAbsolutePath();
+			txtCookiesOpera.setText(strFile);
+		}
+	}
 
-				@Override
-				public String getDescription() {
-					return "cookies.sqlite";
-				}
-			};
-			File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesPaleMoon.getText(), filter);
-			if (file != null) {
-				String strFile = file.getAbsolutePath();
-				txtCookiesPaleMoon.setText(strFile);
+	private void cookiesOperaNew() {
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.getName().equals("Cookies") || f.isDirectory();
 			}
-		} else if (e.getSource() == menuItemNew || e.getSource() == btnSubdirNew) {
-			subdirModel.addEmptyRow();
-		} else if (e.getSource() == menuItemDelete || e.getSource() == btnSubdirDelete) {
-			int[] rows = jtSubdirs.getSelectedRows();
-			for (int i = 0; i < rows.length; i++) {
-				subdirModel.removeRow(rows[i]);
+
+			@Override
+			public String getDescription() {
+				return "Cookies";
 			}
-		} else if (e.getSource() == menuItemUp || e.getSource() == btnSubdirUp) {
-			int selectedRow = jtSubdirs.getSelectedRow();
-			if (selectedRow > 0) {
-				subdirModel.moveRow(selectedRow, selectedRow, selectedRow - 1);
-				jtSubdirs.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
+		};
+		File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesOperaNew.getText(), filter);
+		if (file != null) {
+			String strFile = file.getAbsolutePath();
+			txtCookiesOperaNew.setText(strFile);
+		}
+	}
+
+	private void cookiesFirefox() {
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.getName().equals("cookies.txt") || f.getName().equals("cookies.sqlite") || f.isDirectory();
 			}
-		} else if (e.getSource() == menuItemDown || e.getSource() == btnSubdirDown) {
-			int selectedRow = jtSubdirs.getSelectedRow();
-			if (selectedRow < (subdirModel.getRowCount() - 1)) {
-				subdirModel.moveRow(selectedRow, selectedRow, selectedRow + 1);
-				jtSubdirs.setRowSelectionInterval(selectedRow + 1, selectedRow + 1);
+
+			@Override
+			public String getDescription() {
+				return "cookies.txt, cookies.sqlite";
 			}
-		} else if (e.getSource() == btnSubdirHelp) {
-			JOptionPane.showMessageDialog(this, Localization.getString("SubdirHelp"), Localization.getString("Help"), JOptionPane.INFORMATION_MESSAGE);
+		};
+		File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesFirefox.getText(), filter);
+		if (file != null) {
+			String strFile = file.getAbsolutePath();
+			txtCookiesFirefox.setText(strFile);
+		}
+	}
+
+	private void cookiePaleMoon() {
+		FileFilter filter = new FileFilter() {
+			@Override
+			public boolean accept(File f) {
+				return f.getName().equals("cookies.sqlite") || f.isDirectory();
+			}
+
+			@Override
+			public String getDescription() {
+				return "cookies.sqlite";
+			}
+		};
+		File file = FileDialogUtil.showFileOpenDialog(this, txtCookiesPaleMoon.getText(), filter);
+		if (file != null) {
+			String strFile = file.getAbsolutePath();
+			txtCookiesPaleMoon.setText(strFile);
+		}
+	}
+
+	private void subdirNew() {
+		subdirModel.addEmptyRow();
+	}
+
+	private void subdirDelete() {
+		int[] rows = jtSubdirs.getSelectedRows();
+		for (int i = 0; i < rows.length; i++) {
+			subdirModel.removeRow(rows[i]);
+		}
+	}
+
+	private void subdirUp() {
+		int selectedRow = jtSubdirs.getSelectedRow();
+		if (selectedRow > 0) {
+			subdirModel.moveRow(selectedRow, selectedRow, selectedRow - 1);
+			jtSubdirs.setRowSelectionInterval(selectedRow - 1, selectedRow - 1);
+		}
+	}
+
+	private void subdirDown() {
+		int selectedRow = jtSubdirs.getSelectedRow();
+		if (selectedRow < (subdirModel.getRowCount() - 1)) {
+			subdirModel.moveRow(selectedRow, selectedRow, selectedRow + 1);
+			jtSubdirs.setRowSelectionInterval(selectedRow + 1, selectedRow + 1);
 		}
 	}
 
@@ -1926,7 +2037,7 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 	 * Apply Settings
 	 */
 	private void applySettings() {
-		settingsManager.removeSettingsListener(this);
+		settingsManager.removeSettingsListener(settingsListener);
 		mainWindowAccess.setMessage(Localization.getString("ApplyingSettings"));
 
 		Settings settings = settingsManager.getSettings();
@@ -2118,130 +2229,28 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 		settingsManager.fireSettingsChanged();
 
 		mainWindowAccess.setMessage(Localization.getString("SettingsApplied"));
-		settingsManager.addSettingsListener(this);
+		settingsManager.addSettingsListener(settingsListener);
 
 		if (lookAndFeelChanged) {
 			SwingUtilities.updateComponentTreeUI(owner);
 		}
 	}
 
-	@Override
-	public void stateChanged(ChangeEvent e) {
-		if (e.getSource() == sldConnectionCount) {
-			if (sldConnectionCount.getValue() == 0) {
-				sldConnectionCount.setValue(1);
-			} else {
-				txtConnectionCount.setText(String.valueOf(sldConnectionCount.getValue()));
-			}
-		} else if (e.getSource() == sldConnectionCountPerHost) {
-			txtConnectionCountPerHost.setText(String.valueOf(sldConnectionCountPerHost.getValue()));
-		} else if (e.getSource() == sldThreadCount) {
-			txtThreadCount.setText(String.valueOf(sldThreadCount.getValue()));
-		} else if (e.getSource() == cbAuth) {
-			lblProxyUser.setEnabled(cbAuth.isSelected());
-			lblProxyPassword.setEnabled(cbAuth.isSelected());
-			txtProxyUser.setEnabled(cbAuth.isSelected());
-			txtProxyPassword.setEnabled(cbAuth.isSelected());
-		} else if ((e.getSource() == rbNoProxy) || (e.getSource() == rbHTTP)) {
-			boolean b1 = rbNoProxy.isSelected();
-			boolean b2 = rbHTTP.isSelected();
-			boolean b = false;
-			if (b2) {
-				b = true;
-			}
-			lblProxyName.setEnabled(b);
-			lblProxyPort.setEnabled(b);
-			txtProxyName.setEnabled(b);
-			txtProxyPort.setEnabled(b);
-			cbAuth.setEnabled(!(b1));
-			if (b1) {
-				cbAuth.setSelected(false);
-			}
+	private void proxyModeChanged() {
+		boolean b1 = rbNoProxy.isSelected();
+		boolean b2 = rbHTTP.isSelected();
+		boolean b = false;
+		if (b2) {
+			b = true;
 		}
-	}
-
-	@Override
-	public void settingsChanged() {
-		init();
-	}
-
-	@Override
-	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
-		// Nothing to do
-	}
-
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == cmbCookies) {
-			boolean bOpera = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_OPERA);
-			boolean bOperaNew = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_OPERA_NEW);
-			boolean bFirefox = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_FIREFOX);
-			boolean bPaleMoon = (cmbCookies.getSelectedIndex() == BrowserCookies.BROWSER_PALE_MOON);
-			lblCookiesOpera.setVisible(bOpera);
-			cbCookiesOperaFixed.setVisible(bOpera);
-			txtCookiesOpera.setVisible(bOpera);
-			btnCookiesOpera.setVisible(bOpera);
-			pnlCookiesOpera.setVisible(bOpera);
-			lblCookiesOperaNew.setVisible(bOperaNew);
-			cbCookiesOperaNewFixed.setVisible(bOperaNew);
-			txtCookiesOperaNew.setVisible(bOperaNew);
-			btnCookiesOperaNew.setVisible(bOperaNew);
-			pnlCookiesOperaNew.setVisible(bOperaNew);
-			lblCookiesFirefox.setVisible(bFirefox);
-			cbCookiesFirefoxFixed.setVisible(bFirefox);
-			txtCookiesFirefox.setVisible(bFirefox);
-			btnCookiesFirefox.setVisible(bFirefox);
-			pnlCookiesFirefox.setVisible(bFirefox);
-			lblCookiesPaleMoon.setVisible(bPaleMoon);
-			cbCookiesPaleMoonFixed.setVisible(bPaleMoon);
-			txtCookiesPaleMoon.setVisible(bPaleMoon);
-			btnCookiesPaleMoon.setVisible(bPaleMoon);
-			pnlCookiesPaleMoon.setVisible(bPaleMoon);
-		} else if (e.getSource() == cbCookiesOperaFixed) {
-			btnCookiesOpera.setEnabled(cbCookiesOperaFixed.isSelected());
-		} else if (e.getSource() == cbCookiesOperaNewFixed) {
-			btnCookiesOperaNew.setEnabled(cbCookiesOperaNewFixed.isSelected());
-		} else if (e.getSource() == cbCookiesFirefoxFixed) {
-			btnCookiesFirefox.setEnabled(cbCookiesFirefoxFixed.isSelected());
-		} else if (e.getSource() == cbCookiesPaleMoonFixed) {
-			btnCookiesPaleMoon.setEnabled(cbCookiesPaleMoonFixed.isSelected());
+		lblProxyName.setEnabled(b);
+		lblProxyPort.setEnabled(b);
+		txtProxyName.setEnabled(b);
+		txtProxyPort.setEnabled(b);
+		cbAuth.setEnabled(!(b1));
+		if (b1) {
+			cbAuth.setSelected(false);
 		}
-	}
-
-	@Override
-	public void mouseClicked(MouseEvent e) {
-		if (((e.getSource() == jtSubdirs) || (e.getSource() == spSubdirs)) && (e.getButton() == 3)) {
-			menuItemDelete.setEnabled(jtSubdirs.getSelectedRowCount() > 0);
-			int w = 0;
-			int h = 0;
-			if (e.getSource() == spSubdirs) {
-				h = jtSubdirs.getTableHeader().getSize().height;
-				Insets insets = spSubdirs.getInsets();
-				h += insets.top + insets.bottom;
-				w = insets.left + insets.right;
-			}
-			popupSubdirs.show(jtSubdirs, e.getX() - w, e.getY() - h);
-		}
-	}
-
-	@Override
-	public void mouseEntered(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseExited(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mousePressed(MouseEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void mouseReleased(MouseEvent e) {
-		// Nothing to do
 	}
 
 	/**
@@ -2263,67 +2272,6 @@ public class SettingsDialog extends JDialog implements ActionListener, ItemListe
 			return;
 		}
 		TableUtil.applyColWidths(jtSubdirs, settingsManager.getColWidthsSubdirs());
-	}
-
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowClosing(WindowEvent e) {
-		settingsManager.removeSettingsListener(this);
-		this.dispose();
-	}
-
-	@Override
-	public void windowClosed(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// Nothing to do
 	}
 
 	private int parseTimeoutSetting(JTextField textField, int defaultValue) {

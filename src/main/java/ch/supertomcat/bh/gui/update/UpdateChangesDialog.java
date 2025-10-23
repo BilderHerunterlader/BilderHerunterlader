@@ -2,7 +2,6 @@ package ch.supertomcat.bh.gui.update;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
@@ -23,7 +22,7 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * Dialog which displays the changelog
  */
-public class UpdateChangesDialog extends JDialog implements ActionListener {
+public class UpdateChangesDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -68,7 +67,7 @@ public class UpdateChangesDialog extends JDialog implements ActionListener {
 
 		add(sp, BorderLayout.CENTER);
 		add(pnlButtons, BorderLayout.SOUTH);
-		btnOK.addActionListener(this);
+		btnOK.addActionListener(e -> dispose());
 		tp.setCaretPosition(0);
 		pack();
 		setLocationRelativeTo(owner);
@@ -90,12 +89,5 @@ public class UpdateChangesDialog extends JDialog implements ActionListener {
 		am.put(windowOkKey, windowOkAction);
 
 		setModal(true);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			this.dispose();
-		}
 	}
 }

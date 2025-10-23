@@ -2,7 +2,6 @@ package ch.supertomcat.bh.gui.queue;
 
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 
 import javax.swing.AbstractAction;
@@ -24,7 +23,7 @@ import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPas
 /**
  * Dialog for renaming directories
  */
-public class PathRenameDialog extends JDialog implements ActionListener {
+public class PathRenameDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -92,8 +91,11 @@ public class PathRenameDialog extends JDialog implements ActionListener {
 
 		setTitle(Localization.getString("PathInput"));
 
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> okPressed());
+		btnCancel.addActionListener(e -> {
+			canceled = true;
+			this.dispose();
+		});
 
 		add(pnlRename, BorderLayout.CENTER);
 		add(pnlButtons, BorderLayout.SOUTH);
@@ -133,21 +135,6 @@ public class PathRenameDialog extends JDialog implements ActionListener {
 		am.put(windowOkKey, windowOkAction);
 
 		setVisible(true);
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-	 */
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed();
-		} else if (e.getSource() == btnCancel) {
-			canceled = true;
-			this.dispose();
-		}
 	}
 
 	/**

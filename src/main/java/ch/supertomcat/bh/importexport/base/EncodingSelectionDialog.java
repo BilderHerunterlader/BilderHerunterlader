@@ -3,8 +3,6 @@ package ch.supertomcat.bh.importexport.base;
 import java.awt.BorderLayout;
 import java.awt.Dialog;
 import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -22,7 +20,7 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 /**
  * EncodingSelectionDialog
  */
-public class EncodingSelectionDialog extends JDialog implements ActionListener {
+public class EncodingSelectionDialog extends JDialog {
 
 	/**
 	 * 
@@ -101,23 +99,15 @@ public class EncodingSelectionDialog extends JDialog implements ActionListener {
 		add(pnlButtons, BorderLayout.SOUTH);
 		pnlButtons.add(btnOK);
 		pnlButtons.add(btnCancel);
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> {
+			canceled = false;
+			dispose();
+		});
+		btnCancel.addActionListener(e -> dispose());
 
 		pack();
 		setLocationRelativeTo(getOwner());
 		setVisible(true);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			canceled = false;
-			dispose();
-		} else if (e.getSource() == btnCancel) {
-			canceled = true;
-			dispose();
-		}
 	}
 
 	/**

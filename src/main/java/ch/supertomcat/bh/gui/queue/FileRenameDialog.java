@@ -5,9 +5,6 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.util.List;
 
@@ -38,7 +35,7 @@ import ch.supertomcat.supertomcatutils.gui.copyandpaste.JTextComponentCopyAndPas
 /**
  * Dialog for renaming files
  */
-public class FileRenameDialog extends JDialog implements ActionListener, ItemListener {
+public class FileRenameDialog extends JDialog {
 	/**
 	 * UID
 	 */
@@ -208,11 +205,34 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 		txtFilename.setEnabled(!b);
 		btnClear.setEnabled(!b);
 
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
-		btnClear.addActionListener(this);
-		cbClear.addItemListener(this);
-		cbOriginalFilenames.addItemListener(this);
+		btnOK.addActionListener(e -> okPressed());
+		btnCancel.addActionListener(e -> {
+			canceled = true;
+			this.dispose();
+		});
+		btnClear.addActionListener(e -> txtFilename.setSelectedIndex(0));
+		cbClear.addItemListener(e -> {
+			boolean clearSelected = cbClear.isSelected();
+			boolean bOriginalFilenames = cbOriginalFilenames.isSelected();
+			lblFilename.setEnabled(!clearSelected && !bOriginalFilenames);
+			lblStartNumber.setEnabled(!clearSelected);
+			lblStep.setEnabled(!clearSelected);
+			txtFilename.setEnabled(!clearSelected && !bOriginalFilenames);
+			btnClear.setEnabled(!clearSelected && !bOriginalFilenames);
+			txtStartNumber.setEnabled(!clearSelected);
+			txtStep.setEnabled(!clearSelected);
+			txtPrefix.setEnabled(!clearSelected);
+			txtAppendix.setEnabled(!clearSelected);
+			cbPrefix.setEnabled(!clearSelected);
+			cbAppendix.setEnabled(!clearSelected);
+			cbOriginalFilenames.setEnabled(!clearSelected);
+		});
+		cbOriginalFilenames.addItemListener(e -> {
+			boolean originalFilenamesSelected = cbOriginalFilenames.isSelected();
+			lblFilename.setEnabled(!originalFilenamesSelected);
+			txtFilename.setEnabled(!originalFilenamesSelected);
+			btnClear.setEnabled(!originalFilenamesSelected);
+		});
 
 		pnlRename.setLayout(new BoxLayout(pnlRename, BoxLayout.Y_AXIS));
 
@@ -328,18 +348,6 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 	 */
 	private void limitHeightToPreferredHeight(Component comp) {
 		comp.setMaximumSize(new Dimension(Integer.MAX_VALUE, comp.getPreferredSize().height));
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			okPressed();
-		} else if (e.getSource() == btnCancel) {
-			canceled = true;
-			this.dispose();
-		} else if (e.getSource() == btnClear) {
-			txtFilename.setSelectedIndex(0);
-		}
 	}
 
 	/**
@@ -523,30 +531,5 @@ public class FileRenameDialog extends JDialog implements ActionListener, ItemLis
 		retval[5] = frd.getKeepOriginalFilename();
 		retval[6] = frd.getClearFilename();
 		return retval;
-	}
-
-	@Override
-	public void itemStateChanged(ItemEvent e) {
-		if (e.getSource() == cbClear) {
-			boolean b = cbClear.isSelected();
-			boolean bOriginalFilenames = cbOriginalFilenames.isSelected();
-			lblFilename.setEnabled(!b && !bOriginalFilenames);
-			lblStartNumber.setEnabled(!b);
-			lblStep.setEnabled(!b);
-			txtFilename.setEnabled(!b && !bOriginalFilenames);
-			btnClear.setEnabled(!b && !bOriginalFilenames);
-			txtStartNumber.setEnabled(!b);
-			txtStep.setEnabled(!b);
-			txtPrefix.setEnabled(!b);
-			txtAppendix.setEnabled(!b);
-			cbPrefix.setEnabled(!b);
-			cbAppendix.setEnabled(!b);
-			cbOriginalFilenames.setEnabled(!b);
-		} else if (e.getSource() == cbOriginalFilenames) {
-			boolean b = cbOriginalFilenames.isSelected();
-			lblFilename.setEnabled(!b);
-			txtFilename.setEnabled(!b);
-			btnClear.setEnabled(!b);
-		}
 	}
 }

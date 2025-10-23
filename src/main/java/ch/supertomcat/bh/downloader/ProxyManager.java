@@ -1,5 +1,9 @@
 package ch.supertomcat.bh.downloader;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
+
 import org.apache.hc.client5.http.auth.AuthScope;
 import org.apache.hc.client5.http.auth.Credentials;
 import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
@@ -16,9 +20,11 @@ import org.apache.hc.client5.http.impl.io.PoolingHttpClientConnectionManagerBuil
 import org.apache.hc.core5.http.HttpHost;
 import org.apache.hc.core5.http.config.Http1Config;
 import org.apache.hc.core5.http.io.SocketConfig;
+import org.apache.hc.core5.io.CloseMode;
 import org.apache.hc.core5.util.TimeValue;
 import org.apache.hc.core5.util.Timeout;
 
+import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
@@ -72,17 +78,44 @@ public class ProxyManager {
 	private final PoolingHttpClientConnectionManager conManager;
 
 	/**
+	 * Shared HTTP Client
+	 */
+	private CloseableHttpClient sharedHttpClient;
+
+	/**
+	 * SharedHttpClient Lock
+	 */
+	private final ReadWriteLock sharedHttpClientLock = new ReentrantReadWriteLock();
+
+	/**
+	 * SharedHttpClient Read Lock
+	 */
+	private final Lock sharedHttpClientReadLock = sharedHttpClientLock.readLock();
+
+	/**
+	 * SharedHttpClient Write Lock
+	 */
+	private final Lock sharedHttpClientWriteLock = sharedHttpClientLock.writeLock();
+
+	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
 
 	/**
+	 * cookieManager
+	 */
+	private final CookieManager cookieManager;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param settingsManager SettingsManager
+	 * @param cookieManager Cookie Manager
 	 */
-	public ProxyManager(SettingsManager settingsManager) {
+	public ProxyManager(SettingsManager settingsManager, CookieManager cookieManager) {
 		this.settingsManager = settingsManager;
+		this.cookieManager = cookieManager;
 		// Get the configuration
 		readFromSettings();
 
@@ -103,11 +136,14 @@ public class ProxyManager {
 
 		conManager = conManagerBuilder.build();
 
+		createSharedHTTPClient();
+
 		settingsManager.addSettingsListener(new BHSettingsListener() {
 
 			@Override
 			public void settingsChanged() {
 				conManager.setDefaultConnectionConfig(createConnectionConfig());
+				createSharedHTTPClient();
 			}
 
 			@Override
@@ -115,6 +151,21 @@ public class ProxyManager {
 				// Nothing to do
 			}
 		});
+	}
+
+	/**
+	 * Create shared HTTP Client
+	 */
+	private void createSharedHTTPClient() {
+		try {
+			sharedHttpClientWriteLock.lock();
+			if (sharedHttpClient != null) {
+				sharedHttpClient.close(CloseMode.GRACEFUL);
+			}
+			sharedHttpClient = getHTTPClientBuilder().setDefaultCookieStore(cookieManager.getCookieStore()).build();
+		} finally {
+			sharedHttpClientWriteLock.unlock();
+		}
 	}
 
 	/**
@@ -184,6 +235,22 @@ public class ProxyManager {
 	 */
 	public CloseableHttpClient getHTTPClient() {
 		return getHTTPClientBuilder().build();
+	}
+
+	/**
+	 * Returns a preconfigured shared HttpClient
+	 * 
+	 * Note: The returned must not be closed!
+	 * 
+	 * @return HttpClient
+	 */
+	public CloseableHttpClient getSharedHTTPClient() {
+		try {
+			sharedHttpClientReadLock.lock();
+			return sharedHttpClient;
+		} finally {
+			sharedHttpClientReadLock.unlock();
+		}
 	}
 
 	/**

@@ -75,8 +75,8 @@ public class UpdateUpdatesXMLTest {
 	public void beforeTest() throws IOException, SAXException, JAXBException {
 		SettingsManager settingsManager = new SettingsManager(ApplicationProperties.getProperty(ApplicationMain.SETTINGS_PATH), "BH-settings.xml", "settings.xml");
 		settingsManager.readSettings();
-		ProxyManager proxyManager = new ProxyManager(settingsManager);
 		CookieManager cookieManager = new CookieManager(settingsManager);
+		ProxyManager proxyManager = new ProxyManager(settingsManager, cookieManager);
 		hostManager = new HostManager(null, new RestrictionAccess() {
 
 			@Override

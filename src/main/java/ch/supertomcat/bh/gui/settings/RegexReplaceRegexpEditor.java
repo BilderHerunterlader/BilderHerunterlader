@@ -8,7 +8,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.util.regex.PatternSyntaxException;
 
@@ -33,7 +32,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 /**
  * Rule-Regexp-Editor-Dialog
  */
-public class RegexReplaceRegexpEditor extends JDialog implements ActionListener {
+public class RegexReplaceRegexpEditor extends JDialog {
 	/**
 	 * UID
 	 */
@@ -126,8 +125,23 @@ public class RegexReplaceRegexpEditor extends JDialog implements ActionListener 
 		setLayout(new BorderLayout());
 		pnlButtons.add(btnOK);
 		pnlButtons.add(btnCancel);
-		btnOK.addActionListener(this);
-		btnCancel.addActionListener(this);
+		btnOK.addActionListener(e -> {
+			try {
+				this.rrre.setSearch(txtSearch.getText());
+			} catch (PatternSyntaxException pse) {
+				txtError.setText(pse.getLocalizedMessage());
+				txtError.setVisible(true);
+				lblError.setVisible(true);
+				return;
+			}
+			this.rrre.setReplace(txtReplace.getText());
+			canceled = false;
+			this.dispose();
+		});
+		btnCancel.addActionListener(e -> {
+			canceled = true;
+			this.dispose();
+		});
 
 		txtSearch.setText(this.rrre.getSearch());
 		txtReplace.setText(this.rrre.getReplace());
@@ -201,26 +215,6 @@ public class RegexReplaceRegexpEditor extends JDialog implements ActionListener 
 		am.put(windowOkKey, windowOkAction);
 
 		setVisible(true);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			try {
-				this.rrre.setSearch(txtSearch.getText());
-			} catch (PatternSyntaxException pse) {
-				txtError.setText(pse.getLocalizedMessage());
-				txtError.setVisible(true);
-				lblError.setVisible(true);
-				return;
-			}
-			this.rrre.setReplace(txtReplace.getText());
-			canceled = false;
-			this.dispose();
-		} else if (e.getSource() == btnCancel) {
-			canceled = true;
-			this.dispose();
-		}
 	}
 
 	/**

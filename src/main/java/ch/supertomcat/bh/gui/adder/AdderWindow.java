@@ -128,7 +128,7 @@ import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
 /**
  * Panel for selecting files to download
  */
-public class AdderWindow extends JFrame implements ActionListener {
+public class AdderWindow extends JFrame {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -697,15 +697,32 @@ public class AdderWindow extends JFrame implements ActionListener {
 		popupMenu.add(menuItemSelect);
 		popupMenu.add(menuItemDeselect);
 		popupMenu.add(menuItemSelectOther);
-		menuItemSelectKeyword.addActionListener(this);
-		menuItemChangeTargetfilename.addActionListener(this);
-		menuItemChangeTargetBySelection.addActionListener(this);
-		menuItemChangeTargetByInput.addActionListener(this);
-		menuItemCopyURL.addActionListener(this);
-		menuItemOpenURL.addActionListener(this);
-		menuItemSelect.addActionListener(this);
-		menuItemDeselect.addActionListener(this);
-		menuItemSelectOther.addActionListener(this);
+		menuItemSelectKeyword.addActionListener(e -> {
+			List<Keyword> vk = keywordManager.getKeywords();
+			Collections.sort(vk);
+			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(this, Localization.getString("SelectKeyword"), true, null, vk, false, settingsManager);
+			if (aks.isOkPressed()) {
+				Keyword keyword = aks.getSelectedKeyword();
+				if (aks.isNewKeywordCreated()) {
+					keywordManager.addKeyword(keyword);
+				}
+
+				int[] selectedRows = jtAdder.getSelectedRows();
+				int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
+				for (int x = 0; x < selectedRows.length; x++) {
+					model.setValueAt(keyword, jtAdder.convertRowIndexToModel(selectedRows[x]), keywordColumnModelIndex);
+					updatePathColumn(selectedRows[x]);
+				}
+			}
+		});
+		menuItemChangeTargetfilename.addActionListener(e -> actionChangeTargetFilename());
+		menuItemChangeTargetBySelection.addActionListener(e -> actionChangeTargetBySelection());
+		menuItemChangeTargetByInput.addActionListener(e -> actionChangeTargetByInput());
+		menuItemCopyURL.addActionListener(e -> actionCopyURLs());
+		menuItemOpenURL.addActionListener(e -> actionOpenURLs());
+		menuItemSelect.addActionListener(e -> select(true));
+		menuItemDeselect.addActionListener(e -> deselect(true));
+		menuItemSelectOther.addActionListener(e -> invertSelection(true));
 
 		txtReferrer.setEditable(false);
 		btnTitleUpdate.addActionListener(new ActionListener() {
@@ -720,10 +737,64 @@ public class AdderWindow extends JFrame implements ActionListener {
 			txtTargetDir.addItem(strAdd);
 		}
 		txtTargetDir.setSelectedIndex(0);
-		txtTargetDir.addActionListener(this);
-		btnTargetDir.addActionListener(this);
-		itemTargetBySelection.addActionListener(this);
-		itemTargetByInput.addActionListener(this);
+		txtTargetDir.addActionListener(e -> updateAllPathColumns());
+		btnTargetDir.addActionListener(e -> {
+			Point mousePosition = MouseInfo.getPointerInfo().getLocation();
+			Rectangle buttonBounds = btnTargetDir.getBounds();
+			buttonBounds.setLocation(btnTargetDir.getLocationOnScreen());
+			if (buttonBounds.contains(mousePosition)) {
+				Point mouseLocationRelativeToComp = new Point(mousePosition.x, mousePosition.y);
+				SwingUtilities.convertPointFromScreen(mouseLocationRelativeToComp, btnTargetDir);
+				menuTarget.show(btnTargetDir, mouseLocationRelativeToComp.x, mouseLocationRelativeToComp.y);
+			} else {
+				Dimension buttonSize = btnTargetDir.getSize();
+				menuTarget.show(btnTargetDir, buttonSize.width / 2, buttonSize.height / 2);
+			}
+		});
+		itemTargetBySelection.addActionListener(e -> {
+			File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
+			if (file != null) {
+				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
+				int folderIndex = getIndexForFolder(folder);
+				if (folderIndex < 0) {
+					txtTargetDir.addItem(folder);
+					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
+					if (!settingsManager.getGUISettings().getTargetDirChangeHistory().contains(folder)) {
+						settingsManager.getGUISettings().getTargetDirChangeHistory().add(folder);
+					}
+					settingsManager.writeSettings(true);
+				} else {
+					txtTargetDir.setSelectedIndex(folderIndex);
+				}
+				if (settingsManager.getDirectorySettings().isRememberLastUsedPath()) {
+					settingsManager.getDirectorySettings().setSavePath(folder);
+					settingsManager.writeSettings(true);
+				}
+			}
+		});
+		itemTargetByInput.addActionListener(e -> {
+			String input = PathRenameDialog.showPathRenameDialog(this, (String)txtTargetDir.getSelectedItem());
+			if ((input != null) && (input.length() > 2)) {
+				if (!input.endsWith("/") && !input.endsWith("\\")) {
+					input += FileUtil.FILE_SEPERATOR;
+				}
+				input = BHUtil.filterPath(input, settingsManager);
+				input = BHUtil.reducePathLength(input, settingsManager);
+				int folderIndex = getIndexForFolder(input);
+				if (folderIndex < 0) {
+					txtTargetDir.addItem(input);
+					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
+					settingsManager.getGUISettings().getTargetDirChangeHistory().add(input);
+					settingsManager.writeSettings(true);
+				} else {
+					txtTargetDir.setSelectedIndex(folderIndex);
+				}
+				if (settingsManager.getDirectorySettings().isRememberLastUsedPath()) {
+					settingsManager.getDirectorySettings().setSavePath(input);
+					settingsManager.writeSettings(true);
+				}
+			}
+		});
 		menuTarget.add(itemTargetBySelection);
 		menuTarget.add(itemTargetByInput);
 
@@ -791,17 +862,38 @@ public class AdderWindow extends JFrame implements ActionListener {
 		pnlTargetDirAuto.add(btnSearchAgain);
 		pnlTargetDirAuto.add(btnNewKeyword);
 		if (settingsManager.getGUISettings().isDownloadPreviews()) {
-			btnShowPreviews.addActionListener(this);
+			btnShowPreviews.addActionListener(e -> {
+				tableColumnHider.setVisible("Preview", btnShowPreviews.isSelected());
+				int newRowHeight = btnShowPreviews.isSelected() ? previewHeight : defaultRowHeight;
+				// If Default row height is bigger, then use the default. This prevents the rows from getting too small on large displays.
+				jtAdder.setRowHeight(Integer.max(newRowHeight, defaultRowHeight));
+			});
 		}
-		btnSearchAgain.addActionListener(this);
-		btnNewKeyword.addActionListener(this);
+		btnSearchAgain.addActionListener(e -> {
+			if (kst != null) {
+				kst.removeKeywordSearchThreadListener(keywordSearchThreadListener);
+				kst = null;
+				btnSearchAgain.setText(Localization.getString("SearchAgain"));
+				setPGEnabled(false);
+			} else {
+				searchForKeywords();
+			}
+		});
+		btnNewKeyword.addActionListener(e -> {
+			Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(this, settingsManager, txtTitle.getSelectedText());
+			if (k != null) {
+				keywordManager.addKeyword(k);
+				searchForKeywords();
+			}
+		});
 
 		btnSelectAll.setToolTipText(Localization.getString("SelectAll"));
 		btnSelectNothing.setToolTipText(Localization.getString("SelectNothing"));
 		btnSelectOther.setToolTipText(Localization.getString("SelectOther"));
-		btnSelectAll.addActionListener(this);
-		btnSelectNothing.addActionListener(this);
-		btnSelectOther.addActionListener(this);
+		btnSelectAll.addActionListener(e -> select(false));
+		btnSelectNothing.addActionListener(e -> deselect(false));
+		btnSelectOther.addActionListener(e -> invertSelection(false));
+
 		pnlSelect.setLayout(new BoxLayout(pnlSelect, BoxLayout.LINE_AXIS));
 		pnlSelect.add(new JLabel(Localization.getString("Selection") + ":"));
 		pnlSelect.add(Box.createRigidArea(new Dimension(5, 0)));
@@ -816,9 +908,35 @@ public class AdderWindow extends JFrame implements ActionListener {
 		}
 		cbAdd.setEditable(true);
 		cbAdd.setPrototypeDisplayValue("XXXXXXXXXX");
-		btnAddTitle.addActionListener(this);
-		btnAdd.addActionListener(this);
-		btnImportIrada.addActionListener(this);
+		btnAddTitle.addActionListener(e -> {
+			String title = txtTitle.getText();
+			if (title.isEmpty()) {
+				return;
+			}
+			addToPaths(title);
+		});
+		btnAdd.addActionListener(e -> {
+			String addValue = (String)cbAdd.getSelectedItem();
+			if (addValue == null || addValue.isEmpty()) {
+				return;
+			}
+			addToPaths(addValue);
+
+			boolean available = false;
+			String strAdd = cbAdd.getSelectedItem().toString();
+			for (int a = 0; a < cbAdd.getItemCount(); a++) {
+				if (cbAdd.getItemAt(a).equals(strAdd)) {
+					available = true;
+					break;
+				}
+			}
+			if (!available) {
+				cbAdd.insertItemAt(strAdd, 0);
+				settingsManager.getGUISettings().getDownloadSelectionAddStrings().add(strAdd);
+				settingsManager.writeSettings(true);
+			}
+		});
+		btnImportIrada.addActionListener(e -> importIrada());
 		pnlPath.setLayout(new BoxLayout(pnlPath, BoxLayout.LINE_AXIS));
 		pnlPath.add(new JLabel(Localization.getString("TargetFolder") + ":"));
 		pnlPath.add(Box.createRigidArea(new Dimension(5, 0)));
@@ -834,10 +952,17 @@ public class AdderWindow extends JFrame implements ActionListener {
 		pnlActions.add(pnlSelect, BorderLayout.WEST);
 		pnlActions.add(pnlPath, BorderLayout.CENTER);
 
-		btnOK.addActionListener(this);
+		btnOK.addActionListener(e -> addLinksToQueue());
 		btnOK.setDefaultCapable(true);
 		btnCancel.setMnemonic(KeyEvent.VK_C);
-		btnCancel.addActionListener(this);
+		btnCancel.addActionListener(e -> {
+			if (this.huc != null) {
+				this.huc.stopAdding();
+				btnCancel.setEnabled(false);
+				return;
+			}
+			this.dispose();
+		});
 		pnlOKCancel.add(btnOK);
 		pnlOKCancel.add(btnCancel);
 
@@ -1439,163 +1564,6 @@ public class AdderWindow extends JFrame implements ActionListener {
 		btnTargetDir.setEnabled(b);
 		btnImportIrada.setEnabled(b);
 		btnShowPreviews.setEnabled(b);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnOK) {
-			addLinksToQueue();
-		} else if (e.getSource() == btnCancel) {
-			if (this.huc != null) {
-				this.huc.stopAdding();
-				btnCancel.setEnabled(false);
-				return;
-			}
-			this.dispose();
-		} else if (e.getSource() == btnSelectAll) {
-			select(false);
-		} else if (e.getSource() == btnSelectNothing) {
-			deselect(false);
-		} else if (e.getSource() == btnSelectOther) {
-			invertSelection(false);
-		} else if (e.getSource() == itemTargetBySelection) {
-			File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
-			if (file != null) {
-				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-				int folderIndex = getIndexForFolder(folder);
-				if (folderIndex < 0) {
-					txtTargetDir.addItem(folder);
-					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
-					if (!settingsManager.getGUISettings().getTargetDirChangeHistory().contains(folder)) {
-						settingsManager.getGUISettings().getTargetDirChangeHistory().add(folder);
-					}
-					settingsManager.writeSettings(true);
-				} else {
-					txtTargetDir.setSelectedIndex(folderIndex);
-				}
-				if (settingsManager.getDirectorySettings().isRememberLastUsedPath()) {
-					settingsManager.getDirectorySettings().setSavePath(folder);
-					settingsManager.writeSettings(true);
-				}
-			}
-		} else if (e.getSource() == itemTargetByInput) {
-			String input = PathRenameDialog.showPathRenameDialog(this, (String)txtTargetDir.getSelectedItem());
-			if ((input != null) && (input.length() > 2)) {
-				if (!input.endsWith("/") && !input.endsWith("\\")) {
-					input += FileUtil.FILE_SEPERATOR;
-				}
-				input = BHUtil.filterPath(input, settingsManager);
-				input = BHUtil.reducePathLength(input, settingsManager);
-				int folderIndex = getIndexForFolder(input);
-				if (folderIndex < 0) {
-					txtTargetDir.addItem(input);
-					txtTargetDir.setSelectedIndex(txtTargetDir.getItemCount() - 1);
-					settingsManager.getGUISettings().getTargetDirChangeHistory().add(input);
-					settingsManager.writeSettings(true);
-				} else {
-					txtTargetDir.setSelectedIndex(folderIndex);
-				}
-				if (settingsManager.getDirectorySettings().isRememberLastUsedPath()) {
-					settingsManager.getDirectorySettings().setSavePath(input);
-					settingsManager.writeSettings(true);
-				}
-			}
-		} else if (e.getSource() == btnAddTitle) {
-			String title = txtTitle.getText();
-			if (title.isEmpty()) {
-				return;
-			}
-			addToPaths(title);
-		} else if (e.getSource() == btnSearchAgain) {
-			if (kst != null) {
-				kst.removeKeywordSearchThreadListener(keywordSearchThreadListener);
-				kst = null;
-				btnSearchAgain.setText(Localization.getString("SearchAgain"));
-				setPGEnabled(false);
-			} else {
-				searchForKeywords();
-			}
-		} else if (e.getSource() == btnNewKeyword) {
-			Keyword k = AdderKeywordAddDialog.openAddKeywordDialog(this, settingsManager, txtTitle.getSelectedText());
-			if (k != null) {
-				keywordManager.addKeyword(k);
-				searchForKeywords();
-			}
-		} else if (e.getSource() == btnAdd) {
-			String addValue = (String)cbAdd.getSelectedItem();
-			if (addValue == null || addValue.isEmpty()) {
-				return;
-			}
-			addToPaths(addValue);
-
-			boolean available = false;
-			String strAdd = cbAdd.getSelectedItem().toString();
-			for (int a = 0; a < cbAdd.getItemCount(); a++) {
-				if (cbAdd.getItemAt(a).equals(strAdd)) {
-					available = true;
-					break;
-				}
-			}
-			if (!available) {
-				cbAdd.insertItemAt(strAdd, 0);
-				settingsManager.getGUISettings().getDownloadSelectionAddStrings().add(strAdd);
-				settingsManager.writeSettings(true);
-			}
-		} else if (e.getSource() == menuItemSelectKeyword) {
-			List<Keyword> vk = keywordManager.getKeywords();
-			Collections.sort(vk);
-			AdderKeywordSelectorTitle aks = new AdderKeywordSelectorTitle(this, Localization.getString("SelectKeyword"), true, null, vk, false, settingsManager);
-			if (aks.isOkPressed()) {
-				Keyword keyword = aks.getSelectedKeyword();
-				if (aks.isNewKeywordCreated()) {
-					keywordManager.addKeyword(keyword);
-				}
-
-				int[] selectedRows = jtAdder.getSelectedRows();
-				int keywordColumnModelIndex = jtAdder.getColumn("Keyword").getModelIndex();
-				for (int x = 0; x < selectedRows.length; x++) {
-					model.setValueAt(keyword, jtAdder.convertRowIndexToModel(selectedRows[x]), keywordColumnModelIndex);
-					updatePathColumn(selectedRows[x]);
-				}
-			}
-		} else if (e.getSource() == menuItemChangeTargetfilename) {
-			actionChangeTargetFilename();
-		} else if (e.getSource() == btnImportIrada) {
-			importIrada();
-		} else if (e.getSource() == menuItemChangeTargetBySelection) {
-			actionChangeTargetBySelection();
-		} else if (e.getSource() == menuItemChangeTargetByInput) {
-			actionChangeTargetByInput();
-		} else if (e.getSource() == menuItemSelect) {
-			select(true);
-		} else if (e.getSource() == menuItemDeselect) {
-			deselect(true);
-		} else if (e.getSource() == menuItemSelectOther) {
-			invertSelection(true);
-		} else if (e.getSource() == txtTargetDir) {
-			updateAllPathColumns();
-		} else if (e.getSource() == menuItemCopyURL) {
-			actionCopyURLs();
-		} else if (e.getSource() == menuItemOpenURL) {
-			actionOpenURLs();
-		} else if (e.getSource() == btnShowPreviews) {
-			tableColumnHider.setVisible("Preview", btnShowPreviews.isSelected());
-			int newRowHeight = btnShowPreviews.isSelected() ? previewHeight : defaultRowHeight;
-			// If Default row height is bigger, then use the default. This prevents the rows from getting too small on large displays.
-			jtAdder.setRowHeight(Integer.max(newRowHeight, defaultRowHeight));
-		} else if (e.getSource() == btnTargetDir) {
-			Point mousePosition = MouseInfo.getPointerInfo().getLocation();
-			Rectangle buttonBounds = btnTargetDir.getBounds();
-			buttonBounds.setLocation(btnTargetDir.getLocationOnScreen());
-			if (buttonBounds.contains(mousePosition)) {
-				Point mouseLocationRelativeToComp = new Point(mousePosition.x, mousePosition.y);
-				SwingUtilities.convertPointFromScreen(mouseLocationRelativeToComp, btnTargetDir);
-				menuTarget.show(btnTargetDir, mouseLocationRelativeToComp.x, mouseLocationRelativeToComp.y);
-			} else {
-				Dimension buttonSize = btnTargetDir.getSize();
-				menuTarget.show(btnTargetDir, buttonSize.width / 2, buttonSize.height / 2);
-			}
-		}
 	}
 
 	/**

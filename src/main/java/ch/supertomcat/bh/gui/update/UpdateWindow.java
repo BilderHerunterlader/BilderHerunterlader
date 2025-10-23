@@ -380,7 +380,7 @@ public class UpdateWindow extends JDialog {
 				}
 			} catch (UpdateException e) {
 				logger.error("CheckForUpdates failed", e);
-				lblMessages.insert("CheckForUpdates failed:\n" + ApplicationUtil.formatStackTrace(e) + "\n", 0);
+				appendMessage("CheckForUpdates failed:\n" + ApplicationUtil.formatStackTrace(e) + "\n");
 				btnChanges.setVisible(false);
 				btnUpdate.setEnabled(false);
 				btnWebsite.setVisible(false);
@@ -437,6 +437,16 @@ public class UpdateWindow extends JDialog {
 	}
 
 	/**
+	 * Append Message
+	 * 
+	 * @param message Message
+	 */
+	private void appendMessage(String message) {
+		lblMessages.setCaretPosition(lblMessages.getDocument().getLength());
+		lblMessages.append(message);
+	}
+
+	/**
 	 * updateColWidthsToSettingsManager
 	 */
 	private void updateColWidthsToSettingsManager() {
@@ -474,7 +484,7 @@ public class UpdateWindow extends JDialog {
 
 		@Override
 		public void updatesFailed() {
-			lblMessages.insert(Localization.getString("DownloadUpdateFailed"), 0);
+			appendMessage(Localization.getString("DownloadUpdateFailed" + "\n"));
 			updateSuccessfull = false;
 			updateManager.removeListener(this);
 			prgUpdate.setIndeterminate(false);
@@ -495,7 +505,7 @@ public class UpdateWindow extends JDialog {
 		@Override
 		public void updateDownloadStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
 			String message = Localization.getString("DownloadUpdate") + " (" + source + " -> " + target + ")\n";
-			lblMessages.insert(message, 0);
+			appendMessage(message);
 		}
 
 		@Override
@@ -506,7 +516,7 @@ public class UpdateWindow extends JDialog {
 		@Override
 		public void updateUnpackStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
 			String message = Localization.getString("UnpackUpdate") + " (" + source + " -> " + target + ")\n";
-			lblMessages.insert(message, 0);
+			appendMessage(message);
 		}
 
 		@Override
@@ -517,7 +527,7 @@ public class UpdateWindow extends JDialog {
 		@Override
 		public void updateCopyStarted(String source, String target) {
 			String message = Localization.getString("CopyUpdate") + " (" + source + " -> " + target + ")\n";
-			lblMessages.insert(message, 0);
+			appendMessage(message);
 		}
 
 		@Override
@@ -527,7 +537,7 @@ public class UpdateWindow extends JDialog {
 
 		@Override
 		public void errorOccured(String message, Exception ex) {
-			lblMessages.insert(message + "\n" + ApplicationUtil.formatStackTrace(ex) + "\n", 0);
+			appendMessage(message + "\n" + ApplicationUtil.formatStackTrace(ex) + "\n");
 		}
 	}
 }
