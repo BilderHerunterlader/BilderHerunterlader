@@ -257,7 +257,6 @@ public abstract class BH {
 		}
 
 		try (ExecutorService executor = Executors.newFixedThreadPool(threadCount)) {
-
 			List<Callable<Object>> tasks = new ArrayList<>();
 			tasks.add(Executors.callable(new Runnable() {
 				@Override
@@ -389,20 +388,26 @@ public abstract class BH {
 
 		if (settingsManager.getSettings().isCheckForUpdatesOnStart()) {
 			// If the user wants, we check if updates are available
-			UpdateManager updateManager = new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent);
-			updateWindow = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
-			if (updateWindow.checkForUpdates()) {
-				// If Updates are available, show the Update-Window
-				EventQueue.invokeLater(() -> {
-					updateWindow.setVisible(true);
-					updateWindow.toFront();
-				});
-			} else {
-				// If not, dispose it
-				EventQueue.invokeLater(() -> {
-					updateWindow.dispose();
-					updateWindow = null;
-				});
+
+			try {
+				HTTPXMLUpdateSource updateSource = new HTTPXMLUpdateSource(proxyManager);
+				UpdateManager updateManager = new UpdateManager(updateSource, hostManager, guiEvent);
+				updateWindow = new UpdateWindow(updateManager, main, queueManager, keywordManager, settingsManager, guiEvent);
+				if (updateWindow.checkForUpdates()) {
+					// If Updates are available, show the Update-Window
+					EventQueue.invokeLater(() -> {
+						updateWindow.setVisible(true);
+						updateWindow.toFront();
+					});
+				} else {
+					// If not, dispose it
+					EventQueue.invokeLater(() -> {
+						updateWindow.dispose();
+						updateWindow = null;
+					});
+				}
+			} catch (IOException | SAXException | JAXBException e) {
+				logger.error("Could not initiliaze update source", e);
 			}
 		}
 	}

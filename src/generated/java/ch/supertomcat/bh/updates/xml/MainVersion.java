@@ -5,10 +5,8 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
-import java.util.ArrayList;
-import java.util.List;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
@@ -16,24 +14,18 @@ import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for UpdateData complex type</p>.
+ * <p>Java class for MainVersion complex type</p>.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.</p>
  * 
  * <pre>{@code
- * <complexType name="UpdateData">
+ * <complexType name="MainVersion">
  *   <complexContent>
  *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       <sequence>
- *         <element name="source" type="{}UpdateDataAdditionalSource" maxOccurs="unbounded" minOccurs="0"/>
- *       </sequence>
  *       <attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       <attribute name="src" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       <attribute name="filename" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *       <attribute name="name" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       <attribute name="bhminversion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       <attribute name="bhmaxversion" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       <attribute name="delete" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     </restriction>
  *   </complexContent>
  * </complexType>
@@ -42,12 +34,9 @@ import jakarta.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "UpdateData", propOrder = {
-    "source"
-})
-public class UpdateData {
+@XmlType(name = "MainVersion")
+public class MainVersion {
 
-    protected List<UpdateDataAdditionalSource> source;
     @XmlAttribute(name = "version", required = true)
     protected String version;
     @XmlAttribute(name = "src", required = true)
@@ -56,44 +45,6 @@ public class UpdateData {
     protected String filename;
     @XmlAttribute(name = "name", required = true)
     protected String name;
-    @XmlAttribute(name = "bhminversion")
-    protected String bhminversion;
-    @XmlAttribute(name = "bhmaxversion")
-    protected String bhmaxversion;
-    @XmlAttribute(name = "delete")
-    protected String delete;
-
-    /**
-     * Gets the value of the source property.
-     * 
-     * <p>This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the source property.</p>
-     * 
-     * <p>
-     * For example, to add a new item, do as follows:
-     * </p>
-     * <pre>
-     * getSource().add(newItem);
-     * </pre>
-     * 
-     * 
-     * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link UpdateDataAdditionalSource }
-     * </p>
-     * 
-     * 
-     * @return
-     *     The value of the source property.
-     */
-    public List<UpdateDataAdditionalSource> getSource() {
-        if (source == null) {
-            source = new ArrayList<>();
-        }
-        return this.source;
-    }
 
     /**
      * Gets the value of the version property.
@@ -189,78 +140,6 @@ public class UpdateData {
      */
     public void setName(String value) {
         this.name = value;
-    }
-
-    /**
-     * Gets the value of the bhminversion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getBhminversion() {
-        return bhminversion;
-    }
-
-    /**
-     * Sets the value of the bhminversion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setBhminversion(String value) {
-        this.bhminversion = value;
-    }
-
-    /**
-     * Gets the value of the bhmaxversion property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getBhmaxversion() {
-        return bhmaxversion;
-    }
-
-    /**
-     * Sets the value of the bhmaxversion property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setBhmaxversion(String value) {
-        this.bhmaxversion = value;
-    }
-
-    /**
-     * Gets the value of the delete property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getDelete() {
-        return delete;
-    }
-
-    /**
-     * Sets the value of the delete property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setDelete(String value) {
-        this.delete = value;
     }
 
 }

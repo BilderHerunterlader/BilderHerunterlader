@@ -2,7 +2,7 @@ package ch.supertomcat.bh.gui.update;
 
 import javax.swing.table.DefaultTableModel;
 
-import ch.supertomcat.bh.update.containers.UpdateObject;
+import ch.supertomcat.bh.update.containers.WrappedUpdateData;
 
 /**
  * TableModel for UpdateWindow
@@ -32,15 +32,15 @@ public class UpdateTableModel extends DefaultTableModel {
 	/**
 	 * Adds a row
 	 * 
-	 * @param update UpdateObject
+	 * @param wrappedUpdateData WrappedUpdateData
 	 */
-	public void addRow(UpdateObject update) {
+	public void addRow(WrappedUpdateData wrappedUpdateData) {
 		Object[] data = new Object[5];
-		data[0] = update.getAction();
-		data[1] = update.getTypeAsString();
-		data[2] = update.getName();
-		data[3] = update.getVersion();
-		data[4] = update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE ? update.getComment() : update.getSources().get(0).getSource();
+		data[0] = wrappedUpdateData.getAction();
+		data[1] = wrappedUpdateData.getType();
+		data[2] = wrappedUpdateData.getName();
+		data[3] = wrappedUpdateData.getVersion();
+		data[4] = wrappedUpdateData.getComment();
 		this.addRow(data);
 	}
 

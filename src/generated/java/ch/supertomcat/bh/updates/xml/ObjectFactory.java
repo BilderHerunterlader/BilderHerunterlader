@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import jakarta.xml.bind.annotation.XmlRegistry;
 
@@ -13,7 +13,7 @@ import jakarta.xml.bind.annotation.XmlRegistry;
 /**
  * This object contains factory methods for each 
  * Java content interface and Java element interface 
- * generated in the ch.supertomcat.bh.update.sources.httpxml.xml package. 
+ * generated in the ch.supertomcat.bh.updates.xml package. 
  * <p>An ObjectFactory allows you to programmatically 
  * construct new instances of the Java representation 
  * for XML content. The Java representation of XML 
@@ -29,7 +29,7 @@ public class ObjectFactory {
 
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: ch.supertomcat.bh.update.sources.httpxml.xml
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: ch.supertomcat.bh.updates.xml
      * 
      */
     public ObjectFactory() {
@@ -66,33 +66,33 @@ public class ObjectFactory {
     }
 
     /**
-     * Create an instance of {@link VersionDescription }
+     * Create an instance of {@link RedirectUpdates }
      * 
      * @return
-     *     the new instance of {@link VersionDescription }
+     *     the new instance of {@link RedirectUpdates }
      */
-    public VersionDescription createVersionDescription() {
-        return new VersionDescription();
+    public RedirectUpdates createRedirectUpdates() {
+        return new RedirectUpdates();
     }
 
     /**
-     * Create an instance of {@link Redirects }
+     * Create an instance of {@link HosterUpdates }
      * 
      * @return
-     *     the new instance of {@link Redirects }
+     *     the new instance of {@link HosterUpdates }
      */
-    public Redirects createRedirects() {
-        return new Redirects();
+    public HosterUpdates createHosterUpdates() {
+        return new HosterUpdates();
     }
 
     /**
-     * Create an instance of {@link Hoster }
+     * Create an instance of {@link RuleUpdates }
      * 
      * @return
-     *     the new instance of {@link Hoster }
+     *     the new instance of {@link RuleUpdates }
      */
-    public Hoster createHoster() {
-        return new Hoster();
+    public RuleUpdates createRuleUpdates() {
+        return new RuleUpdates();
     }
 
     /**

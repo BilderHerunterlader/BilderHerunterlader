@@ -1,4 +1,4 @@
-package ch.supertomcat.bh.update.sources.httpxml;
+package ch.supertomcat.bh.update;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,8 +16,8 @@ import javax.xml.validation.SchemaFactory;
 
 import org.xml.sax.SAXException;
 
-import ch.supertomcat.bh.update.sources.httpxml.xml.ObjectFactory;
-import ch.supertomcat.bh.update.sources.httpxml.xml.Updates;
+import ch.supertomcat.bh.updates.xml.ObjectFactory;
+import ch.supertomcat.bh.updates.xml.Updates;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Marshaller;
@@ -53,7 +53,7 @@ public class UpdatesXmlIO {
 		JAXBContext jaxbContext = JAXBContext.newInstance(ObjectFactory.class);
 
 		Schema schema;
-		try (InputStream schemaIn = getClass().getResourceAsStream("/ch/supertomcat/bh/update/sources/httpxml/updates.xsd")) {
+		try (InputStream schemaIn = getClass().getResourceAsStream("/ch/supertomcat/bh/updates/xml/updates.xsd")) {
 			SchemaFactory sf = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 			Source schemaSource = new StreamSource(schemaIn);
 			schema = sf.newSchema(schemaSource);

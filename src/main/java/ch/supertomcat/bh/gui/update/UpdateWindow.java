@@ -5,12 +5,8 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.util.Iterator;
-import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -33,19 +29,17 @@ import org.slf4j.LoggerFactory;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.GuiEvent;
-import ch.supertomcat.bh.gui.renderer.UpdateActionColumnRenderer;
-import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.gui.renderer.UpdateColumnRenderer;
 import ch.supertomcat.bh.keywords.KeywordManager;
 import ch.supertomcat.bh.queue.QueueManager;
-import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.update.UpdateException;
 import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.UpdateManagerListener;
-import ch.supertomcat.bh.update.containers.UpdateList;
-import ch.supertomcat.bh.update.containers.UpdateObject;
-import ch.supertomcat.bh.update.containers.UpdateObject.UpdateActionType;
-import ch.supertomcat.bh.update.containers.UpdateObject.UpdateType;
+import ch.supertomcat.bh.update.containers.UpdateActionType;
+import ch.supertomcat.bh.update.containers.UpdateType;
+import ch.supertomcat.bh.update.containers.WrappedUpdateData;
+import ch.supertomcat.bh.update.containers.WrappedUpdates;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
@@ -59,7 +53,7 @@ import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowR
 /**
  * Update-Window
  */
-public class UpdateWindow extends JDialog implements ActionListener, TableColumnModelListener, WindowListener, UpdateManagerListener {
+public class UpdateWindow extends JDialog {
 	/**
 	 * UID
 	 */
@@ -71,14 +65,34 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private static Logger logger = LoggerFactory.getLogger(UpdateWindow.class);
 
 	/**
-	 * Label
+	 * Update Manager
 	 */
-	private JLabel lblMain = new JLabel("");
+	private final UpdateManager updateManager;
 
 	/**
-	 * Panel
+	 * Queue Manager
 	 */
-	private JPanel pnlMain = new JPanel();
+	private final QueueManager queueManager;
+
+	/**
+	 * Keyword Manager
+	 */
+	private final KeywordManager keywordManager;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
+	 * Update Manager Listener
+	 */
+	private final UpdateWindowUpdateManagerListener updateManagerListener = new UpdateWindowUpdateManagerListener();
+
+	/**
+	 * Label
+	 */
+	private JLabel lblMain = new JLabel();
 
 	/**
 	 * Button
@@ -126,14 +140,19 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private JButton btnUpdate = new JButton(Localization.getString("Update"), Icons.getTangoSVGIcon("status/software-update-available.svg", 16));
 
 	/**
-	 * Table
-	 */
-	private JTable table = new JTable();
-
-	/**
 	 * TableModel
 	 */
 	private UpdateTableModel model = new UpdateTableModel();
+
+	/**
+	 * Table
+	 */
+	private JTable table = new JTable(model);
+
+	/**
+	 * UpdateActionColumnRenderer
+	 */
+	private UpdateColumnRenderer uacr = new UpdateColumnRenderer();
 
 	/**
 	 * Scrollpane
@@ -155,9 +174,10 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 */
 	private GridBagLayoutUtil gblt = new GridBagLayoutUtil(1, 1, 1, 1);
 
-	private UpdateManager updateManager = null;
-
-	private UpdateList updateList = null;
+	/**
+	 * Update List
+	 */
+	private WrappedUpdates updateList = null;
 
 	/**
 	 * Changelog
@@ -175,36 +195,6 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	private boolean updateSuccessfull = false;
 
 	/**
-	 * UpdateActionColumnRenderer
-	 */
-	private UpdateActionColumnRenderer uacr = new UpdateActionColumnRenderer();
-
-	/**
-	 * Queue Manager
-	 */
-	private final QueueManager queueManager;
-
-	/**
-	 * Keyword Manager
-	 */
-	private final KeywordManager keywordManager;
-
-	/**
-	 * Settings Manager
-	 */
-	private final SettingsManager settingsManager;
-
-	/**
-	 * Host Manager
-	 */
-	private final HostManager hostManager;
-
-	/**
-	 * GUI Event
-	 */
-	private final GuiEvent guiEvent;
-
-	/**
 	 * Constructor
 	 * 
 	 * @param updateManager UpdateManager
@@ -212,20 +202,26 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
 	 * @param settingsManager Settings Manager
-	 * @param hostManager Host Manager
 	 * @param guiEvent GUI Event
 	 */
-	public UpdateWindow(UpdateManager updateManager, Window owner, QueueManager queueManager, KeywordManager keywordManager, SettingsManager settingsManager, HostManager hostManager,
-			GuiEvent guiEvent) {
+	public UpdateWindow(UpdateManager updateManager, Window owner, QueueManager queueManager, KeywordManager keywordManager, SettingsManager settingsManager, GuiEvent guiEvent) {
 		this.updateManager = updateManager;
 		this.queueManager = queueManager;
 		this.keywordManager = keywordManager;
 		this.settingsManager = settingsManager;
-		this.hostManager = hostManager;
-		this.guiEvent = guiEvent;
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setIconImage(BHIcons.getBHMultiResImage("BH.png"));
-		addWindowListener(this);
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosed(WindowEvent e) {
+				guiEvent.updateWindowClosed(updateRunned, updateSuccessfull);
+			}
+
+			@Override
+			public void windowOpened(WindowEvent e) {
+				guiEvent.updateWindowOpened();
+			}
+		});
 
 		setModal(true);
 		getContentPane().setLayout(gbl);
@@ -236,20 +232,54 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		pnlButtons.add(btnCheck);
 		pnlButtons.add(btnUpdate);
 
+		JPanel pnlMain = new JPanel();
 		pnlMain.add(lblMain);
 		pnlMain.add(btnWebsite);
 		pnlMain.add(btnChanges);
-		btnWebsite.addActionListener(this);
+
+		btnWebsite.addActionListener(e -> {
+			String url;
+			if (settingsManager.getGUISettings().getLanguage().equals("de_DE")) {
+				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=de";
+			} else {
+				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=en";
+			}
+			FileExplorerUtil.openURL(url);
+		});
 		btnWebsite.setVisible(false);
-		btnChanges.addActionListener(this);
+
+		btnChanges.addActionListener(e -> {
+			String message = changelog.replace("\\n", "\n");
+			UpdateChangesDialog dlg = new UpdateChangesDialog(this, message, Localization.getString("Changes"));
+			dlg.setVisible(true);
+		});
 		btnChanges.setVisible(false);
 
-		btnCheck.addActionListener(this);
-		btnUpdate.addActionListener(this);
+		btnCheck.addActionListener(e -> {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					checkForUpdates();
+				}
+			});
+			t.setName("UpdateWindow-Check-Thread-" + t.threadId());
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		});
+
+		btnUpdate.addActionListener(e -> {
+			Thread t = new Thread(new Runnable() {
+				@Override
+				public void run() {
+					startUpdate();
+				}
+			});
+			t.setName("UpdateWindow-Thread-" + t.threadId());
+			t.setPriority(Thread.MIN_PRIORITY);
+			t.start();
+		});
 		btnUpdate.setEnabled(false);
 		prgUpdate.setVisible(false);
-
-		table.setModel(model);
 
 		TableUtil.internationalizeColumns(table);
 
@@ -258,6 +288,7 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		table.getColumn("UpdateAction").setCellRenderer(uacr);
 		table.getColumn("UpdateAction").setPreferredWidth(updateActionTableHeaderWidth);
 		int updateTypeTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("UpdateType"), 20);
+		table.getColumn("UpdateType").setCellRenderer(uacr);
 		table.getColumn("UpdateType").setPreferredWidth(updateTypeTableHeaderWidth);
 		int updateNameTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("Name"), 50);
 		table.getColumn("Name").setPreferredWidth(updateNameTableHeaderWidth);
@@ -266,7 +297,35 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		int updateSourceNoteTableHeaderWidth = TableUtil.calculateColumnHeaderWidth(table, table.getColumn("UpdateSourceNote"), 15);
 		table.getColumn("UpdateSourceNote").setPreferredWidth(updateSourceNoteTableHeaderWidth);
 		updateColWidthsFromSettingsManager();
-		table.getColumnModel().addColumnModelListener(this);
+
+		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
+
+			@Override
+			public void columnAdded(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnMarginChanged(ChangeEvent e) {
+				updateColWidthsToSettingsManager();
+			}
+
+			@Override
+			public void columnMoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnRemoved(TableColumnModelEvent e) {
+				// Nothing to do
+			}
+
+			@Override
+			public void columnSelectionChanged(ListSelectionEvent e) {
+				// Nothing to do
+			}
+		});
+
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setGridColor(BHGUIConstants.TABLE_GRID_COLOR);
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
@@ -307,208 +366,60 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		btnCheck.setEnabled(false);
 		prgUpdate.setIndeterminate(true);
 		prgUpdate.setVisible(true);
-		boolean retval = false;
-
-		boolean updateAvailable = false;
 		try {
-			updateList = updateManager.checkForUpdates();
-			updateAvailable = updateList != null;
-		} catch (UpdateException e) {
-			logger.error("CheckForUpdates failed", e);
-			String cause = e.getCause() != null ? e.getCause().getMessage() : "Unkown cause";
-			lblMessages.setText(e.getMessage() + ": " + cause + "\n" + lblMessages.getText());
-			updateAvailable = false;
-		}
-		if (!updateAvailable) {
-			btnCheck.setEnabled(true);
+			try {
+				updateList = updateManager.checkForUpdates();
+				if (!updateList.isUpdateRequired() && !updateList.isSubUpdateRequired()) {
+					lblMain.setText(Localization.getString("NoNewProgramVersion"));
+					lblStatus.setText(Localization.getString("NoUpdatesAvailable"));
+					btnChanges.setVisible(false);
+					btnUpdate.setEnabled(false);
+					btnWebsite.setVisible(false);
+					btnCheck.setEnabled(true);
+					return false;
+				}
+			} catch (UpdateException e) {
+				logger.error("CheckForUpdates failed", e);
+				lblMessages.insert("CheckForUpdates failed:\n" + ApplicationUtil.formatStackTrace(e) + "\n", 0);
+				btnChanges.setVisible(false);
+				btnUpdate.setEnabled(false);
+				btnWebsite.setVisible(false);
+				btnCheck.setEnabled(true);
+				return false;
+			}
+
+			btnUpdate.setEnabled(true);
+
+			if (updateList.isUpdateRequired()) {
+				lblMain.setText(Localization.getString("NewProgramVersion") + " (v" + updateList.getVersion() + ")");
+				changelog = updateList.getChangeLog().replace("\\n", "\n");
+				btnChanges.setVisible(true);
+				btnWebsite.setVisible(true);
+			} else {
+				lblMain.setText(Localization.getString("NoNewProgramVersion"));
+				changelog = "";
+				btnChanges.setVisible(false);
+				btnWebsite.setVisible(false);
+			}
+
+			model.removeAllRows();
+
+			updateList.getHosterUpdates().stream().filter(WrappedUpdateData::isUpdateRequired).forEachOrdered(model::addRow);
+			updateList.getRedirectUpdates().stream().filter(WrappedUpdateData::isUpdateRequired).forEachOrdered(model::addRow);
+			updateList.getRuleUpdates().stream().filter(WrappedUpdateData::isUpdateRequired).forEachOrdered(model::addRow);
+
+			if (model.getRowCount() > 0) {
+				lblStatus.setText(Localization.getString("UpdatesAvailable"));
+			} else {
+				lblStatus.setText(Localization.getString("NoUpdatesAvailable"));
+			}
+
+			btnCheck.setEnabled(false);
+			return true;
+		} finally {
 			prgUpdate.setIndeterminate(false);
 			prgUpdate.setVisible(false);
-			return false;
 		}
-
-		UpdateObject updateBH = updateList.getApplicationUpdate();
-		if (updateBH == null) {
-			btnCheck.setEnabled(true);
-			prgUpdate.setIndeterminate(false);
-			prgUpdate.setVisible(false);
-			// Revert Text
-			lblMain.setText(Localization.getString("NoNewProgramVersion"));
-			logger.error("Could not check for updates. updateBH is null");
-			lblMessages.setText("Check For Updates failed: updateBH is null\n" + lblMessages.getText());
-			return false;
-		}
-		List<UpdateObject> updateRules = updateList.getRulesUpdates();
-		List<UpdateObject> updateHostPlugins = updateList.getHostPluginUpdates();
-		List<UpdateObject> updateRedirectPlugins = updateList.getRedirectPluginUpdates();
-
-		// Main
-		if (ApplicationUtil.compareVersions(updateBH.getVersion(), ApplicationProperties.getProperty(ApplicationMain.APPLICATION_VERSION)) > 0) {
-			lblMain.setText(Localization.getString("NewProgramVersion") + " (v" + updateBH.getVersion() + ")");
-			btnWebsite.setVisible(false);
-			btnChanges.setVisible(true);
-			btnUpdate.setEnabled(true);
-			retval = true;
-			updateBH.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
-			changelog = updateBH.getChangeLog();
-		} else {
-			lblMain.setText(Localization.getString("NoNewProgramVersion"));
-			updateBH.setAction(UpdateObject.UpdateActionType.ACTION_NONE);
-		}
-
-		// Hosts
-		for (int i = 0; i < updateHostPlugins.size(); i++) {
-			UpdateObject update = updateHostPlugins.get(i);
-			if (update == null) {
-				btnCheck.setEnabled(true);
-				prgUpdate.setIndeterminate(false);
-				prgUpdate.setVisible(false);
-				// Revert enabled buttons
-				btnChanges.setVisible(false);
-				btnUpdate.setEnabled(false);
-				// Revert Text
-				lblMain.setText(Localization.getString("NoNewProgramVersion"));
-				// Revert table entries
-				model.removeAllRows();
-				logger.error("Could not check for updates. update is null");
-				lblMessages.setText("Check For Updates failed: update is null\n" + lblMessages.getText());
-				return false;
-			}
-
-			String v = hostManager.getHostVersion(update.getName());
-			if (!v.equals("")) {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					model.addRow(update);
-				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
-					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
-						model.addRow(update);
-					}
-				}
-			} else {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NONE);
-				} else if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NEW);
-					model.addRow(update);
-				}
-			}
-		}
-
-		// Redirects
-		for (int i = 0; i < updateRedirectPlugins.size(); i++) {
-			UpdateObject update = updateRedirectPlugins.get(i);
-			if (update == null) {
-				btnCheck.setEnabled(true);
-				prgUpdate.setIndeterminate(false);
-				prgUpdate.setVisible(false);
-				// Revert enabled buttons
-				btnChanges.setVisible(false);
-				btnUpdate.setEnabled(false);
-				// Revert Text
-				lblMain.setText(Localization.getString("NoNewProgramVersion"));
-				// Revert table entries
-				model.removeAllRows();
-				logger.error("Could not check for updates. update is null");
-				lblMessages.setText("Check For Updates failed: update is null\n" + lblMessages.getText());
-				return false;
-			}
-
-			String v = hostManager.getRedirectManager().getRedirectVersion(update.getName());
-			if (!v.equals("")) {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					model.addRow(update);
-				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
-					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
-						model.addRow(update);
-					}
-				}
-			} else {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NONE);
-				} else if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NEW);
-					model.addRow(update);
-				}
-			}
-		}
-
-		// Rules
-		int sizer = hostManager.getHostRules().getRules().size();
-
-		// We create first an array with name and version of all rules
-		String[][] ruleVersions = new String[sizer][2];
-		Iterator<Rule> it = hostManager.getHostRules().getRules().iterator();
-		int ir = 0;
-		Rule r;
-		while (it.hasNext()) {
-			r = it.next();
-			ruleVersions[ir][0] = r.getFile().getFileName().toString();
-			ruleVersions[ir][1] = r.getVersion();
-			ir++;
-		}
-
-		String v;
-		for (int i = 0; i < updateRules.size(); i++) {
-			UpdateObject update = updateRules.get(i);
-			if (update == null) {
-				btnCheck.setEnabled(true);
-				prgUpdate.setIndeterminate(false);
-				prgUpdate.setVisible(false);
-				// Revert enabled buttons
-				btnChanges.setVisible(false);
-				btnUpdate.setEnabled(false);
-				// Revert Text
-				lblMain.setText(Localization.getString("NoNewProgramVersion"));
-				// Revert table entries
-				model.removeAllRows();
-				logger.error("Could not check for updates. update is null");
-				lblMessages.setText("Check For Updates failed: update is null\n" + lblMessages.getText());
-				return false;
-			}
-
-			// Now we try to find the version of the current rule to update
-			v = "";
-			for (int x = 0; x < ruleVersions.length; x++) {
-				if ((ruleVersions[x][0] == null) || (ruleVersions[x][1] == null)) {
-					logger.error("NullPointer in vr-Array");
-					continue;
-				}
-				if (ruleVersions[x][0].equals(update.getName())) {
-					v = ruleVersions[x][1];
-				}
-			}
-
-			if (!v.equals("")) {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					model.addRow(update);
-				} else if (ApplicationUtil.compareVersions(update.getVersion(), v) > 0) {
-					if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-						update.setAction(UpdateObject.UpdateActionType.ACTION_UPDATE);
-						model.addRow(update);
-					}
-				}
-			} else {
-				if (update.getAction() == UpdateObject.UpdateActionType.ACTION_REMOVE) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NONE);
-				} else if (UpdateManager.checkMinMaxVersions(update.getBhMinVersion(), update.getBhMaxVersion())) {
-					update.setAction(UpdateObject.UpdateActionType.ACTION_NEW);
-					model.addRow(update);
-				}
-			}
-		}
-
-		if (model.getRowCount() > 0) {
-			lblStatus.setText(Localization.getString("UpdatesAvailable"));
-			btnUpdate.setEnabled(true);
-			retval = true;
-		} else {
-			lblStatus.setText(Localization.getString("NoUpdatesAvailable"));
-		}
-		prgUpdate.setIndeterminate(false);
-		prgUpdate.setVisible(false);
-		btnCheck.setEnabled(false);
-		return retval;
 	}
 
 	private void startUpdate() {
@@ -516,49 +427,13 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		queueManager.closeDatabase();
 		keywordManager.closeDatabase();
 
+		lblMessages.setText("");
 		updateRunned = true;
 		btnUpdate.setEnabled(false);
 		prgUpdate.setIndeterminate(true);
 		prgUpdate.setVisible(true);
-		updateManager.addListener(this);
+		updateManager.addListener(updateManagerListener);
 		updateManager.startUpdate(updateList, this);
-	}
-
-	@Override
-	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == btnCheck) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					checkForUpdates();
-				}
-			});
-			t.setName("UpdateWindow-Check-Thread-" + t.threadId());
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == btnUpdate) {
-			Thread t = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					startUpdate();
-				}
-			});
-			t.setName("UpdateWindow-Thread-" + t.threadId());
-			t.setPriority(Thread.MIN_PRIORITY);
-			t.start();
-		} else if (e.getSource() == btnWebsite) {
-			String url;
-			if (settingsManager.getGUISettings().getLanguage().equals("de_DE")) {
-				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=de";
-			} else {
-				url = "http://bihe.berlios.de/page/?loc=bilderherunterlader/download&lng=en";
-			}
-			FileExplorerUtil.openURL(url);
-		} else if (e.getSource() == btnChanges) {
-			String message = changelog.replace("\\n", "\n");
-			UpdateChangesDialog dlg = new UpdateChangesDialog(this, message, Localization.getString("Changes"));
-			dlg.setVisible(true);
-		}
 	}
 
 	/**
@@ -582,152 +457,77 @@ public class UpdateWindow extends JDialog implements ActionListener, TableColumn
 		TableUtil.applyColWidths(table, settingsManager.getColWidthsUpdate());
 	}
 
-	@Override
-	public void columnAdded(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnMarginChanged(ChangeEvent e) {
-		updateColWidthsToSettingsManager();
-	}
-
-	@Override
-	public void columnMoved(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnRemoved(TableColumnModelEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void columnSelectionChanged(ListSelectionEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowActivated(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowClosed(WindowEvent e) {
-		guiEvent.updateWindowClosed(updateRunned, updateSuccessfull);
-	}
-
-	@Override
-	public void windowClosing(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowDeactivated(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowDeiconified(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowIconified(WindowEvent e) {
-		// Nothing to do
-	}
-
-	@Override
-	public void windowOpened(WindowEvent e) {
-		guiEvent.updateWindowOpened();
-	}
-
-	@Override
-	public void updatesStarted() {
-		// Nothing to do
-	}
-
-	@Override
-	public void updatesComplete() {
-		updateSuccessfull = true;
-		updateManager.removeListener(this);
-	}
-
-	@Override
-	public void updatesFailed() {
-		updateSuccessfull = false;
-		updateManager.removeListener(this);
-	}
-
-	@Override
-	public void updateInstallStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
-		String action = "Unknown Action";
-		String message = "Unknown Message";
-		switch (updateActionType) {
-			case ACTION_NEW, ACTION_UPDATE:
-				action = Localization.getString("DownloadUpdate");
-				message = source;
-				break;
-			case ACTION_REMOVE:
-				action = Localization.getString("DeleteUpdate");
-				message = target;
-				break;
-			default:
-				break;
+	private class UpdateWindowUpdateManagerListener implements UpdateManagerListener {
+		@Override
+		public void updatesStarted() {
+			// Nothing to do
 		}
-		lblMessages.setText(action + " (" + message + ")\n" + lblMessages.getText());
-	}
 
-	@Override
-	public void updateInstallComplete(UpdateType updateType, UpdateActionType updateActionType) {
-		// Nothing to do
-	}
-
-	@Override
-	public void updateInstallFailed(UpdateType updateType, UpdateActionType updateActionType) {
-		String message = "Unknown Message";
-		switch (updateActionType) {
-			case ACTION_NEW:
-				message = Localization.getString("DownloadUpdateFailed");
-				break;
-			case ACTION_UPDATE:
-				message = Localization.getString("DownloadUpdateFailed");
-				break;
-			case ACTION_REMOVE:
-				message = Localization.getString("DeleteUpdateFailed");
-				break;
-			default:
-				break;
+		@Override
+		public void updatesComplete() {
+			lblStatus.setText(Localization.getString("UpdatesInstalled"));
+			updateSuccessfull = true;
+			updateManager.removeListener(this);
+			prgUpdate.setIndeterminate(false);
+			prgUpdate.setVisible(false);
 		}
-		lblMessages.setText(message + "\n" + lblMessages.getText());
-	}
 
-	@Override
-	public void errorOccured(String message) {
-		lblMessages.setText(message + "\n" + lblMessages.getText());
-	}
-
-	@Override
-	public void updatesInstalled(int updateCount) {
-		if (updateCount == 0) {
-			if (!(lblStatus.getText().equals(Localization.getString("NoUpdatesAvailable")))) {
-				lblStatus.setText(Localization.getString("NoUpdatesInstalled"));
-			}
-		} else {
-			lblStatus.setText(updateCount + " " + Localization.getString("UpdatesInstalled"));
+		@Override
+		public void updatesFailed() {
+			lblMessages.insert(Localization.getString("DownloadUpdateFailed"), 0);
+			updateSuccessfull = false;
+			updateManager.removeListener(this);
+			prgUpdate.setIndeterminate(false);
+			prgUpdate.setVisible(false);
 		}
-		prgUpdate.setIndeterminate(false);
-		prgUpdate.setVisible(false);
-	}
 
-	@Override
-	public void newProgramVersionInstalled() {
-		lblMain.setText(Localization.getString("NewProgramVersionInstalled"));
-	}
+		@Override
+		public void newProgramVersionInstalled() {
+			lblMain.setText(Localization.getString("NewProgramVersionInstalled"));
+		}
 
-	@Override
-	public void newProgramVersionInstallFailed() {
-		lblMain.setText(Localization.getString("NewProgramVersionInstallFailed"));
-		btnChanges.setVisible(false);
+		@Override
+		public void newProgramVersionInstallFailed() {
+			lblMain.setText(Localization.getString("NewProgramVersionInstallFailed"));
+			btnChanges.setVisible(false);
+		}
+
+		@Override
+		public void updateDownloadStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
+			String message = Localization.getString("DownloadUpdate") + " (" + source + " -> " + target + ")\n";
+			lblMessages.insert(message, 0);
+		}
+
+		@Override
+		public void updateDownloadComplete(UpdateType updateType, UpdateActionType updateActionType) {
+			// Nothing to do
+		}
+
+		@Override
+		public void updateUnpackStarted(UpdateType updateType, UpdateActionType updateActionType, String source, String target) {
+			String message = Localization.getString("UnpackUpdate") + " (" + source + " -> " + target + ")\n";
+			lblMessages.insert(message, 0);
+		}
+
+		@Override
+		public void updateUnpackComplete(UpdateType updateType, UpdateActionType updateActionType) {
+			// Nothing to do
+		}
+
+		@Override
+		public void updateCopyStarted(String source, String target) {
+			String message = Localization.getString("CopyUpdate") + " (" + source + " -> " + target + ")\n";
+			lblMessages.insert(message, 0);
+		}
+
+		@Override
+		public void updateCopyComplete() {
+			// Nothing to do
+		}
+
+		@Override
+		public void errorOccured(String message, Exception ex) {
+			lblMessages.insert(message + "\n" + ApplicationUtil.formatStackTrace(ex) + "\n", 0);
+		}
 	}
 }

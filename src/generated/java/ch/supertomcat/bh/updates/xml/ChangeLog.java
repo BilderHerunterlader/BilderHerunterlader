@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import java.util.ArrayList;
 import java.util.List;

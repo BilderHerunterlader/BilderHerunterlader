@@ -5,12 +5,11 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
-import jakarta.xml.bind.annotation.XmlElement;
 import jakarta.xml.bind.annotation.XmlType;
 
 
@@ -23,9 +22,6 @@ import jakarta.xml.bind.annotation.XmlType;
  * <complexType name="SetupRelease">
  *   <complexContent>
  *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
- *       <sequence>
- *         <element name="description" type="{}VersionDescription"/>
- *       </sequence>
  *       <attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     </restriction>
  *   </complexContent>
@@ -35,39 +31,11 @@ import jakarta.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "SetupRelease", propOrder = {
-    "description"
-})
+@XmlType(name = "SetupRelease")
 public class SetupRelease {
 
-    @XmlElement(required = true)
-    protected VersionDescription description;
     @XmlAttribute(name = "version", required = true)
     protected String version;
-
-    /**
-     * Gets the value of the description property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link VersionDescription }
-     *     
-     */
-    public VersionDescription getDescription() {
-        return description;
-    }
-
-    /**
-     * Sets the value of the description property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link VersionDescription }
-     *     
-     */
-    public void setDescription(VersionDescription value) {
-        this.description = value;
-    }
 
     /**
      * Gets the value of the version property.

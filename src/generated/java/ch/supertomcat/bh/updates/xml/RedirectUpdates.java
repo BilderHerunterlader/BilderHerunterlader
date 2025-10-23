@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +15,16 @@ import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Hoster complex type</p>.
+ * <p>Java class for RedirectUpdates complex type</p>.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.</p>
  * 
  * <pre>{@code
- * <complexType name="Hoster">
+ * <complexType name="RedirectUpdates">
  *   <complexContent>
  *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       <sequence>
- *         <element name="host" type="{}UpdateData" maxOccurs="unbounded" minOccurs="0"/>
+ *         <element name="redirect" type="{}UpdateData" maxOccurs="unbounded" minOccurs="0"/>
  *       </sequence>
  *     </restriction>
  *   </complexContent>
@@ -34,26 +34,26 @@ import jakarta.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Hoster", propOrder = {
-    "host"
+@XmlType(name = "RedirectUpdates", propOrder = {
+    "redirect"
 })
-public class Hoster {
+public class RedirectUpdates {
 
-    protected List<UpdateData> host;
+    protected List<UpdateData> redirect;
 
     /**
-     * Gets the value of the host property.
+     * Gets the value of the redirect property.
      * 
      * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the host property.</p>
+     * This is why there is not a <CODE>set</CODE> method for the redirect property.</p>
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * </p>
      * <pre>
-     * getHost().add(newItem);
+     * getRedirect().add(newItem);
      * </pre>
      * 
      * 
@@ -64,13 +64,13 @@ public class Hoster {
      * 
      * 
      * @return
-     *     The value of the host property.
+     *     The value of the redirect property.
      */
-    public List<UpdateData> getHost() {
-        if (host == null) {
-            host = new ArrayList<>();
+    public List<UpdateData> getRedirect() {
+        if (redirect == null) {
+            redirect = new ArrayList<>();
         }
-        return this.host;
+        return this.redirect;
     }
 
 }

@@ -186,6 +186,14 @@ public class HostRules extends Host implements IHoster, IRedirect {
 	}
 
 	/**
+	 * @param ruleFileName Rule File Name
+	 * @return Rule Version or empty String
+	 */
+	public synchronized String getRuleVersionByFileName(String ruleFileName) {
+		return rules.stream().filter(x -> x.getFile().getFileName().toString().equals(ruleFileName)).map(Rule::getVersion).findFirst().orElse("");
+	}
+
+	/**
 	 * @return Domains
 	 */
 	public List<String> getDomains() {

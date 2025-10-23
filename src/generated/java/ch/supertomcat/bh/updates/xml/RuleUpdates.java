@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,16 +15,16 @@ import jakarta.xml.bind.annotation.XmlType;
 
 
 /**
- * <p>Java class for Redirects complex type</p>.
+ * <p>Java class for RuleUpdates complex type</p>.
  * 
  * <p>The following schema fragment specifies the expected content contained within this class.</p>
  * 
  * <pre>{@code
- * <complexType name="Redirects">
+ * <complexType name="RuleUpdates">
  *   <complexContent>
  *     <restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
  *       <sequence>
- *         <element name="redirect" type="{}UpdateData" maxOccurs="unbounded" minOccurs="0"/>
+ *         <element name="rule" type="{}UpdateData" maxOccurs="unbounded" minOccurs="0"/>
  *       </sequence>
  *     </restriction>
  *   </complexContent>
@@ -34,26 +34,26 @@ import jakarta.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "Redirects", propOrder = {
-    "redirect"
+@XmlType(name = "RuleUpdates", propOrder = {
+    "rule"
 })
-public class Redirects {
+public class RuleUpdates {
 
-    protected List<UpdateData> redirect;
+    protected List<UpdateData> rule;
 
     /**
-     * Gets the value of the redirect property.
+     * Gets the value of the rule property.
      * 
      * <p>This accessor method returns a reference to the live list,
      * not a snapshot. Therefore any modification you make to the
      * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the redirect property.</p>
+     * This is why there is not a <CODE>set</CODE> method for the rule property.</p>
      * 
      * <p>
      * For example, to add a new item, do as follows:
      * </p>
      * <pre>
-     * getRedirect().add(newItem);
+     * getRule().add(newItem);
      * </pre>
      * 
      * 
@@ -64,13 +64,13 @@ public class Redirects {
      * 
      * 
      * @return
-     *     The value of the redirect property.
+     *     The value of the rule property.
      */
-    public List<UpdateData> getRedirect() {
-        if (redirect == null) {
-            redirect = new ArrayList<>();
+    public List<UpdateData> getRule() {
+        if (rule == null) {
+            rule = new ArrayList<>();
         }
-        return this.redirect;
+        return this.rule;
     }
 
 }

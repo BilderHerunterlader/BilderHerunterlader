@@ -99,8 +99,11 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public LogManager(SettingsManager settingsManager) {
 		this.settingsManager = settingsManager;
+		/*
+		 * Defragment of the database takes a long time, because this database can be very large. So defragment min file size is set to a high value.
+		 */
 		this.logsSQLiteDB = new LogsSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Logs.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
-				.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
+				.getSettings().isDefragDBOnStart(), 2L * 1024 * 1024 * 1024);
 
 		this.logFile = ApplicationProperties.getProperty("DownloadLogPath")
 				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);

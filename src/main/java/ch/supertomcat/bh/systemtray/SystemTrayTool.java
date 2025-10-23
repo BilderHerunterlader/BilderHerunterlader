@@ -12,12 +12,14 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.cookies.CookieManager;
@@ -43,6 +45,7 @@ import ch.supertomcat.bh.update.UpdateManager;
 import ch.supertomcat.bh.update.sources.httpxml.HTTPXMLUpdateSource;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Class which handles the SystemTray
@@ -367,9 +370,16 @@ public class SystemTrayTool implements IDownloadQueueManagerListener, BHSettings
 		if (downloadQueueManager.isDownloading()) {
 			JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
 		} else {
-			UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource(proxyManager), guiEvent), mainWindow, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
-			update.setVisible(true);
-			update.toFront();
+			try {
+				HTTPXMLUpdateSource updateSource = new HTTPXMLUpdateSource(proxyManager);
+				UpdateManager updateManager = new UpdateManager(updateSource, hostManager, guiEvent);
+				UpdateWindow update = new UpdateWindow(updateManager, mainWindow, queueManager, keywordManager, settingsManager, guiEvent);
+				update.setVisible(true);
+				update.toFront();
+			} catch (IOException | SAXException | JAXBException e) {
+				logger.error("Could not initiliaze update source", e);
+				JOptionPane.showMessageDialog(null, "Failed to initialize update source", "Error", JOptionPane.ERROR_MESSAGE);
+			}
 		}
 	}
 

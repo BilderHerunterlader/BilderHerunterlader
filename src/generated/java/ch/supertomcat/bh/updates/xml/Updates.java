@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -26,9 +26,9 @@ import jakarta.xml.bind.annotation.XmlType;
  *       <sequence>
  *         <element name="setuprelease" type="{}SetupRelease"/>
  *         <element name="main" type="{}MainVersion"/>
- *         <element name="description" type="{}VersionDescription"/>
- *         <element name="redirects" type="{}Redirects"/>
- *         <element name="hoster" type="{}Hoster"/>
+ *         <element name="redirectUpdates" type="{}RedirectUpdates"/>
+ *         <element name="hosterUpdates" type="{}HosterUpdates"/>
+ *         <element name="ruleUpdates" type="{}RuleUpdates"/>
  *         <element name="changelog" type="{}ChangeLog"/>
  *       </sequence>
  *     </restriction>
@@ -42,9 +42,9 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlType(name = "", propOrder = {
     "setuprelease",
     "main",
-    "description",
-    "redirects",
-    "hoster",
+    "redirectUpdates",
+    "hosterUpdates",
+    "ruleUpdates",
     "changelog"
 })
 @XmlRootElement(name = "updates")
@@ -55,11 +55,11 @@ public class Updates {
     @XmlElement(required = true)
     protected MainVersion main;
     @XmlElement(required = true)
-    protected VersionDescription description;
+    protected RedirectUpdates redirectUpdates;
     @XmlElement(required = true)
-    protected Redirects redirects;
+    protected HosterUpdates hosterUpdates;
     @XmlElement(required = true)
-    protected Hoster hoster;
+    protected RuleUpdates ruleUpdates;
     @XmlElement(required = true)
     protected ChangeLog changelog;
 
@@ -112,75 +112,75 @@ public class Updates {
     }
 
     /**
-     * Gets the value of the description property.
+     * Gets the value of the redirectUpdates property.
      * 
      * @return
      *     possible object is
-     *     {@link VersionDescription }
+     *     {@link RedirectUpdates }
      *     
      */
-    public VersionDescription getDescription() {
-        return description;
+    public RedirectUpdates getRedirectUpdates() {
+        return redirectUpdates;
     }
 
     /**
-     * Sets the value of the description property.
+     * Sets the value of the redirectUpdates property.
      * 
      * @param value
      *     allowed object is
-     *     {@link VersionDescription }
+     *     {@link RedirectUpdates }
      *     
      */
-    public void setDescription(VersionDescription value) {
-        this.description = value;
+    public void setRedirectUpdates(RedirectUpdates value) {
+        this.redirectUpdates = value;
     }
 
     /**
-     * Gets the value of the redirects property.
+     * Gets the value of the hosterUpdates property.
      * 
      * @return
      *     possible object is
-     *     {@link Redirects }
+     *     {@link HosterUpdates }
      *     
      */
-    public Redirects getRedirects() {
-        return redirects;
+    public HosterUpdates getHosterUpdates() {
+        return hosterUpdates;
     }
 
     /**
-     * Sets the value of the redirects property.
+     * Sets the value of the hosterUpdates property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Redirects }
+     *     {@link HosterUpdates }
      *     
      */
-    public void setRedirects(Redirects value) {
-        this.redirects = value;
+    public void setHosterUpdates(HosterUpdates value) {
+        this.hosterUpdates = value;
     }
 
     /**
-     * Gets the value of the hoster property.
+     * Gets the value of the ruleUpdates property.
      * 
      * @return
      *     possible object is
-     *     {@link Hoster }
+     *     {@link RuleUpdates }
      *     
      */
-    public Hoster getHoster() {
-        return hoster;
+    public RuleUpdates getRuleUpdates() {
+        return ruleUpdates;
     }
 
     /**
-     * Sets the value of the hoster property.
+     * Sets the value of the ruleUpdates property.
      * 
      * @param value
      *     allowed object is
-     *     {@link Hoster }
+     *     {@link RuleUpdates }
      *     
      */
-    public void setHoster(Hoster value) {
-        this.hoster = value;
+    public void setRuleUpdates(RuleUpdates value) {
+        this.ruleUpdates = value;
     }
 
     /**

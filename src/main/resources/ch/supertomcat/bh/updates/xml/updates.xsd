@@ -6,9 +6,9 @@
 			<xs:sequence>
 				<xs:element name="setuprelease" type="SetupRelease" />
 				<xs:element name="main" type="MainVersion" />
-				<xs:element name="description" type="VersionDescription" />
-				<xs:element name="redirects" type="Redirects" />
-				<xs:element name="hoster" type="Hoster" />
+				<xs:element name="redirectUpdates" type="RedirectUpdates" />
+				<xs:element name="hosterUpdates" type="HosterUpdates" />
+				<xs:element name="ruleUpdates" type="RuleUpdates" />
 				<xs:element name="changelog" type="ChangeLog" />
 			</xs:sequence>
 		</xs:complexType>
@@ -16,10 +16,6 @@
 	
 	<!-- Setup Release -->
 	<xs:complexType name="SetupRelease">
-		<xs:sequence>
-			<!-- Domain List -->
-			<xs:element name="description" type="VersionDescription" />
-		</xs:sequence>
 		<xs:attribute name="version" type="xs:string" use="required" />
 	</xs:complexType>
 	
@@ -34,17 +30,7 @@
 		<!-- Name -->
 		<xs:attribute name="name" type="xs:string" use="required" />
 	</xs:complexType>
-	
-	<!-- Version Description -->
-	<xs:complexType name="VersionDescription">
-		<xs:sequence>
-			<!-- German Description -->
-			<xs:element name="mainDE" type="xs:string" />
-			<!-- English Description -->
-			<xs:element name="mainEN" type="xs:string" />
-		</xs:sequence>
-	</xs:complexType>
-	
+
 	<!-- Update Data -->
 	<xs:complexType name="UpdateData">
 		<xs:sequence>
@@ -78,7 +64,7 @@
 	</xs:complexType>
 	
 	<!-- Redirects -->
-	<xs:complexType name="Redirects">
+	<xs:complexType name="RedirectUpdates">
 		<xs:sequence>
 			<!-- Redirects -->
 			<xs:element name="redirect" type="UpdateData" minOccurs="0" maxOccurs="unbounded" />
@@ -86,10 +72,18 @@
 	</xs:complexType>
 	
 	<!-- Hoster -->
-	<xs:complexType name="Hoster">
+	<xs:complexType name="HosterUpdates">
 		<xs:sequence>
 			<!-- Redirects -->
 			<xs:element name="host" type="UpdateData" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
+	
+	<!-- Rules -->
+	<xs:complexType name="RuleUpdates">
+		<xs:sequence>
+			<!-- Redirects -->
+			<xs:element name="rule" type="UpdateData" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 	
@@ -107,8 +101,6 @@
 			<xs:extension base="xs:string">
 				<!-- Version -->
 				<xs:attribute name="version" type="xs:string" use="required" />
-				<!-- Language -->
-				<xs:attribute name="lng" type="xs:string" use="required" />
 			</xs:extension>
 		</xs:simpleContent>
 	</xs:complexType>

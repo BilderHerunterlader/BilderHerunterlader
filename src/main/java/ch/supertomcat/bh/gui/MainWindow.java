@@ -181,8 +181,8 @@ public class MainWindow extends JFrame implements ChangeListener, ComponentListe
 		tab.addTab(Localization.getString("Log"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), log);
 		tab.addTab(Localization.getString("DirectoryLog"), Icons.getTangoSVGIcon("mimetypes/text-x-generic.svg", 22), directoryLog);
 		tab.addTab(Localization.getString("Keywords"), Icons.getTangoSVGIcon("emblems/emblem-favorite.svg", 22), keywords);
-		tab.addTab(Localization.getString("Rules"), BHIcons.getBHSVGIcon("actions/approval.svg", 22), rules);
-		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHSVGIcon("actions/approval.svg", 22), hosts);
+		tab.addTab(Localization.getString("Rules"), BHIcons.getBHSVGIcon("rule.svg", 22), rules);
+		tab.addTab(Localization.getString("HosterPlugins"), BHIcons.getBHSVGIcon("hostplugin.svg", 22), hosts);
 
 		DropTargetAdapter dtl = new DropTargetAdapter() {
 			@Override

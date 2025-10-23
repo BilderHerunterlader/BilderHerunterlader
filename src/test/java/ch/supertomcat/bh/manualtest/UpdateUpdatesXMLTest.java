@@ -11,8 +11,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +24,7 @@ import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.HostManager;
+import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.hoster.hostimpl.HostSortImages;
 import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
@@ -33,9 +32,9 @@ import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.rules.Rule;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.bh.update.sources.httpxml.UpdatesXmlIO;
-import ch.supertomcat.bh.update.sources.httpxml.xml.UpdateData;
-import ch.supertomcat.bh.update.sources.httpxml.xml.Updates;
+import ch.supertomcat.bh.update.UpdatesXmlIO;
+import ch.supertomcat.bh.updates.xml.UpdateData;
+import ch.supertomcat.bh.updates.xml.Updates;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
@@ -44,8 +43,6 @@ import jakarta.xml.bind.JAXBException;
 
 @SuppressWarnings("javadoc")
 public class UpdateUpdatesXMLTest {
-	private static final Pattern RULE_PATTERN = Pattern.compile("filename=\"Rule.+?\\.xml\"");
-
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	private HostManager hostManager;
@@ -103,13 +100,38 @@ public class UpdateUpdatesXMLTest {
 
 		List<Class<?>> internalHostClasses = Arrays.asList(HostRules.class, HostSortImages.class, HostzDefaultFiles.class);
 
+		Map<String, UpdateData> redirectUpdates = new HashMap<>();
 		Map<String, UpdateData> hostUpdates = new HashMap<>();
 		Map<String, UpdateData> ruleUpdates = new HashMap<>();
-		for (UpdateData host : updates.getHoster().getHost()) {
-			if (host.getFilename().endsWith(".xml")) {
-				ruleUpdates.put(host.getName(), host);
+		for (UpdateData redicrect : updates.getRedirectUpdates().getRedirect()) {
+			redirectUpdates.put(redicrect.getName(), redicrect);
+		}
+		for (UpdateData host : updates.getHosterUpdates().getHost()) {
+			hostUpdates.put(host.getName(), host);
+		}
+		for (UpdateData rule : updates.getRuleUpdates().getRule()) {
+			ruleUpdates.put(rule.getName(), rule);
+		}
+
+		for (IRedirect redirect : hostManager.getRedirectManager().getRedirects()) {
+			if (internalHostClasses.contains(redirect.getClass())) {
+				continue;
+			}
+
+			UpdateData redirectUpdate = redirectUpdates.get(redirect.getName());
+			if (redirectUpdate != null) {
+				if (!redirectUpdate.getVersion().equals(redirect.getVersion())) {
+					logger.info("Updated Version of Redirect {}: {} -> {}", redirectUpdate.getName(), redirectUpdate.getVersion(), redirect.getVersion());
+					redirectUpdate.setVersion(redirect.getVersion());
+				}
 			} else {
-				hostUpdates.put(host.getName(), host);
+				UpdateData newRedirectUpdate = new UpdateData();
+				newRedirectUpdate.setName(redirect.getName());
+				newRedirectUpdate.setVersion(redirect.getVersion());
+				newRedirectUpdate.setSrc("TODO");
+				newRedirectUpdate.setFilename(redirect.getClass().getSimpleName() + ".class");
+				updates.getRedirectUpdates().getRedirect().add(newRedirectUpdate);
+				logger.info("Added Redirect {}: {}", newRedirectUpdate.getName(), newRedirectUpdate.getVersion());
 			}
 		}
 
@@ -130,7 +152,7 @@ public class UpdateUpdatesXMLTest {
 				newHostUpdate.setVersion(host.getVersion());
 				newHostUpdate.setSrc("TODO");
 				newHostUpdate.setFilename(host.getClass().getSimpleName() + ".class");
-				updates.getHoster().getHost().add(newHostUpdate);
+				updates.getHosterUpdates().getHost().add(newHostUpdate);
 				logger.info("Added Host {}: {}", newHostUpdate.getName(), newHostUpdate.getVersion());
 			}
 		}
@@ -152,7 +174,7 @@ public class UpdateUpdatesXMLTest {
 				newRuleUpdate.setVersion(rule.getVersion());
 				newRuleUpdate.setSrc("TODO");
 				newRuleUpdate.setFilename(rule.getFile().getFileName().toString());
-				updates.getHoster().getHost().add(newRuleUpdate);
+				updates.getRuleUpdates().getRule().add(newRuleUpdate);
 				logger.info("Added Rule {}: {}", newRuleUpdate.getName(), newRuleUpdate.getVersion());
 			}
 		}
@@ -166,35 +188,15 @@ public class UpdateUpdatesXMLTest {
 		List<String> lines = Files.readAllLines(updatesXmlFile.toPath(), StandardCharsets.UTF_8);
 
 		try (FileOutputStream out = new FileOutputStream(updatesXmlFile); OutputStreamWriter writer = new OutputStreamWriter(out, StandardCharsets.UTF_8)) {
-			boolean firstRuleFound = false;
 			for (String line : lines) {
-				if (!firstRuleFound) {
-					Matcher ruleMatcher = RULE_PATTERN.matcher(line);
-					if (ruleMatcher.find()) {
-						writer.write("\t\t<!-- End of Host-Classes -->\n");
-						writer.write("\t\t<!-- Start of Rules -->\n");
-						writer.flush();
-						firstRuleFound = true;
-					}
-				}
-
-				if (line.contains("</hoster>")) {
-					writer.write("\t\t<!-- End of Rules -->\n");
-					writer.flush();
-				}
-
 				String formattedLine = line.replace("    ", "\t").replace("/>", " />");
 				writer.write(formattedLine);
 				writer.write("\n");
 				writer.flush();
 
-				if (line.contains("<hoster>")) {
-					writer.write("\t\t<!-- Start of Host-Classes -->\n");
-					writer.flush();
-				} else if (line.contains("<changelog>")) {
+				if (line.contains("<changelog>")) {
 					writer.write("\t\t<!--\n");
-					writer.write("\t\t<changes version=\"4.9.0\" lng=\"de\"></changes>\n");
-					writer.write("\t\t<changes version=\"4.9.0\" lng=\"en\"></changes>\n");
+					writer.write("\t\t<changes version=\"4.9.0\"></changes>\n");
 					writer.write("\t\t-->\n");
 					writer.flush();
 				}

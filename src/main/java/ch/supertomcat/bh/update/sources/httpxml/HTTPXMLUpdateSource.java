@@ -1,67 +1,81 @@
 package ch.supertomcat.bh.update.sources.httpxml;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.ReadableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Collections;
 import java.util.List;
-import java.util.StringJoiner;
 
 import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.core5.http.message.StatusLine;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.downloader.ProxyManager;
-import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.update.UpdateException;
 import ch.supertomcat.bh.update.UpdateIOException;
-import ch.supertomcat.bh.update.UpdateSource;
-import ch.supertomcat.bh.update.containers.UpdateList;
-import ch.supertomcat.bh.update.containers.UpdateObject;
-import ch.supertomcat.bh.update.containers.UpdateSourceFile;
+import ch.supertomcat.bh.update.UpdatesXmlIO;
+import ch.supertomcat.bh.update.sources.UpdateSource;
+import ch.supertomcat.bh.updates.xml.MainVersion;
+import ch.supertomcat.bh.updates.xml.UpdateData;
+import ch.supertomcat.bh.updates.xml.UpdateDataAdditionalSource;
+import ch.supertomcat.bh.updates.xml.Updates;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * UpdateSource implementation which retrieves Updates by an xml file over HTTP
  */
 public class HTTPXMLUpdateSource implements UpdateSource {
 	/**
+	 * Logger
+	 */
+	protected final Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
 	 * Proxy Manager
 	 */
 	protected final ProxyManager proxyManager;
 
 	/**
+	 * Update Xml IO
+	 */
+	protected final UpdatesXmlIO updateXmlIO;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param proxyManager Proxy Manager
+	 * @throws JAXBException
+	 * @throws SAXException
+	 * @throws IOException
 	 */
-	public HTTPXMLUpdateSource(ProxyManager proxyManager) {
+	public HTTPXMLUpdateSource(ProxyManager proxyManager) throws IOException, SAXException, JAXBException {
 		this.proxyManager = proxyManager;
+		this.updateXmlIO = new UpdatesXmlIO();
 	}
 
-	/**
-	 * Downloads and parses Update-xml-File
-	 * 
-	 * @param url URL
-	 * @return UpdateList if updates available, null otherwise
-	 * @throws UpdateException
-	 */
-	private UpdateList getUpdateXmlFile(String url) throws UpdateException {
-		UpdateObject updateBH = null;
-		List<UpdateObject> updateRules = new ArrayList<>();
-		List<UpdateObject> updateHostPlugins = new ArrayList<>();
-		List<UpdateObject> updateRedirectPlugins = new ArrayList<>();
-
-		url = HTTPUtil.encodeURL(url);
+	@Override
+	public Updates checkForUpdates() throws UpdateException {
+		String updateXMLURL = ApplicationProperties.getProperty("UpdateURL");
+		logger.info("Downloading Updates XML: {}", updateXMLURL);
 		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
-			HttpGet method = new HttpGet(url);
-			Document doc = client.execute(method, response -> {
+			String encodedURL = HTTPUtil.encodeURL(updateXMLURL);
+			HttpGet method = new HttpGet(encodedURL);
+			return client.execute(method, response -> {
 				StatusLine statusLine = new StatusLine(response);
 				int statusCode = statusLine.getStatusCode();
+
+				logger.info("StatusLine: {}", statusLine);
 
 				if (statusCode != 200) {
 					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
@@ -69,167 +83,96 @@ public class HTTPXMLUpdateSource implements UpdateSource {
 
 				try (@SuppressWarnings("resource")
 				InputStream in = response.getEntity().getContent()) {
-					SAXBuilder b = new SAXBuilder();
+					/*
+					 * Don't validate, so that XML can still be read, even if there are changes in it which don't match the current XSD
+					 */
 					try {
-						return b.build(in);
-					} catch (JDOMException e) {
-						throw new HostHttpIOException("Could not parse XML", e);
+						Updates updatesXML = updateXmlIO.readUpdates(in, false);
+						logger.info("Download Successful: Source: {}", updateXMLURL);
+						return updatesXML;
+					} catch (JAXBException e) {
+						throw new UpdateIOException("Failed to parse XML", e);
 					}
 				}
 			});
-
-			Element root = doc.getRootElement();
-
-			// Main
-			Element main = root.getChild("main");
-			updateBH = getUpdateObject(main, UpdateObject.UpdateType.TYPE_BH);
-
-			Element changelog = root.getChild("changelog");
-			List<Element> changes = changelog.getChildren();
-			StringJoiner changeLog = new StringJoiner("\n");
-			Element change = null;
-			String version = "";
-			String description = "";
-			for (int l = 0; l < changes.size(); l++) {
-				change = changes.get(l);
-				version = change.getAttribute("version").getValue();
-				description = change.getValue();
-
-				changeLog.add("Version: " + version);
-				changeLog.add(description);
-			}
-
-			if (updateBH != null) {
-				updateBH.setChangeLog(changeLog.toString());
-			}
-
-			// Hosts und Rules
-			updateHostPlugins.clear();
-			updateRules.clear();
-
-			Element hoster = root.getChild("hoster");
-			Iterator<?> ite = hoster.getChildren().iterator();
-
-			while (ite.hasNext()) {
-				Element el = (Element)ite.next();
-				String filename = el.getAttributeValue("filename");
-				UpdateObject.UpdateType type = UpdateObject.UpdateType.TYPE_HOST_PLUGIN;
-				if (filename.endsWith(".xml")) {
-					type = UpdateObject.UpdateType.TYPE_RULE;
-				}
-				UpdateObject update = getUpdateObject(el, type);
-				if (type == UpdateObject.UpdateType.TYPE_HOST_PLUGIN) {
-					updateHostPlugins.add(update);
-				} else if (type == UpdateObject.UpdateType.TYPE_RULE) {
-					updateRules.add(update);
-				}
-			}
-
-			// Redirects
-			updateRedirectPlugins.clear();
-
-			Element redirects = root.getChild("redirects");
-			Iterator<?> itr = redirects.getChildren().iterator();
-
-			while (itr.hasNext()) {
-				Element el = (Element)itr.next();
-				UpdateObject update = getUpdateObject(el, UpdateObject.UpdateType.TYPE_REDIRECT_PLUGIN);
-				updateRedirectPlugins.add(update);
-			}
-
-			return new UpdateList(updateBH, updateRules, updateHostPlugins, updateRedirectPlugins);
 		} catch (Exception e) {
 			throw new UpdateException("Could not retrieve update list", e);
 		}
 	}
 
 	/**
-	 * Returns the UpdateObject or null if not all required information is present
+	 * Download File
 	 * 
-	 * @param elHost Element
-	 * @param updateType Update-Type
-	 * @return UpdateObject or null if not all required information is present
+	 * @param url URL
+	 * @param targetFile Target File
+	 * @throws UpdateException
 	 */
-	private UpdateObject getUpdateObject(Element elHost, UpdateObject.UpdateType updateType) {
-		UpdateObject updateObject = null;
+	protected void downloadFile(String url, Path targetFile) throws UpdateException {
+		logger.info("Download Update: Source: {}, Target: {}", url, targetFile);
+		String encodedURL = HTTPUtil.encodeURL(url);
+		try (CloseableHttpClient client = proxyManager.getHTTPClient()) {
+			HttpGet method = new HttpGet(encodedURL);
 
-		// Read out name
-		String updateName = elHost.getAttributeValue("name");
-		if (updateName == null) {
-			return null;
-		}
+			Path targetFolder = targetFile.toAbsolutePath().getParent();
+			Files.createDirectories(targetFolder);
 
-		// Read out version
-		String version = elHost.getAttributeValue("version");
-		if (version == null) {
-			return null;
-		}
+			client.execute(method, response -> {
+				StatusLine statusLine = new StatusLine(response);
+				int statusCode = statusLine.getStatusCode();
 
-		// Read out min and max version
-		String minVersion = elHost.getAttributeValue("bhminversion");
-		String maxVersion = elHost.getAttributeValue("bhmaxversion");
-		if (minVersion == null) {
-			minVersion = "";
-		}
-		if (maxVersion == null) {
-			maxVersion = "";
-		}
+				logger.info("StatusLine: {}", statusLine);
 
-		// Read out delete attribute
-		String delete = elHost.getAttributeValue("delete");
-
-		// Read out source
-		List<UpdateSourceFile> sources = new ArrayList<>();
-
-		String source = elHost.getAttributeValue("src");
-		if (source == null) {
-			return null;
-		}
-		String targetFilename = elHost.getAttributeValue("filename");
-		if (targetFilename == null) {
-			return null;
-		}
-		sources.add(new HTTPUpdateSourceFile(source, targetFilename, delete != null, proxyManager));
-
-		/*
-		 * In the new version of the update-xml-file host-plugins and redirect-plugins
-		 * can now define additional source-files, so we read them out too
-		 */
-		if (updateType == UpdateObject.UpdateType.TYPE_HOST_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_REDIRECT_PLUGIN) {
-			Iterator<?> itSource = elHost.getChildren().iterator();
-			while (itSource.hasNext()) {
-				Element el = (Element)itSource.next();
-				if (el.getName().equals("source")) {
-					String src = el.getAttributeValue("src");
-					if (src == null) {
-						return null;
-					}
-					String tgtFilename = el.getAttributeValue("filename");
-					if (tgtFilename == null) {
-						return null;
-					}
-					String deleteAdditional = el.getAttributeValue("delete");
-					sources.add(new HTTPUpdateSourceFile(src, tgtFilename, deleteAdditional != null, proxyManager));
+				if (statusCode != 200) {
+					throw new UpdateIOException("HTTP-Error: " + statusCode + " " + statusLine.getReasonPhrase());
 				}
-			}
+
+				try (@SuppressWarnings("resource")
+				InputStream in = response.getEntity().getContent();
+						ReadableByteChannel inChannel = Channels.newChannel(in);
+						FileChannel out = FileChannel.open(targetFile, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING)) {
+					long totalBytesRead = 0;
+					long bytesRead;
+					while ((bytesRead = out.transferFrom(inChannel, totalBytesRead, ProxyManager.BUFFER_SIZE)) > 0) {
+						totalBytesRead += bytesRead;
+					}
+				}
+				logger.info("Download Successful: Source: {}, Target: {}", url, targetFile);
+				return null;
+			});
+		} catch (IOException e) {
+			throw new UpdateException("Download Update failed: " + url, e);
 		}
-
-		// Create update object
-		updateObject = new UpdateObject(updateType, updateName, version, sources, minVersion, maxVersion);
-
-		// Add type specific information to the created update object
-		if (delete != null
-				&& (updateType == UpdateObject.UpdateType.TYPE_HOST_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_REDIRECT_PLUGIN || updateType == UpdateObject.UpdateType.TYPE_RULE)) {
-			updateObject.setAction(UpdateObject.UpdateActionType.ACTION_REMOVE);
-			updateObject.setComment(delete);
-		}
-
-		return updateObject;
 	}
 
 	@Override
-	public UpdateList checkForUpdates() throws UpdateException {
-		String updateXMLURL = ApplicationProperties.getProperty("UpdateURL");
-		return getUpdateXmlFile(updateXMLURL);
+	public Path downloadUpdate(MainVersion update, Path targetDirectory) throws UpdateException {
+		Path targetFile = targetDirectory.resolve(update.getFilename());
+		downloadFile(update.getSrc(), targetFile);
+		return targetFile;
+	}
+
+	@Override
+	public List<Path> downloadUpdate(UpdateData update, Path targetDirectory) throws UpdateException {
+		if (update.getDelete() != null) {
+			return Collections.emptyList();
+		}
+
+		List<Path> downloadedFiles = new ArrayList<>();
+
+		Path targetFile = targetDirectory.resolve(update.getFilename());
+		downloadFile(update.getSrc(), targetFile);
+		downloadedFiles.add(targetFile);
+
+		for (UpdateDataAdditionalSource additionalFile : update.getSource()) {
+			if (additionalFile.getDelete() != null) {
+				continue;
+			}
+
+			Path subTargetFile = targetDirectory.resolve(additionalFile.getFilename());
+			downloadFile(additionalFile.getSrc(), subTargetFile);
+			downloadedFiles.add(subTargetFile);
+		}
+
+		return downloadedFiles;
 	}
 }

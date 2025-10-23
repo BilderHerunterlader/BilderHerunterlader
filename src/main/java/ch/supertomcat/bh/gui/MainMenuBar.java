@@ -3,6 +3,7 @@ package ch.supertomcat.bh.gui;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
@@ -17,6 +18,10 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
 
 import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
@@ -35,11 +40,17 @@ import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Main Menu Bar
  */
 public class MainMenuBar {
+	/**
+	 * Logger
+	 */
+	private Logger logger = LoggerFactory.getLogger(getClass());
+
 	/**
 	 * MenuBar
 	 */
@@ -119,14 +130,14 @@ public class MainMenuBar {
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param queueManager Queue Manager
 	 * @param keywordManager Keyword Manager
-	 * @param proxyManger Proxy Manager
+	 * @param proxyManager Proxy Manager
 	 * @param settingsManager Settings Manager
 	 * @param cookieManager Cookie Manager
 	 * @param hostManager Host Manager
 	 * @param guiEvent GUI Event
 	 */
 	public MainMenuBar(JFrame parentWindow, MainWindowAccess mainWindowAccess, LogManager logManager, DownloadQueueManager downloadQueueManager, QueueManager queueManager,
-			KeywordManager keywordManager, ProxyManager proxyManger, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager, GuiEvent guiEvent) {
+			KeywordManager keywordManager, ProxyManager proxyManager, SettingsManager settingsManager, CookieManager cookieManager, HostManager hostManager, GuiEvent guiEvent) {
 		menuFile.add(itemExit);
 
 		menuSettings.add(itemSettings);
@@ -146,15 +157,23 @@ public class MainMenuBar {
 
 		itemExit.addActionListener(e -> guiEvent.exitApp(false, false));
 
-		itemSettings.addActionListener(e -> new SettingsDialog(parentWindow, mainWindowAccess, proxyManger, settingsManager, cookieManager, hostManager));
+		itemSettings.addActionListener(e -> new SettingsDialog(parentWindow, mainWindowAccess, proxyManager, settingsManager, cookieManager, hostManager));
 
 		itemUpdate.addActionListener(e -> {
 			if (downloadQueueManager.isDownloading()) {
 				JOptionPane.showMessageDialog(null, Localization.getString("UpdatesWhileDownloading"), "Error", JOptionPane.ERROR_MESSAGE);
-			} else {
-				UpdateWindow update = new UpdateWindow(new UpdateManager(new HTTPXMLUpdateSource(proxyManger), guiEvent), parentWindow, queueManager, keywordManager, settingsManager, hostManager, guiEvent);
+				return;
+			}
+
+			try {
+				HTTPXMLUpdateSource updateSource = new HTTPXMLUpdateSource(proxyManager);
+				UpdateManager updateManager = new UpdateManager(updateSource, hostManager, guiEvent);
+				UpdateWindow update = new UpdateWindow(updateManager, parentWindow, queueManager, keywordManager, settingsManager, guiEvent);
 				update.setVisible(true);
 				update.toFront();
+			} catch (IOException | SAXException | JAXBException ex) {
+				logger.error("Could not initiliaze update source", ex);
+				JOptionPane.showMessageDialog(null, "Failed to initialize update source", "Error", JOptionPane.ERROR_MESSAGE);
 			}
 		});
 

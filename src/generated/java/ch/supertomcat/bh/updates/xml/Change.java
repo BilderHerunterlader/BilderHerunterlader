@@ -5,7 +5,7 @@
 //
 
 
-package ch.supertomcat.bh.update.sources.httpxml.xml;
+package ch.supertomcat.bh.updates.xml;
 
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlAccessorType;
@@ -24,7 +24,6 @@ import jakarta.xml.bind.annotation.XmlValue;
  *   <simpleContent>
  *     <extension base="<http://www.w3.org/2001/XMLSchema>string">
  *       <attribute name="version" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
- *       <attribute name="lng" use="required" type="{http://www.w3.org/2001/XMLSchema}string" />
  *     </extension>
  *   </simpleContent>
  * </complexType>
@@ -42,8 +41,6 @@ public class Change {
     protected String value;
     @XmlAttribute(name = "version", required = true)
     protected String version;
-    @XmlAttribute(name = "lng", required = true)
-    protected String lng;
 
     /**
      * Gets the value of the value property.
@@ -91,30 +88,6 @@ public class Change {
      */
     public void setVersion(String value) {
         this.version = value;
-    }
-
-    /**
-     * Gets the value of the lng property.
-     * 
-     * @return
-     *     possible object is
-     *     {@link String }
-     *     
-     */
-    public String getLng() {
-        return lng;
-    }
-
-    /**
-     * Sets the value of the lng property.
-     * 
-     * @param value
-     *     allowed object is
-     *     {@link String }
-     *     
-     */
-    public void setLng(String value) {
-        this.lng = value;
     }
 
 }
