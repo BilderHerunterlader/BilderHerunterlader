@@ -420,13 +420,16 @@ public class UpdateManager {
 		}
 
 		if (Files.exists(fJreJavaw)) {
+			logger.info("Updater not found: {}", fJreJavaw);
 			return jreJavaw;
 		}
 
 		if (Files.exists(fJreJava)) {
+			logger.info("Updater not found: {}", fJreJava);
 			return jreJava;
 		}
 
+		logger.info("Java exe not found");
 		return null;
 	}
 
@@ -443,14 +446,17 @@ public class UpdateManager {
 		 * Choose updater from temp directory
 		 */
 		if (Files.exists(updaterJarPath)) {
+			logger.info("Updater found: {}", updaterJarPath);
 			return updaterJarPath;
 		}
 
+		logger.info("Updater not found in: {}", directory);
 		return null;
 	}
 
 	private boolean startUpdater(Path updateXMLFilePath, Path updaterJarPath) {
 		try {
+			logger.info("Start upater: XMLFile: {}, UpdaterJarPath: {}", updateXMLFilePath, updaterJarPath);
 			EvelatedProcessExecutor executor;
 			if (Platform.isWindows()) {
 				executor = new WindowsEvelatedProcessExecutor();
