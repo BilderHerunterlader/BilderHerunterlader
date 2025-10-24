@@ -42,7 +42,6 @@ import ch.supertomcat.supertomcatutils.process.windows.WindowsEvelatedProcessExe
 import ch.supertomcat.updaterxml.UpdateXmlIO;
 import ch.supertomcat.updaterxml.update.xml.CopyDirectoryActionDefinition;
 import ch.supertomcat.updaterxml.update.xml.DeleteFileActionDefinition;
-import ch.supertomcat.updaterxml.update.xml.SelfUpdateActionDefinition;
 import ch.supertomcat.updaterxml.update.xml.StartProcessActionDefinition;
 import ch.supertomcat.updaterxml.update.xml.Update;
 import jakarta.xml.bind.JAXBException;
@@ -230,10 +229,8 @@ public class UpdateManager {
 
 			logger.info("Downloads successful");
 
-			boolean selfUpdate = false;
 			Path updaterJarPath = getUpdaterJarPath(tempMainDirectory);
 			if (updaterJarPath != null) {
-				selfUpdate = true;
 			} else {
 				updaterJarPath = getUpdaterJarPath(applicationPath);
 			}
@@ -259,9 +256,7 @@ public class UpdateManager {
 			if (mainUpdateAvailable) {
 				addCopyDirectory(updateXMLDefinition, tempMainDirectory, applicationPath, true);
 			}
-			if (selfUpdate) {
-				addUpdaterSelfUpdate(updateXMLDefinition, applicationPath);
-			}
+
 			addStartProcess(updateXMLDefinition, applicationPath);
 			writeUpdateXMLFile(updateXMLDefinition, updateXMLFilePath);
 
@@ -363,12 +358,6 @@ public class UpdateManager {
 		updateXMLDefinition.getActions().add(deleteFileDefinition);
 	}
 
-	private void addUpdaterSelfUpdate(Update updateXMLDefinition, Path applicationPath) {
-		SelfUpdateActionDefinition selfUpdateDefinition = new SelfUpdateActionDefinition();
-		selfUpdateDefinition.setTargetDirectory(applicationPath.resolve("updater").toAbsolutePath().toString());
-		updateXMLDefinition.getActions().add(selfUpdateDefinition);
-	}
-
 	private void addStartProcess(Update updateXMLDefinition, Path applicationPath) {
 		String jarFilename = ApplicationProperties.getProperty(ApplicationMain.JAR_FILENAME);
 		if (jarFilename == null || jarFilename.isEmpty()) {
@@ -420,12 +409,12 @@ public class UpdateManager {
 		}
 
 		if (Files.exists(fJreJavaw)) {
-			logger.info("Updater not found: {}", fJreJavaw);
+			logger.info("Java exe found: {}", fJreJavaw);
 			return jreJavaw;
 		}
 
 		if (Files.exists(fJreJava)) {
-			logger.info("Updater not found: {}", fJreJava);
+			logger.info("Java exe found: {}", fJreJava);
 			return jreJava;
 		}
 
