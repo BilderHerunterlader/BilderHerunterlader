@@ -230,8 +230,7 @@ public class UpdateManager {
 			logger.info("Downloads successful");
 
 			Path updaterJarPath = getUpdaterJarPath(tempMainDirectory);
-			if (updaterJarPath != null) {
-			} else {
+			if (updaterJarPath == null) {
 				updaterJarPath = getUpdaterJarPath(applicationPath);
 			}
 
@@ -370,7 +369,7 @@ public class UpdateManager {
 			applicationAbsolutePath += FileUtil.FILE_SEPERATOR;
 		}
 
-		String javaExePath = getJavaExePath();
+		String javaExePath = ApplicationUtil.getJavaExePath();
 		if (javaExePath == null) {
 			logger.error("Could not find java executable. Updater will not start BH after updates.");
 			return;
@@ -385,41 +384,6 @@ public class UpdateManager {
 		startProcessActionDefinition.setWorkingDirectory(applicationPath.toAbsolutePath().toString());
 		startProcessActionDefinition.getCommand().addAll(arguments);
 		updateXMLDefinition.getActions().add(startProcessActionDefinition);
-	}
-
-	/**
-	 * TODO Already available in ApplicationMain, but as instance method. Should be made available static in utils. Copied to code for now.
-	 * 
-	 * @return Java Executable Path or null
-	 */
-	protected String getJavaExePath() {
-		String jreBinPath = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR;
-
-		String jreJavaw = jreBinPath + "javaw";
-		String jreJava = jreBinPath + "java";
-
-		Path fJreJavaw;
-		Path fJreJava;
-		if (Platform.isWindows()) {
-			fJreJavaw = Paths.get(jreJavaw + ".exe");
-			fJreJava = Paths.get(jreJava + ".exe");
-		} else {
-			fJreJavaw = Paths.get(jreJavaw);
-			fJreJava = Paths.get(jreJava);
-		}
-
-		if (Files.exists(fJreJavaw)) {
-			logger.info("Java exe found: {}", fJreJavaw);
-			return jreJavaw;
-		}
-
-		if (Files.exists(fJreJava)) {
-			logger.info("Java exe found: {}", fJreJava);
-			return jreJava;
-		}
-
-		logger.info("Java exe not found");
-		return null;
 	}
 
 	private void writeUpdateXMLFile(Update updateXMLDefinition, Path xmlFile) throws IOException, JAXBException {
@@ -455,7 +419,7 @@ public class UpdateManager {
 				executor = new LinuxEvelatedProcessExecutor();
 			}
 
-			String javaExePath = getJavaExePath();
+			String javaExePath = ApplicationUtil.getJavaExePath();
 			if (javaExePath == null) {
 				logger.error("Could not find java executable");
 				return false;
