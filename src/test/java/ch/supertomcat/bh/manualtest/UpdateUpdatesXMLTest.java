@@ -94,7 +94,7 @@ public class UpdateUpdatesXMLTest {
 
 	@Test
 	public void testUpdateUpdatesXML() throws IOException, JAXBException {
-		File updatesXmlFile = new File("updatev6.xml");
+		File updatesXmlFile = new File("updatev7.xml");
 		logger.info("Loading Updates XML File: {}", updatesXmlFile.getAbsolutePath());
 		Updates updates = updatesXmlIO.readUpdates(updatesXmlFile.getAbsolutePath(), true);
 
