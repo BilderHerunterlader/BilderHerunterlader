@@ -1,6 +1,20 @@
 # Changelog
 
 ## Version 5:
+- **Java 21 is required!**
+- Display an error, when settings file can't be read and let user decide to replace with default settings or exit program
+- Store download logs in database (Text-File is still written too). This improves performance when checking for already downloaded URLs and in display of table.
+- Store blacklist in database
+- Display SVG Icons
+- Refactored update code. Updates should now work without write rights in application folder. Updates are downloaded to temporary directory and then installed by a separate updater executable, which asks to run with admin rights.
+- Removed NonMultiThreadHttpClient
+- Replaced NanoHttp by Grizzly-Http-Server
+- Removed backward compatibility with old settings format
+- Bug Fixed: Saved last used export path was not used in select dialog
+- Fixed encoding issues, because since Java18 Charset.defaultCharset is now returning UTF-8 instead of the native encoding of the operating system
+- Lots of smaller Sonar / Bug Fixes
+
+## Version 5:
 - **Java 11 is required**
 - Self written Host Classes might not be compatible anymore, because of HttpClient upgrade and other changes. But they should be made compatible with minimal effort.
 - In a rule it is now possible to store variables in a Regex Pipeline and use the variable in search patterns in following Regex definitions. This should be used only if it is really needed.

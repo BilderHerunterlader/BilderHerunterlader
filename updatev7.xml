@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="5.3.0" />
-	<main version="5.3.0" src="https://www.dropbox.com/scl/fi/2u1tb8efbns6szwekuwbf/BH-5.3.0.zip?rlkey=y3o7m45i61s3yoiws7ktcm7hf&amp;dl=1" filename="BH-5.3.0.zip" name="BilderHerunterlader" />
+	<setuprelease version="6.0.0" />
+	<main version="6.0.0" src="https://www.dropbox.com/scl/fi/2u1tb8efbns6szwekuwbf/BH-5.3.0.zip?rlkey=y3o7m45i61s3yoiws7ktcm7hf&amp;dl=1" filename="BH-6.0.0.zip" name="BilderHerunterlader" />
 	<redirectUpdates />
 	<hosterUpdates>
 		<host version="4.6" src="https://www.dropbox.com/s/b867m84mcgn29m2/HostCoppermineGalleries.class?dl=1" filename="HostCoppermineGalleries.class" name="HostCoppermineGalleries">
@@ -67,8 +67,9 @@
 	</ruleUpdates>
 	<changelog>
 		<!--
-		<changes version="5.0.0"></changes>
+		<changes version="6.0.0"></changes>
 		-->
+		<changes version="6.0.0">- Important: Java 21 is required!\n- Display an error, when settings file can't be read and let user decide to replace with default settings or exit program\n- Store download logs in database (Text-File is still written too). This improves performance when checking for already downloaded URLs and in display of table.\n- Store blacklist in database\n- Display SVG Icons\n- Refactored update code. Updates should now work without write rights in application folder. Updates are downloaded to temporary directory and then installed by a separate updater executable, which asks to run with admin rights.\n- Removed NonMultiThreadHttpClient\n- Replaced NanoHttp by Grizzly-Http-Server\n- Removed backward compatibility with old settings format\n- Bug Fixed: Saved last used export path was not used in select dialog\n- Fixed encoding issues, because since Java18 Charset.defaultCharset is now returning UTF-8 instead of the native encoding of the operating system\n- Lots of smaller Sonar / Bug Fixes</changes>
 		<changes version="5.3.0">- Fixed redirect URL detection, when URL is relative\n- Bug Fixed: Deadlock, when copy or open URL menu items are used, while downloads are running\n- Updated libraries</changes>
 		<changes version="5.2.0">- Bug Fixed: ArrayIndexOutOfBounceException in keyword selector when no keywords are available\n- Improved logging\n- Bug Fixed: Encoding was not detected from Requests sent from Firefox WebExtension\n- Updated libraries\n- Bug Fixed: Labels for the thread count slider where painted over each other, when a lot of processors are available\n- Use multi resolution images for icons in some parts of the GUI</changes>
 		<changes version="5.1.2">- Version 5.1.2 is the same as 5.1.1, but with fixed BH.exe\n- Updated IZPack to Version 5.2.0\n- Updated NSIS to Version 3.09\n- Cleaned up Installers generated with IZPack and NSIS\n- Added BH.exe (Launch4j)\n- Added options to disable reduction of filename and path lengths\n- Bug Fixed: NullPointerException if table sort order setting is empty</changes>
