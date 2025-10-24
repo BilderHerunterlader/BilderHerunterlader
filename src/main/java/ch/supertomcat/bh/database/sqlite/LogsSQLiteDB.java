@@ -58,7 +58,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 
 		selectAllEntriesSQL = "SELECT * FROM " + tableName;
 
-		selectEntriesRangeSQL = "SELECT * FROM " + tableName + " ORDER BY DownloadTimestamp DESC LIMIT ? OFFSET ?";
+		selectEntriesRangeSQL = "SELECT * FROM " + tableName + " ORDER BY DownloadTimestamp ASC LIMIT ? OFFSET ?";
 
 		selectDirectoyLogEntriesSQL = "SELECT *, max(DownloadTimestamp) FROM " + tableName + " GROUP BY TargetPath ORDER BY DownloadTimestamp DESC LIMIT ?";
 
