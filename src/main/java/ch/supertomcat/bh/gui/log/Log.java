@@ -4,7 +4,6 @@ import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.nio.file.Paths;
 import java.util.HashSet;
 
 import javax.swing.BorderFactory;
@@ -35,7 +34,6 @@ import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
-import ch.supertomcat.supertomcatutils.io.FileUtil;
 
 /**
  * Panel containing Logs
@@ -314,11 +312,9 @@ public class Log extends JPanel implements ILogManagerListener {
 			public void run() {
 				HashSet<String> dirs = new HashSet<>();
 				int[] s = jtLog.getSelectedRows();
-				String file = "";
 				for (int i = 0; i < s.length; i++) {
-					file = (String)model.getValueAt(s[i], 2);
-					file = FileUtil.getPathFromFile(Paths.get(file));
-					dirs.add(file);
+					String directory = (String)model.getValueAt(s[i], 2);
+					dirs.add(directory);
 				}
 				for (String dir : dirs) {
 					FileExplorerUtil.openDirectory(dir);

@@ -14,7 +14,8 @@ public class LogTableModel extends DefaultTableModel {
 	public LogTableModel() {
 		this.addColumn("DateTime");
 		this.addColumn("URL");
-		this.addColumn("Target");
+		this.addColumn("TargetPath");
+		this.addColumn("TargetFilename");
 		this.addColumn("Size");
 	}
 
@@ -27,16 +28,18 @@ public class LogTableModel extends DefaultTableModel {
 	 * Adds a log
 	 * 
 	 * @param containerURL ContainerURL
-	 * @param target Target
+	 * @param targetPath Target Path
+	 * @param targetFilename Target Filename
 	 * @param dateTime Date and Time
 	 * @param filesize Filesize
 	 */
-	public void addRow(final String containerURL, final String target, final String dateTime, final String filesize) {
-		Object[] data = new Object[4];
+	public void addRow(final String containerURL, final String targetPath, final String targetFilename, final String dateTime, final String filesize) {
+		Object[] data = new Object[5];
 		data[0] = dateTime;
 		data[1] = containerURL;
-		data[2] = target;
-		data[3] = filesize;
+		data[2] = targetPath;
+		data[3] = targetFilename;
+		data[4] = filesize;
 		insertRow(0, data);
 
 		int rc = getRowCount();

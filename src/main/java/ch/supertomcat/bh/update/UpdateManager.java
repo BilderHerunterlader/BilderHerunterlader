@@ -187,14 +187,6 @@ public class UpdateManager {
 		Path rulesDirectory = applicationPath.resolve("rules");
 		logger.info("Directories: Application: {}, Hosts: {}, Rules: {}", applicationPath, hostsDirectory, rulesDirectory);
 
-		Path deleteUpdatesFile = applicationPath.resolve("delete_update.txt");
-		try {
-			logger.info("Delete delete_update.txt if it exists");
-			Files.deleteIfExists(deleteUpdatesFile);
-		} catch (IOException e) {
-			logger.error("Could not delete delete_update.txt file", e);
-		}
-
 		boolean mainUpdateAvailable = wrappedUpdates.isUpdateRequired();
 		boolean redirectDeleteUpdatesAvailable = checkDeleteUpdatesAvaialble(wrappedUpdates.getRedirectUpdates());
 		boolean hosterDeleteUpdatesAvailable = checkDeleteUpdatesAvaialble(wrappedUpdates.getHosterUpdates());

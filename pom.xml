@@ -16,7 +16,7 @@
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
 		<libsPath>${project.basedir}/lib</libsPath>
 		<updaterPath>${project.basedir}/updater</updaterPath>
-		<updaterVersion>1.0.0-SNAPSHOT</updaterVersion>
+		<updaterVersion>1.0.0</updaterVersion>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -144,21 +144,6 @@
 							<sources>
 								<source>src/generated/java</source>
 							</sources>
-						</configuration>
-					</execution>
-					<execution>
-						<id>attach-exe</id>
-						<phase>package</phase>
-						<goals>
-							<goal>attach-artifact</goal>
-						</goals>
-						<configuration>
-							<artifacts>
-								<artifact>
-									<file>${project.basedir}/BH.exe</file>
-									<type>exe</type>
-								</artifact>
-							</artifacts>
 						</configuration>
 					</execution>
 				</executions>

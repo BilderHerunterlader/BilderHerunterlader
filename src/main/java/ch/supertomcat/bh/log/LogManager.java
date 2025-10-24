@@ -2,7 +2,6 @@ package ch.supertomcat.bh.log;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,6 +30,7 @@ import javax.swing.WindowConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import ch.supertomcat.bh.database.sqlite.BlacklistSQLiteDB;
 import ch.supertomcat.bh.database.sqlite.LogsSQLiteDB;
 import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.gui.log.LogTableModel;
@@ -78,11 +78,6 @@ public class LogManager implements BHSettingsListener {
 	private String logFile;
 
 	/**
-	 * Path to Text-Blacklist-File
-	 */
-	private String blacklistFile = ApplicationProperties.getProperty("DownloadLogPath") + BH_BLACKLIST_FILENAME;
-
-	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
@@ -91,6 +86,11 @@ public class LogManager implements BHSettingsListener {
 	 * Logs Database
 	 */
 	private final LogsSQLiteDB logsSQLiteDB;
+
+	/**
+	 * Blacklist Database
+	 */
+	private final BlacklistSQLiteDB blacklistSQLiteDB;
 
 	/**
 	 * Constructor
@@ -104,6 +104,9 @@ public class LogManager implements BHSettingsListener {
 		 */
 		this.logsSQLiteDB = new LogsSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Logs.sqlite", settingsManager.getSettings().isBackupDbOnStart(), settingsManager
 				.getSettings().isDefragDBOnStart(), 2L * 1024 * 1024 * 1024);
+
+		this.blacklistSQLiteDB = new BlacklistSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Blacklist.sqlite", settingsManager.getSettings()
+				.isBackupDbOnStart(), settingsManager.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 
 		this.logFile = ApplicationProperties.getProperty("DownloadLogPath")
 				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
@@ -178,6 +181,7 @@ public class LogManager implements BHSettingsListener {
 				writer.flush();
 
 				if (blacklist) {
+					blacklistSQLiteDB.insertEntry(new BlacklistEntry(line));
 					lineCounter++;
 					if (countIn.getCount() >= nextPercentValue * bytesPerPercent) {
 						progressWindow.progressChanged(nextPercentValue);
@@ -210,7 +214,7 @@ public class LogManager implements BHSettingsListener {
 						if (arr.length >= 7) {
 							thumbURL = arr[6];
 						}
-						LogEntry logEntry = new LogEntry(timestamp, containerURL, threadURL, downloadURL, thumbURL, target, targetPath, targetFilename, size);
+						LogEntry logEntry = new LogEntry(timestamp, containerURL, threadURL, downloadURL, thumbURL, targetPath, targetFilename, size);
 						entries.add(logEntry);
 					}
 				} catch (Exception e) {
@@ -308,40 +312,26 @@ public class LogManager implements BHSettingsListener {
 	 * @param ap AdderPanel
 	 */
 	public synchronized void searchBlacklist(List<URL> urls, AdderWindow ap) {
-		Path file = Paths.get(blacklistFile);
-		if (!Files.exists(file)) {
-			return;
-		}
-
 		boolean updateProgress = ap != null;
-
-		try (FileInputStream in = new FileInputStream(blacklistFile);
-				CountingInputStream countIn = new CountingInputStream(in);
-				BufferedReader br = new BufferedReader(new InputStreamReader(countIn, StandardCharsets.UTF_8))) {
-			long lFile = Files.size(file);
-			long bytesPerPercent = lFile / 100;
-			int nextPercentValue = 1;
-
+		try {
 			if (updateProgress) {
-				ap.setPGEnabled(true, 0, 100, 0);
+				ap.setPGEnabled(true, 0, urls.size(), 0);
 				ap.setPGText(Localization.getString("CheckBlacklisted"));
 			}
 
-			String row = null;
-			while ((row = br.readLine()) != null) {
-				for (URL url : urls) {
-					if (!url.isBlacklisted() && row.equals(url.getURL())) {
-						url.setBlacklisted(true);
-					}
+			int alreadyChecked = 0;
+			int progressUpdateCount = 0;
+			for (URL url : urls) {
+				if (!url.isBlacklisted() && blacklistSQLiteDB.checkBlacklisted(url.getURL())) {
+					url.setBlacklisted(true);
 				}
-
-				if (updateProgress && countIn.getCount() >= nextPercentValue * bytesPerPercent) {
-					ap.setPGValue(nextPercentValue);
-					nextPercentValue++;
+				alreadyChecked++;
+				progressUpdateCount++;
+				if (updateProgress && progressUpdateCount >= 1000) {
+					ap.setPGValue(alreadyChecked);
+					progressUpdateCount = 0;
 				}
 			}
-		} catch (IOException e) {
-			logger.error("Could not search for blacklisted files", e);
 		} finally {
 			if (updateProgress) {
 				ap.setPGEnabled(false);
@@ -486,14 +476,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param url URL
 	 */
 	public synchronized void writeBlacklist(String url) {
-		Path file = Paths.get(blacklistFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-			writer.write(url);
-			writer.write("\n");
-			writer.flush();
-		} catch (IOException e) {
-			logger.error("Could not write blacklist file: {}", file, e);
-		}
+		blacklistSQLiteDB.insertEntry(new BlacklistEntry(url));
 	}
 
 	/**
@@ -508,7 +491,7 @@ public class LogManager implements BHSettingsListener {
 	 * @return Directory-Log
 	 */
 	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, int max) {
-		List<LogEntry> entries = logsSQLiteDB.getDirectlyLogEntries(max);
+		List<LogEntry> entries = logsSQLiteDB.getDirectoryLogEntries(max);
 		Stream<LogEntry> stream = entries.stream();
 		if (pattern != null) {
 			stream = stream.filter(x -> pattern.matcher(x.getTargetPath()).find());

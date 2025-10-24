@@ -37,11 +37,6 @@ public class LogEntry {
 	private final String thumbURL;
 
 	/**
-	 * Target (path and filename)
-	 */
-	private final String target;
-
-	/**
 	 * Target path
 	 */
 	private final String targetPath;
@@ -64,18 +59,16 @@ public class LogEntry {
 	 * @param threadURL Thread URL
 	 * @param downloadURL Download URL
 	 * @param thumbURL Thumb URL
-	 * @param target Target (path and filename)
 	 * @param targetPath Filename
 	 * @param targetFilename Filename
 	 * @param size Size
 	 */
-	public LogEntry(long timestamp, String containerURL, String threadURL, String downloadURL, String thumbURL, String target, String targetPath, String targetFilename, long size) {
+	public LogEntry(long timestamp, String containerURL, String threadURL, String downloadURL, String thumbURL, String targetPath, String targetFilename, long size) {
 		this.timestamp = timestamp;
 		this.containerURL = containerURL;
 		this.threadURL = threadURL;
 		this.downloadURL = downloadURL;
 		this.thumbURL = thumbURL;
-		this.target = target;
 		this.targetPath = targetPath;
 		this.targetFilename = targetFilename;
 		this.size = size;
@@ -90,19 +83,17 @@ public class LogEntry {
 	 * @param threadURL Thread URL
 	 * @param downloadURL Download URL
 	 * @param thumbURL Thumb URL
-	 * @param target Target (path and filename)
 	 * @param targetPath Filename
 	 * @param targetFilename Filename
 	 * @param size Size
 	 */
-	public LogEntry(int id, long timestamp, String containerURL, String threadURL, String downloadURL, String thumbURL, String target, String targetPath, String targetFilename, long size) {
+	public LogEntry(int id, long timestamp, String containerURL, String threadURL, String downloadURL, String thumbURL, String targetPath, String targetFilename, long size) {
 		this.id = id;
 		this.timestamp = timestamp;
 		this.containerURL = containerURL;
 		this.threadURL = threadURL;
 		this.downloadURL = downloadURL;
 		this.thumbURL = thumbURL;
-		this.target = target;
 		this.targetPath = targetPath;
 		this.targetFilename = targetFilename;
 		this.size = size;
@@ -119,7 +110,6 @@ public class LogEntry {
 		this.threadURL = pic.getThreadURL();
 		this.downloadURL = pic.getDownloadURL();
 		this.thumbURL = pic.getThumb();
-		this.target = pic.getTarget();
 		this.targetPath = pic.getTargetPath();
 		this.targetFilename = pic.getTargetFilename();
 		this.size = pic.getSize();
@@ -204,15 +194,6 @@ public class LogEntry {
 	 */
 	public String getTargetFilename() {
 		return targetFilename;
-	}
-
-	/**
-	 * Returns the target
-	 * 
-	 * @return target
-	 */
-	public String getTarget() {
-		return target;
 	}
 
 	/**

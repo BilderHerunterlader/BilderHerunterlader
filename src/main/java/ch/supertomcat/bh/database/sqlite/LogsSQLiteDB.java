@@ -77,12 +77,11 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		sbInsertEntry.append("ThreadURL, ");
 		sbInsertEntry.append("DownloadURL, ");
 		sbInsertEntry.append("ThumbURL, ");
-		sbInsertEntry.append("Target, ");
 		sbInsertEntry.append("TargetPath, ");
 		sbInsertEntry.append("TargetFilename, ");
 		sbInsertEntry.append("Size");
 		sbInsertEntry.append(") VALUES (");
-		sbInsertEntry.append("?, ?, ?, ?, ?, ?, ?, ?, ?");
+		sbInsertEntry.append("?, ?, ?, ?, ?, ?, ?, ?");
 		sbInsertEntry.append(")");
 
 		insertEntrySQL = sbInsertEntry.toString();
@@ -96,7 +95,6 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		sbInsertEntry.append("ThreadURL = ?, ");
 		sbInsertEntry.append("DownloadURL = ?, ");
 		sbInsertEntry.append("ThumbURL = ?, ");
-		sbInsertEntry.append("Target = ?, ");
 		sbInsertEntry.append("TargetPath = ?, ");
 		sbInsertEntry.append("TargetFilename = ?, ");
 		sbInsertEntry.append("Size = ?");
@@ -124,7 +122,6 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		sbCreateTable.append("ThreadURL TEXT NOT NULL, ");
 		sbCreateTable.append("DownloadURL TEXT NOT NULL, ");
 		sbCreateTable.append("ThumbURL TEXT NOT NULL, ");
-		sbCreateTable.append("Target TEXT NOT NULL, ");
 		sbCreateTable.append("TargetPath TEXT NOT NULL, ");
 		sbCreateTable.append("TargetFilename TEXT NOT NULL, ");
 		sbCreateTable.append("Size BIGINT NOT NULL");
@@ -178,12 +175,11 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		String threadURL = result.getString("ThreadURL");
 		String downloadURL = result.getString("DownloadURL");
 		String thumbURL = result.getString("ThumbURL");
-		String target = result.getString("Target");
 		String targetPath = result.getString("TargetPath");
 		String targetFilename = result.getString("TargetFilename");
 		long size = result.getLong("Size");
 
-		return new LogEntry(id, timestamp, containerURL, threadURL, downloadURL, thumbURL, target, targetPath, targetFilename, size);
+		return new LogEntry(id, timestamp, containerURL, threadURL, downloadURL, thumbURL, targetPath, targetFilename, size);
 	}
 
 	@Override
@@ -233,7 +229,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param count Count
 	 * @return Entries
 	 */
-	public synchronized List<LogEntry> getDirectlyLogEntries(int count) {
+	public synchronized List<LogEntry> getDirectoryLogEntries(int count) {
 		List<LogEntry> logEntries = new ArrayList<>();
 
 		try (Connection con = getDatabaseConnection()) {
@@ -296,7 +292,8 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 					while (rs.next()) {
 						long timestamp = rs.getLong("DownloadTimestamp");
 						String containerURL = rs.getString("ContainerURL");
-						String target = rs.getString("Target");
+						String targetPath = rs.getString("TargetPath");
+						String targetFilename = rs.getString("TargetFilename");
 						long size = rs.getLong("Size");
 
 						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
@@ -307,7 +304,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 						} else {
 							strFilesize = Localization.getString("Unkown");
 						}
-						model.addRow(containerURL, target, strDateTime, strFilesize);
+						model.addRow(containerURL, targetPath, targetFilename, strDateTime, strFilesize);
 					}
 				}
 			}
@@ -362,10 +359,9 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		statement.setString(3, entry.getThreadURL());
 		statement.setString(4, entry.getDownloadURL());
 		statement.setString(5, entry.getThumbURL());
-		statement.setString(6, entry.getTarget());
-		statement.setString(7, entry.getTargetPath());
-		statement.setString(8, entry.getTargetFilename());
-		statement.setLong(9, entry.getSize());
+		statement.setString(6, entry.getTargetPath());
+		statement.setString(7, entry.getTargetFilename());
+		statement.setLong(8, entry.getSize());
 
 		int rowsAffected = statement.executeUpdate();
 		if (rowsAffected <= 0) {
@@ -445,10 +441,9 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 		statement.setString(3, entry.getThreadURL());
 		statement.setString(4, entry.getDownloadURL());
 		statement.setString(5, entry.getThumbURL());
-		statement.setString(6, entry.getTarget());
-		statement.setString(7, entry.getTargetPath());
-		statement.setString(8, entry.getTargetFilename());
-		statement.setLong(9, entry.getSize());
+		statement.setString(6, entry.getTargetPath());
+		statement.setString(7, entry.getTargetFilename());
+		statement.setLong(8, entry.getSize());
 		statement.executeUpdate();
 		return true;
 	}

@@ -196,7 +196,7 @@ public class UpdateUpdatesXMLTest {
 
 				if (line.contains("<changelog>")) {
 					writer.write("\t\t<!--\n");
-					writer.write("\t\t<changes version=\"4.9.0\"></changes>\n");
+					writer.write("\t\t<changes version=\"6.0.0\"></changes>\n");
 					writer.write("\t\t-->\n");
 					writer.flush();
 				}
