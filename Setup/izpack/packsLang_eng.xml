@@ -7,6 +7,9 @@
 	<str id="package.libs" txt="Libraries" />
 	<str id="package.libs.description" txt="Libraries" />
 
+	<str id="package.updater" txt="Updater" />
+	<str id="package.updater.description" txt="Updater" />
+
 	<str id="package.hosts" txt="Host-Classes" />
 	<str id="package.hosts.description" txt="Host-Classes" />
 	

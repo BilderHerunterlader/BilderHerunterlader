@@ -115,6 +115,10 @@ Section !$(SecMainName) SecMain
 	SetOutPath "$INSTDIR\lib"
 	File "..\lib\*.jar"
 	
+	SetOutPath "$INSTDIR\updater"
+	File "..\updater\*.jar"
+	File "..\updater\*.exe"
+	
 	SetOutPath "$INSTDIR"
 	
 	;Set Write permissions on programm directory
@@ -179,6 +183,8 @@ Section "Uninstall"
 	Delete "$INSTDIR\HostzDefaultImages.txt.example"
 	Delete "$INSTDIR\CHANGELOG.md"
 	Delete "$INSTDIR\lib\*.jar"
+	Delete "$INSTDIR\updater\*.jar"
+	Delete "$INSTDIR\updater\*.exe"
 	Delete "$INSTDIR\Uninstall.exe"
 	
 	MessageBox MB_YESNO "Remove also all Rules and Host-Classes?" IDYES true IDNO false
@@ -193,6 +199,7 @@ Section "Uninstall"
 	next:
 	
 	RMDir "$INSTDIR\lib"
+	RMDir "$INSTDIR\updater"
 	RMDir "$INSTDIR"
 	
 	;Startmenu Shortcuts

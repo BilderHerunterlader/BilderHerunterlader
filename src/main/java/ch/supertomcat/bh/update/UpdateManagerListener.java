@@ -70,19 +70,6 @@ public interface UpdateManagerListener {
 	public void updateUnpackComplete(UpdateType updateType, UpdateActionType updateActionType);
 
 	/**
-	 * Update copy started
-	 * 
-	 * @param source Source
-	 * @param target Target
-	 */
-	public void updateCopyStarted(String source, String target);
-
-	/**
-	 * Update copy complete
-	 */
-	public void updateCopyComplete();
-
-	/**
 	 * An error occured
 	 * 
 	 * @param message Message

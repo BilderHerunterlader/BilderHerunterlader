@@ -11,7 +11,7 @@
 			<author name="bilderherunterlader" email="bilderherunterlader@gmail.com"/>
 		</authors>
 		<url>https://bilderherunterlader.sourceforge.net/page/?loc=bilderherunterlader</url>
-		<javaversion>11.0</javaversion>
+		<javaversion>21.0</javaversion>
 	</info>
 	
 	<guiprefs width="640" height="480" resizable="yes"/>
@@ -59,6 +59,14 @@
 			<description>Libraries</description>
 			<fileset dir="../../lib" targetdir="$INSTALL_PATH/lib">
 				<include name="*.jar" />
+			</fileset>
+		</pack>
+		
+		<pack name="Updater" required="yes" id="package.updater">
+			<description>Updater</description>
+			<fileset dir="../../updater" targetdir="$INSTALL_PATH/updater">
+				<include name="*.jar" />
+				<include name="*.exe" />
 			</fileset>
 		</pack>
 		

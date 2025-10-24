@@ -10,5 +10,7 @@ del v.txt
 
 ::version einsetzen und zip datei erstellen
 "%programfiles%\7-zip\7z.exe" a -tzip BH-%version%.zip lib\*.jar -r
+"%programfiles%\7-zip\7z.exe" a -tzip BH-%version%.zip updater\*.exe -r
+"%programfiles%\7-zip\7z.exe" a -tzip BH-%version%.zip updater\*.jar -r
 "%programfiles%\7-zip\7z.exe" a -tzip BH-%version%.zip BH.jar
 "%programfiles%\7-zip\7z.exe" a -tzip BH-%version%.zip BH.exe

@@ -1,24 +1,23 @@
 package ch.supertomcat.bh.update;
 
 import java.awt.Component;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.file.FileVisitResult;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.SimpleFileVisitor;
-import java.nio.file.StandardCopyOption;
-import java.nio.file.StandardOpenOption;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.UnaryOperator;
 
+import javax.swing.JOptionPane;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.xml.sax.SAXException;
+
+import com.sun.jna.Platform;
 
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -34,8 +33,19 @@ import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.application.ApplicationUtil;
 import ch.supertomcat.supertomcatutils.gui.Localization;
-import ch.supertomcat.supertomcatutils.io.DirectoryUtil;
+import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.io.ZipUtil;
+import ch.supertomcat.supertomcatutils.process.EvelatedProcessExecutor;
+import ch.supertomcat.supertomcatutils.process.linux.LinuxEvelatedProcessExecutor;
+import ch.supertomcat.supertomcatutils.process.macos.MacOSEvelatedProcessExecutor;
+import ch.supertomcat.supertomcatutils.process.windows.WindowsEvelatedProcessExecutor;
+import ch.supertomcat.updaterxml.UpdateXmlIO;
+import ch.supertomcat.updaterxml.update.xml.CopyDirectoryActionDefinition;
+import ch.supertomcat.updaterxml.update.xml.DeleteFileActionDefinition;
+import ch.supertomcat.updaterxml.update.xml.SelfUpdateActionDefinition;
+import ch.supertomcat.updaterxml.update.xml.StartProcessActionDefinition;
+import ch.supertomcat.updaterxml.update.xml.Update;
+import jakarta.xml.bind.JAXBException;
 
 /**
  * Update Manager
@@ -67,19 +77,28 @@ public class UpdateManager {
 	private final HostManager hostManager;
 
 	/**
+	 * Update XML IO
+	 */
+	private final UpdateXmlIO updateXMLIO;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param updateSource UpdateSource
 	 * @param hostManager Host Manager
 	 * @param guiEvent GUI Event
+	 * @throws JAXBException
+	 * @throws SAXException
+	 * @throws IOException
 	 */
-	public UpdateManager(UpdateSource updateSource, HostManager hostManager, GuiEvent guiEvent) {
+	public UpdateManager(UpdateSource updateSource, HostManager hostManager, GuiEvent guiEvent) throws IOException, SAXException, JAXBException {
 		if (updateSource == null) {
 			throw new IllegalArgumentException("No source for updates available!");
 		}
 		this.updateSource = updateSource;
 		this.guiEvent = guiEvent;
 		this.hostManager = hostManager;
+		this.updateXMLIO = new UpdateXmlIO();
 	}
 
 	/**
@@ -203,55 +222,76 @@ public class UpdateManager {
 			}
 
 			Path tempHostsDirectory = tempDirectory.resolve("hosts");
-			List<Path> downloadedRedirectFiles = downloadUpdates(wrappedUpdates.getRedirectUpdates(), tempHostsDirectory, UpdateType.TYPE_REDIRECT_PLUGIN);
-			List<Path> downloadedHosterFiles = downloadUpdates(wrappedUpdates.getHosterUpdates(), tempHostsDirectory, UpdateType.TYPE_HOST_PLUGIN);
+			downloadUpdates(wrappedUpdates.getRedirectUpdates(), tempHostsDirectory, UpdateType.TYPE_REDIRECT_PLUGIN);
+			downloadUpdates(wrappedUpdates.getHosterUpdates(), tempHostsDirectory, UpdateType.TYPE_HOST_PLUGIN);
 
 			Path tempRulesDirectory = tempDirectory.resolve("rules");
-			List<Path> downloadedRuleFiles = downloadUpdates(wrappedUpdates.getRuleUpdates(), tempRulesDirectory, UpdateType.TYPE_RULE);
+			downloadUpdates(wrappedUpdates.getRuleUpdates(), tempRulesDirectory, UpdateType.TYPE_RULE);
 
-			addDeleteUpdates(wrappedUpdates.getRedirectUpdates(), hostsDirectory, deleteUpdatesFile);
-			addDeleteUpdates(wrappedUpdates.getHosterUpdates(), hostsDirectory, deleteUpdatesFile);
-			addDeleteUpdates(wrappedUpdates.getRuleUpdates(), rulesDirectory, deleteUpdatesFile);
+			logger.info("Downloads successful");
 
-			/*
-			 * Now that everything is downloaded copy files to application directory
-			 * 
-			 * TODO In the future this should not be done by this application, but by a separate updater
-			 */
-			copyFilesToApplicationDirectory(downloadedRedirectFiles, applicationPath, tempDirectory);
-			copyFilesToApplicationDirectory(downloadedHosterFiles, applicationPath, tempDirectory);
-			copyFilesToApplicationDirectory(downloadedRuleFiles, applicationPath, tempDirectory);
+			boolean selfUpdate = false;
+			Path updaterJarPath = getUpdaterJarPath(tempMainDirectory);
+			if (updaterJarPath != null) {
+				selfUpdate = true;
+			} else {
+				updaterJarPath = getUpdaterJarPath(applicationPath);
+			}
+
+			if (updaterJarPath == null) {
+				logger.error("Update installation failed. Could not find updater");
+				fireErrorOccured("Update installation failed. Could not find updater", null);
+				if (mainUpdateAvailable) {
+					fireNewProgramVersionInstallFailed();
+				}
+				fireUpdatesFailed();
+				return;
+			}
+
+			Path updateXMLFilePath = tempDirectory.resolve("update.xml");
+
+			Update updateXMLDefinition = new Update();
+			addDeleteFiles(updateXMLDefinition, wrappedUpdates.getRedirectUpdates(), hostsDirectory);
+			addDeleteFiles(updateXMLDefinition, wrappedUpdates.getHosterUpdates(), hostsDirectory);
+			addDeleteFiles(updateXMLDefinition, wrappedUpdates.getRuleUpdates(), rulesDirectory);
+			addCopyDirectory(updateXMLDefinition, tempHostsDirectory, hostsDirectory, false);
+			addCopyDirectory(updateXMLDefinition, tempRulesDirectory, rulesDirectory, false);
 			if (mainUpdateAvailable) {
-				copyFolderToApplicationDirectory(applicationPath, tempMainDirectory);
+				addCopyDirectory(updateXMLDefinition, tempMainDirectory, applicationPath, true);
+			}
+			if (selfUpdate) {
+				addUpdaterSelfUpdate(updateXMLDefinition, applicationPath);
+			}
+			addStartProcess(updateXMLDefinition, applicationPath);
+			writeUpdateXMLFile(updateXMLDefinition, updateXMLFilePath);
+
+			JOptionPane.showMessageDialog(owner, Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), JOptionPane.WARNING_MESSAGE);
+
+			logger.info("Start updater and exit");
+			if (mainUpdateAvailable) {
 				fireNewProgramVersionInstalled();
 			}
-
-			logger.info("Updates successful");
 			fireUpdatesComplete();
 
-			if (deleteUpdatesAvailable) {
-				logger.info("Exit BH without restart");
-				guiEvent.exitAppForced(Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart"), Localization.getString("Update"), owner, false, true);
-			} else {
-				logger.info("Exit BH with restart");
-				guiEvent.exitAppForced(Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), owner, true, true);
+			if (!startUpdater(updateXMLFilePath, updaterJarPath)) {
+				logger.error("Update installation failed. Could not launche updater");
+				fireErrorOccured("Update installation failed. Could not launche updater", null);
+				if (mainUpdateAvailable) {
+					fireNewProgramVersionInstallFailed();
+				}
+				fireUpdatesFailed();
+				return;
 			}
-		} catch (UpdateException | IOException e) {
+
+			logger.info("Exit BH without restart");
+			guiEvent.exitAppForced(false, true);
+		} catch (UpdateException | IOException | JAXBException e) {
 			logger.error("Update installation failed", e);
 			fireErrorOccured("Update installation failed", e);
 			if (mainUpdateAvailable) {
 				fireNewProgramVersionInstallFailed();
 			}
 			fireUpdatesFailed();
-		} finally {
-			if (tempDirectory != null) {
-				try {
-					logger.info("Delete temp directory: {}", tempDirectory);
-					DirectoryUtil.deleteDirectoryRecursive(tempDirectory, true);
-				} catch (IOException e) {
-					logger.error("Could not delete temp directory", e);
-				}
-			}
 		}
 	}
 
@@ -280,56 +320,6 @@ public class UpdateManager {
 	}
 
 	/**
-	 * Copy Files to application directory
-	 * 
-	 * @param tempFiles Temp Files
-	 * @param applicationDirectory Application Directory
-	 * @param tempDirectory Temp Directory
-	 * @throws IOException
-	 */
-	private void copyFilesToApplicationDirectory(List<Path> tempFiles, Path applicationDirectory, Path tempDirectory) throws IOException {
-		logger.info("Copy files from {} to {}", tempDirectory, applicationDirectory);
-		for (Path tempFile : tempFiles) {
-			Path targetFile = applicationDirectory.resolve(tempDirectory.relativize(tempFile).toString());
-			logger.info("Copy file from {} to {}", tempFile, targetFile);
-			fireUpdateCopyStarted(tempFile.toString(), targetFile.toString());
-			Files.copy(tempFile, targetFile, StandardCopyOption.REPLACE_EXISTING);
-			fireUpdateCopyComplete();
-		}
-	}
-
-	/**
-	 * Copy Files to application directory
-	 * 
-	 * @param applicationDirectory Application Directory
-	 * @param tempDirectory Temp Directory
-	 * @throws IOException
-	 */
-	private void copyFolderToApplicationDirectory(Path applicationDirectory, Path tempDirectory) throws IOException {
-		logger.info("Copy files from {} to {}", tempDirectory, applicationDirectory);
-		fireUpdateCopyStarted(tempDirectory.toString(), applicationDirectory.toString());
-		Files.walkFileTree(tempDirectory, new SimpleFileVisitor<Path>() {
-
-			@Override
-			public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
-				Path targetDirectory = applicationDirectory.resolve(tempDirectory.relativize(dir).toString());
-				logger.info("Create directory if not exists: {}", targetDirectory);
-				Files.createDirectories(targetDirectory);
-				return FileVisitResult.CONTINUE;
-			}
-
-			@Override
-			public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-				Path targetFile = applicationDirectory.resolve(tempDirectory.relativize(file).toString());
-				logger.info("Copy file from {} to {}", file, targetFile);
-				Files.copy(file, targetFile, StandardCopyOption.REPLACE_EXISTING);
-				return FileVisitResult.CONTINUE;
-			}
-		});
-		fireUpdateCopyComplete();
-	}
-
-	/**
 	 * Check if delete updates available
 	 * 
 	 * @param wrappedUpdateDataList List
@@ -339,31 +329,155 @@ public class UpdateManager {
 		return wrappedUpdateDataList.stream().anyMatch(x -> x.isDelete() || x.isSubDelete());
 	}
 
+	private void addCopyDirectory(Update updateXMLDefinition, Path sourceDirectory, Path targetDirectory, boolean recursive) {
+		if (!Files.exists(sourceDirectory)) {
+			logger.info("Source directory does not exist, does not need to be copied: {}", sourceDirectory);
+			return;
+		}
+		CopyDirectoryActionDefinition copyDirectoryDefinition = new CopyDirectoryActionDefinition();
+		copyDirectoryDefinition.setSourceDirectory(sourceDirectory.toAbsolutePath().toString());
+		copyDirectoryDefinition.setTargetDirectory(targetDirectory.toAbsolutePath().toString());
+		copyDirectoryDefinition.setRecursive(recursive);
+		updateXMLDefinition.getActions().add(copyDirectoryDefinition);
+	}
+
+	private void addDeleteFiles(Update updateXMLDefinition, List<WrappedUpdateData> wrappedUpdateDataList, Path directory) {
+		List<WrappedUpdateData> deletes = wrappedUpdateDataList.stream().filter(WrappedUpdateData::isDelete).toList();
+		for (WrappedUpdateData wrappedUpdateData : deletes) {
+			UpdateData updateData = wrappedUpdateData.getUpdateData();
+			Path targetFile = directory.resolve(updateData.getFilename());
+			addDeleteFile(updateXMLDefinition, targetFile);
+		}
+
+		List<UpdateDataAdditionalSource> subDeletes = wrappedUpdateDataList.stream().filter(WrappedUpdateData::isSubDelete).map(WrappedUpdateData::getUpdateData).flatMap(x -> x.getSource().stream())
+				.filter(x -> x.getDelete() != null).toList();
+		for (UpdateDataAdditionalSource additionalSource : subDeletes) {
+			Path targetFile = directory.resolve(additionalSource.getFilename());
+			addDeleteFile(updateXMLDefinition, targetFile);
+		}
+	}
+
+	private void addDeleteFile(Update updateXMLDefinition, Path targetFile) {
+		DeleteFileActionDefinition deleteFileDefinition = new DeleteFileActionDefinition();
+		deleteFileDefinition.setFile(targetFile.toAbsolutePath().toString());
+		updateXMLDefinition.getActions().add(deleteFileDefinition);
+	}
+
+	private void addUpdaterSelfUpdate(Update updateXMLDefinition, Path applicationPath) {
+		SelfUpdateActionDefinition selfUpdateDefinition = new SelfUpdateActionDefinition();
+		selfUpdateDefinition.setTargetDirectory(applicationPath.resolve("updater").toAbsolutePath().toString());
+		updateXMLDefinition.getActions().add(selfUpdateDefinition);
+	}
+
+	private void addStartProcess(Update updateXMLDefinition, Path applicationPath) {
+		String jarFilename = ApplicationProperties.getProperty(ApplicationMain.JAR_FILENAME);
+		if (jarFilename == null || jarFilename.isEmpty()) {
+			logger.error("JarFilename Application Property is null or empty: {}. Updater will not start BH after updates.", jarFilename);
+			return;
+		}
+
+		String applicationAbsolutePath = applicationPath.toAbsolutePath().toString();
+		if (!applicationAbsolutePath.endsWith(FileUtil.FILE_SEPERATOR)) {
+			applicationAbsolutePath += FileUtil.FILE_SEPERATOR;
+		}
+
+		String javaExePath = getJavaExePath();
+		if (javaExePath == null) {
+			logger.error("Could not find java executable. Updater will not start BH after updates.");
+			return;
+		}
+
+		List<String> arguments = new ArrayList<>();
+		arguments.add(javaExePath);
+		arguments.add("-jar");
+		arguments.add(applicationAbsolutePath + jarFilename);
+
+		StartProcessActionDefinition startProcessActionDefinition = new StartProcessActionDefinition();
+		startProcessActionDefinition.setWorkingDirectory(applicationPath.toAbsolutePath().toString());
+		startProcessActionDefinition.getCommand().addAll(arguments);
+		updateXMLDefinition.getActions().add(startProcessActionDefinition);
+	}
+
 	/**
-	 * Add delete updates
+	 * TODO Already available in ApplicationMain, but as instance method. Should be made available static in utils. Copied to code for now.
 	 * 
-	 * @param wrappedUpdateDataList List
-	 * @param directory Directory
-	 * @param deleteUpdatesFile Delete Updates File
-	 * @throws IOException
+	 * @return Java Executable Path or null
 	 */
-	private void addDeleteUpdates(List<WrappedUpdateData> wrappedUpdateDataList, Path directory, Path deleteUpdatesFile) throws IOException {
-		try (BufferedWriter writer = Files.newBufferedWriter(deleteUpdatesFile, Charset.forName(System.getProperty("native.encoding")), StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-			List<WrappedUpdateData> deletes = wrappedUpdateDataList.stream().filter(WrappedUpdateData::isDelete).toList();
-			for (WrappedUpdateData wrappedUpdateData : deletes) {
-				UpdateData updateData = wrappedUpdateData.getUpdateData();
-				writer.write(directory.resolve(updateData.getFilename()).toString());
-				writer.write("\n");
-				writer.flush();
+	protected String getJavaExePath() {
+		String jreBinPath = System.getProperty("java.home") + FileUtil.FILE_SEPERATOR + "bin" + FileUtil.FILE_SEPERATOR;
+
+		String jreJavaw = jreBinPath + "javaw";
+		String jreJava = jreBinPath + "java";
+
+		Path fJreJavaw;
+		Path fJreJava;
+		if (Platform.isWindows()) {
+			fJreJavaw = Paths.get(jreJavaw + ".exe");
+			fJreJava = Paths.get(jreJava + ".exe");
+		} else {
+			fJreJavaw = Paths.get(jreJavaw);
+			fJreJava = Paths.get(jreJava);
+		}
+
+		if (Files.exists(fJreJavaw)) {
+			return jreJavaw;
+		}
+
+		if (Files.exists(fJreJava)) {
+			return jreJava;
+		}
+
+		return null;
+	}
+
+	private void writeUpdateXMLFile(Update updateXMLDefinition, Path xmlFile) throws IOException, JAXBException {
+		updateXMLIO.writeUpdate(xmlFile, updateXMLDefinition);
+		String xmlString = new String(Files.readAllBytes(xmlFile), StandardCharsets.UTF_8);
+		logger.info("Update XML File written to {}:\n{}", xmlFile, xmlString);
+	}
+
+	private Path getUpdaterJarPath(Path directory) {
+		String updateJarFilename = "Updater.jar";
+		Path updaterJarPath = directory.resolve("updater").resolve(updateJarFilename);
+		/*
+		 * Choose updater from temp directory
+		 */
+		if (Files.exists(updaterJarPath)) {
+			return updaterJarPath;
+		}
+
+		return null;
+	}
+
+	private boolean startUpdater(Path updateXMLFilePath, Path updaterJarPath) {
+		try {
+			EvelatedProcessExecutor executor;
+			if (Platform.isWindows()) {
+				executor = new WindowsEvelatedProcessExecutor();
+			} else if (Platform.isMac()) {
+				executor = new MacOSEvelatedProcessExecutor();
+			} else {
+				executor = new LinuxEvelatedProcessExecutor();
 			}
 
-			List<UpdateDataAdditionalSource> subDeletes = wrappedUpdateDataList.stream().filter(WrappedUpdateData::isSubDelete).map(WrappedUpdateData::getUpdateData)
-					.flatMap(x -> x.getSource().stream()).filter(x -> x.getDelete() != null).toList();
-			for (UpdateDataAdditionalSource additionalSource : subDeletes) {
-				writer.write(directory.resolve(additionalSource.getFilename()).toString());
-				writer.write("\n");
-				writer.flush();
+			String javaExePath = getJavaExePath();
+			if (javaExePath == null) {
+				logger.error("Could not find java executable");
+				return false;
 			}
+
+			List<String> arguments = new ArrayList<>();
+			arguments.add(javaExePath);
+			arguments.add("-jar");
+			arguments.add(updaterJarPath.toAbsolutePath().toString());
+			arguments.add("-update");
+			arguments.add(updateXMLFilePath.toAbsolutePath().toString());
+
+			executor.startProcess(null, arguments);
+			return true;
+		} catch (Exception e) {
+			logger.error("Could not start updater", e);
+			return false;
 		}
 	}
 
@@ -424,18 +538,6 @@ public class UpdateManager {
 	private void fireUpdateUnpackComplete(UpdateType updateType, UpdateActionType updateActionType) {
 		for (UpdateManagerListener listener : listeners) {
 			listener.updateUnpackComplete(updateType, updateActionType);
-		}
-	}
-
-	private void fireUpdateCopyStarted(String source, String target) {
-		for (UpdateManagerListener listener : listeners) {
-			listener.updateCopyStarted(source, target);
-		}
-	}
-
-	private void fireUpdateCopyComplete() {
-		for (UpdateManagerListener listener : listeners) {
-			listener.updateCopyComplete();
 		}
 	}
 

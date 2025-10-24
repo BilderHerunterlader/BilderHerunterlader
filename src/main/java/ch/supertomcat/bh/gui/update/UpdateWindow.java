@@ -525,19 +525,12 @@ public class UpdateWindow extends JDialog {
 		}
 
 		@Override
-		public void updateCopyStarted(String source, String target) {
-			String message = Localization.getString("CopyUpdate") + " (" + source + " -> " + target + ")\n";
-			appendMessage(message);
-		}
-
-		@Override
-		public void updateCopyComplete() {
-			// Nothing to do
-		}
-
-		@Override
 		public void errorOccured(String message, Exception ex) {
-			appendMessage(message + "\n" + ApplicationUtil.formatStackTrace(ex) + "\n");
+			if (ex != null) {
+				appendMessage(message + "\n" + ApplicationUtil.formatStackTrace(ex) + "\n");
+			} else {
+				appendMessage(message + "\n");
+			}
 		}
 	}
 }

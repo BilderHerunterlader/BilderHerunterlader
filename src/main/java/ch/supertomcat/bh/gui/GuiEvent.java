@@ -52,6 +52,18 @@ public class GuiEvent {
 	/**
 	 * Exit programm forced
 	 * 
+	 * @param restart Restart
+	 * @param update True if exit is done, because of installed updates, false otherwise
+	 */
+	public void exitAppForced(boolean restart, boolean update) {
+		for (IGuiEventListener listener : listeners) {
+			listener.exitAppForced(restart, update);
+		}
+	}
+
+	/**
+	 * Exit programm forced
+	 * 
 	 * @param message Message
 	 * @param title Title
 	 * @param owner Owner
