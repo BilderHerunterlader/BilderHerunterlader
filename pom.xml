@@ -8,7 +8,7 @@
 	</parent>
 
 	<artifactId>bilderherunterlader</artifactId>
-	<version>6.0.0</version>
+	<version>6.0.1-SNAPSHOT</version>
 	<name>BilderHerunterlader</name>
 	<description>Download files from file hosts</description>
 	<url>https://github.com/BilderHerunterlader/BilderHerunterlader</url>
@@ -275,6 +275,6 @@
 		<url>https://github.com/BilderHerunterlader/BilderHerunterlader.git</url>
 		<connection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</connection>
 		<developerConnection>scm:git:https://github.com/BilderHerunterlader/BilderHerunterlader.git</developerConnection>
-		<tag>bilderherunterlader-6.0.0</tag>
+		<tag>HEAD</tag>
 	</scm>
 </project>
