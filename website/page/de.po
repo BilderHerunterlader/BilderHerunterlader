@@ -1,91 +1,178 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-08-05 19:06+0200\n"
-"PO-Revision-Date: 2020-08-05 19:06+0200\n"
+"POT-Creation-Date: 2025-10-25 20:48+0200\n"
+"PO-Revision-Date: 2025-10-25 20:48+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4\n"
-"X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
+"X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: cache\n"
 "X-Poedit-SearchPathExcluded-1: configs\n"
 "X-Poedit-SearchPathExcluded-2: geshi\n"
 "X-Poedit-SearchPathExcluded-3: templates_c\n"
 
-#: language.php:9
-msgid "home"
-msgstr "Startseite"
+#: templates/bilderherunterlader/index.tpl:1
+msgid "Description:"
+msgstr "Beschreibung:"
 
-#: language.php:10 language.php:17
-msgid "useful"
-msgstr "Nützliches"
+#: templates/bilderherunterlader/index.tpl:2
+msgid ""
+"BilderHerunterlader is a program written in Java, which makes it easier to "
+"download images, hosted on image-host-websites.\n"
+"But it is not limited to that. It can not only download images, but any type "
+"of files.\n"
+"Support for additional hosts or websites can be added over user definded "
+"rules.\n"
+"With user definded keywords, files can directly downloaded to the right "
+"folder.\n"
+"The program is available in English or German."
+msgstr ""
+"BilderHerunterlader ist ein in Java geschriebenes Programm, welches das "
+"Herunterladen von Bildern, die auf Bild-Hostern gespeichert sind "
+"vereinfacht.\n"
+"Es ist aber nicht darauf begrenzt. Es können nicht nur Bilder sondern "
+"jegliche Art von Dateien runtergeladen werden.\n"
+"Über selbst definierbare Regeln kann man auf einfach Weise die Unterstützung "
+"für weitere Hoster oder Webseiten beibringen.\n"
+"Mit selbst definierbaren Schüsselwörtern kann dafür gesorgt werden, dass "
+"Dateien direkt in die richtigen Ordner gelangen.\n"
+"Das Programm ist in Englisch und Deutsch verfügbar."
 
-#: language.php:11
-msgid "contact"
-msgstr "Kontakt"
+#: templates/bilderherunterlader/index.tpl:8
+msgid "This program is OpenSource and linsenced under the GPL (v2)."
+msgstr "Das Programm ist OpenSource und ist lizenziert unter der GPL (v2)."
 
-#: language.php:12
-msgid "features"
-msgstr "Features"
+#: templates/bilderherunterlader/index.tpl:10
+msgid "Project-Page on GitHub"
+msgstr "Projekt-Seite auf GitHub"
 
-#: language.php:13
-msgid "download"
-msgstr "Download"
+#: templates/bilderherunterlader/index.tpl:11
+msgid "Project-Page on SourceForge"
+msgstr "Projekt-Seite auf SourceForge"
 
-#: language.php:14
-msgid "changelog"
-msgstr "Changelog"
+#: templates/bilderherunterlader/index.tpl:12
+msgid "Supported Operating Systems:"
+msgstr "Unterstützte Betriebssysteme:"
 
-#: language.php:15
-msgid "screenshots"
-msgstr "Screenshots"
+#: templates/bilderherunterlader/index.tpl:14
+msgid ""
+"Windows, Linux, MacOS, BSD and any other operating system for which the JRE "
+"(Java Runtime Environment) is available."
+msgstr ""
+"Windows, Linux, MacOS, BSD und alle anderen Betriebssysteme wofür die JRE "
+"(Java Runtime Environment) zur Verfügung steht."
 
-#: language.php:16
-msgid "faq"
-msgstr "FAQ"
+#: templates/bilderherunterlader/index.tpl:16
+msgid "Supported Hosts:"
+msgstr "Unterstütze Hoster:"
 
-#: language.php:18
-msgid "tutorial"
-msgstr "Anleitung"
-
-#: language.php:19
-msgid "rules"
-msgstr "Regeln"
-
-#: language.php:20
-msgid "hostplugins"
-msgstr "Host-Plugins"
-
-#: language.php:21
-msgid "options"
-msgstr "Einstellungen"
-
-#: language.php:22
-msgid "portable"
-msgstr "Portable"
-
-#: language.php:23
-msgid "bilderherunterlader"
+#: templates/bilderherunterlader/menu.tpl:3
+msgid "BilderHerunterlader"
 msgstr "BilderHerunterlader"
 
-#: language.php:24
-msgid "error404"
-msgstr "Error"
+#: templates/bilderherunterlader/menu.tpl:4
+msgid "Download"
+msgstr "Download"
 
-#: language.php:25
-msgid "irada"
-msgstr "Irada"
+#: templates/bilderherunterlader/menu.tpl:5
+msgid "Features"
+msgstr "Features"
 
-#: language.php:26
-msgid "anleitung"
+#: templates/bilderherunterlader/menu.tpl:6
+msgid "Tutorial"
 msgstr "Anleitung"
 
+#: templates/bilderherunterlader/menu.tpl:7
+msgid "Screenshots"
+msgstr "Screenshots"
+
+#: templates/bilderherunterlader/menu.tpl:8
+msgid "Changelog"
+msgstr "Changelog"
+
+#: templates/bilderherunterlader/menu.tpl:9
+msgid "FAQ"
+msgstr "FAQ"
+
+#: templates/bilderherunterlader/menu.tpl:10
+msgid "Useful"
+msgstr "Nützliches"
+
+#: templates/bilderherunterlader/menu.tpl:11
+msgid "Rules"
+msgstr "Regeln"
+
+#: templates/bilderherunterlader/menu.tpl:12
+msgid "Portable"
+msgstr "Portable"
+
+#: templates/index.tpl:21
+msgid "Home"
+msgstr "Startseite"
+
+#: templates/index.tpl:23
+msgid "Irada"
+msgstr "Irada"
+
+#: templates/index.tpl:24
+msgid "Contact"
+msgstr "Kontakt"
+
+#: language.php:21
+msgid "Host-Plugins"
+msgstr "Host-Plugins"
+
+#: language.php:22
+msgid "Options"
+msgstr "Einstellungen"
+
 #: language.php:27
+msgid "Anleitung"
+msgstr "Anleitung"
+
+#: language.php:28
 msgid "hostini"
 msgstr "host.ini"
+
+#~ msgid "home"
+#~ msgstr "Startseite"
+
+#~ msgid "useful"
+#~ msgstr "Nützliches"
+
+#~ msgid "features"
+#~ msgstr "Features"
+
+#~ msgid "download"
+#~ msgstr "Download"
+
+#~ msgid "changelog"
+#~ msgstr "Changelog"
+
+#~ msgid "screenshots"
+#~ msgstr "Screenshots"
+
+#~ msgid "faq"
+#~ msgstr "FAQ"
+
+#~ msgid "tutorial"
+#~ msgstr "Anleitung"
+
+#~ msgid "rules"
+#~ msgstr "Regeln"
+
+#~ msgid "portable"
+#~ msgstr "Portable"
+
+#~ msgid "bilderherunterlader"
+#~ msgstr "BilderHerunterlader"
+
+#~ msgid "error404"
+#~ msgstr "Error"

@@ -11,7 +11,7 @@ ob_start();
 include_once("includes/inc_escape.php");
 
 // Include the GeSHi library
-include_once("geshi/geshi.php");
+include_once("geshi/src/geshi.php");
 $geshiInstance = new GeSHi();
 
 $pageLanguage = "en";
@@ -36,9 +36,6 @@ include_once("language.php");
 // Determine Template File
 $pageLocation = "home";
 $pageTemplateFile = "home.tpl";
-if (file_exists('templates/' . "home_" . $pageLanguage . ".tpl")) {
-	$pageTemplateFile = "home_" . $pageLanguage . ".tpl";
-}
 $pageSubMenuTemplateFile = "";
 $pageLocationSubStyle = "";
 $pageTitleArr = ["home"];
@@ -66,19 +63,11 @@ if (isset($_GET['loc']) && ($_GET['loc'] != "")) {
 			$folderIndexTemplateFile .= "/";
 		}
 		$subMenuTemplateFile = $folderIndexTemplateFile . "menu.tpl";
-		$folderIndexTemplateLangFile = $folderIndexTemplateFile . "index_" . $pageLanguage . ".tpl";
 		$folderIndexTemplateFile .= "index.tpl";
-		if (file_exists('templates/' . $folderIndexTemplateLangFile)) {
-			$pageTemplateFile = $folderIndexTemplateLangFile;
-			$foundTemplateFile = true;
-		} else if (file_exists('templates/' . $folderIndexTemplateFile)) {
+		if (file_exists('templates/' . $folderIndexTemplateFile)) {
 			$pageTemplateFile = $folderIndexTemplateFile;
 			$foundTemplateFile = true;
 		}
-	} else if (file_exists('templates/' . $loc . "_" . $pageLanguage . '.tpl')) {
-		$pageTemplateFile = $loc . "_" . $pageLanguage . ".tpl";
-		$subMenuTemplateFile = dirname($loc . "_" . $pageLanguage . '.tpl') . "/menu.tpl";
-		$foundTemplateFile = true;
 	} else if (file_exists('templates/' . $loc . '.tpl')) {
 		$pageTemplateFile = $loc . ".tpl";
 		$subMenuTemplateFile = dirname($loc . '.tpl') . "/menu.tpl";
@@ -104,7 +93,7 @@ if (isset($_GET['loc']) && ($_GET['loc'] != "")) {
 
 $pageTitleArrTranslated = array();
 foreach ($pageTitleArr as $pageTitlePart) {
-	$pageTitleArrTranslated[] = getLocalizedText($pageTitlePart);
+	$pageTitleArrTranslated[] = getLocalizedPageTitlePartText($pageTitlePart);
 }
 
 $smarty = new Smarty();
@@ -113,6 +102,7 @@ $smarty->setTemplateDir(dirname(__FILE__) . '/templates/');
 $smarty->setCompileDir(dirname(__FILE__) . '/templates_c/');
 $smarty->setConfigDir(dirname(__FILE__) . '/configs/');
 $smarty->setCacheDir(dirname(__FILE__) . '/cache/');
+$smarty->addPluginsDir(dirname(__FILE__) . '/../smartyPlugins/');
 
 $smarty->assign('bhUpdatesXMLFile', realpath('../bh/updatev6.xml'));
 $smarty->assign('pageLocationTemplate', $pageTemplateFile);

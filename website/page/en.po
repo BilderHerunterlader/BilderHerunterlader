@@ -1,90 +1,165 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2020-08-05 19:09+0200\n"
-"PO-Revision-Date: 2020-08-05 19:12+0200\n"
+"POT-Creation-Date: 2025-10-25 20:48+0200\n"
+"PO-Revision-Date: 2025-10-25 20:49+0200\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.4\n"
-"X-Poedit-Basepath: .\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Poedit 3.8\n"
+"X-Poedit-Basepath: .\n"
 "X-Poedit-SearchPath-0: .\n"
 "X-Poedit-SearchPathExcluded-0: geshi\n"
 "X-Poedit-SearchPathExcluded-1: cache\n"
 "X-Poedit-SearchPathExcluded-2: templates_c\n"
 
-#: language.php:9
-msgid "home"
-msgstr "Homepage"
+#: templates/bilderherunterlader/index.tpl:1
+msgid "Description:"
+msgstr ""
 
-#: language.php:10 language.php:17
-msgid "useful"
-msgstr "Useful"
+#: templates/bilderherunterlader/index.tpl:2
+msgid ""
+"BilderHerunterlader is a program written in Java, which makes it easier to "
+"download images, hosted on image-host-websites.\n"
+"But it is not limited to that. It can not only download images, but any type "
+"of files.\n"
+"Support for additional hosts or websites can be added over user definded "
+"rules.\n"
+"With user definded keywords, files can directly downloaded to the right "
+"folder.\n"
+"The program is available in English or German."
+msgstr ""
 
-#: language.php:11
-msgid "contact"
-msgstr "Contact"
+#: templates/bilderherunterlader/index.tpl:8
+msgid "This program is OpenSource and linsenced under the GPL (v2)."
+msgstr ""
 
-#: language.php:12
-msgid "features"
-msgstr "Features"
+#: templates/bilderherunterlader/index.tpl:10
+msgid "Project-Page on GitHub"
+msgstr ""
 
-#: language.php:13
-msgid "download"
-msgstr "Download"
+#: templates/bilderherunterlader/index.tpl:11
+msgid "Project-Page on SourceForge"
+msgstr ""
 
-#: language.php:14
-msgid "changelog"
-msgstr "Changelog"
+#: templates/bilderherunterlader/index.tpl:12
+msgid "Supported Operating Systems:"
+msgstr ""
 
-#: language.php:15
-msgid "screenshots"
-msgstr "Screenshots"
+#: templates/bilderherunterlader/index.tpl:14
+msgid ""
+"Windows, Linux, MacOS, BSD and any other operating system for which the JRE "
+"(Java Runtime Environment) is available."
+msgstr ""
 
-#: language.php:16
-msgid "faq"
-msgstr "FAQ"
+#: templates/bilderherunterlader/index.tpl:16
+msgid "Supported Hosts:"
+msgstr ""
 
-#: language.php:18
-msgid "tutorial"
-msgstr "Tutorial"
+#: templates/bilderherunterlader/menu.tpl:3
+msgid "BilderHerunterlader"
+msgstr ""
 
-#: language.php:19
-msgid "rules"
-msgstr "Rules"
+#: templates/bilderherunterlader/menu.tpl:4
+msgid "Download"
+msgstr ""
 
-#: language.php:20
-msgid "hostplugins"
-msgstr "Host-Plugins"
+#: templates/bilderherunterlader/menu.tpl:5
+msgid "Features"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:6
+msgid "Tutorial"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:7
+msgid "Screenshots"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:8
+msgid "Changelog"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:9
+msgid "FAQ"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:10
+msgid "Useful"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:11
+msgid "Rules"
+msgstr ""
+
+#: templates/bilderherunterlader/menu.tpl:12
+msgid "Portable"
+msgstr ""
+
+#: templates/index.tpl:21
+msgid "Home"
+msgstr ""
+
+#: templates/index.tpl:23
+msgid "Irada"
+msgstr ""
+
+#: templates/index.tpl:24
+msgid "Contact"
+msgstr ""
 
 #: language.php:21
-msgid "options"
-msgstr "Options"
+msgid "Host-Plugins"
+msgstr ""
 
 #: language.php:22
-msgid "portable"
-msgstr "Portable"
-
-#: language.php:23
-msgid "bilderherunterlader"
-msgstr "BilderHerunterlader"
-
-#: language.php:24
-msgid "error404"
-msgstr "Error"
-
-#: language.php:25
-msgid "irada"
-msgstr "Irada"
-
-#: language.php:26
-msgid "anleitung"
-msgstr "Tutorial"
+msgid "Options"
+msgstr ""
 
 #: language.php:27
+msgid "Anleitung"
+msgstr ""
+
+#: language.php:28
 msgid "hostini"
-msgstr "host.ini"
+msgstr ""
+
+#~ msgid "error404"
+#~ msgstr "Error 404"
+
+#~ msgid "tutorial"
+#~ msgstr "Tutorial"
+
+#~ msgid "home"
+#~ msgstr "Homepage"
+
+#~ msgid "useful"
+#~ msgstr "Useful"
+
+#~ msgid "features"
+#~ msgstr "Features"
+
+#~ msgid "download"
+#~ msgstr "Download"
+
+#~ msgid "changelog"
+#~ msgstr "Changelog"
+
+#~ msgid "screenshots"
+#~ msgstr "Screenshots"
+
+#~ msgid "faq"
+#~ msgstr "FAQ"
+
+#~ msgid "rules"
+#~ msgstr "Rules"
+
+#~ msgid "portable"
+#~ msgstr "Portable"
+
+#~ msgid "bilderherunterlader"
+#~ msgstr "BilderHerunterlader"

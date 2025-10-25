@@ -18,10 +18,10 @@
 	<body>
 		<div id="menu">
 			<ul id="menumainindex" class="menumain">
-				<li><a href="?loc=home&amp;lng={$pageLanguage}">{gettext}home{/gettext}</a></li>
-				<li><a href="?loc=bilderherunterlader&amp;lng={$pageLanguage}">{gettext}bilderherunterlader{/gettext}</a></li>
-				<li><a href="?loc=irada&amp;lng={$pageLanguage}">{gettext}irada{/gettext}</a></li>
-				<li><a href="?loc=contact&amp;lng={$pageLanguage}">{gettext}contact{/gettext}</a></li>
+				<li><a href="?loc=home&amp;lng={$pageLanguage}">{t}Home{/t}</a></li>
+				<li><a href="?loc=bilderherunterlader&amp;lng={$pageLanguage}">{t}BilderHerunterlader{/t}</a></li>
+				<li><a href="?loc=irada&amp;lng={$pageLanguage}">{t}Irada{/t}</a></li>
+				<li><a href="?loc=contact&amp;lng={$pageLanguage}">{t}Contact{/t}</a></li>
 			</ul>
 			<ul id="menumainkofi" class="menumain">
 				<li><script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script><script type='text/javascript'>kofiwidget2.init('Support Me on Ko-fi', '#29abe0', 'V7V5HEVRH');kofiwidget2.draw();</script></li>
