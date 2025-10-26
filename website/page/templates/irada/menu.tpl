@@ -1,7 +1,7 @@
 ﻿		<div id="submenu">
 			<ul class="menusub">
-				<li><a href="?loc=irada&amp;lng={$pageLanguage}">{gettext}irada{/gettext}</a></li>
-				<li><a href="?loc=irada/anleitung&amp;lng={$pageLanguage}">{gettext}anleitung{/gettext}</a></li>
-				<li><a href="?loc=irada/hostini&amp;lng={$pageLanguage}">{gettext}hostini{/gettext}</a></li>
+				<li><a href="?loc=irada&amp;lng={$pageLanguage}">{t}irada{/t}</a></li>
+				<li><a href="?loc=irada/anleitung&amp;lng={$pageLanguage}">{t}anleitung{/t}</a></li>
+				<li><a href="?loc=irada/hostini&amp;lng={$pageLanguage}">{t}hostini{/t}</a></li>
 			</ul>
 		</div>
