@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-10-26 09:28+0100\n"
-"PO-Revision-Date: 2025-10-26 09:29+0100\n"
+"POT-Creation-Date: 2025-10-26 13:55+0100\n"
+"PO-Revision-Date: 2025-10-26 13:55+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -16,6 +16,475 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: geshi\n"
 "X-Poedit-SearchPathExcluded-1: cache\n"
 "X-Poedit-SearchPathExcluded-2: templates_c\n"
+
+#: templates/bilderherunterlader/download.tpl:15
+msgid "Requirements:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:17
+msgid "or higher"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:19
+msgid "Download-Page"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:24
+msgid "Please read the"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:24
+msgid "tutorial"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:24
+msgid "before installing"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:28
+msgid "Downloads"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:29
+msgid "BilderHerunterlader Setup (for Windows)"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:30
+msgid "BilderHerunterlader Setup (platform independent)"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:31
+msgid ""
+"BilderHerunterlader Binaries in Zip-Archiv (for other operating systems)"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:46
+#: templates/bilderherunterlader/download.tpl:61
+#: templates/bilderherunterlader/download.tpl:76
+#: templates/bilderherunterlader/download.tpl:93
+#: templates/bilderherunterlader/download.tpl:106
+msgid "Usage:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:48
+#: templates/bilderherunterlader/download.tpl:78
+#: templates/bilderherunterlader/download.tpl:108
+msgid "On a page with images: Rightclick -> Download files with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:50
+#: templates/bilderherunterlader/download.tpl:80
+msgid ""
+"The function can also be called directly by using the keyboard-shortcut "
+"Shift + B."
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:63
+msgid ""
+"On a page with images: Rightclick -> BilderHerunterlader -> Download files "
+"with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:85
+msgid "Plugin for Opera:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:88
+#: templates/bilderherunterlader/menu.tpl:4
+msgid "Download"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:88
+msgid "Operating System"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:89
+#: templates/bilderherunterlader/download.tpl:90
+msgid "or Higher"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:90
+msgid "maybe also BSD and MacOS"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:95
+msgid "Read the readme.txt in the zip-file."
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:100
+msgid "Plugin for Internet Explorer:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:111
+msgid "Other Browsers:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:113
+msgid ""
+"There are no extensions available for other browser at the moment. But you "
+"can use the program too."
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:115
+msgid "There are 2 ways:"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:117
+msgid ""
+"Turn on Clipboard-Monitoring and copy the URL of the webpage into the "
+"clipboard"
+msgstr ""
+
+#: templates/bilderherunterlader/download.tpl:119
+msgid ""
+"Select the images in the Browser and drag and drop the selection to the "
+"program"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:2
+msgid "Will further hosts be supported?"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:3
+msgid ""
+"Yes, when it's technically possible. Send me an e-mail if you know a host, "
+"that isn't supported yet. And send also links with images hosted on that "
+"host."
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:5
+msgid "The program caused an error. What should i do?"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:6
+msgid ""
+"Send me an e-mail with an exact description of the error.\n"
+"Send me also the logfile (BH.log) as attechment. The logfile is stored in "
+"your profile folder in subfolder .BH."
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:9
+msgid "Where is my profile folder?"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:10
+msgid ""
+"Under Windows you can find the folder, when you type %userprofile%.BH in the "
+"Explorer.\n"
+"Under Linux you can find the folder over ~/.BH"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:13
+msgid "A file is downloaded, but the progressbar ins't moving. Why?"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:14
+msgid ""
+"Some server don't send the size of the file. Without knowing the size the "
+"progressbar can't be shown correctly. So the progressbar isn't moving."
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:16
+msgid "Are there any other commandline arguments?"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:17
+msgid "Yes. Here is the full list:"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:18
+msgid "Prints the Version of BH (e.g. 1.2.0)"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:19
+msgid "Prints the VersionNumber of BH (e.g. 120)"
+msgstr ""
+
+#: templates/bilderherunterlader/faq.tpl:21
+msgid ""
+"<b>What's the meaning of the name BilderHerunterlader?</b>\n"
+"BilderHerunterlader is german and translated in english it means image "
+"downloader."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:2
+#: templates/bilderherunterlader/screenshots.tpl:4
+msgid "Download-Selection"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:4
+msgid "Selection of files to download"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:5
+msgid "Files which have already been downloaded are deselected automatically"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:8
+msgid "Files which have already been downloaded are marked blue, others red"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:9
+msgid ""
+"This is only working if in the settings under download \"Save logs\" is "
+"enabled"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:12
+msgid "Manual selection of the download directory (for all files)"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:13
+msgid "Automatic selection of the download directory based on keywords"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:16
+msgid "Can be activated by enabling \"Automatic recognition\""
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:17
+msgid "Recognition is done by title or filenames"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:18
+msgid "The directory path is marked green, if a keyword was found"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:21
+msgid ""
+"Manual selection of the download-directory by selecting a keyword or "
+"directory-selection and change of the filename"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:24
+msgid "Right click with the mouse on a file and to open the context-menu"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:27
+msgid "Buttons for fast select or deselect of files"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:28
+msgid "Button for adding the title to the download-directory-path"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:29
+msgid ""
+"Textfield and a button to add the content of the textfield to the download-"
+"directory-path"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:30
+msgid "Button for the creation of new keywords"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:33
+msgid ""
+"If there is something selected in the title-textfield, the selection is "
+"taken as name and directory for the keyword, but that can still be changed"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:36
+msgid ""
+"Filenames in the download-selection could look ugly, but shortly before the "
+"download begins they are mostly changed to a nice one. The reason for that "
+"is that for some file-hosts the possibility to retrieve the original "
+"filename is only shortly before the download can begin."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:41
+#: templates/bilderherunterlader/screenshots.tpl:8
+msgid "Download-Queue"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:43
+msgid "Stop-Button"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:46
+msgid ""
+"One click will stop files that are waiting for a free slot immediatly, but "
+"running downloads will be completed."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:47
+msgid "If you click twice also running downloads are stopped immediatly."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:50
+msgid "Simultaneous Downloads"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:55
+msgid "Links from HTML-file"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:56
+msgid "Links from text-file"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:57
+msgid "Links from a dialog-window"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:60
+msgid "Import / Export of Downloads"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:63
+msgid "Downloads can be exported to a text-file and imported again"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:66
+msgid "Sort of files on the harddisk by using keywords"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:69
+msgid ""
+"Files are treated as normal downloads. But instead of downloading, the files "
+"are just moved to the corresponding directory on working of the queue."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:76
+#: templates/bilderherunterlader/screenshots.tpl:12
+#: templates/bilderherunterlader/screenshots.tpl:16
+msgid "Download-Log"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:78
+msgid ""
+"Logging of downloads (Date and time, Link, Directory and filename, Filesize)"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:79
+#: templates/bilderherunterlader/features.tpl:95
+msgid "Context-Menu for every file with useful actions"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:80
+msgid "Import / Export"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:83
+msgid "Export log to a text-file"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:90
+#: templates/bilderherunterlader/screenshots.tpl:20
+msgid "Keywords"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:92
+msgid "Are used to download files directly to the desired directory"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:93
+msgid ""
+"For every keyword a title can be given and you can define one or more "
+"(key)words (seperated by ; )"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:94
+msgid ""
+"A keyword can have an absolute or relative path (relative to the standard-"
+"download-directory)"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:96
+msgid "Import"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:99
+msgid "Keywords from a text-file"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:103
+msgid "The lines of the text-file must look like that:"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:105
+msgid ""
+"Title&nbsp;&nbsp;&nbsp;&nbsp;Keywords&nbsp;&nbsp;&nbsp;&nbsp;'Directory with "
+"absolute path'&nbsp;&nbsp;&nbsp;&nbsp;'Directory with relative "
+"path'&nbsp;&nbsp;&nbsp;&nbsp;relative path(true/false)"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:107
+msgid "The individual entries must be separated by tabs."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:108
+msgid "If you don't want to specify an entrie, you have to write a #."
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:114
+msgid "Export to a text-file"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:119
+#: templates/bilderherunterlader/menu.tpl:11
+#: templates/bilderherunterlader/rules.tpl:2
+#: templates/bilderherunterlader/screenshots.tpl:28
+#: templates/bilderherunterlader/tutorial.tpl:47
+msgid "Rules"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:121
+msgid "With Rules support for unsupported websites / file hosts can be added"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:122
+#: templates/bilderherunterlader/features.tpl:131
+msgid "The creation is described here:"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:127
+#: templates/bilderherunterlader/screenshots.tpl:32
+#: templates/bilderherunterlader/tutorial.tpl:38
+msgid "Host-Plugins"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:129
+msgid ""
+"With Host-Plugins support for unsupported websites / file hosts can be added"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:130
+msgid "Host-Plugins are programmed in Java"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:136
+#: templates/bilderherunterlader/screenshots.tpl:24
+msgid "Settings"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:138
+msgid ""
+"There are different options to customize the behavior of the program for "
+"your needs"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:139
+msgid "Some settings are described here:"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:144
+msgid "Update-Function"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:146
+msgid "Update of the program"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:147
+msgid "Update of Host-Plugins and Rules"
+msgstr ""
+
+#: templates/bilderherunterlader/features.tpl:148
+msgid ""
+"Can also done automatically on the start of program, but that must be "
+"activated in the settings"
+msgstr ""
 
 #: templates/bilderherunterlader/index.tpl:1
 msgid "Description:"
@@ -64,11 +533,8 @@ msgstr ""
 msgid "BilderHerunterlader"
 msgstr ""
 
-#: templates/bilderherunterlader/menu.tpl:4
-msgid "Download"
-msgstr ""
-
 #: templates/bilderherunterlader/menu.tpl:5
+#: templates/bilderherunterlader/tutorial.tpl:31
 msgid "Features"
 msgstr ""
 
@@ -90,10 +556,6 @@ msgstr ""
 
 #: templates/bilderherunterlader/menu.tpl:10
 msgid "Useful"
-msgstr ""
-
-#: templates/bilderherunterlader/menu.tpl:11
-msgid "Rules"
 msgstr ""
 
 #: templates/bilderherunterlader/menu.tpl:12
@@ -135,6 +597,366 @@ msgid ""
 "But it would also be possible to define the directories by absolute paths."
 msgstr ""
 
+#: templates/bilderherunterlader/rules.tpl:3
+msgid ""
+"In BH everyone can define his own rules. It is possible to add support for "
+"other hosters. But you have to know regular expressions."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:7
+#: templates/bilderherunterlader/rules.tpl:28
+msgid "Possibility"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:8
+msgid ""
+"If it is possible to replace something in the Container-URL or Thumbnail-URL "
+"to get the direct URL to the image than you can do so.\n"
+"\n"
+"You have to create a new rule. First you have to define a pattern for the "
+"Container-URL as regular expression, so that the rule knows for which URLs "
+"to search.\n"
+"Now you can make one or more replacements behind the other.\n"
+"The result from a replacement is used for the next replacement.\n"
+"Only the first replacement is using the Container-URL or Thumbnail-URL."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:15
+#: templates/bilderherunterlader/rules.tpl:51
+msgid "Example"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:16
+msgid "The Thumbnail-URL is:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:17
+msgid "The search pattern is:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:19
+msgid "And the replacement looks like this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:21
+msgid "We get the URL:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:29
+msgid ""
+"You have to create a new rule. First you have to define a pattern for the "
+"Container-URL as regular expression, so that the rule knows for which URLs "
+"to search.\n"
+"Then you have to select the second mode.\n"
+"\n"
+"If the URL to the image can't get from the Container-URL, than you can let "
+"the program download the sourcecode of the webpage and you can make "
+"replacements in it.\n"
+"Here you can also do more than one searches behind the other. The result "
+"from a search is the position in the sourcecode where the pattern was "
+"found.\n"
+"The next search will use this position as startpoint for the search.\n"
+"The last search is taking the result and is replacing it.\n"
+"\n"
+"In the Replacement-Pattern you can use two variables:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:38
+msgid "As URL we have:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:39
+msgid "is replaced by the domain. So we get"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:40
+msgid "is replaced by the URL without the filename. We get"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:42
+msgid ""
+"In the Search-Pattern you can use brackets to use the content as reference "
+"in the Replace-Pattern.\n"
+"We take as sourcecode this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:45
+msgid "As Search-Pattern we take:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:46
+msgid ""
+"For this bracket you can use the reference $1.\n"
+"On replacing the program will also replace $1 with the content of the SRC-"
+"attribute.\n"
+"You can use more than one brackets, the reference are then nummbered.\n"
+"The first bracket is $1, the second is $2 and so on."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:52
+msgid ""
+"The source is downloaded first.\n"
+"As URL we take this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:55
+msgid "Here is a part of the sourcecode from imagevenue:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:62
+msgid "The first search-pattern looks like this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:64
+msgid ""
+"The search finds the position of the pattern in the sourcecode.\n"
+"Now we aren't at the right position, because we want the image, the content "
+"in SRC=\"\"\n"
+"So we need a second search-pattern which looks like this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:68
+msgid ""
+"Now we got what we want. In the program the result is written to a "
+"variable.\n"
+"In this variable is now this:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:72
+msgid ""
+"Now we have to define a Replace-Pattern in the last search.\n"
+"In this example we need $SRV$1\n"
+"The program replaces now the variable with this pattern und we get the URL:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:79
+msgid ""
+"You can now also correct the filename. This is working similar to "
+"Possibility 1. But for the search the filename from the Image-URL is used, "
+"not the whole URL.\n"
+"\n"
+"So, if the URL is"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:83
+msgid "then it is used only"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:85
+msgid "Share your rules with others"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:86
+msgid ""
+"If you have defined a rule and want to share it with other users of the "
+"program, you can send it to me. I will proof the rule and make it available "
+"over the update-function."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:88
+msgid "XML-Files of the Rules"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:89
+msgid ""
+"The rules are stored in XML-Files in the subfolder \"rules\" of the program "
+"folder."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:91
+msgid "Directly linked images"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:92
+msgid ""
+"If it is nessesary to download directly linked images or other files, you "
+"can enable this with regular expressions.\n"
+"That class detects by default only a small number of URLs. To allow more "
+"URLs to be downloaded you have to create a textfile with the name "
+"HostzDefaultImages.txt in the hosts folder.\n"
+"In that file you have to write one expression per line.\n"
+"\n"
+"Here is an example:"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:100
+msgid ""
+"The first expression allows to download file with some endings.\n"
+"The second expression allows to download attachments in the boardsoftware "
+"WBB.\n"
+"Upper and lower case at this point of the program is not respected."
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:104
+msgid "Host-Plugins (Host-Classes)"
+msgstr ""
+
+#: templates/bilderherunterlader/rules.tpl:105
+msgid ""
+"If this possibilities aren't enough and you can program in Java, then you "
+"can write your own classes which can be used as Hosters-Plugins.\n"
+"To compile such a class the sourcecode of the program is required.\n"
+"Because the class has to extend ch.supertomcat.bh.hoster.Host and has to "
+"implement the Interface ch.supertomcat.bh.hoster.IHoster."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:4
+msgid "Download Java and install it, if not already done"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:5
+msgid "Download BilderHerunterlader and install it"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:6
+msgid ""
+"Download and install the extension or plugin for your browser, if available."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:7
+msgid "Start BilderHerunterlader"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:8
+msgid ""
+"On the first start the default settings are used and you should change those "
+"to your needs."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:9
+msgid "The most important options are:"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:12
+msgid "Connection"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:12
+msgid ""
+"Direct Connection / Proxy: If you use a proxy, you must define that, "
+"otherwise the program is not working."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:13
+msgid "Folders"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:13
+msgid ""
+"Standard Savepath: Here you must choose a folder, in which you want to "
+"download the files."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:14
+msgid "Other"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:14
+msgid ""
+"Updates: Many hosts change their websites from time to time, so that the "
+"download with BilderHerunterlader is not working anymore. To fix that, there "
+"is a program internal Update-Function which updates BilderHerunterlader and "
+"the Rules and Host-Plugins. If the option is activated, the program checks "
+"on every start if there are upates. If you don't want that, you can still "
+"check for updates manually, in order to do that go to Info -> Update."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:17
+msgid "Open a website which contains links to Images / Files in your browser"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:20
+msgid "In PaleMoon: Rightclick -> Download files with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:21
+msgid "In Firefox: Rightclick -> BilderHerunterlader -> Download files with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:22
+msgid "In Opera: Rightclick -> Download files with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:23
+msgid "In the Internet Explorer: Rightclick -> Download files with BH"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:24
+msgid ""
+"Alternative: Copy the URL of the website into the clipboard (ctrl + c). In "
+"order make it working that way, you need to enable the \"Clipboard - Check "
+"for particular links\" option in the settings."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:25
+msgid ""
+"If nothing happens, click on \"Check Clipboard now\" on the System-Tray-Icon-"
+"Menu or in the menubar."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:26
+msgid ""
+"Another alternative: Select the images / links in the browser and drag and "
+"drop the selection with the mouse to the program-window."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:29
+msgid "Now a new window opens, which shows the available files"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:30
+msgid ""
+"Here you can change the download-directory or let it changed automatically "
+"by keywords. You can also select which files are downloaded and which not. "
+"And you can define some other things."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:31
+msgid ""
+"For a detailed description of the possibilities you should read the feature-"
+"page"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:32
+msgid "Now click on OK and the files are added to the download-queue"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:33
+msgid "Now click on Start on the download-queue and the files are downloading"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:40
+msgid "Some Host-Plugins have own settings"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:41
+msgid ""
+"Those are not in the settings dialog, but under the Host-Plugins tab. In the "
+"list there is a \"Settings\" button if the Host-Plugin has settings."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:45
+msgid ""
+"This Host-Plugin is not for a specific hoster, but is used to detect any "
+"links."
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:46
+msgid ""
+"In the settings it can be chosen, which type of files to detect. It can also "
+"be configured to accept any kind of links"
+msgstr ""
+
+#: templates/bilderherunterlader/tutorial.tpl:47
+msgid ""
+"There is one more way to define more links to be detected by this Host-"
+"Plugin. It is described under \"Directly linked images\" on this page:"
+msgstr ""
+
+#: templates/bilderherunterlader/useful.tpl:3
+msgid "The logo in different resolutions, as SVG and as Windows-Ico-File."
+msgstr ""
+
 #: templates/index.tpl:21
 msgid "Home"
 msgstr ""
@@ -145,10 +967,6 @@ msgstr ""
 
 #: templates/index.tpl:24
 msgid "Contact"
-msgstr ""
-
-#: language.php:21
-msgid "Host-Plugins"
 msgstr ""
 
 #: language.php:22
@@ -166,9 +984,6 @@ msgstr ""
 #~ msgid "error404"
 #~ msgstr "Error 404"
 
-#~ msgid "tutorial"
-#~ msgstr "Tutorial"
-
 #~ msgid "home"
 #~ msgstr "Homepage"
 
@@ -177,9 +992,6 @@ msgstr ""
 
 #~ msgid "features"
 #~ msgstr "Features"
-
-#~ msgid "download"
-#~ msgstr "Download"
 
 #~ msgid "changelog"
 #~ msgstr "Changelog"
@@ -195,6 +1007,3 @@ msgstr ""
 
 #~ msgid "portable"
 #~ msgstr "Portable"
-
-#~ msgid "bilderherunterlader"
-#~ msgstr "BilderHerunterlader"

@@ -1,108 +1,120 @@
 ﻿{bh_release_version file=$bhUpdatesXMLFile}
-{assign var="ffversion" value="4.8"}
-{assign var="ff57version" value="4.9"}
-{assign var="smversion" value="4.8"}
+{assign var="palemoonversion" value="4.8"}
+{assign var="palemoonURL" value="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$palemoonversion}.xpi?dl=1"}
+{assign var="firefoxversion" value="4.9"}
+{assign var="firefoxURL" value="https://www.dropbox.com/scl/fi/jr8inbj2eynwrmd4bn827/bilderherunterladerwebext-4.9-fx.xpi?rlkey=9ak8q374chy95kxzd69qf7cn0&dl=1"}
+{assign var="seamonkeyversion" value="4.8"}
+{assign var="seamonkeyURL" value="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$seamonkeyversion}.xpi?dl=1"}
 {assign var="operaversion" value="6"}
+{assign var="operaWindowsURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginWindowsV{$operaversion}.zip/download"}
+{assign var="operaLinuxURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginLinuxV{$operaversion}.zip/download"}
 {assign var="ieversion" value="9.0"}
-<script type="text/javascript" src="installext.js"></script>
+{assign var="ieURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/BHIEPluginSetupv{$ieversion}.exe/download"}
+<script type="text/javascript" src="bilderherunterlader/installext.js"></script>
 <div class="download"><a name="requirements"></a>
-<pre>
-<img src="bilderherunterlader/java.gif" alt="Java" />
-<b>Requirement:</b>
-JRE (Java  Runtime Environment) Version 11 or higher
-<a href="https://adoptium.net/temurin/releases/">Download-Page</a>
-
-<b>Supported Operating Systems:</b>
-Windows, Linux, MacOS, BSD und any other operating system for which the JRE (Java Runtime Environment) is available.
-</pre>
+<b>{t}Requirements:{/t}</b>
+<br/>
+JRE (Java  Runtime Environment) Version 21 {t}or higher{/t}
+<br/>
+<a href="https://adoptium.net/temurin/releases/">{t}Download-Page{/t}</a>
 </div>
 <div class="download"><a name="bh"></a>
-<pre>
 <img src="bilderherunterlader/bilderherunterlader2-50.png" alt="Bilderherunterlader" />
-<span style="color: #FF0000; font-weight: bold;">Please read the <a href="?loc=bilderherunterlader/tutorial&amp;lng={$pageLanguage}">{gettext}tutorial{/gettext}</a> before installing</span>
-<b>Version:</b>
-{$BHSetupReleaseVersion}:
+<br/>
+<span style="color: #FF0000; font-weight: bold;">{t}Please read the{/t} <a href="?loc=bilderherunterlader/tutorial&amp;lng={$pageLanguage}">{t}tutorial{/t}</a> {t}before installing{/t}</span>
+<br/>
+<b>Version:</b> {$BHSetupReleaseVersion}
 <table summary="downloads" class="downloads">
-<tr><th>Download</th></tr>
-<tr><td><a href="http://sourceforge.net/projects/bilderherunterlader/files/BilderHerunterlader{$BHSetupReleaseVersionFilenameNumber}Setup.exe/download">BilderHerunterlader Setup (for Windows)</a></td></tr>
-<tr><td><a href="http://sourceforge.net/projects/bilderherunterlader/files/BilderHerunterlader{$BHSetupReleaseVersionFilenameNumber}Setup.jar/download">BilderHerunterlader Setup (platform independent)</a></td></tr>
-<tr><td><a href="http://sourceforge.net/projects/bilderherunterlader/files/BilderHerunterlader{$BHSetupReleaseVersionFilenameNumber}Binary.zip/download">BilderHerunterlader Binaries in Zip-Archiv (for other operating systems)</a></td></tr>
+<tr><th>{t}Downloads{/t}</th></tr>
+<tr><td><a href="https://github.com/BilderHerunterlader/BilderHerunterlader/releases/download/bilderherunterlader-{$BHSetupReleaseVersion}/BilderHerunterlader-{$BHSetupReleaseVersion}-Setup.exe">{t}BilderHerunterlader Setup (for Windows){/t}</a></td></tr>
+<tr><td><a href="https://github.com/BilderHerunterlader/BilderHerunterlader/releases/download/bilderherunterlader-{$BHSetupReleaseVersion}/BilderHerunterlader-{$BHSetupReleaseVersion}-Setup.jar">{t}BilderHerunterlader Setup (platform independent){/t}</a></td></tr>
+<tr><td><a href="https://github.com/BilderHerunterlader/BilderHerunterlader/releases/download/bilderherunterlader-{$BHSetupReleaseVersion}/BilderHerunterlader-{$BHSetupReleaseVersion}-Binary.zip">{t}BilderHerunterlader Binaries in Zip-Archiv (for other operating systems){/t}</a></td></tr>
 <tr><td><a href="https://github.com/BilderHerunterlader/BilderHerunterlader">BilderHerunterlader Source-Code on GitHub</a></td></tr>
 </table>
-</pre>
 </div>
 <div class="download"><a name="palemoon"></a>
-<pre>
-<img src="bilderherunterlader/palemoon.png" alt="Pale Moon" /><img src="bilderherunterlader/firefox.png" alt="Firefox" />
-<b>Pale Moon / Firefox (until Version 56) - Extension:</b>
-<b><i>Version {$ffversion}:
-Only for Firefox 1.5 - 56.*
-Only for Pale Moon 25.0 - 29.*</i></b>
-<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$ffversion}.xpi?dl=1">Install Pale Moon / Firefox (until Version 56) - Extension</a>
-
-Usage:
-On a page with images: Rightclick -> Download files with BH
-The function can also be called directly by using the keyboard-shortcut Shift + B.
-</pre>
+<img src="bilderherunterlader/palemoon.png" alt="Pale Moon" />
+<br/>
+<b>Pale Moon - Extension:</b>
+<br/>
+<b>Version:</b> {$palemoonversion}
+<br/>
+<a href="{$palemoonURL}" onclick="return bhInstExt(&quot;{$palemoonURL}&quot;, &quot;BilderHerunterlader&quot;)">Install Pale Moon - Extension</a>
+<br/>
+<a href="{$palemoonURL}">Download Pale Moon - Extension</a>
+<br/><br/>
+{t}Usage:{/t}
+<br/>
+{t}On a page with images: Rightclick -> Download files with BH{/t}
+<br/>
+{t}The function can also be called directly by using the keyboard-shortcut Shift + B.{/t}
 </div>
 <div class="download"><a name="firefox"></a>
-<pre>
 <img src="bilderherunterlader/firefox57.png" alt="Firefox" />
-<b>Firefox 57+ WebExtension:</b>
-<b><i>Version {$ff57version}:
-Only for Firefox 57.0 or higher
-Requires BH 4.6.0 or higher</i></b>
-<a href="https://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/bilderherunterladerwebext-{$ff57version}-fx.xpi/download">Install Firefox - WebExtension</a>
-
-Usage:
-On a page with images: Rightclick -> BilderHerunterlader -> Download files with BH
-</pre>
+<br/>
+<b>Firefox WebExtension:</b>
+<br/>
+<b>Version:</b> {$firefoxversion}
+<br/>
+<a href="{$firefoxURL}">Download Firefox - WebExtension</a>
+<br/><br/>
+{t}Usage:{/t}
+<br/>
+{t}On a page with images: Rightclick -> BilderHerunterlader -> Download files with BH{/t}
 </div>
 <div class="download"><a name="seamonkey"></a>
-<pre>
 <img src="bilderherunterlader/seamonkey.png" alt="Seamonkey" />
+<br/>
 <b>Seamonkey-Extension:</b>
-<b><i>Version {$smversion}: Only for Seamonkey 2.0 - *.*.* (Means the extension is marked as compatible with every future Seamonkey version, even if the extension is not actually working with that version)</i></b>
-<a href="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$smversion}.xpi?dl=1">Install Seamonkey-Extension</a>
-
-Usage:
-On a page with images: Rightclick -> Download files with BH
-The function can also be called directly by using the keyboard-shortcut Shift + B.
-</pre>
+<br/>
+<b>Version:</b> {$seamonkeyversion}
+<br/>
+<a href="{$seamonkeyURL}" onclick="return bhInstExt(&quot;{$seamonkeyURL}&quot;, &quot;BilderHerunterlader&quot;)">Install Seamonkey-Extension</a>
+<br/>
+<a href="{$seamonkeyURL}">Download Seamonkey-Extension</a>
+<br/><br/>
+{t}Usage:{/t}
+<br/>
+{t}On a page with images: Rightclick -> Download files with BH{/t}
+<br/>
+{t}The function can also be called directly by using the keyboard-shortcut Shift + B.{/t}
 </div>
 <div class="download"><a name="opera"></a>
-<pre>
 <img src="bilderherunterlader/opera.gif" alt="Opera" />
-<b>Plugin for Opera:</b>
+<br/>
+<b>{t}Plugin for Opera:{/t}</b>
+<br/>
 <table summary="downloads" class="downloads">
-<tr><th>Download</th><th>Operating System</th><th>Opera Version</th></tr>
-<tr><td><a href="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginWindowsV{$operaversion}.zip/download">OperaPluginWindowsV{$operaversion}.zip</a></td><td>Windows</td><td>9.5 or Higher</td></tr>
-<tr><td><a href="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginLinuxV{$operaversion}.zip/download">OperaPluginLinuxV{$operaversion}.zip</a></td><td>Linux (maybe also BSD and MacOS)</td><td>9.5 or Higher</td></tr>
+<tr><th>{t}Download{/t}</th><th>{t}Operating System{/t}</th><th>Opera Version</th></tr>
+<tr><td><a href="{$operaWindowsURL}">OperaPluginWindowsV{$operaversion}.zip</a></td><td>Windows</td><td>9.5 {t}or Higher{/t}</td></tr>
+<tr><td><a href="{$operaLinuxURL}">OperaPluginLinuxV{$operaversion}.zip</a></td><td>Linux ({t}maybe also BSD and MacOS{/t})</td><td>9.5 {t}or Higher{/t}</td></tr>
 </table>
-Usage:
-Read the readme.txt in the zip-file.
-</pre>
+<br/>
+{t}Usage:{/t}
+<br/>
+{t}Read the readme.txt in the zip-file.{/t}
 </div>
 <div class="download"><a name="ie"></a>
-<pre>
 <img src="bilderherunterlader/ie.gif" alt="Internet Explorer" />
-<b>Plugin for Internet Explorer:</b>
+<br/>
+<b>{t}Plugin for Internet Explorer:{/t}</b>
+<br/>
 <b><i>Version {$ieversion}:</i></b>
-<a href="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/BHIEPluginSetupv{$ieversion}.exe/download">BHIEPluginSetupv{$ieversion}.exe</a>
-
-Usage:
-On a page with images: Rightclick -> Download files with BH
-</pre>
+<br/>
+<a href="{$ieURL}">BHIEPluginSetupv{$ieversion}.exe</a>
+<br/><br/>
+{t}Usage:{/t}
+<br/>
+{t}On a page with images: Rightclick -> Download files with BH{/t}
 </div>
 <div class="download"><a name="other"></a>
-<pre>
-<b>Other Browsers:</b>
-There are no extensions available for other browser at the moment. But you can use the program too.
-There are 2 ways:
-1:
-Turn on Clipboard-Monitoring
-Copy the URL of the webpage into the clipboard (Ctrl + C)
-2:
-Select the images in the Browser and drag and drop the selection to the program
-</pre>
+<b>{t}Other Browsers:{/t}</b>
+<br/>
+{t}There are no extensions available for other browser at the moment. But you can use the program too.{/t}
+<br/>
+{t}There are 2 ways:{/t}
+<br/>
+1: {t}Turn on Clipboard-Monitoring and copy the URL of the webpage into the clipboard{/t} (Ctrl + C)
+<br/>
+2: {t}Select the images in the Browser and drag and drop the selection to the program{/t}
 </div>

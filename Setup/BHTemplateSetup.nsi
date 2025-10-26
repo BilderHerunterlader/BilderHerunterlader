@@ -21,7 +21,7 @@
 	!define PROGRAM_EXECUTABLE "BH.exe"
 	!define PROGRAM_ICON "BHIcon.ico"
 	Name "${PROGRAM_NAME} ${PROGRAM_VERSION}"
-	OutFile "${PROGRAM_NAME}TemplateXSetup.exe"
+	OutFile "${PROGRAM_NAME}-TemplateX-Setup.exe"
 	
 	;Default installation folder
 	InstallDir "$PROGRAMFILES\${PROGRAM_NAME}"

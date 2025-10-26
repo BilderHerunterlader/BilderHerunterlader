@@ -15,10 +15,10 @@ setup\sed\sed.exe "s/TemplateY/%versionx%/g" Setup\izpack\template_install.xml >
 
 :compile
 cd Setup\izpack
-call "%programfiles%\IzPack\bin\compile" install.xml -b . -o BilderHerunterlader%version%Setup.jar -k standard
+call "%programfiles%\IzPack\bin\compile" install.xml -b . -o BilderHerunterlader-%versionx%-Setup.jar -k standard
 
 cd ..\..
 
 del Setup\izpack\install.xml
 
-move Setup\izpack\BilderHerunterlader%version%Setup.jar .
+move Setup\izpack\BilderHerunterlader-%versionx%-Setup.jar .

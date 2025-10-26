@@ -9,24 +9,24 @@ for /f "tokens=1" %%o in (vz.txt) do set versionx=%%o
 del vy.txt
 del vz.txt
 
-IF EXIST Setup\BH%version%Setup.nsi GOTO compile
+IF EXIST Setup\BH%versionx%Setup.nsi GOTO compile
 
 :template
 setup\sed\sed.exe "s/TemplateY/%versionx%/g" Setup\BHTemplateSetup.nsi >> BHTemplateSetupX.nsi
-setup\sed\sed.exe "s/TemplateX/%version%/g" BHTemplateSetupX.nsi >> Setup\BH%version%Setup.nsi
+setup\sed\sed.exe "s/TemplateX/%versionx%/g" BHTemplateSetupX.nsi >> Setup\BH%versionx%Setup.nsi
 del BHTemplateSetupX.nsi
 
 :compile
 if exist "%PROGRAMFILES(X86)%\NSIS\makensisw.exe" goto x86
 
-"%programfiles%\NSIS\makensisw.exe" Setup\BH%version%Setup.nsi
+"%programfiles%\NSIS\makensisw.exe" Setup\BH%versionx%Setup.nsi
 goto continue
 
 :x86
-"%PROGRAMFILES(X86)%\NSIS\makensisw.exe" Setup\BH%version%Setup.nsi
+"%PROGRAMFILES(X86)%\NSIS\makensisw.exe" Setup\BH%versionx%Setup.nsi
 
 :continue
 
-del Setup\BH%version%Setup.nsi
+del Setup\BH%versionx%Setup.nsi
 
-move Setup\BilderHerunterlader%version%Setup.exe .
+move Setup\BilderHerunterlader-%versionx%-Setup.exe .
