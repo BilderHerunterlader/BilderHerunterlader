@@ -3,7 +3,7 @@ $poFilePath = $pageLanguage . ".po";
 if (!file_exists($poFilePath)) {
 	$poFilePath = "en.po";
 }
-$poFileTranslatedTexts = loadTranslationsFromPoFile($poFilePath);
+$poFileTranslatedTexts = loadTranslationsFromPoFile($poFilePath, true);
 
 //The following array is defined so that PoEdit will find the texts in the code. The actual texts are used dynamically, so they can't be translated otherwise.
 // The assigned values in the array are not translated, but the String without gettext() around it. Example key: home value: Home
@@ -27,13 +27,14 @@ $translatedTexts["irada"] = gettext("Irada");
 $translatedTexts["anleitung"] = gettext("Anleitung");
 $translatedTexts["hostini"] = gettext("hostini");
 
-function loadTranslationsFromPoFile($poFile) {
+function loadTranslationsFromPoFile($poFile, $includeFuzzy) {
 	$poFileTranslatedTexts = array();
 	$poFileContent = file_get_contents($poFile);
 	
 	$poStartFound = false;
 	$poEntryKey = false;
 	$poEntryValue = false;
+	$poEntryFuzzy = false;
 	$poEntryStrKey = "";
 	$poEntryStrValue = "";
 	$lines = explode("\n", $poFileContent);
@@ -46,35 +47,47 @@ function loadTranslationsFromPoFile($poFile) {
 			continue;
 		}
 
-		if (str_starts_with($line, "msgid")) {
+		if (str_starts_with($line, "msgid") || str_starts_with($line, "#~ msgid")) {
+			if (strlen($poEntryStrKey) > 0 && strlen($poEntryStrValue) > 0 && ($includeFuzzy == true || $poEntryFuzzy == false)) {
+				$poFileTranslatedTexts[$poEntryStrKey] = $poEntryStrValue;
+			}
 			$poEntryKey = true;
 			$poEntryValue = false;
-			if (strlen($poEntryStrKey) > 0 && strlen($poEntryStrValue) > 0) {
-				$poFileTranslatedTexts[str_replace("\\n", "\n", $poEntryStrKey)] = $poEntryStrValue;
-				
+			if (str_starts_with($line, "#~ msgid")) {
+				$poEntryFuzzy = true;
+			} else {
+				$poEntryFuzzy = false;
 			}
 			$poEntryStrKey = "";
 			$poEntryStrValue = "";
-		} else if (str_starts_with($line, "msgstr")) {
+		} else if (str_starts_with($line, "msgstr") || str_starts_with($line, "#~ msgstr")) {
 			$poEntryKey = false;
 			$poEntryValue = true;
+			if (str_starts_with($line, "#~ msgstr")) {
+				$poEntryFuzzy = true;
+			} else {
+				$poEntryFuzzy = false;
+			}
 			$poEntryStrValue = "";
 		}
 		
-		if (($poEntryKey || $poEntryValue) && preg_match('/"([^"]*)"/', $line, $matches)) {
+		$strStartPos = strpos($line, "\"");
+		$strEndPos = strrpos($line, "\"");
+		if (($poEntryKey || $poEntryValue) && $strStartPos !== false && $strEndPos !== false) {
+			$currentText = substr($line, $strStartPos + 1, $strEndPos - $strStartPos - 1);
 			if ($poEntryKey) {
-				$poEntryStrKey .= $matches[1];
+				$poEntryStrKey .= str_replace("\\n", "\n", str_replace("\\\"", "\"", $currentText));
 			}
 			if ($poEntryValue) {
-				$poEntryStrValue .= $matches[1];
+				$poEntryStrValue .= str_replace("\\n", "\n", str_replace("\\\"", "\"", $currentText));
 			}
 		}
 	}
 	
-	if (strlen($poEntryStrKey) > 0 && strlen($poEntryStrValue) > 0) {
-		$poFileTranslatedTexts[str_replace("\\n", "\n", $poEntryStrKey)] = $poEntryStrValue;
+	if (strlen($poEntryStrKey) > 0 && strlen($poEntryStrValue) > 0 && ($includeFuzzy == true || $poEntryFuzzy == false)) {
+		$poFileTranslatedTexts[$poEntryStrKey] = $poEntryStrValue;
 	}
-	
+
 	return $poFileTranslatedTexts;
 }
 
@@ -93,9 +106,10 @@ function getLocalizedPageTitlePartText($key) {
 	if (array_key_exists($key, $translatedTexts)) {
 		$mappedKey = $translatedTexts[$key];
 	}
+
 	if (array_key_exists($mappedKey, $poFileTranslatedTexts)) {
 		return $poFileTranslatedTexts[$mappedKey];
 	}
-	return $key;
+	return $mappedKey;
 }
 ?>
