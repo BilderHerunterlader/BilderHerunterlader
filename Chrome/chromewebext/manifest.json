@@ -20,11 +20,6 @@
 		"commands"
 	],
 
-	"host_permissions": [
-		"http://localhost/*",
-		"<all_urls>"
-	],
-
 	"action": {
 		"default_icon": "icons/bilderherunterlader.png",
 		"default_title": "BilderHerunterlader"
