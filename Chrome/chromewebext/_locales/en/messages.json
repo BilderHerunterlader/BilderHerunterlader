@@ -1,0 +1,18 @@
+{
+	"contextMenuItemBHFireLinks": {
+		"message": "Download files with BH",
+		"description": "Download Files with BH"
+	},
+	"contextMenuItemBHFireImages": {
+		"message": "Download embedded images with BH",
+		"description": "Download Embedded Images with BH"
+	},
+	"contextMenuItemBHFireParsePage": {
+		"message": "Parse page with BH",
+		"description": "Parse page with BH"
+	},
+	"contextMenuItemBHOpenOptionsPage": {
+		"message": "Options",
+		"description": "Open Options Page"
+	}
+}

@@ -1,0 +1,71 @@
+{
+	"manifest_version": 3,
+	"name": "BilderHerunterlader",
+	"version": "5.0",
+	"description": "Download files with BilderHerunterlader / Dateien mit BilderHerunterlader herunterladen",
+	"homepage_url": "http://bilderherunterlader.sourceforge.net/page/?loc=bilderherunterlader",
+	"default_locale": "en",
+
+	"icons": {
+		"32": "icons/bilderherunterlader.png",
+		"48": "icons/bilderherunterlader.png",
+		"128": "icons/bilderherunterlader.png"
+	},
+
+	"permissions": [
+		"activeTab",
+		"contextMenus",
+		"storage",
+		"scripting",
+		"commands"
+	],
+
+	"host_permissions": [
+		"http://localhost/*",
+		"<all_urls>"
+	],
+
+	"action": {
+		"default_icon": "icons/bilderherunterlader.png",
+		"default_title": "BilderHerunterlader"
+	},
+
+	"background": {
+		"service_worker": "background/bh_contextMenu.js",
+		"type": "module"
+	},
+
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": [
+				"contentscripts/bh_Util.js",
+				"contentscripts/bh_RequestData.js",
+				"contentscripts/bh_PageTitle.js",
+				"contentscripts/bh_SendToBH.js"
+			]
+		}
+	],
+
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"background/bh_SendLinksFromTabToBH.js",
+				"background/bh_SendImagesFromTabToBH.js",
+				"background/bh_SendParsePageFromTabToBH.js"
+			],
+			"matches": ["<all_urls>"]
+		}
+	],
+
+	"commands": {
+		"bhSendLinksFromTabToBH": {
+			"suggested_key": { "default": "Ctrl+Shift+Y" },
+			"description": "Send a 'bhSendLinksFromTabToBH' event to the extension"
+		}
+	},
+
+	"options_page": "settings/options.html",
+	
+	"minimum_edge_version": "115.0.0.0"
+}
