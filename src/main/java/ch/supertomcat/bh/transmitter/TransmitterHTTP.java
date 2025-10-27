@@ -135,6 +135,10 @@ public class TransmitterHTTP extends HttpServer {
 			logger.info("Send success reponse");
 			response.setStatus(HttpStatus.OK_200);
 			response.setContentType(ContentType.newContentType("text/plain", encoding.name()));
+			String originRequestHeader = request.getHeader("Origin");
+			if (originRequestHeader != null) {
+				response.setHeader("Access-Control-Allow-Origin", originRequestHeader);
+			}
 			response.getWriter().write("URLs received");
 		}
 	}
