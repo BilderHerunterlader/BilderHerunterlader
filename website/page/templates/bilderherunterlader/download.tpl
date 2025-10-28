@@ -5,11 +5,6 @@
 {assign var="firefoxURL" value="https://www.dropbox.com/scl/fi/jr8inbj2eynwrmd4bn827/bilderherunterladerwebext-4.9-fx.xpi?rlkey=9ak8q374chy95kxzd69qf7cn0&dl=1"}
 {assign var="seamonkeyversion" value="4.8"}
 {assign var="seamonkeyURL" value="https://www.dropbox.com/s/dorgswgwzkwbfr6/bilderherunterlader-v{$seamonkeyversion}.xpi?dl=1"}
-{assign var="operaversion" value="6"}
-{assign var="operaWindowsURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginWindowsV{$operaversion}.zip/download"}
-{assign var="operaLinuxURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/OperaPluginLinuxV{$operaversion}.zip/download"}
-{assign var="ieversion" value="9.0"}
-{assign var="ieURL" value="http://sourceforge.net/projects/bilderherunterlader/files/Browser%20Plugins/BHIEPluginSetupv{$ieversion}.exe/download"}
 <script type="text/javascript" src="bilderherunterlader/installext.js"></script>
 <div class="download"><a name="requirements"></a>
 <b>{t}Requirements:{/t}</b>
@@ -78,34 +73,6 @@ JRE (Java  Runtime Environment) Version 21 {t}or higher{/t}
 {t}On a page with images: Rightclick -> Download files with BH{/t}
 <br/>
 {t}The function can also be called directly by using the keyboard-shortcut Shift + B.{/t}
-</div>
-<div class="download"><a name="opera"></a>
-<img src="bilderherunterlader/opera.gif" alt="Opera" />
-<br/>
-<b>{t}Plugin for Opera:{/t}</b>
-<br/>
-<table summary="downloads" class="downloads">
-<tr><th>{t}Download{/t}</th><th>{t}Operating System{/t}</th><th>Opera Version</th></tr>
-<tr><td><a href="{$operaWindowsURL}">OperaPluginWindowsV{$operaversion}.zip</a></td><td>Windows</td><td>9.5 {t}or Higher{/t}</td></tr>
-<tr><td><a href="{$operaLinuxURL}">OperaPluginLinuxV{$operaversion}.zip</a></td><td>Linux ({t}maybe also BSD and MacOS{/t})</td><td>9.5 {t}or Higher{/t}</td></tr>
-</table>
-<br/>
-{t}Usage:{/t}
-<br/>
-{t}Read the readme.txt in the zip-file.{/t}
-</div>
-<div class="download"><a name="ie"></a>
-<img src="bilderherunterlader/ie.gif" alt="Internet Explorer" />
-<br/>
-<b>{t}Plugin for Internet Explorer:{/t}</b>
-<br/>
-<b><i>Version {$ieversion}:</i></b>
-<br/>
-<a href="{$ieURL}">BHIEPluginSetupv{$ieversion}.exe</a>
-<br/><br/>
-{t}Usage:{/t}
-<br/>
-{t}On a page with images: Rightclick -> Download files with BH{/t}
 </div>
 <div class="download"><a name="other"></a>
 <b>{t}Other Browsers:{/t}</b>
