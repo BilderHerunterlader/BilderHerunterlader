@@ -27,6 +27,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *       <sequence>
  *         <element name="rulesBeforeClasses" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         <element name="deactivations" type="{}HostDeactivationSetting" maxOccurs="unbounded" minOccurs="0"/>
+ *         <element name="customURLDetectionPatterns" type="{http://www.w3.org/2001/XMLSchema}string" maxOccurs="unbounded" minOccurs="0"/>
  *       </sequence>
  *     </restriction>
  *   </complexContent>
@@ -38,13 +39,15 @@ import jakarta.xml.bind.annotation.XmlType;
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "HostsSettings", propOrder = {
     "rulesBeforeClasses",
-    "deactivations"
+    "deactivations",
+    "customURLDetectionPatterns"
 })
 public class HostsSettings {
 
     @XmlElement(defaultValue = "false")
     protected boolean rulesBeforeClasses;
     protected List<HostDeactivationSetting> deactivations;
+    protected List<String> customURLDetectionPatterns;
 
     /**
      * Gets the value of the rulesBeforeClasses property.
@@ -92,6 +95,38 @@ public class HostsSettings {
             deactivations = new ArrayList<>();
         }
         return this.deactivations;
+    }
+
+    /**
+     * Gets the value of the customURLDetectionPatterns property.
+     * 
+     * <p>This accessor method returns a reference to the live list,
+     * not a snapshot. Therefore any modification you make to the
+     * returned list will be present inside the JAXB object.
+     * This is why there is not a <CODE>set</CODE> method for the customURLDetectionPatterns property.</p>
+     * 
+     * <p>
+     * For example, to add a new item, do as follows:
+     * </p>
+     * <pre>
+     * getCustomURLDetectionPatterns().add(newItem);
+     * </pre>
+     * 
+     * 
+     * <p>
+     * Objects of the following type(s) are allowed in the list
+     * {@link String }
+     * </p>
+     * 
+     * 
+     * @return
+     *     The value of the customURLDetectionPatterns property.
+     */
+    public List<String> getCustomURLDetectionPatterns() {
+        if (customURLDetectionPatterns == null) {
+            customURLDetectionPatterns = new ArrayList<>();
+        }
+        return this.customURLDetectionPatterns;
     }
 
 }

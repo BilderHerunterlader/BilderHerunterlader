@@ -309,6 +309,8 @@
 		<xs:sequence>
 			<xs:element name="rulesBeforeClasses" type="xs:boolean" default="false" />
 			<xs:element name="deactivations" type="HostDeactivationSetting" minOccurs="0" maxOccurs="unbounded" />
+			<!-- URL Detection Patterns for HostzDefaultFiles -->
+			<xs:element name="customURLDetectionPatterns" type="xs:string" minOccurs="0" maxOccurs="unbounded" />
 		</xs:sequence>
 	</xs:complexType>
 	
