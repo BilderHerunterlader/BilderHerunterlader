@@ -8,9 +8,9 @@
 {assign var="chromeversion" value="5.0"}
 {assign var="chromeURL" value="https://chromewebstore.google.com/detail/bilderherunterlader/dhakkekdifhcedejafeameclokbkcdkp"}
 {assign var="operaversion" value="5.0"}
-{assign var="operaURL" value="TODO"}
+{assign var="operaURL" value="https://chromewebstore.google.com/detail/bilderherunterlader/dhakkekdifhcedejafeameclokbkcdkp"}
 {assign var="edgeversion" value="5.0"}
-{assign var="edgeURL" value="TODO"}
+{assign var="edgeURL" value="https://chromewebstore.google.com/detail/bilderherunterlader/dhakkekdifhcedejafeameclokbkcdkp"}
 <script type="text/javascript" src="bilderherunterlader/installext.js"></script>
 <div class="download"><a name="requirements"></a>
 <b>{t}Requirements:{/t}</b>
@@ -83,8 +83,7 @@ JRE (Java  Runtime Environment) Version 21 {t}or higher{/t}
 <br/>
 <b>Version:</b> {$operaversion}
 <br/>
-Not yet available
-<!-- <a href="{$operaURL}">Install Opera - WebExtension</a> -->
+<a href="{$operaURL}">Install Opera - WebExtension</a>
 <br/><br/>
 {t}Usage:{/t}
 <br/>
@@ -97,8 +96,7 @@ Not yet available
 <br/>
 <b>Version:</b> {$edgeversion}
 <br/>
-Not yet available
-<!-- <a href="{$edgeURL}">Install Edge - WebExtension</a> -->
+<a href="{$edgeURL}">Install Edge - WebExtension</a>
 <br/><br/>
 {t}Usage:{/t}
 <br/>
