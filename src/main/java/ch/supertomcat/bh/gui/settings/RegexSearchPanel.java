@@ -2,7 +2,7 @@ package ch.supertomcat.bh.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JDialog;
@@ -11,10 +11,6 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.TableColumnModelEvent;
-import javax.swing.event.TableColumnModelListener;
 
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Icons;
@@ -22,13 +18,12 @@ import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 import ch.supertomcat.supertomcatutils.gui.table.renderer.DefaultStringColorRowRenderer;
-import ch.supertomcat.supertomcatutils.regex.RegexReplace;
-import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
+import ch.supertomcat.supertomcatutils.regex.RegexSearch;
 
 /**
  * Rule-Pipeline-Panel
  */
-public class RegexReplacePanel extends JPanel {
+public class RegexSearchPanel extends JPanel {
 	/**
 	 * UID
 	 */
@@ -47,7 +42,7 @@ public class RegexReplacePanel extends JPanel {
 	/**
 	 * TableModel
 	 */
-	private RegexSearchReplaceTableModel model = new RegexSearchReplaceTableModel();
+	private RegexSearchReplaceTableModel model = new RegexSearchReplaceTableModel(true);
 
 	/**
 	 * Button
@@ -82,10 +77,10 @@ public class RegexReplacePanel extends JPanel {
 	/**
 	 * Constructor
 	 * 
-	 * @param pipe Pipeline
+	 * @param regexSearchList Regex Search List
 	 * @param settingsManager Settings Manager
 	 */
-	public RegexReplacePanel(RegexReplacePipeline pipe, SettingsManager settingsManager) {
+	public RegexSearchPanel(List<RegexSearch> regexSearchList, SettingsManager settingsManager) {
 		setLayout(new BorderLayout());
 
 		table = new JTable(model);
@@ -94,41 +89,10 @@ public class RegexReplacePanel extends JPanel {
 
 		table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		table.setDefaultRenderer(Object.class, new DefaultStringColorRowRenderer());
-		updateColWidthsFromSettingsManager(settingsManager);
-		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-			@Override
-			public void columnAdded(TableColumnModelEvent e) {
-				// Nothing to do
-			}
-
-			@Override
-			public void columnMarginChanged(ChangeEvent e) {
-				updateColWidthsToSettingsManager(settingsManager);
-			}
-
-			@Override
-			public void columnMoved(TableColumnModelEvent e) {
-				// Nothing to do
-			}
-
-			@Override
-			public void columnRemoved(TableColumnModelEvent e) {
-				// Nothing to do
-			}
-
-			@Override
-			public void columnSelectionChanged(ListSelectionEvent e) {
-				// Nothing to do
-			}
-		});
 		table.getTableHeader().setReorderingAllowed(false);
 		table.setRowHeight(TableUtil.calculateRowHeight(table, false, true));
 
-		Iterator<RegexReplace> it = pipe.getRegexps().iterator();
-		while (it.hasNext()) {
-			RegexReplace rrre = it.next();
-			model.addRow(rrre.getSearch(), rrre.getReplace());
-		}
+		regexSearchList.stream().forEachOrdered(x -> model.addRow(x.getSearch(), null));
 
 		Dimension preferredScrollableTableSize = new Dimension(table.getPreferredScrollableViewportSize().width, 15 * table.getRowHeight());
 		table.setPreferredScrollableViewportSize(preferredScrollableTableSize);
@@ -151,13 +115,12 @@ public class RegexReplacePanel extends JPanel {
 			if (this.getTopLevelAncestor() instanceof JDialog dialog) {
 				parent = dialog;
 			}
-			RegexReplace rrre = new RegexReplace();
-			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
+			RegexSearch regexSearch = new RegexSearch();
+			RegexSearchRegexpEditor rme = new RegexSearchRegexpEditor(parent, regexSearch);
 			if (rme.getCanceled()) {
 				return;
 			}
-			model.addRow(rrre.getSearch(), rrre.getReplace());
-			pipe.addRegExp(rrre);
+			model.addRow(regexSearch.getSearch(), null);
 		});
 		btnEdit.addActionListener(e -> {
 			int row = table.getSelectedRow();
@@ -168,18 +131,16 @@ public class RegexReplacePanel extends JPanel {
 			if (this.getTopLevelAncestor() instanceof JDialog dialog) {
 				parent = dialog;
 			}
-			RegexReplace rrre = pipe.getRegexp(row);
-			RegexReplaceRegexpEditor rme = new RegexReplaceRegexpEditor(parent, rrre);
+			RegexSearch regexSearch = new RegexSearch((String)model.getValueAt(row, 0));
+			RegexSearchRegexpEditor rme = new RegexSearchRegexpEditor(parent, regexSearch);
 			if (rme.getCanceled()) {
 				return;
 			}
-			model.setValueAt(rrre.getSearch(), row, 0);
-			model.setValueAt(rrre.getReplace(), row, 1);
+			model.setValueAt(regexSearch.getSearch(), row, 0);
 		});
 		btnUp.addActionListener(e -> {
 			int row = table.getSelectedRow();
 			if (row > 0) {
-				pipe.swapRegExp(row, row - 1);
 				model.moveRow(row, row, row - 1);
 				table.setRowSelectionInterval(row - 1, row - 1);
 			}
@@ -187,7 +148,6 @@ public class RegexReplacePanel extends JPanel {
 		btnDown.addActionListener(e -> {
 			int row = table.getSelectedRow();
 			if (row > -1 && row < model.getRowCount() - 1) {
-				pipe.swapRegExp(row, row + 1);
 				model.moveRow(row, row, row + 1);
 				table.setRowSelectionInterval(row + 1, row + 1);
 			}
@@ -198,39 +158,6 @@ public class RegexReplacePanel extends JPanel {
 				return;
 			}
 			model.removeRow(row);
-			pipe.removeRegExp(row);
 		});
-	}
-
-	/**
-	 * Apply
-	 */
-	public void apply() {
-		// Nothing to do
-	}
-
-	/**
-	 * updateColWidthsToSettingsManager
-	 * 
-	 * @param settingsManager Settings Manager
-	 */
-	private void updateColWidthsToSettingsManager(SettingsManager settingsManager) {
-		if (!settingsManager.isSaveTableColumnSizes()) {
-			return;
-		}
-		settingsManager.setColWidthsRulesEditor(TableUtil.serializeColWidthSetting(table));
-		settingsManager.writeSettings(true);
-	}
-
-	/**
-	 * updateColWidthsFromSettingsManager
-	 * 
-	 * @param settingsManager Settings Manager
-	 */
-	private void updateColWidthsFromSettingsManager(SettingsManager settingsManager) {
-		if (!settingsManager.isSaveTableColumnSizes()) {
-			return;
-		}
-		TableUtil.applyColWidths(table, settingsManager.getColWidthsRulesEditor());
 	}
 }

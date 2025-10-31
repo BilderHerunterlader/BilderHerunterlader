@@ -10,6 +10,7 @@ import javax.swing.event.TableColumnModelListener;
 
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorTablePanel;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleRegexpEditor;
+import ch.supertomcat.bh.gui.settings.RegexSearchReplaceTableModel;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
@@ -17,7 +18,7 @@ import ch.supertomcat.supertomcatutils.gui.table.TableUtil;
 /**
  * Panel with buttons to edit a table
  */
-public class RulePipelineURLRegexTablePanel extends RuleEditorTablePanel<RulePipelineURLRegexTableModel> {
+public class RulePipelineURLRegexTablePanel extends RuleEditorTablePanel<RegexSearchReplaceTableModel> {
 	private static final long serialVersionUID = 1L;
 
 	/**
@@ -28,7 +29,7 @@ public class RulePipelineURLRegexTablePanel extends RuleEditorTablePanel<RulePip
 	 * @param regexps Regex List
 	 */
 	public RulePipelineURLRegexTablePanel(JDialog owner, SettingsManager settingsManager, List<RuleRegex> regexps) {
-		super(new RulePipelineURLRegexTableModel(), () -> createRegexp(owner), x -> editRegexp(owner, x));
+		super(new RegexSearchReplaceTableModel(), () -> createRegexp(owner), x -> editRegexp(owner, x));
 
 		updateColWidthsFromSettingsManager(settingsManager);
 		table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {

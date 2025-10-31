@@ -16,7 +16,7 @@ import javax.swing.event.TableColumnModelListener;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorPart;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleEditorTablePanel;
 import ch.supertomcat.bh.gui.rules.editor.base.RuleRegexpEditor;
-import ch.supertomcat.bh.gui.rules.editor.urlpipe.regex.RulePipelineURLRegexTableModel;
+import ch.supertomcat.bh.gui.settings.RegexSearchReplaceTableModel;
 import ch.supertomcat.bh.rules.xml.Pipeline;
 import ch.supertomcat.bh.rules.xml.RuleDefinition;
 import ch.supertomcat.bh.rules.xml.RuleRegex;
@@ -36,7 +36,7 @@ public abstract class RulePipelineFilenamePanelBase<T extends Pipeline, S extend
 	/**
 	 * TableModel
 	 */
-	protected RulePipelineURLRegexTableModel model = new RulePipelineURLRegexTableModel();
+	protected RegexSearchReplaceTableModel model = new RegexSearchReplaceTableModel();
 
 	/**
 	 * Action New Supplier
@@ -51,7 +51,7 @@ public abstract class RulePipelineFilenamePanelBase<T extends Pipeline, S extend
 	/**
 	 * Table Panel
 	 */
-	protected RuleEditorTablePanel<RulePipelineURLRegexTableModel> pnlTable = new RuleEditorTablePanel<>(model, actionNewSupplier, actionEditFunction);
+	protected RuleEditorTablePanel<RegexSearchReplaceTableModel> pnlTable = new RuleEditorTablePanel<>(model, actionNewSupplier, actionEditFunction);
 
 	/**
 	 * ComboBox

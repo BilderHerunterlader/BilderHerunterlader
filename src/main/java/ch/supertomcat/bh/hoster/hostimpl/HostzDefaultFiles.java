@@ -3,8 +3,8 @@ package ch.supertomcat.bh.hoster.hostimpl;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.ContextBuilder;
@@ -20,8 +20,11 @@ import ch.supertomcat.bh.exceptions.HostHttpIOException;
 import ch.supertomcat.bh.exceptions.HostWrongContentTypeException;
 import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IHoster;
-import ch.supertomcat.bh.hoster.hosteroptions.IHosterOptions;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
+import ch.supertomcat.bh.settings.BHSettingsListener;
+import ch.supertomcat.bh.settings.xml.DetectionSettings;
+import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
+import ch.supertomcat.bh.settings.xml.RegexSearchSetting;
 import ch.supertomcat.bh.tool.BHUtil;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
@@ -33,7 +36,7 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * 
  * @version 3.8
  */
-public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
+public class HostzDefaultFiles extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
@@ -58,7 +61,7 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 	/**
 	 * Kompilierte Muster (Aus Text-Datei geladen)
 	 */
-	private List<Pattern> urlPatterns = new ArrayList<>();
+	private List<Pattern> urlPatterns = new CopyOnWriteArrayList<>();
 
 	private boolean checkContentType = false;
 
@@ -91,64 +94,38 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		Path file = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostzDefaultImages.txt");
 		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, StandardCharsets.UTF_8, true));
 
-		try {
-			checkContentType = getBooleanOptionValue("checkContentTypeDefaultImages");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("checkContentTypeDefaultImages", false);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
-			}
-		}
+		initFromSettings();
 
-		try {
-			allFileTypes = getBooleanOptionValue("allFileTypes");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("allFileTypes", false);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
-			}
-		}
+		getSettingsManager().addSettingsListener(new BHSettingsListener() {
 
-		try {
-			images = getBooleanOptionValue("images");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("images", true);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
+			@Override
+			public void settingsChanged() {
+				initFromSettings();
 			}
-		}
 
-		try {
-			video = getBooleanOptionValue("video");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("video", true);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
+			@Override
+			public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
+				// Nothing to do
 			}
-		}
+		});
+	}
 
-		try {
-			audio = getBooleanOptionValue("audio");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("audio", true);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
-			}
-		}
+	/**
+	 * Init from settings
+	 */
+	private void initFromSettings() {
+		DetectionSettings detectionSettings = getSettingsManager().getDetectionSettings();
+		checkContentType = detectionSettings.isCheckContentType();
+		allFileTypes = detectionSettings.isAllFileTypes();
+		images = detectionSettings.isImage();
+		video = detectionSettings.isVideo();
+		audio = detectionSettings.isAudio();
+		archive = detectionSettings.isArchive();
 
-		try {
-			archive = getBooleanOptionValue("archive");
-		} catch (Exception e) {
-			try {
-				setBooleanOptionValue("archive", true);
-			} catch (Exception e1) {
-				logger.error(e1.getMessage(), e1);
-			}
+		urlPatterns.clear();
+		for (RegexSearchSetting detectionPattern : detectionSettings.getDetectionPatterns()) {
+			Pattern compiledPattern = Pattern.compile(detectionPattern.getPattern());
+			urlPatterns.add(compiledPattern);
 		}
 	}
 
@@ -277,59 +254,6 @@ public class HostzDefaultFiles extends Host implements IHoster, IHosterOptions {
 		if (!contentType.startsWith(expectedType)) {
 			throw new HostWrongContentTypeException(errorMessage, expectedType, contentType);
 		}
-	}
-
-	@Override
-	public synchronized void openOptionsDialog() {
-		HostzDefaultFilesOptionsDialog dialog = new HostzDefaultFilesOptionsDialog(getMainWindow(), checkContentType, allFileTypes, images, video, audio, archive);
-		if (dialog.isOkPressed()) {
-			checkContentType = dialog.isCheckContentType();
-			allFileTypes = dialog.isAllFileTypes();
-			images = dialog.isImage();
-			video = dialog.isVideo();
-			audio = dialog.isAudio();
-			archive = dialog.isArchive();
-
-			try {
-				setBooleanOptionValue("checkContentTypeDefaultImages", checkContentType);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			try {
-				setBooleanOptionValue("allFileTypes", allFileTypes);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			try {
-				setBooleanOptionValue("images", images);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			try {
-				setBooleanOptionValue("video", video);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			try {
-				setBooleanOptionValue("audio", audio);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			try {
-				setBooleanOptionValue("archive", archive);
-			} catch (Exception ex) {
-				logger.error(ex.getMessage(), ex);
-			}
-			getSettingsManager().writeSettings(true);
-		}
-	}
-
-	private boolean getBooleanOptionValue(String name) throws Exception {
-		return getSettingsManager().getBooleanValue(NAME, name);
-	}
-
-	private void setBooleanOptionValue(String name, boolean value) throws Exception {
-		getSettingsManager().setHosterSettingValue(NAME, name, value);
 	}
 
 	@Override

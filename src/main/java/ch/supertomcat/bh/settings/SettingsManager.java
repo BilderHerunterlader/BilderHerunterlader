@@ -16,9 +16,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.logging.log4j.Level;
 import org.xml.sax.SAXException;
 
+import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
 import ch.supertomcat.bh.settings.xml.CustomSetting;
+import ch.supertomcat.bh.settings.xml.DetectionSettings;
 import ch.supertomcat.bh.settings.xml.DirectorySettings;
 import ch.supertomcat.bh.settings.xml.DownloadSettings;
 import ch.supertomcat.bh.settings.xml.GUISettings;
@@ -62,7 +64,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	/**
 	 * Default User Agent
 	 */
-	private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:6.5) Goanna/20231221 PaleMoon/32.5.2";
+	private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:6.8) Goanna/20251016 PaleMoon/33.9.1";
 
 	/**
 	 * Log Level Mapping
@@ -153,8 +155,8 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 			logger.info("Loading Settings File: {}", settingsFile);
 			try {
 				this.settings = loadUserSettingsFile();
-				checkSettings();
 				updateHosterSettingsMap();
+				checkSettings();
 				applyLogLevel();
 				applyRegexPipelines();
 				applySubDirs();
@@ -261,6 +263,53 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 
 		if (settings.getDownloadSettings().isReducePathLength() == null) {
 			settings.getDownloadSettings().setReducePathLength(true);
+		}
+
+		if (settings.getDetectionSettings() == null) {
+			DetectionSettings detectionSettings = new DetectionSettings();
+			settings.setDetectionSettings(detectionSettings);
+
+			Boolean checkContentType = getBooleanValue(HostzDefaultFiles.NAME, "checkContentTypeDefaultImages");
+			if (checkContentType != null) {
+				detectionSettings.setCheckContentType(checkContentType);
+			} else {
+				detectionSettings.setCheckContentType(false);
+			}
+
+			Boolean allFileTypes = getBooleanValue(HostzDefaultFiles.NAME, "allFileTypes");
+			if (allFileTypes != null) {
+				detectionSettings.setAllFileTypes(allFileTypes);
+			} else {
+				detectionSettings.setAllFileTypes(false);
+			}
+
+			Boolean images = getBooleanValue(HostzDefaultFiles.NAME, "images");
+			if (images != null) {
+				detectionSettings.setImage(images);
+			} else {
+				detectionSettings.setImage(true);
+			}
+
+			Boolean video = getBooleanValue(HostzDefaultFiles.NAME, "video");
+			if (video != null) {
+				detectionSettings.setVideo(video);
+			} else {
+				detectionSettings.setVideo(true);
+			}
+
+			Boolean audio = getBooleanValue(HostzDefaultFiles.NAME, "audio");
+			if (audio != null) {
+				detectionSettings.setAudio(audio);
+			} else {
+				detectionSettings.setAudio(true);
+			}
+
+			Boolean archive = getBooleanValue(HostzDefaultFiles.NAME, "archive");
+			if (archive != null) {
+				detectionSettings.setArchive(archive);
+			} else {
+				detectionSettings.setArchive(true);
+			}
 		}
 	}
 
@@ -571,6 +620,15 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 */
 	public KeywordsSettings getKeywordsSettings() {
 		return settings.getKeywordsSettings();
+	}
+
+	/**
+	 * Returns the settings
+	 * 
+	 * @return settings
+	 */
+	public DetectionSettings getDetectionSettings() {
+		return settings.getDetectionSettings();
 	}
 
 	/**
@@ -1057,7 +1115,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized boolean getBooleanValue(String host, String key) {
+	public synchronized Boolean getBooleanValue(String host, String key) {
 		return getHosterSettingValue(host, key, Boolean.class);
 	}
 
@@ -1080,7 +1138,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized int getIntValue(String host, String key) {
+	public synchronized Integer getIntValue(String host, String key) {
 		return getHosterSettingValue(host, key, Integer.class);
 	}
 
@@ -1126,7 +1184,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized long getLongValue(String host, String key) {
+	public synchronized Long getLongValue(String host, String key) {
 		return getHosterSettingValue(host, key, Long.class);
 	}
 
@@ -1149,7 +1207,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized byte getByteValue(String host, String key) {
+	public synchronized Byte getByteValue(String host, String key) {
 		return getHosterSettingValue(host, key, Byte.class);
 	}
 
@@ -1172,7 +1230,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized short getShortValue(String host, String key) {
+	public synchronized Short getShortValue(String host, String key) {
 		return getHosterSettingValue(host, key, Short.class);
 	}
 
@@ -1195,7 +1253,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized float getFloatValue(String host, String key) {
+	public synchronized Float getFloatValue(String host, String key) {
 		return getHosterSettingValue(host, key, Float.class);
 	}
 
@@ -1218,7 +1276,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * @param key Key
 	 * @return Wert
 	 */
-	public synchronized double getDoubleValue(String host, String key) {
+	public synchronized Double getDoubleValue(String host, String key) {
 		return getHosterSettingValue(host, key, Double.class);
 	}
 

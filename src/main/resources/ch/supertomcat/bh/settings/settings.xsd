@@ -22,6 +22,9 @@
 				<!-- Keywords -->
 				<xs:element name="keywordsSettings" type="KeywordsSettings" />
 
+				<!-- Detection -->
+				<xs:element name="detectionSettings" type="DetectionSettings" />
+
 				<!-- Other Settings -->
 				<xs:element name="checkForUpdatesOnStart" type="xs:boolean" default="false" />
 				<xs:element name="checkClipboard" type="xs:boolean" default="false" />
@@ -272,6 +275,11 @@
 		<xs:attribute name="save" type="xs:boolean" use="required" />
 	</xs:complexType>
 	
+	<xs:complexType name="RegexSearchSetting">
+		<!-- Required Regex Pattern -->
+		<xs:attribute name="pattern" type="xs:string" use="required" />
+	</xs:complexType>
+	
 	<xs:complexType name="RegexReplaceSetting">
 		<!-- Required Regex Pattern -->
 		<xs:attribute name="pattern" type="xs:string" use="required" />
@@ -362,6 +370,21 @@
 			<xs:enumeration value="ALL" />
 		</xs:restriction>
 	</xs:simpleType>
+	
+	<!-- Detection Settings -->
+	<xs:complexType name="DetectionSettings">
+		<xs:sequence>
+			<xs:element name="checkContentType" type="xs:boolean" default="false" />
+			<xs:element name="allFileTypes" type="xs:boolean" default="false" />
+			<xs:element name="image" type="xs:boolean" default="true" />
+			<xs:element name="video" type="xs:boolean" default="true" />
+			<xs:element name="audio" type="xs:boolean" default="true" />
+			<xs:element name="archive" type="xs:boolean" default="true" />
+			
+			<!-- Regex Search Pattern used to detect specific URLs -->
+			<xs:element name="detectionPatterns" type="RegexSearchSetting" minOccurs="0" maxOccurs="unbounded" />
+		</xs:sequence>
+	</xs:complexType>
 	
 	<!-- Hoster Specific Settings -->
 	<xs:complexType name="HosterSettings">

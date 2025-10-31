@@ -33,6 +33,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *         <element name="hostsSettings" type="{}HostsSettings"/>
  *         <element name="downloadSettings" type="{}DownloadSettings"/>
  *         <element name="keywordsSettings" type="{}KeywordsSettings"/>
+ *         <element name="detectionSettings" type="{}DetectionSettings"/>
  *         <element name="checkForUpdatesOnStart" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         <element name="checkClipboard" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *         <element name="webExtensionPort" type="{http://www.w3.org/2001/XMLSchema}int"/>
@@ -58,6 +59,7 @@ import jakarta.xml.bind.annotation.XmlType;
     "hostsSettings",
     "downloadSettings",
     "keywordsSettings",
+    "detectionSettings",
     "checkForUpdatesOnStart",
     "checkClipboard",
     "webExtensionPort",
@@ -83,6 +85,8 @@ public class Settings {
     protected DownloadSettings downloadSettings;
     @XmlElement(required = true)
     protected KeywordsSettings keywordsSettings;
+    @XmlElement(required = true)
+    protected DetectionSettings detectionSettings;
     @XmlElement(defaultValue = "false")
     protected boolean checkForUpdatesOnStart;
     @XmlElement(defaultValue = "false")
@@ -244,6 +248,30 @@ public class Settings {
      */
     public void setKeywordsSettings(KeywordsSettings value) {
         this.keywordsSettings = value;
+    }
+
+    /**
+     * Gets the value of the detectionSettings property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link DetectionSettings }
+     *     
+     */
+    public DetectionSettings getDetectionSettings() {
+        return detectionSettings;
+    }
+
+    /**
+     * Sets the value of the detectionSettings property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link DetectionSettings }
+     *     
+     */
+    public void setDetectionSettings(DetectionSettings value) {
+        this.detectionSettings = value;
     }
 
     /**

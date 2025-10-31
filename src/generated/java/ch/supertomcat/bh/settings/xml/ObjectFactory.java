@@ -106,6 +106,16 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link DetectionSettings }
+     * 
+     * @return
+     *     the new instance of {@link DetectionSettings }
+     */
+    public DetectionSettings createDetectionSettings() {
+        return new DetectionSettings();
+    }
+
+    /**
      * Create an instance of {@link HosterSettings }
      * 
      * @return
@@ -153,6 +163,16 @@ public class ObjectFactory {
      */
     public WindowSettings createWindowSettings() {
         return new WindowSettings();
+    }
+
+    /**
+     * Create an instance of {@link RegexSearchSetting }
+     * 
+     * @return
+     *     the new instance of {@link RegexSearchSetting }
+     */
+    public RegexSearchSetting createRegexSearchSetting() {
+        return new RegexSearchSetting();
     }
 
     /**

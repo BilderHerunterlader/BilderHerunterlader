@@ -119,6 +119,15 @@
 		<deleteNoKeyword />
 	</keywordsSettings>
 
+	<detectionSettings>
+		<checkContentType />
+		<allFileTypes />
+		<image />
+		<video />
+		<audio />
+		<archive />
+	</detectionSettings>
+
 	<checkForUpdatesOnStart />
 	<checkClipboard />
 	<webExtensionPort />
