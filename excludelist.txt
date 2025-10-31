@@ -1,4 +1,3 @@
-HostzDefaultImages.txt
 *developerhosts*
 *developerhostssrc*
 *developerrules*

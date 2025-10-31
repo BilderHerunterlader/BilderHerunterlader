@@ -2,8 +2,10 @@ package ch.supertomcat.bh.gui.settings.tabs;
 
 import java.awt.GridBagConstraints;
 
+import javax.swing.BorderFactory;
 import javax.swing.JCheckBox;
 
+import ch.supertomcat.bh.gui.settings.RegexSearchPanel;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.DetectionSettings;
 import ch.supertomcat.bh.settings.xml.Settings;
@@ -51,14 +53,17 @@ public class DetectionSettingsPanel extends SettingsPanelBase {
 	private JCheckBox cbArchive;
 
 	/**
+	 * Panel
+	 */
+	private final RegexSearchPanel pnlRegexSearch;
+
+	/**
 	 * Constructor
 	 * 
 	 * @param settingsManager Settings Manager
 	 */
 	public DetectionSettingsPanel(SettingsManager settingsManager) {
 		super(settingsManager);
-		// TODO Auto-generated constructor stub
-
 		cbCheckContentType = new JCheckBox(Localization.getString("CheckCTDefaultImages"), false);
 		String strImages = Localization.getString("Images") + " (bmp, gif, jpe, jpg, jpeg, png, tif, tiff, webp)";
 		String strVideo = Localization.getString("Videos") + " (3g2, 3gp, 3gp2, 3gpp, amr, asf, divx, evo, flv, hdmov, m2t, m2ts, m2v";
@@ -90,40 +95,33 @@ public class DetectionSettingsPanel extends SettingsPanelBase {
 		cbAudio.setEnabled(!cbAllTypes.isSelected());
 		cbArchive.setEnabled(!cbAllTypes.isSelected());
 
+		this.pnlRegexSearch = new RegexSearchPanel(settingsManager.getDetectionPatterns());
+		pnlRegexSearch.setBorder(BorderFactory.createTitledBorder(Localization.getString("DetectionSearchPatterns")));
+
 		GridBagConstraints gbc = new GridBagConstraints();
 
 		int i = 0;
+
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblStdSavePath, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbAllTypes, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblRememberLastUsedPath, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbCheckContentType, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblSubdirsEnabled, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbImage, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblSubdirsResolutionMode, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbVideo, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblSubdirsResolutionMode, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbAudio, this);
 		i++;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
-		// GridBagLayoutUtil.addItemToPanel(gbl, gbc, lblSubdirsResolutionMode, this);
-		gbc = gblt.getGBC(1, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbArchive, this);
 		i++;
-		// TODO Add patterns
+		gbc = gblt.getGBC(0, i, 2, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, pnlRegexSearch, this);
 	}
 
 	@Override
@@ -152,5 +150,8 @@ public class DetectionSettingsPanel extends SettingsPanelBase {
 		detectionSettings.setVideo(cbVideo.isSelected());
 		detectionSettings.setAudio(cbAudio.isSelected());
 		detectionSettings.setArchive(cbArchive.isSelected());
+
+		settingsManager.setDetectionPatterns(pnlRegexSearch.getRegexSearches());
+		settingsManager.applyDetectionPatternsToXMLSettings();
 	}
 }

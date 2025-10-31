@@ -2,6 +2,7 @@ package ch.supertomcat.bh.gui.settings;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JButton;
@@ -12,7 +13,6 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpringLayout;
 
-import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.Icons;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.gui.layout.SpringUtilities;
@@ -78,9 +78,8 @@ public class RegexSearchPanel extends JPanel {
 	 * Constructor
 	 * 
 	 * @param regexSearchList Regex Search List
-	 * @param settingsManager Settings Manager
 	 */
-	public RegexSearchPanel(List<RegexSearch> regexSearchList, SettingsManager settingsManager) {
+	public RegexSearchPanel(List<RegexSearch> regexSearchList) {
 		setLayout(new BorderLayout());
 
 		table = new JTable(model);
@@ -159,5 +158,17 @@ public class RegexSearchPanel extends JPanel {
 			}
 			model.removeRow(row);
 		});
+	}
+
+	/**
+	 * @return Regex Search list
+	 */
+	public List<RegexSearch> getRegexSearches() {
+		List<RegexSearch> regexSearches = new ArrayList<>();
+		for (int i = 0; i < model.getRowCount(); i++) {
+			String search = (String)model.getValueAt(i, 0);
+			regexSearches.add(new RegexSearch(search));
+		}
+		return regexSearches;
 	}
 }

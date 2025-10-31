@@ -1,10 +1,7 @@
 package ch.supertomcat.bh.hoster.hostimpl;
 
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Pattern;
 
 import org.apache.hc.client5.http.ContextBuilder;
@@ -24,19 +21,16 @@ import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.xml.DetectionSettings;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
-import ch.supertomcat.bh.settings.xml.RegexSearchSetting;
-import ch.supertomcat.bh.tool.BHUtil;
-import ch.supertomcat.supertomcatutils.application.ApplicationMain;
-import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
+import ch.supertomcat.supertomcatutils.regex.RegexSearch;
 
 /**
  * Host-Klasse fuer beliebige Dateien und speziell fuer Bilder die nicht auf einem Image-Hoster gehostet sind.
  * 
  * @version 3.8
  */
-public class HostzDefaultFiles extends Host implements IHoster {
+public class HostDefaultFiles extends Host implements IHoster {
 	/**
 	 * Version dieser Klasse
 	 */
@@ -58,10 +52,7 @@ public class HostzDefaultFiles extends Host implements IHoster {
 
 	private Pattern urlPatternArchive;
 
-	/**
-	 * Kompilierte Muster (Aus Text-Datei geladen)
-	 */
-	private List<Pattern> urlPatterns = new CopyOnWriteArrayList<>();
+	private List<RegexSearch> urlPatterns = new ArrayList<>();
 
 	private boolean checkContentType = false;
 
@@ -78,9 +69,9 @@ public class HostzDefaultFiles extends Host implements IHoster {
 	/**
 	 * Konstruktor
 	 */
-	public HostzDefaultFiles() {
+	public HostDefaultFiles() {
 		super(NAME, VERSION);
-		String strImages = "(?:bmp|gif|jpe|jpg|jpeg|png|tif|tiff|webp)";
+		String strImages = "(?:avif|bmp|gif|jpe|jpg|jpeg|jfif|pjpeg|pjp|apng|png|tif|tiff|webp)";
 		String strVideo = "(?:3g2|3gp|3gp2|3gpp|amr|asf|divx|evo|flv|hdmov|m2t|m2ts|m2v|m4v|mkv|m1v|mov|mp2v|mp4|mpe|mpeg|mpg|mts|ogm|ogv|pva|pss|qt|rm|ram|rpm|rmm|ts|tp|tpr|vob|wmv|wmp)";
 		String strAudio = "(?:aac|ac3|au|dts|flac|m1a|m2a|m4a|m4b|mid|midi|mka|mp2|mp3|mpa|oga|ogg|ra|rmi|snd|wav|wma)";
 		String strArchive = "(?:7z|arj|bz2|bzip2|cab|cpio|deb|dmg|gz|gzip|hfs|iso|lha|lzh|lzma|rar|rpm|split|swm|tar|taz|tbz|tbz2|tgz|tpz|wim|xar|z|zip)";
@@ -90,9 +81,6 @@ public class HostzDefaultFiles extends Host implements IHoster {
 		urlPatternVideo = Pattern.compile(strPatternPrefix + strVideo + "$", Pattern.CASE_INSENSITIVE);
 		urlPatternAudio = Pattern.compile(strPatternPrefix + strAudio + "$", Pattern.CASE_INSENSITIVE);
 		urlPatternArchive = Pattern.compile(strPatternPrefix + strArchive + "$", Pattern.CASE_INSENSITIVE);
-
-		Path file = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts/HostzDefaultImages.txt");
-		urlPatterns.addAll(BHUtil.readPatternsFromTextFile(file, StandardCharsets.UTF_8, true));
 
 		initFromSettings();
 
@@ -122,11 +110,7 @@ public class HostzDefaultFiles extends Host implements IHoster {
 		audio = detectionSettings.isAudio();
 		archive = detectionSettings.isArchive();
 
-		urlPatterns.clear();
-		for (RegexSearchSetting detectionPattern : detectionSettings.getDetectionPatterns()) {
-			Pattern compiledPattern = Pattern.compile(detectionPattern.getPattern());
-			urlPatterns.add(compiledPattern);
-		}
+		urlPatterns = new ArrayList<>(getSettingsManager().getDetectionPatterns());
 	}
 
 	@Override
@@ -163,43 +147,32 @@ public class HostzDefaultFiles extends Host implements IHoster {
 		String filename = getFilenameFromURL(url);
 
 		// Check for images, videos, audio and archives
-		if (images && !filename.isEmpty()) {
-			if (urlPatternImages.matcher(filename).matches()) {
-				if (checkType) {
-					checkContentType(url, "image/", Localization.getString("FileIsNotImage"));
-				}
-				return true;
+		if (images && !filename.isEmpty() && urlPatternImages.matcher(filename).matches()) {
+			if (checkType) {
+				checkContentType(url, "image/", Localization.getString("FileIsNotImage"));
 			}
-		}
-		if (video && !filename.isEmpty()) {
-			if (urlPatternVideo.matcher(filename).matches()) {
-				if (checkType) {
-					checkContentType(url, "video/", Localization.getString("FileIsNotVideo"));
-				}
-				return true;
-			}
-		}
-		if (audio && !filename.isEmpty()) {
-			if (urlPatternAudio.matcher(filename).matches()) {
-				if (checkType) {
-					checkContentType(url, "audio/", Localization.getString("FileIsNotAudio"));
-				}
-				return true;
-			}
-		}
-		if (archive && !filename.isEmpty()) {
-			if (urlPatternArchive.matcher(filename).matches()) {
-				return true;
-			}
+			return true;
 		}
 
-		for (Pattern pattern : urlPatterns) {
-			if (pattern.matcher(url).matches()) {
-				return true;
+		if (video && !filename.isEmpty() && urlPatternVideo.matcher(filename).matches()) {
+			if (checkType) {
+				checkContentType(url, "video/", Localization.getString("FileIsNotVideo"));
 			}
+			return true;
 		}
 
-		return false;
+		if (audio && !filename.isEmpty() && urlPatternAudio.matcher(filename).matches()) {
+			if (checkType) {
+				checkContentType(url, "audio/", Localization.getString("FileIsNotAudio"));
+			}
+			return true;
+		}
+
+		if (archive && !filename.isEmpty() && urlPatternArchive.matcher(filename).matches()) {
+			return true;
+		}
+
+		return urlPatterns.stream().anyMatch(x -> x.match(url));
 	}
 
 	@Override

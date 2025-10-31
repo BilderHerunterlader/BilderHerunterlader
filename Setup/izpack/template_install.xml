@@ -48,7 +48,6 @@
 				<include name="BH.jar" />
 				<include name="license.txt" />
 				<include name="directories.properties.example" />
-				<include name="HostzDefaultImages.txt.example" />
 				<include name="CHANGELOG.md" />
 			</fileset>
 			<file src="BilderHerunterlader-256.png" targetdir="$INSTALL_PATH" />

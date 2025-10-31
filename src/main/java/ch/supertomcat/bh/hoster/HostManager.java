@@ -22,9 +22,9 @@ import ch.supertomcat.bh.cookies.CookieManager;
 import ch.supertomcat.bh.downloader.ProxyManager;
 import ch.supertomcat.bh.exceptions.HostException;
 import ch.supertomcat.bh.hoster.classloader.HostClassesLoader;
+import ch.supertomcat.bh.hoster.hostimpl.HostDefaultFiles;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.hoster.hostimpl.HostSortImages;
-import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
 import ch.supertomcat.bh.hoster.parser.URLParseObject;
 import ch.supertomcat.bh.hoster.urlchecker.RemoveDuplicatesRunnable;
 import ch.supertomcat.bh.pic.URL;
@@ -135,11 +135,11 @@ public class HostManager {
 				@Override
 				public int compare(Host o1, Host o2) {
 
-					if (o2.getName().equals(HostzDefaultFiles.NAME)) {
-						// HostDefaultImages has to be at the end of the array!
+					if (o2.getName().equals(HostDefaultFiles.NAME)) {
+						// HostDefaultFiles has to be at the end of the array!
 						return -1;
-					} else if (o1.getName().equals(HostzDefaultFiles.NAME)) {
-						// HostDefaultImages has to be at the end of the array!
+					} else if (o1.getName().equals(HostDefaultFiles.NAME)) {
+						// HostDefaultFiles has to be at the end of the array!
 						return 1;
 					}
 

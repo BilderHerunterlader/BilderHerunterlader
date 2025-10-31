@@ -103,7 +103,6 @@ Section !$(SecMainName) SecMain
 	File "..\BHIcon.ico"
 	
 	File "..\directories.properties.example"
-	File "..\HostzDefaultImages.txt.example"
 	File "..\CHANGELOG.md"
 	
 	SetOutPath "$INSTDIR\hosts"
@@ -180,7 +179,6 @@ Section "Uninstall"
 	Delete "$INSTDIR\license.txt"
 	Delete "$INSTDIR\BHIcon.ico"
 	Delete "$INSTDIR\directories.properties.example"
-	Delete "$INSTDIR\HostzDefaultImages.txt.example"
 	Delete "$INSTDIR\CHANGELOG.md"
 	Delete "$INSTDIR\lib\*.jar"
 	Delete "$INSTDIR\updater\*.jar"

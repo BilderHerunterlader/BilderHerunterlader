@@ -27,7 +27,7 @@ import ch.supertomcat.bh.hoster.HostManager;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.hostimpl.HostRules;
 import ch.supertomcat.bh.hoster.hostimpl.HostSortImages;
-import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
+import ch.supertomcat.bh.hoster.hostimpl.HostDefaultFiles;
 import ch.supertomcat.bh.queue.DownloadRestriction;
 import ch.supertomcat.bh.queue.RestrictionAccess;
 import ch.supertomcat.bh.rules.Rule;
@@ -98,7 +98,7 @@ public class UpdateUpdatesXMLTest {
 		logger.info("Loading Updates XML File: {}", updatesXmlFile.getAbsolutePath());
 		Updates updates = updatesXmlIO.readUpdates(updatesXmlFile.getAbsolutePath(), true);
 
-		List<Class<?>> internalHostClasses = Arrays.asList(HostRules.class, HostSortImages.class, HostzDefaultFiles.class);
+		List<Class<?>> internalHostClasses = Arrays.asList(HostRules.class, HostSortImages.class, HostDefaultFiles.class);
 
 		Map<String, UpdateData> redirectUpdates = new HashMap<>();
 		Map<String, UpdateData> hostUpdates = new HashMap<>();

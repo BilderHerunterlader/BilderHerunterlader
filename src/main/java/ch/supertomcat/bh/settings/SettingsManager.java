@@ -16,7 +16,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import org.apache.logging.log4j.Level;
 import org.xml.sax.SAXException;
 
-import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
+import ch.supertomcat.bh.hoster.hostimpl.HostDefaultFiles;
 import ch.supertomcat.bh.settings.options.Subdir;
 import ch.supertomcat.bh.settings.xml.ConnectionSettings;
 import ch.supertomcat.bh.settings.xml.CustomSetting;
@@ -32,6 +32,7 @@ import ch.supertomcat.bh.settings.xml.LogLevelSetting;
 import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.bh.settings.xml.ObjectFactory;
 import ch.supertomcat.bh.settings.xml.RegexReplaceSetting;
+import ch.supertomcat.bh.settings.xml.RegexSearchSetting;
 import ch.supertomcat.bh.settings.xml.Settings;
 import ch.supertomcat.bh.settings.xml.SubDirSetting;
 import ch.supertomcat.bh.tool.BHUtil;
@@ -41,6 +42,7 @@ import ch.supertomcat.supertomcatutils.gui.formatter.UnitFormatUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
 import ch.supertomcat.supertomcatutils.regex.RegexReplace;
 import ch.supertomcat.supertomcatutils.regex.RegexReplacePipeline;
+import ch.supertomcat.supertomcatutils.regex.RegexSearch;
 import ch.supertomcat.supertomcatutils.settings.SettingsManagerBase;
 import ch.supertomcat.supertomcatutils.settings.SettingsUtil;
 import jakarta.xml.bind.JAXBException;
@@ -99,6 +101,11 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 * regexReplacePipelineFilename
 	 */
 	private RegexReplacePipeline regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename");
+
+	/**
+	 * Detection Patterns
+	 */
+	private List<RegexSearch> detectionPatterns = new ArrayList<>();
 
 	/**
 	 * Subdirs
@@ -269,42 +276,42 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 			DetectionSettings detectionSettings = new DetectionSettings();
 			settings.setDetectionSettings(detectionSettings);
 
-			Boolean checkContentType = getBooleanValue(HostzDefaultFiles.NAME, "checkContentTypeDefaultImages");
+			Boolean checkContentType = getBooleanValue(HostDefaultFiles.NAME, "checkContentTypeDefaultImages");
 			if (checkContentType != null) {
 				detectionSettings.setCheckContentType(checkContentType);
 			} else {
 				detectionSettings.setCheckContentType(false);
 			}
 
-			Boolean allFileTypes = getBooleanValue(HostzDefaultFiles.NAME, "allFileTypes");
+			Boolean allFileTypes = getBooleanValue(HostDefaultFiles.NAME, "allFileTypes");
 			if (allFileTypes != null) {
 				detectionSettings.setAllFileTypes(allFileTypes);
 			} else {
 				detectionSettings.setAllFileTypes(false);
 			}
 
-			Boolean images = getBooleanValue(HostzDefaultFiles.NAME, "images");
+			Boolean images = getBooleanValue(HostDefaultFiles.NAME, "images");
 			if (images != null) {
 				detectionSettings.setImage(images);
 			} else {
 				detectionSettings.setImage(true);
 			}
 
-			Boolean video = getBooleanValue(HostzDefaultFiles.NAME, "video");
+			Boolean video = getBooleanValue(HostDefaultFiles.NAME, "video");
 			if (video != null) {
 				detectionSettings.setVideo(video);
 			} else {
 				detectionSettings.setVideo(true);
 			}
 
-			Boolean audio = getBooleanValue(HostzDefaultFiles.NAME, "audio");
+			Boolean audio = getBooleanValue(HostDefaultFiles.NAME, "audio");
 			if (audio != null) {
 				detectionSettings.setAudio(audio);
 			} else {
 				detectionSettings.setAudio(true);
 			}
 
-			Boolean archive = getBooleanValue(HostzDefaultFiles.NAME, "archive");
+			Boolean archive = getBooleanValue(HostDefaultFiles.NAME, "archive");
 			if (archive != null) {
 				detectionSettings.setArchive(archive);
 			} else {
@@ -344,6 +351,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	private void applyRegexPipelines() {
 		regexReplacePipelinePageTitle = new RegexReplacePipeline("regexReplacePageTitle", getRegexReplaces(settings.getGuiSettings().getRegexReplacesPageTitle(), "regexReplacePageTitle"));
 		regexReplacePipelineFilename = new RegexReplacePipeline("regexReplaceFilename", getRegexReplaces(settings.getDownloadSettings().getRegexReplacesFilename(), "regexReplaceFilename"));
+		detectionPatterns = getRegexSearches(settings.getDetectionSettings().getDetectionPatterns(), "detectionPatterns");
 	}
 
 	private void applySubDirs() {
@@ -368,6 +376,21 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 			} catch (Exception ex) {
 				logger.error("Could not load regexp from RegexReplaceSetting for {}: Pattern: '{}', Replacement: '{}'", pipelineName, regexReplaceSetting.getPattern(), regexReplaceSetting
 						.getReplacement(), ex);
+				throw ex;
+			}
+		}
+
+		return regexps;
+	}
+
+	private List<RegexSearch> getRegexSearches(List<RegexSearchSetting> regexSearchSettings, String pipelineName) {
+		List<RegexSearch> regexps = new ArrayList<>();
+
+		for (RegexSearchSetting regexSearchSetting : regexSearchSettings) {
+			try {
+				regexps.add(new RegexSearch(regexSearchSetting.getPattern()));
+			} catch (Exception ex) {
+				logger.error("Could not load regexp from RegexSearchSetting for: Pattern: '{}'", pipelineName, regexSearchSetting.getPattern(), ex);
 				throw ex;
 			}
 		}
@@ -404,6 +427,15 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 		}
 	}
 
+	private void convertToXMLRegexSearchSettings(List<RegexSearch> regexSearches, List<RegexSearchSetting> xmlRegexList) {
+		xmlRegexList.clear();
+		for (RegexSearch regexSearch : regexSearches) {
+			RegexSearchSetting regexSearchSetting = new RegexSearchSetting();
+			regexSearchSetting.setPattern(regexSearch.getSearch());
+			xmlRegexList.add(regexSearchSetting);
+		}
+	}
+
 	/**
 	 * Returns the regexReplacePipelinePageTitle
 	 * 
@@ -434,6 +466,31 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	 */
 	public void applyRegexReplacePipelineFilenameToXMLSettings() {
 		convertToXMLRegexReplaceSettings(regexReplacePipelineFilename, settings.getDownloadSettings().getRegexReplacesFilename());
+	}
+
+	/**
+	 * Returns the regexReplacePipelineFilename
+	 * 
+	 * @return regexReplacePipelineFilename
+	 */
+	public List<RegexSearch> getDetectionPatterns() {
+		return detectionPatterns;
+	}
+
+	/**
+	 * Apply Regex Replace Pipeline for Filenames to XML Settings
+	 */
+	public void applyDetectionPatternsToXMLSettings() {
+		convertToXMLRegexSearchSettings(detectionPatterns, settings.getDetectionSettings().getDetectionPatterns());
+	}
+
+	/**
+	 * Set detection patterns
+	 * 
+	 * @param detectionPatterns Detection Patterns
+	 */
+	public void setDetectionPatterns(List<RegexSearch> detectionPatterns) {
+		this.detectionPatterns = new ArrayList<>(detectionPatterns);
 	}
 
 	/**

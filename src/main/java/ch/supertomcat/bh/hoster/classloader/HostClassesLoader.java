@@ -9,7 +9,7 @@ import ch.supertomcat.bh.hoster.Host;
 import ch.supertomcat.bh.hoster.IRedirect;
 import ch.supertomcat.bh.hoster.classloader.impl.HostClassLoader;
 import ch.supertomcat.bh.hoster.classloader.impl.RedirectClassLoader;
-import ch.supertomcat.bh.hoster.hostimpl.HostzDefaultFiles;
+import ch.supertomcat.bh.hoster.hostimpl.HostDefaultFiles;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 
@@ -39,8 +39,8 @@ public final class HostClassesLoader {
 		Path folderHostClasses = Paths.get(ApplicationProperties.getProperty(ApplicationMain.APPLICATION_PATH), "hosts");
 		foundHostClasses.addAll(hostClassLoader.findHostClasses(folderHostClasses, false));
 
-		// HostzDefaultFiles has to be added at the end of the array
-		foundHostClasses.add(new FoundHostClass(HostzDefaultFiles.class, false));
+		// HostDefaultFiles has to be added at the end of the array
+		foundHostClasses.add(new FoundHostClass(HostDefaultFiles.class, false));
 
 		// Get instances of the classes
 		return hostClassLoader.loadHostClasses(foundHostClasses);

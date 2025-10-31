@@ -19,5 +19,4 @@ del v.txt
 "%programfiles%\7-zip\7z.exe" a -tzip BilderHerunterlader-%version%-Binary.zip BHIcon.ico
 "%programfiles%\7-zip\7z.exe" a -tzip BilderHerunterlader-%version%-Binary.zip license.txt
 "%programfiles%\7-zip\7z.exe" a -tzip BilderHerunterlader-%version%-Binary.zip directories.properties.example
-"%programfiles%\7-zip\7z.exe" a -tzip BilderHerunterlader-%version%-Binary.zip HostzDefaultImages.txt.example
 "%programfiles%\7-zip\7z.exe" a -tzip BilderHerunterlader-%version%-Binary.zip CHANGELOG.md

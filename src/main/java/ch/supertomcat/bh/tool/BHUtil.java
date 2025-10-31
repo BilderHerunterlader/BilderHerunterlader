@@ -1,16 +1,7 @@
 package ch.supertomcat.bh.tool;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.regex.Pattern;
-import java.util.regex.PatternSyntaxException;
 
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -18,8 +9,6 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.Configuration;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.mozilla.universalchardet.UniversalDetector;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -28,11 +17,6 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
  * This class provides methods, which are often used.
  */
 public final class BHUtil {
-	/**
-	 * Logger for this class
-	 */
-	private static Logger logger = LoggerFactory.getLogger(BHUtil.class);
-
 	/**
 	 * Constructor
 	 */
@@ -125,45 +109,6 @@ public final class BHUtil {
 		}
 
 		return encoding;
-	}
-
-	/**
-	 * Read patterns defined by the user from a textfile
-	 * 
-	 * @param file Text File
-	 * @param encoding Encoding
-	 * @param caseInsensitive True if patterns should be compiled with CASE_INSENSITIVE flag, false otherwise
-	 * @return Patterns
-	 */
-	public static List<Pattern> readPatternsFromTextFile(Path file, Charset encoding, boolean caseInsensitive) {
-		List<Pattern> patterns = new ArrayList<>();
-		if (!Files.exists(file)) {
-			return patterns;
-		}
-
-		try (InputStream in = Files.newInputStream(file); BufferedReader reader = new BufferedReader(new InputStreamReader(in, encoding))) {
-			String row = null;
-			while ((row = reader.readLine()) != null) {
-				if (row.isEmpty()) {
-					continue;
-				}
-
-				try {
-					Pattern compiledPattern;
-					if (caseInsensitive) {
-						compiledPattern = Pattern.compile(row, Pattern.CASE_INSENSITIVE);
-					} else {
-						compiledPattern = Pattern.compile(row);
-					}
-					patterns.add(compiledPattern);
-				} catch (PatternSyntaxException pse) {
-					logger.error("Could not compile pattern: {}", row, pse);
-				}
-			}
-		} catch (IOException e) {
-			logger.error("Could not load patterns from: {}", file, e);
-		}
-		return patterns;
 	}
 
 	/**
