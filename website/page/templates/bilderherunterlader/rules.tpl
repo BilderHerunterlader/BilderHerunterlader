@@ -90,8 +90,7 @@ http://img7.imagevenue.com/aAfkjfp01fo1i-28074/loc164/54394_NoraTschirner_FCVenu
 
 <b><a name="DirectLinkedImages">{t}Directly linked images{/t}</a></b>
 {t}If it is nessesary to download directly linked images or other files, you can enable this with regular expressions.
-That class detects by default only a small number of URLs. To allow more URLs to be downloaded you have to create a textfile with the name HostzDefaultImages.txt in the hosts folder.
-In that file you have to write one expression per line.
+That class detects by default only a small number of URLs. To allow more URLs to be downloaded you have add search patterns in the detection settings.
 
 Here is an example:{/t}
 <div class="code">^http:\/\/.*\/.*\.(gif|jpg|jpeg|jpe|png|tif|tiff)

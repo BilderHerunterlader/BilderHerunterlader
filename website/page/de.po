@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-10-26 13:55+0100\n"
-"PO-Revision-Date: 2025-10-26 13:59+0100\n"
+"POT-Creation-Date: 2025-10-31 23:31+0100\n"
+"PO-Revision-Date: 2025-10-31 23:33+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: de\n"
@@ -18,72 +18,75 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-2: geshi\n"
 "X-Poedit-SearchPathExcluded-3: templates_c\n"
 
-#: templates/bilderherunterlader/download.tpl:15
+#: templates/bilderherunterlader/download.tpl:16
 msgid "Requirements:"
 msgstr "Vorraussetzungen:"
 
-#: templates/bilderherunterlader/download.tpl:17
+#: templates/bilderherunterlader/download.tpl:18
 msgid "or higher"
 msgstr "oder höher"
 
-#: templates/bilderherunterlader/download.tpl:19
+#: templates/bilderherunterlader/download.tpl:20
 msgid "Download-Page"
 msgstr "Download-Seite"
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "Please read the"
 msgstr "Bitte lies erst noch die"
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "tutorial"
 msgstr "Anleitung"
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "before installing"
 msgstr "vor der Installation"
 
-#: templates/bilderherunterlader/download.tpl:28
+#: templates/bilderherunterlader/download.tpl:29
 msgid "Downloads"
 msgstr "Downloads"
 
-#: templates/bilderherunterlader/download.tpl:29
+#: templates/bilderherunterlader/download.tpl:30
 msgid "BilderHerunterlader Setup (for Windows)"
 msgstr "BilderHerunterlader Setup (für Windows)"
 
-#: templates/bilderherunterlader/download.tpl:30
+#: templates/bilderherunterlader/download.tpl:31
 msgid "BilderHerunterlader Setup (platform independent)"
 msgstr "BilderHerunterlader Setup (Plattformunabhängig)"
 
-#: templates/bilderherunterlader/download.tpl:31
+#: templates/bilderherunterlader/download.tpl:32
 msgid ""
 "BilderHerunterlader Binaries in Zip-Archiv (for other operating systems)"
 msgstr ""
 "BilderHerunterlader Binaries in Zip-Archiv (für alle anderen Betriebsysteme)"
 
-#: templates/bilderherunterlader/download.tpl:46
-#: templates/bilderherunterlader/download.tpl:61
-#: templates/bilderherunterlader/download.tpl:76
-#: templates/bilderherunterlader/download.tpl:93
-#: templates/bilderherunterlader/download.tpl:106
+#: templates/bilderherunterlader/download.tpl:47
+#: templates/bilderherunterlader/download.tpl:62
+#: templates/bilderherunterlader/download.tpl:75
+#: templates/bilderherunterlader/download.tpl:89
+#: templates/bilderherunterlader/download.tpl:103
+#: templates/bilderherunterlader/download.tpl:118
 msgid "Usage:"
 msgstr "Verwendung:"
 
-#: templates/bilderherunterlader/download.tpl:48
-#: templates/bilderherunterlader/download.tpl:78
-#: templates/bilderherunterlader/download.tpl:108
+#: templates/bilderherunterlader/download.tpl:49
+#: templates/bilderherunterlader/download.tpl:120
 msgid "On a page with images: Rightclick -> Download files with BH"
 msgstr ""
 "Auf einer Webseite mit Bildern: Rechtsklick -> Dateien mit BH herunterladen"
 
-#: templates/bilderherunterlader/download.tpl:50
-#: templates/bilderherunterlader/download.tpl:80
+#: templates/bilderherunterlader/download.tpl:51
+#: templates/bilderherunterlader/download.tpl:122
 msgid ""
 "The function can also be called directly by using the keyboard-shortcut "
 "Shift + B."
 msgstr ""
 "Mit der Tastenkombination Shift + B wird die Funktion direkt aufgerufen."
 
-#: templates/bilderherunterlader/download.tpl:63
+#: templates/bilderherunterlader/download.tpl:64
+#: templates/bilderherunterlader/download.tpl:77
+#: templates/bilderherunterlader/download.tpl:91
+#: templates/bilderherunterlader/download.tpl:105
 msgid ""
 "On a page with images: Rightclick -> BilderHerunterlader -> Download files "
 "with BH"
@@ -91,41 +94,11 @@ msgstr ""
 "Auf einer Webseite mit Bildern: Rechtsklick -> BilderHerunterlader -> "
 "Dateien mit BH herunterladen"
 
-#: templates/bilderherunterlader/download.tpl:85
-msgid "Plugin for Opera:"
-msgstr "Plugin für Opera:"
-
-#: templates/bilderherunterlader/download.tpl:88
-#: templates/bilderherunterlader/menu.tpl:4
-msgid "Download"
-msgstr "Download"
-
-#: templates/bilderherunterlader/download.tpl:88
-msgid "Operating System"
-msgstr "Betriebssystem"
-
-#: templates/bilderherunterlader/download.tpl:89
-#: templates/bilderherunterlader/download.tpl:90
-msgid "or Higher"
-msgstr "oder höher"
-
-#: templates/bilderherunterlader/download.tpl:90
-msgid "maybe also BSD and MacOS"
-msgstr "möglicherweise auch BSD und MacOS"
-
-#: templates/bilderherunterlader/download.tpl:95
-msgid "Read the readme.txt in the zip-file."
-msgstr "Lies die readme.txt in der zip-datei."
-
-#: templates/bilderherunterlader/download.tpl:100
-msgid "Plugin for Internet Explorer:"
-msgstr "Plugin für Internet Explorer:"
-
-#: templates/bilderherunterlader/download.tpl:111
+#: templates/bilderherunterlader/download.tpl:125
 msgid "Other Browsers:"
 msgstr "Andere Browser:"
 
-#: templates/bilderherunterlader/download.tpl:113
+#: templates/bilderherunterlader/download.tpl:127
 msgid ""
 "There are no extensions available for other browser at the moment. But you "
 "can use the program too."
@@ -133,11 +106,11 @@ msgstr ""
 "Für andere Browser gibt es im Moment keine Extensions. Aber man kann das "
 "Programm trotzdem verwenden."
 
-#: templates/bilderherunterlader/download.tpl:115
+#: templates/bilderherunterlader/download.tpl:129
 msgid "There are 2 ways:"
 msgstr "Es gibt 2 Wege:"
 
-#: templates/bilderherunterlader/download.tpl:117
+#: templates/bilderherunterlader/download.tpl:131
 msgid ""
 "Turn on Clipboard-Monitoring and copy the URL of the webpage into the "
 "clipboard"
@@ -145,11 +118,11 @@ msgstr ""
 "Schalte die Zwischenablagenüberwachung ein und kopiere die URL der Webseite "
 "in die Zwischenablage (Ctrl + C)"
 
-#: templates/bilderherunterlader/download.tpl:119
+#: templates/bilderherunterlader/download.tpl:133
 msgid ""
 "Select the images in the Browser and drag and drop the selection to the "
 "program"
-msgstr "Markier die Bilder im Browser und ziehe die Markierung ins Programm."
+msgstr "Markier die Bilder im Browser und ziehe die Markierung ins Programm"
 
 #: templates/bilderherunterlader/faq.tpl:2
 msgid "Will further hosts be supported?"
@@ -620,6 +593,10 @@ msgstr "Unterstütze Hoster:"
 msgid "BilderHerunterlader"
 msgstr "BilderHerunterlader"
 
+#: templates/bilderherunterlader/menu.tpl:4
+msgid "Download"
+msgstr "Download"
+
 #: templates/bilderherunterlader/menu.tpl:5
 #: templates/bilderherunterlader/tutorial.tpl:31
 msgid "Features"
@@ -946,22 +923,20 @@ msgid ""
 "If it is nessesary to download directly linked images or other files, you "
 "can enable this with regular expressions.\n"
 "That class detects by default only a small number of URLs. To allow more "
-"URLs to be downloaded you have to create a textfile with the name "
-"HostzDefaultImages.txt in the hosts folder.\n"
-"In that file you have to write one expression per line.\n"
+"URLs to be downloaded you have add search patterns in the detection "
+"settings.\n"
 "\n"
 "Here is an example:"
 msgstr ""
 "Falls es nötig sein sollte andere direkt verlinkte Bilder oder sonstige "
 "Dateien runterzuladen, kann man mit Regulären Ausdrücken dafür sorgen.\n"
-"Diese Klasse erkennt standardmässig aber nur gewisse URLs. Um nun weitere "
-"anzugeben muss im hosts Ordner eine Text-Datei mit dem Namen "
-"HostzDefaultImages.txt angelegt werden.\n"
-"In dieser Datei muss dann pro Zeile ein Regulärer Ausdruck angegeben "
-"werden.\n"
+"Diese Klasse erkennt standardmässig aber nur gewisse URLs. Um weitere URLs "
+"zu erlauben muss in den Erkennungs-Einstellungen weitere Suchmuster "
+"hinzugefügt werden.\n"
+"\n"
 "Hier mal ein Beispiel wie es aussehen könnte:"
 
-#: templates/bilderherunterlader/rules.tpl:100
+#: templates/bilderherunterlader/rules.tpl:99
 msgid ""
 "The first expression allows to download file with some endings.\n"
 "The second expression allows to download attachments in the boardsoftware "
@@ -974,11 +949,11 @@ msgstr ""
 "Gross- und Kleinschreibung wird an dieser Stelle des Programms nicht "
 "beachtet."
 
-#: templates/bilderherunterlader/rules.tpl:104
+#: templates/bilderherunterlader/rules.tpl:103
 msgid "Host-Plugins (Host-Classes)"
 msgstr "Hoster-Plugins (Hoster-Klassen)"
 
-#: templates/bilderherunterlader/rules.tpl:105
+#: templates/bilderherunterlader/rules.tpl:104
 msgid ""
 "If this possibilities aren't enough and you can program in Java, then you "
 "can write your own classes which can be used as Hosters-Plugins.\n"
@@ -1006,7 +981,7 @@ msgid ""
 "Download and install the extension or plugin for your browser, if available."
 msgstr ""
 "Falls vorhanden, die Extension oder das Plugin für den Browser herunterladen "
-"und installieren"
+"und installieren."
 
 #: templates/bilderherunterlader/tutorial.tpl:7
 msgid "Start BilderHerunterlader"
@@ -1109,7 +1084,7 @@ msgid ""
 "Menu or in the menubar."
 msgstr ""
 "Falls nichts passiert, im System-Tray-Icon-Menü oder in der Menüleiste "
-"\"Prüfe Zwischenablage\" anklicken"
+"\"Prüfe Zwischenablage\" anklicken."
 
 #: templates/bilderherunterlader/tutorial.tpl:26
 msgid ""
@@ -1117,7 +1092,7 @@ msgid ""
 "drop the selection with the mouse to the program-window."
 msgstr ""
 "Weitere Alternative: Im Browser die Bilder / Links markieren und mit der "
-"Maus packen und im Programm-Fenster loslassen"
+"Maus packen und im Programm-Fenster loslassen."
 
 #: templates/bilderherunterlader/tutorial.tpl:29
 msgid "Now a new window opens, which shows the available files"
@@ -1209,6 +1184,18 @@ msgstr "Irada"
 msgid "Contact"
 msgstr "Kontakt"
 
+#: templates/irada/menu.tpl:3
+msgid "irada"
+msgstr "Irada"
+
+#: templates/irada/menu.tpl:4
+msgid "anleitung"
+msgstr "Anleitung"
+
+#: templates/irada/menu.tpl:5
+msgid "hostini"
+msgstr "host.ini"
+
 #: language.php:22
 msgid "Options"
 msgstr "Einstellungen"
@@ -1217,9 +1204,23 @@ msgstr "Einstellungen"
 msgid "Anleitung"
 msgstr "Anleitung"
 
-#: language.php:28
-msgid "hostini"
-msgstr "host.ini"
+#~ msgid "Plugin for Opera:"
+#~ msgstr "Plugin für Opera:"
+
+#~ msgid "Operating System"
+#~ msgstr "Betriebssystem"
+
+#~ msgid "or Higher"
+#~ msgstr "oder höher"
+
+#~ msgid "maybe also BSD and MacOS"
+#~ msgstr "möglicherweise auch BSD und MacOS"
+
+#~ msgid "Read the readme.txt in the zip-file."
+#~ msgstr "Lies die readme.txt in der zip-datei."
+
+#~ msgid "Plugin for Internet Explorer:"
+#~ msgstr "Plugin für Internet Explorer:"
 
 #, fuzzy
 #~| msgid "Host-Plugins"

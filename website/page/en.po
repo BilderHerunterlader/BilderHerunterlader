@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
-"POT-Creation-Date: 2025-10-26 13:55+0100\n"
-"PO-Revision-Date: 2025-10-26 13:55+0100\n"
+"POT-Creation-Date: 2025-10-31 23:31+0100\n"
+"PO-Revision-Date: 2025-10-31 23:31+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: en_US\n"
@@ -17,125 +17,98 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-1: cache\n"
 "X-Poedit-SearchPathExcluded-2: templates_c\n"
 
-#: templates/bilderherunterlader/download.tpl:15
+#: templates/bilderherunterlader/download.tpl:16
 msgid "Requirements:"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:17
+#: templates/bilderherunterlader/download.tpl:18
 msgid "or higher"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:19
+#: templates/bilderherunterlader/download.tpl:20
 msgid "Download-Page"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "Please read the"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "tutorial"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:24
+#: templates/bilderherunterlader/download.tpl:25
 msgid "before installing"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:28
+#: templates/bilderherunterlader/download.tpl:29
 msgid "Downloads"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:29
+#: templates/bilderherunterlader/download.tpl:30
 msgid "BilderHerunterlader Setup (for Windows)"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:30
+#: templates/bilderherunterlader/download.tpl:31
 msgid "BilderHerunterlader Setup (platform independent)"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:31
+#: templates/bilderherunterlader/download.tpl:32
 msgid ""
 "BilderHerunterlader Binaries in Zip-Archiv (for other operating systems)"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:46
-#: templates/bilderherunterlader/download.tpl:61
-#: templates/bilderherunterlader/download.tpl:76
-#: templates/bilderherunterlader/download.tpl:93
-#: templates/bilderherunterlader/download.tpl:106
+#: templates/bilderherunterlader/download.tpl:47
+#: templates/bilderherunterlader/download.tpl:62
+#: templates/bilderherunterlader/download.tpl:75
+#: templates/bilderherunterlader/download.tpl:89
+#: templates/bilderherunterlader/download.tpl:103
+#: templates/bilderherunterlader/download.tpl:118
 msgid "Usage:"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:48
-#: templates/bilderherunterlader/download.tpl:78
-#: templates/bilderherunterlader/download.tpl:108
+#: templates/bilderherunterlader/download.tpl:49
+#: templates/bilderherunterlader/download.tpl:120
 msgid "On a page with images: Rightclick -> Download files with BH"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:50
-#: templates/bilderherunterlader/download.tpl:80
+#: templates/bilderherunterlader/download.tpl:51
+#: templates/bilderherunterlader/download.tpl:122
 msgid ""
 "The function can also be called directly by using the keyboard-shortcut "
 "Shift + B."
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:63
+#: templates/bilderherunterlader/download.tpl:64
+#: templates/bilderherunterlader/download.tpl:77
+#: templates/bilderherunterlader/download.tpl:91
+#: templates/bilderherunterlader/download.tpl:105
 msgid ""
 "On a page with images: Rightclick -> BilderHerunterlader -> Download files "
 "with BH"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:85
-msgid "Plugin for Opera:"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:88
-#: templates/bilderherunterlader/menu.tpl:4
-msgid "Download"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:88
-msgid "Operating System"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:89
-#: templates/bilderherunterlader/download.tpl:90
-msgid "or Higher"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:90
-msgid "maybe also BSD and MacOS"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:95
-msgid "Read the readme.txt in the zip-file."
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:100
-msgid "Plugin for Internet Explorer:"
-msgstr ""
-
-#: templates/bilderherunterlader/download.tpl:111
+#: templates/bilderherunterlader/download.tpl:125
 msgid "Other Browsers:"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:113
+#: templates/bilderherunterlader/download.tpl:127
 msgid ""
 "There are no extensions available for other browser at the moment. But you "
 "can use the program too."
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:115
+#: templates/bilderherunterlader/download.tpl:129
 msgid "There are 2 ways:"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:117
+#: templates/bilderherunterlader/download.tpl:131
 msgid ""
 "Turn on Clipboard-Monitoring and copy the URL of the webpage into the "
 "clipboard"
 msgstr ""
 
-#: templates/bilderherunterlader/download.tpl:119
+#: templates/bilderherunterlader/download.tpl:133
 msgid ""
 "Select the images in the Browser and drag and drop the selection to the "
 "program"
@@ -533,6 +506,10 @@ msgstr ""
 msgid "BilderHerunterlader"
 msgstr ""
 
+#: templates/bilderherunterlader/menu.tpl:4
+msgid "Download"
+msgstr ""
+
 #: templates/bilderherunterlader/menu.tpl:5
 #: templates/bilderherunterlader/tutorial.tpl:31
 msgid "Features"
@@ -772,14 +749,13 @@ msgid ""
 "If it is nessesary to download directly linked images or other files, you "
 "can enable this with regular expressions.\n"
 "That class detects by default only a small number of URLs. To allow more "
-"URLs to be downloaded you have to create a textfile with the name "
-"HostzDefaultImages.txt in the hosts folder.\n"
-"In that file you have to write one expression per line.\n"
+"URLs to be downloaded you have add search patterns in the detection "
+"settings.\n"
 "\n"
 "Here is an example:"
 msgstr ""
 
-#: templates/bilderherunterlader/rules.tpl:100
+#: templates/bilderherunterlader/rules.tpl:99
 msgid ""
 "The first expression allows to download file with some endings.\n"
 "The second expression allows to download attachments in the boardsoftware "
@@ -787,11 +763,11 @@ msgid ""
 "Upper and lower case at this point of the program is not respected."
 msgstr ""
 
-#: templates/bilderherunterlader/rules.tpl:104
+#: templates/bilderherunterlader/rules.tpl:103
 msgid "Host-Plugins (Host-Classes)"
 msgstr ""
 
-#: templates/bilderherunterlader/rules.tpl:105
+#: templates/bilderherunterlader/rules.tpl:104
 msgid ""
 "If this possibilities aren't enough and you can program in Java, then you "
 "can write your own classes which can be used as Hosters-Plugins.\n"
@@ -969,16 +945,24 @@ msgstr ""
 msgid "Contact"
 msgstr ""
 
+#: templates/irada/menu.tpl:3
+msgid "irada"
+msgstr ""
+
+#: templates/irada/menu.tpl:4
+msgid "anleitung"
+msgstr ""
+
+#: templates/irada/menu.tpl:5
+msgid "hostini"
+msgstr ""
+
 #: language.php:22
 msgid "Options"
 msgstr ""
 
 #: language.php:27
 msgid "Anleitung"
-msgstr ""
-
-#: language.php:28
-msgid "hostini"
 msgstr ""
 
 #~ msgid "error404"
