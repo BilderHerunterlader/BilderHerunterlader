@@ -83,6 +83,11 @@ public class ProxyManager {
 	private CloseableHttpClient sharedHttpClient;
 
 	/**
+	 * Shared HTTP Client Wrapper
+	 */
+	private SharedHttpClient sharedHttpClientWrapper;
+
+	/**
 	 * SharedHttpClient Lock
 	 */
 	private final ReadWriteLock sharedHttpClientLock = new ReentrantReadWriteLock();
@@ -163,6 +168,7 @@ public class ProxyManager {
 				sharedHttpClient.close(CloseMode.GRACEFUL);
 			}
 			sharedHttpClient = getHTTPClientBuilder().setDefaultCookieStore(cookieManager.getCookieStore()).build();
+			sharedHttpClientWrapper = new SharedHttpClient(sharedHttpClient);
 		} finally {
 			sharedHttpClientWriteLock.unlock();
 		}
@@ -234,7 +240,8 @@ public class ProxyManager {
 	 * @return HttpClient
 	 */
 	public CloseableHttpClient getHTTPClient() {
-		return getHTTPClientBuilder().build();
+		// return getHTTPClientBuilder().build();
+		return getSharedHTTPClient();
 	}
 
 	/**
@@ -247,7 +254,7 @@ public class ProxyManager {
 	public CloseableHttpClient getSharedHTTPClient() {
 		try {
 			sharedHttpClientReadLock.lock();
-			return sharedHttpClient;
+			return sharedHttpClientWrapper;
 		} finally {
 			sharedHttpClientReadLock.unlock();
 		}
