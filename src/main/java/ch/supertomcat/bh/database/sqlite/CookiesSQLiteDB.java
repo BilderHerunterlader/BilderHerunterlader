@@ -5,6 +5,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.sql.Types;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -140,15 +141,26 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 		String value = result.getString("Value");
 		String host = result.getString("Host");
 		String path = result.getString("Path");
+		Instant expiryInstant;
 		long expiryTime = result.getLong("ExpiryTime");
-		Instant expiryInstant = Instant.ofEpochMilli(expiryTime);
+		if (result.wasNull()) {
+			expiryInstant = null;
+		} else {
+			expiryInstant = Instant.ofEpochMilli(expiryTime);
+		}
+
 		/*
 		 * Currently there is no last access time in the cookie of apache httpclient
 		 */
 		// long lastAccessedTime = result.getLong("LastAccessedTime");
 		// Instant lastAccessedInstant = Instant.ofEpochMilli(lastAccessedTime);
+		Instant creationInstant;
 		long creationTime = result.getLong("CreationTime");
-		Instant creationInstant = Instant.ofEpochMilli(creationTime);
+		if (result.wasNull()) {
+			creationInstant = null;
+		} else {
+			creationInstant = Instant.ofEpochMilli(creationTime);
+		}
 		boolean secure = result.getBoolean("Secure");
 		boolean httpOnly = result.getBoolean("HttpOnly");
 
@@ -229,9 +241,19 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 		statement.setString(3, cookie.getValue());
 		statement.setString(4, cookie.getDomain());
 		statement.setString(5, cookie.getPath());
-		statement.setLong(6, cookie.getExpiryInstant().toEpochMilli());
+		Instant expiry = cookie.getExpiryInstant();
+		if (expiry != null) {
+			statement.setLong(6, expiry.toEpochMilli());
+		} else {
+			statement.setNull(6, Types.INTEGER);
+		}
 		statement.setLong(7, Instant.now().toEpochMilli());
-		statement.setLong(8, cookie.getCreationInstant().toEpochMilli());
+		Instant creation = cookie.getCreationInstant();
+		if (creation != null) {
+			statement.setLong(8, creation.toEpochMilli());
+		} else {
+			statement.setNull(8, Types.INTEGER);
+		}
 		statement.setBoolean(9, cookie.isSecure());
 		statement.setBoolean(10, cookie.isHttpOnly());
 
@@ -314,9 +336,19 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 		statement.setString(3, cookie.getValue());
 		statement.setString(4, cookie.getDomain());
 		statement.setString(5, cookie.getPath());
-		statement.setLong(6, cookie.getExpiryInstant().toEpochMilli());
+		Instant expiry = cookie.getExpiryInstant();
+		if (expiry != null) {
+			statement.setLong(6, expiry.toEpochMilli());
+		} else {
+			statement.setNull(6, Types.INTEGER);
+		}
 		statement.setLong(7, Instant.now().toEpochMilli());
-		statement.setLong(8, cookie.getCreationInstant().toEpochMilli());
+		Instant creation = cookie.getCreationInstant();
+		if (creation != null) {
+			statement.setLong(8, creation.toEpochMilli());
+		} else {
+			statement.setNull(8, Types.INTEGER);
+		}
 		statement.setBoolean(9, cookie.isSecure());
 		statement.setBoolean(10, cookie.isHttpOnly());
 		statement.setInt(11, entry.getId());
