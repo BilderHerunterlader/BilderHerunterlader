@@ -423,10 +423,19 @@ public class LogManager implements BHSettingsListener {
 
 		if (start < 0 || start >= count) {
 			// Integer division give count of 100 entries for start
-			start = (count / 100) * 100;
+			if (count > 100) {
+				start = count - 100;
+			} else {
+				start = 0;
+			}
 		}
 
-		logsSQLiteDB.fillTableModelWithEntriesRange(start, 100, model, settingsManager, DATE_FORMAT);
+		int limit = 100;
+		if (start < 100) {
+			limit = count % 100;
+		}
+
+		logsSQLiteDB.fillTableModelWithEntriesRange(start, limit, model, settingsManager, DATE_FORMAT);
 
 		int entriesCount = model.getRowCount();
 		if (entriesCount <= 0) {
