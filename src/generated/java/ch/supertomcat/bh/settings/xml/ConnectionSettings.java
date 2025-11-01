@@ -37,6 +37,7 @@ import jakarta.xml.bind.annotation.XmlType;
  *         <element name="browserCookiesFirefox" type="{}BrowserCookiesSetting"/>
  *         <element name="browserCookiesPaleMoon" type="{}BrowserCookiesSetting"/>
  *         <element name="cookieDatabase" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
+ *         <element name="sharedHttpClient" type="{http://www.w3.org/2001/XMLSchema}boolean"/>
  *       </sequence>
  *     </restriction>
  *   </complexContent>
@@ -59,7 +60,8 @@ import jakarta.xml.bind.annotation.XmlType;
     "browserCookiesOperaNew",
     "browserCookiesFirefox",
     "browserCookiesPaleMoon",
-    "cookieDatabase"
+    "cookieDatabase",
+    "sharedHttpClient"
 })
 public class ConnectionSettings {
 
@@ -90,6 +92,8 @@ public class ConnectionSettings {
     protected BrowserCookiesSetting browserCookiesPaleMoon;
     @XmlElement(defaultValue = "true")
     protected boolean cookieDatabase;
+    @XmlElement(defaultValue = "true")
+    protected boolean sharedHttpClient;
 
     /**
      * Gets the value of the maxConnections property.
@@ -353,6 +357,22 @@ public class ConnectionSettings {
      */
     public void setCookieDatabase(boolean value) {
         this.cookieDatabase = value;
+    }
+
+    /**
+     * Gets the value of the sharedHttpClient property.
+     * 
+     */
+    public boolean isSharedHttpClient() {
+        return sharedHttpClient;
+    }
+
+    /**
+     * Sets the value of the sharedHttpClient property.
+     * 
+     */
+    public void setSharedHttpClient(boolean value) {
+        this.sharedHttpClient = value;
     }
 
 }

@@ -103,6 +103,11 @@ public class ProxyManager {
 	private final Lock sharedHttpClientWriteLock = sharedHttpClientLock.writeLock();
 
 	/**
+	 * Use Shared Http Client Flag
+	 */
+	private boolean useSharedHttpClient = true;
+
+	/**
 	 * Settings Manager
 	 */
 	private final SettingsManager settingsManager;
@@ -148,6 +153,8 @@ public class ProxyManager {
 			@Override
 			public void settingsChanged() {
 				conManager.setDefaultConnectionConfig(createConnectionConfig());
+				ConnectionSettings conSettings = settingsManager.getConnectionSettings();
+				useSharedHttpClient = conSettings.isSharedHttpClient();
 				createSharedHTTPClient();
 			}
 
@@ -240,8 +247,11 @@ public class ProxyManager {
 	 * @return HttpClient
 	 */
 	public CloseableHttpClient getHTTPClient() {
-		// return getHTTPClientBuilder().build();
-		return getSharedHTTPClient();
+		if (useSharedHttpClient) {
+			return getSharedHTTPClient();
+		} else {
+			return getHTTPClientBuilder().build();
+		}
 	}
 
 	/**
@@ -287,6 +297,7 @@ public class ProxyManager {
 		proxyuser = proxySettings.getUser();
 		proxypassword = proxySettings.getPassword();
 		auth = proxySettings.isAuth();
+		useSharedHttpClient = conSettings.isSharedHttpClient();
 	}
 
 	/**

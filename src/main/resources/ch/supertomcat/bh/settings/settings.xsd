@@ -128,6 +128,7 @@
 			<xs:element name="browserCookiesPaleMoon" type="BrowserCookiesSetting" />
 			
 			<xs:element name="cookieDatabase" type="xs:boolean" default="true" />
+			<xs:element name="sharedHttpClient" type="xs:boolean" default="true" />
 		</xs:sequence>
 	</xs:complexType>
 

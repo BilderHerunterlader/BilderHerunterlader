@@ -53,6 +53,11 @@ public class ConnectionSettingsPanel extends SettingsPanelBase {
 	private final CookieManager cookieManager;
 
 	/**
+	 * CheckBox
+	 */
+	private JCheckBox cbSharedHttpClient = new JCheckBox(Localization.getString("SharedHttpClient"), true);
+
+	/**
 	 * ButtonGroup
 	 */
 	private ButtonGroup buttonGroup = new ButtonGroup();
@@ -472,6 +477,9 @@ public class ConnectionSettingsPanel extends SettingsPanelBase {
 
 		int i = 0;
 		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
+		GridBagLayoutUtil.addItemToPanel(gbl, gbc, cbSharedHttpClient, this);
+		i++;
+		gbc = gblt.getGBC(0, i, 1, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, rbNoProxy, this);
 		gbc = gblt.getGBC(1, i, 4, 1, 0.0, 0.0);
 		GridBagLayoutUtil.addItemToPanel(gbl, gbc, rbHTTP, this);
@@ -573,6 +581,8 @@ public class ConnectionSettingsPanel extends SettingsPanelBase {
 
 		ConnectionSettings connectionSettings = settings.getConnectionSettings();
 
+		cbSharedHttpClient.setSelected(connectionSettings.isSharedHttpClient());
+
 		txtConnectionCount.setText(String.valueOf(connectionSettings.getMaxConnections()));
 		sldConnectionCount.setValue(connectionSettings.getMaxConnections());
 
@@ -665,6 +675,8 @@ public class ConnectionSettingsPanel extends SettingsPanelBase {
 		Settings settings = settingsManager.getSettings();
 
 		ConnectionSettings connectionSettings = settings.getConnectionSettings();
+
+		connectionSettings.setSharedHttpClient(cbSharedHttpClient.isSelected());
 
 		connectionSettings.setMaxConnections(sldConnectionCount.getValue());
 		connectionSettings.setMaxConnectionsPerHost(sldConnectionCountPerHost.getValue());
