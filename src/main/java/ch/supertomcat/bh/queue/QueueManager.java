@@ -296,24 +296,25 @@ public class QueueManager implements IPicListener {
 	 * @param pic Pic
 	 */
 	public void removePic(Pic pic) {
-		if (downloadQueueManager.isDownloading() || (pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.DOWNLOADING || pic.getStatus() == PicState.ABORTING)) {
+		if (pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.DOWNLOADING || pic.getStatus() == PicState.ABORTING) {
 			return;
 		}
 
 		try {
 			writeLock.lock();
-			int index = pics.indexOf(pic);
-			if (index >= 0) {
-				pics.remove(pic);
-				pic.removeAllListener();
-				queueSQLiteDB.deleteEntry(pic);
 
-				executeInEventQueueThread(() -> {
-					tableModel.removeRow(index);
-					// Manually called, because the model overwrites the removeRow method and does not fire the event.
-					tableModel.fireTableDataChanged();
-				});
+			pic.removeAllListener();
+
+			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
 			}
+
+			pics.remove(pic);
+
+			queueSQLiteDB.deleteEntry(pic);
+
+			executeInEventQueueThread(() -> tableModel.removeRow(index));
 		} finally {
 			writeLock.unlock();
 		}
@@ -321,7 +322,6 @@ public class QueueManager implements IPicListener {
 
 	/**
 	 * Removes Pics from the queue
-	 * If there are downloads running this method will not do anything!
 	 * 
 	 * @param picList Pics
 	 */
@@ -344,13 +344,15 @@ public class QueueManager implements IPicListener {
 
 			queueSQLiteDB.deleteEntries(picList);
 
+			if (indices.length == 0) {
+				return;
+			}
+
 			executeInEventQueueThread(() -> {
 				// Remove in reverse order
 				for (int i = indices.length - 1; i > -1; i--) {
 					tableModel.removeRow(indices[i]);
 				}
-				// Manually called, because the model overwrites the removeRow method and does not fire the event.
-				tableModel.fireTableDataChanged();
 			});
 		} finally {
 			writeLock.unlock();
@@ -448,12 +450,11 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
-			executeInEventQueueThread(() -> {
-				if (index > -1 && tableModel.getRowCount() > index) {
-					tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
-				}
-			});
+			executeInEventQueueThread(() -> tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX));
 		} finally {
 			readLock.unlock();
 		}
@@ -464,12 +465,14 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
 			executeInEventQueueThread(() -> {
 				if (index > -1 && tableModel.getRowCount() > index) {
 					// Change Cell
 					tableModel.setValueAt(pic.getSize(), index, QueueTableModel.SIZE_COLUMN_INDEX);
-					tableModel.fireTableCellUpdated(index, QueueTableModel.SIZE_COLUMN_INDEX);
 				}
 			});
 
@@ -484,12 +487,14 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
 			executeInEventQueueThread(() -> {
 				if (index > -1 && tableModel.getRowCount() > index) {
 					// Change Cell
 					tableModel.setValueAt(pic.getTarget(), index, QueueTableModel.TARGET_COLUMN_INDEX);
-					tableModel.fireTableCellUpdated(index, QueueTableModel.TARGET_COLUMN_INDEX);
 				}
 			});
 		} finally {
@@ -523,11 +528,7 @@ public class QueueManager implements IPicListener {
 			if (status == PicState.FAILED || status == PicState.FAILED_FILE_NOT_EXIST || status == PicState.SLEEPING || status == PicState.WAITING
 					|| status == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
 				int index = pics.indexOf(pic);
-				executeInEventQueueThread(() -> {
-					if (index > -1 && tableModel.getRowCount() > index) {
-						tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
-					}
-				});
+				executeInEventQueueThread(() -> tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX));
 			}
 
 			if (status != PicState.SLEEPING && status != PicState.WAITING && status != PicState.DOWNLOADING && status != PicState.ABORTING) {
@@ -548,12 +549,11 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
-			executeInEventQueueThread(() -> {
-				if (index > -1 && tableModel.getRowCount() > index) {
-					tableModel.fireTableRowsUpdated(index, index);
-				}
-			});
+			executeInEventQueueThread(() -> tableModel.fireTableRowsUpdated(index, index));
 
 			updatePic(pic);
 		} finally {
@@ -566,12 +566,14 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
 			executeInEventQueueThread(() -> {
 				if (index > -1 && tableModel.getRowCount() > index) {
 					// Change Cell
 					tableModel.setValueAt(pic.getHoster(), index, QueueTableModel.HOST_COLUMN_INDEX);
-					tableModel.fireTableCellUpdated(index, QueueTableModel.HOST_COLUMN_INDEX);
 				}
 			});
 		} finally {
@@ -584,12 +586,14 @@ public class QueueManager implements IPicListener {
 		try {
 			readLock.lock();
 			int index = pics.indexOf(pic);
+			if (index < 0) {
+				return;
+			}
 
 			executeInEventQueueThread(() -> {
 				if (index > -1 && tableModel.getRowCount() > index) {
 					// Change Cell
 					tableModel.setValueAt(pic.getDownloadURL(), index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
-					tableModel.fireTableCellUpdated(index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
 				}
 			});
 

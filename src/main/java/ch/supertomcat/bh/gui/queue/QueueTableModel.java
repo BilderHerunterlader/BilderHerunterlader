@@ -93,13 +93,4 @@ public class QueueTableModel extends DefaultTableModel {
 		data[PROGRESS_COLUMN_INDEX] = pic;
 		this.addRow(data);
 	}
-
-	@Override
-	public void removeRow(int row) {
-		/*
-		 * This method is overridden to disable the fireTableRowsDeleted-Call, because
-		 * this slows down deleting, when a lot of rows have to be deleted.
-		 */
-		dataVector.removeElementAt(row);
-	}
 }

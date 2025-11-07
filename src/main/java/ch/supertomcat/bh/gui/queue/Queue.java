@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.StringJoiner;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -775,7 +776,19 @@ public class Queue extends JPanel {
 
 		picsToChange.stream().forEach(pic -> {
 			pic.setTargetPath(newPathToSet);
-			queueManager.updatePic(pic);
+		});
+
+		executeInNewThread("QueueChangeTargetByInputThread-", () -> {
+			ProgressObserver pg = new ProgressObserver();
+			pg.progressModeChanged(true);
+			pg.progressChanged(Localization.getString("SavingEntries"));
+			try {
+				mainWindowAccess.addProgressObserver(pg);
+				queueManager.updatePics(picsToChange);
+				mainWindowAccess.setMessage(Localization.getString("EntriesSaved"));
+			} finally {
+				mainWindowAccess.removeProgressObserver(pg);
+			}
 		});
 	}
 
@@ -795,7 +808,19 @@ public class Queue extends JPanel {
 		String folderPath = folder.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
 		picsToChange.stream().forEach(pic -> {
 			pic.setTargetPath(folderPath);
-			queueManager.updatePic(pic);
+		});
+
+		executeInNewThread("QueueChangeTargetBySelectionThread-", () -> {
+			ProgressObserver pg = new ProgressObserver();
+			pg.progressModeChanged(true);
+			pg.progressChanged(Localization.getString("SavingEntries"));
+			try {
+				mainWindowAccess.addProgressObserver(pg);
+				queueManager.updatePics(picsToChange);
+				mainWindowAccess.setMessage(Localization.getString("EntriesSaved"));
+			} finally {
+				mainWindowAccess.removeProgressObserver(pg);
+			}
 		});
 	}
 
@@ -840,7 +865,19 @@ public class Queue extends JPanel {
 
 			pic.setTargetFilename(filenameToSet);
 			pic.setFixedTargetFilename(!clearFilename);
-			queueManager.updatePic(pic);
+		});
+
+		executeInNewThread("QueueChangeTargetFilenameThread-", () -> {
+			ProgressObserver pg = new ProgressObserver();
+			pg.progressModeChanged(true);
+			pg.progressChanged(Localization.getString("SavingEntries"));
+			try {
+				mainWindowAccess.addProgressObserver(pg);
+				queueManager.updatePics(picsToChange);
+				mainWindowAccess.setMessage(Localization.getString("EntriesSaved"));
+			} finally {
+				mainWindowAccess.removeProgressObserver(pg);
+			}
 		});
 	}
 
@@ -868,13 +905,18 @@ public class Queue extends JPanel {
 	 */
 	private void actionActivate() {
 		List<Pic> picsToUpdate = new ArrayList<>();
-		for (int selectedRow : jtQueue.getSelectedRows()) {
-			Pic pic = (Pic)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.PROGRESS_COLUMN_INDEX);
+		int[] selectedRows = jtQueue.getSelectedRows();
+		int[] selectedModelRows = Arrays.stream(selectedRows).map(jtQueue::convertRowIndexToModel).toArray();
+		for (int selectedRow : selectedModelRows) {
+			Pic pic = (Pic)model.getValueAt(selectedRow, QueueTableModel.PROGRESS_COLUMN_INDEX);
 			pic.setDeactivated(false, false);
 			picsToUpdate.add(pic);
 		}
 		queueManager.updatePics(picsToUpdate);
-		model.fireTableDataChanged();
+		if (picsToUpdate.isEmpty()) {
+			return;
+		}
+		model.fireTableRowsUpdated(selectedModelRows[0], selectedModelRows[selectedModelRows.length - 1]);
 	}
 
 	/**
@@ -882,13 +924,18 @@ public class Queue extends JPanel {
 	 */
 	private void actionDeactivate() {
 		List<Pic> picsToUpdate = new ArrayList<>();
-		for (int selectedRow : jtQueue.getSelectedRows()) {
-			Pic pic = (Pic)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.PROGRESS_COLUMN_INDEX);
+		int[] selectedRows = jtQueue.getSelectedRows();
+		int[] selectedModelRows = Arrays.stream(selectedRows).map(jtQueue::convertRowIndexToModel).toArray();
+		for (int selectedRow : selectedModelRows) {
+			Pic pic = (Pic)model.getValueAt(selectedRow, QueueTableModel.PROGRESS_COLUMN_INDEX);
 			pic.setDeactivated(true, false);
 			picsToUpdate.add(pic);
 		}
 		queueManager.updatePics(picsToUpdate);
-		model.fireTableDataChanged();
+		if (picsToUpdate.isEmpty()) {
+			return;
+		}
+		model.fireTableRowsUpdated(selectedModelRows[0], selectedModelRows[selectedModelRows.length - 1]);
 	}
 
 	private void disableComponents() {
