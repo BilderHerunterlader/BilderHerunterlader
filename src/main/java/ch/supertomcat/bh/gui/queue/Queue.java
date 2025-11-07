@@ -17,6 +17,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 import javax.swing.AbstractAction;
@@ -606,59 +607,50 @@ public class Queue extends JPanel {
 	 * CopyURLs
 	 */
 	private void actionCopyURLs() {
-		executeInNewThread("QueueCopyURLsThread-", () -> {
-			StringJoiner content = new StringJoiner("\n");
-			synchronized (queueManager.getSyncObject()) {
-				for (int selectedRow : jtQueue.getSelectedRows()) {
-					content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
-				}
-			}
-			if (content.length() > 0) {
-				clipboardObserver.setClipboardContent(content.toString());
-			}
-		});
+		StringJoiner content = new StringJoiner("\n");
+		for (int selectedRow : jtQueue.getSelectedRows()) {
+			content.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
+		}
+
+		if (content.length() > 0) {
+			clipboardObserver.setClipboardContent(content.toString());
+		}
 	}
 
 	/**
 	 * OpenURLs
 	 */
 	private void actionOpenURLs() {
-		executeInNewThread("QueueOpenURLsThread-", () -> {
-			final List<String> urls = new ArrayList<>();
-			synchronized (queueManager.getSyncObject()) {
-				for (int selectedRow : jtQueue.getSelectedRows()) {
-					urls.add((String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX));
-				}
-			}
-
-			for (String url : urls) {
-				FileExplorerUtil.openURL(url);
-			}
-		});
+		for (int selectedRow : jtQueue.getSelectedRows()) {
+			String url = (String)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.URL_COLUMN_INDEX);
+			FileExplorerUtil.openURL(url);
+		}
 	}
 
 	/**
 	 * OpenThreadURLs
 	 */
 	private void actionOpenThreadURLs() {
-		executeInNewThread("QueueOpenThreadURLsThread-", () -> {
-			final List<String> urls = new ArrayList<>();
-			synchronized (queueManager.getSyncObject()) {
-				for (int selectedRow : jtQueue.getSelectedRows()) {
-					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(selectedRow));
-					if (pic != null) {
-						String url = pic.getThreadURL();
-						if (!url.isEmpty()) {
-							urls.add(url);
-						}
-					}
-				}
-			}
+		for (int selectedRow : jtQueue.getSelectedRows()) {
+			Pic pic = (Pic)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.PROGRESS_COLUMN_INDEX);
+			FileExplorerUtil.openURL(pic.getThreadURL());
+		}
+	}
 
-			for (String url : urls) {
-				FileExplorerUtil.openURL(url);
-			}
-		});
+	/**
+	 * @param sortByIndex True if list should be sorted by (model) index, false otherwise
+	 * @return Selected Pics
+	 */
+	private List<Pic> getSelectedPics(boolean sortByIndex) {
+		int[] selectedRows = jtQueue.getSelectedRows();
+		int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, sortByIndex);
+
+		List<Pic> selectedPics = new ArrayList<>();
+		for (int selectedModelRow : selectedModelRows) {
+			Pic pic = (Pic)model.getValueAt(selectedModelRow, QueueTableModel.PROGRESS_COLUMN_INDEX);
+			selectedPics.add(pic);
+		}
+		return selectedPics;
 	}
 
 	/**
@@ -673,32 +665,20 @@ public class Queue extends JPanel {
 
 		disableComponents();
 
+		List<Pic> picsToRemove = getSelectedPics(true);
+
 		executeInNewThread("QueueDeleteThread-", () -> {
+			ProgressObserver pg = new ProgressObserver();
+			pg.progressModeChanged(true);
+			pg.progressChanged(Localization.getString("DeleteEntries"));
 			try {
-				ProgressObserver pg = new ProgressObserver();
 				mainWindowAccess.addProgressObserver(pg);
-				pg.progressModeChanged(true);
-				pg.progressChanged(Localization.getString("DeleteEntries"));
-				synchronized (queueManager.getSyncObject()) {
-					int[] selectedRows = jtQueue.getSelectedRows();
-					int[] selectedModelRows = TableUtil.convertRowIndexToModel(jtQueue, selectedRows, true);
 
-					// Convert first removed row index, before removing any rows
-					int firstRemovedRowViewIndex = jtQueue.convertRowIndexToView(selectedModelRows[0]);
+				queueManager.removePics(picsToRemove);
 
-					queueManager.removePics(selectedModelRows);
-
-					int rowCount = jtQueue.getRowCount();
-					int aboveFirstRemovedRowViewIndex = firstRemovedRowViewIndex - 1;
-					if (firstRemovedRowViewIndex < rowCount) {
-						jtQueue.setRowSelectionInterval(firstRemovedRowViewIndex, firstRemovedRowViewIndex);
-					} else if (aboveFirstRemovedRowViewIndex >= 0 && aboveFirstRemovedRowViewIndex < rowCount) {
-						jtQueue.setRowSelectionInterval(aboveFirstRemovedRowViewIndex, aboveFirstRemovedRowViewIndex);
-					}
-				}
-				mainWindowAccess.removeProgressObserver(pg);
 				mainWindowAccess.setMessage(Localization.getString("EntriesDeleted"));
 			} finally {
+				mainWindowAccess.removeProgressObserver(pg);
 				EventQueue.invokeLater(new Runnable() {
 					@Override
 					public void run() {
@@ -768,98 +748,100 @@ public class Queue extends JPanel {
 	 * ChangeTargetByInput
 	 */
 	private void actionChangeTargetByInput() {
-		synchronized (queueManager.getSyncObject()) {
-			int[] s = jtQueue.getSelectedRows();
-			String defaultPath = settingsManager.getSavePath();
-			if (s.length == 1) {
-				defaultPath = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[0])).getTargetPath();
-			}
-			String input = PathRenameDialog.showPathRenameDialog(parentWindow, defaultPath);
-			if ((input != null) && (input.length() > 2)) {
-				boolean b1 = input.endsWith("/");
-				boolean b2 = input.endsWith("\\");
-				if (!b1 && !b2) {
-					input += FileUtil.FILE_SEPERATOR;
-				}
-				for (int i = 0; i < s.length; i++) {
-					String newPath = input;
-					newPath = BHUtil.filterPath(newPath, settingsManager);
-					newPath = BHUtil.reducePathLength(newPath, settingsManager);
-
-					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-					if (pic != null) {
-						pic.setTargetPath(newPath);
-						queueManager.updatePic(pic);
-					}
-				}
-				queueManager.asyncSaveDatabase();
-			}
+		List<Pic> picsToChange = getSelectedPics(false);
+		if (picsToChange.isEmpty()) {
+			return;
 		}
+
+		String defaultPath;
+		if (picsToChange.size() == 1) {
+			defaultPath = picsToChange.get(0).getTargetPath();
+		} else {
+			defaultPath = settingsManager.getSavePath();
+		}
+
+		String input = PathRenameDialog.showPathRenameDialog(parentWindow, defaultPath);
+		if (input == null || input.length() <= 2) {
+			return;
+		}
+		if (!input.endsWith("/") && !input.endsWith("\\")) {
+			input += FileUtil.FILE_SEPERATOR;
+		}
+
+		String newPath = input;
+		newPath = BHUtil.filterPath(newPath, settingsManager);
+		newPath = BHUtil.reducePathLength(newPath, settingsManager);
+		final String newPathToSet = newPath;
+
+		picsToChange.stream().forEach(pic -> {
+			pic.setTargetPath(newPathToSet);
+			queueManager.updatePic(pic);
+		});
 	}
 
 	/**
 	 * ChangeTargetBySelection
 	 */
 	private void actionChangeTargetBySelection() {
-		synchronized (queueManager.getSyncObject()) {
-			File file = FileDialogUtil.showFolderSaveDialog(this, settingsManager.getSavePath(), null);
-			if (file != null) {
-				String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
-				int[] s = jtQueue.getSelectedRows();
-				for (int i = 0; i < s.length; i++) {
-					Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-					if (pic != null) {
-						pic.setTargetPath(folder);
-						queueManager.updatePic(pic);
-					}
-				}
-				queueManager.asyncSaveDatabase();
-			}
+		List<Pic> picsToChange = getSelectedPics(false);
+		if (picsToChange.isEmpty()) {
+			return;
 		}
+
+		File folder = FileDialogUtil.showFolderSaveDialog(this, settingsManager.getSavePath(), null);
+		if (folder == null) {
+			return;
+		}
+		String folderPath = folder.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
+		picsToChange.stream().forEach(pic -> {
+			pic.setTargetPath(folderPath);
+			queueManager.updatePic(pic);
+		});
 	}
 
 	/**
 	 * ChangeTargetFilename
 	 */
 	private void actionChangeTargetFilename() {
-		synchronized (queueManager.getSyncObject()) {
-			String defaultvalue = "";
-			int[] s = jtQueue.getSelectedRows();
-			if (s.length > 0) {
-				defaultvalue = (String)model.getValueAt(jtQueue.convertRowIndexToModel(s[0]), QueueTableModel.TARGET_COLUMN_INDEX);
-				defaultvalue = defaultvalue.substring(defaultvalue.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-				String[] input = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultvalue, s.length, settingsManager);
-				if ((input != null)) {
-					int index = Integer.parseInt(input[1]);
-					int step = Integer.parseInt(input[2]);
-					boolean keepOriginal = !input[5].isEmpty();
-					boolean clearFilename = !input[6].isEmpty();
-					for (int i = 0; i < s.length; i++) {
-						int modelIndex = jtQueue.convertRowIndexToModel(s[i]);
-						String out = "";
-						if (!clearFilename) {
-							String fname = input[0];
-							if (keepOriginal) {
-								fname = (String)model.getValueAt(modelIndex, QueueTableModel.TARGET_COLUMN_INDEX);
-								fname = fname.substring(fname.lastIndexOf(FileUtil.FILE_SEPERATOR) + 1);
-							}
-							fname = input[3] + fname + input[4];
-							out = FileUtil.getNumberedFilename(fname, index);
-						}
-
-						Pic pic = queueManager.getPicByIndex(modelIndex);
-						if (pic != null) {
-							pic.setTargetFilename(out);
-							pic.setFixedTargetFilename(true);
-							queueManager.updatePic(pic);
-						}
-
-						index += step;
-					}
-					queueManager.asyncSaveDatabase();
-				}
-			}
+		List<Pic> picsToChange = getSelectedPics(false);
+		if (picsToChange.isEmpty()) {
+			return;
 		}
+
+		String defaultValue = picsToChange.get(0).getTargetFilename();
+		String[] input = FileRenameDialog.showFileRenameDialog(parentWindow, "", defaultValue, picsToChange.size(), settingsManager);
+		if (input == null) {
+			return;
+		}
+
+		String value = input[0];
+		int start = Integer.parseInt(input[1]);
+		int step = Integer.parseInt(input[2]);
+		String prefix = input[3];
+		String suffix = input[4];
+		boolean keepOriginal = !input[5].isEmpty();
+		boolean clearFilename = !input[6].isEmpty();
+
+		AtomicInteger indexForFilename = new AtomicInteger(start);
+		picsToChange.stream().forEach(pic -> {
+			String filenameToSet;
+			if (clearFilename) {
+				filenameToSet = "";
+			} else {
+				String newFilename;
+				if (keepOriginal) {
+					newFilename = prefix + pic.getTargetFilename() + suffix;
+				} else {
+					newFilename = prefix + value + suffix;
+				}
+
+				filenameToSet = FileUtil.getNumberedFilename(newFilename, indexForFilename.getAndAdd(step));
+			}
+
+			pic.setTargetFilename(filenameToSet);
+			pic.setFixedTargetFilename(!clearFilename);
+			queueManager.updatePic(pic);
+		});
 	}
 
 	/**
@@ -885,36 +867,28 @@ public class Queue extends JPanel {
 	 * Activate
 	 */
 	private void actionActivate() {
-		synchronized (queueManager.getSyncObject()) {
-			int[] s = jtQueue.getSelectedRows();
-			List<Pic> picsToUpdate = new ArrayList<>();
-			for (int i = 0; i < s.length; i++) {
-				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-				pic.setDeactivated(false, false);
-				picsToUpdate.add(pic);
-			}
-			queueManager.updatePics(picsToUpdate);
-			model.fireTableDataChanged();
-			queueManager.asyncSaveDatabase();
+		List<Pic> picsToUpdate = new ArrayList<>();
+		for (int selectedRow : jtQueue.getSelectedRows()) {
+			Pic pic = (Pic)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.PROGRESS_COLUMN_INDEX);
+			pic.setDeactivated(false, false);
+			picsToUpdate.add(pic);
 		}
+		queueManager.updatePics(picsToUpdate);
+		model.fireTableDataChanged();
 	}
 
 	/**
 	 * Deactivate
 	 */
 	private void actionDeactivate() {
-		synchronized (queueManager.getSyncObject()) {
-			int[] s = jtQueue.getSelectedRows();
-			List<Pic> picsToUpdate = new ArrayList<>();
-			for (int i = 0; i < s.length; i++) {
-				Pic pic = queueManager.getPicByIndex(jtQueue.convertRowIndexToModel(s[i]));
-				pic.setDeactivated(true, false);
-				picsToUpdate.add(pic);
-			}
-			queueManager.updatePics(picsToUpdate);
-			model.fireTableDataChanged();
-			queueManager.asyncSaveDatabase();
+		List<Pic> picsToUpdate = new ArrayList<>();
+		for (int selectedRow : jtQueue.getSelectedRows()) {
+			Pic pic = (Pic)model.getValueAt(jtQueue.convertRowIndexToModel(selectedRow), QueueTableModel.PROGRESS_COLUMN_INDEX);
+			pic.setDeactivated(true, false);
+			picsToUpdate.add(pic);
 		}
+		queueManager.updatePics(picsToUpdate);
+		model.fireTableDataChanged();
 	}
 
 	private void disableComponents() {

@@ -8,8 +8,8 @@ import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import ch.supertomcat.bh.downloader.FileDownloaderFactory;
 import ch.supertomcat.bh.hoster.Hoster;
-import ch.supertomcat.bh.queue.IDownloadListener;
 import ch.supertomcat.supertomcatutils.gui.Localization;
 import ch.supertomcat.supertomcatutils.http.HTTPUtil;
 import ch.supertomcat.supertomcatutils.io.FileUtil;
@@ -152,11 +152,6 @@ public class Pic {
 	 * Progress
 	 */
 	private PicProgress progress = new PicProgress();
-
-	/**
-	 * Download Listener or null
-	 */
-	private IDownloadListener downloadListener = null;
 
 	/**
 	 * Constructor
@@ -780,20 +775,44 @@ public class Pic {
 	}
 
 	/**
-	 * Returns the downloadListener
+	 * Prepare Download
 	 * 
-	 * @return downloadListener
+	 * @param fileDownloaderFactory FileDownloaderFactory
+	 * @return PicDownloadListener or null if download is not allowed
 	 */
-	public IDownloadListener getDownloadListener() {
-		return downloadListener;
+	public PicDownloadListener prepareDownload(FileDownloaderFactory fileDownloaderFactory) {
+		if (deactivated) {
+			return null;
+		}
+
+		if (status == PicState.SLEEPING || status == PicState.FAILED || status == PicState.FAILED_FILE_NOT_EXIST || status == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
+			setStop(false);
+			setStopOncePressed(false);
+			setStatus(PicState.WAITING);
+
+			return new PicDownloadListener(this, fileDownloaderFactory);
+		}
+		return null;
 	}
 
 	/**
-	 * Sets the downloadListener
-	 * 
-	 * @param downloadListener downloadListener
+	 * Stop Download
 	 */
-	public void setDownloadListener(IDownloadListener downloadListener) {
-		this.downloadListener = downloadListener;
+	public void stopDownload() {
+		if (isStopOncePressed()) {
+			setStop(true);
+		}
+
+		if (status == PicState.WAITING) {
+			setStop(true);
+			setStatus(PicState.SLEEPING);
+
+			progress.setBytesTotal(size);
+			progress.setBytesDownloaded(0);
+			progressUpdated();
+		} else if (status == PicState.DOWNLOADING && isStop()) {
+			setStatus(PicState.ABORTING);
+		}
+		setStopOncePressed(true);
 	}
 }

@@ -1,9 +1,11 @@
 package ch.supertomcat.bh.queue;
 
 import java.awt.EventQueue;
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,6 @@ import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.pic.IPicListener;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.PicDownloadListener;
-import ch.supertomcat.bh.pic.PicProgress;
 import ch.supertomcat.bh.pic.PicState;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
@@ -35,21 +36,26 @@ public class QueueManager implements IPicListener {
 	private Logger logger = LoggerFactory.getLogger(getClass());
 
 	/**
-	 * Synchronization Object for pics
+	 * Lock
 	 */
-	private final Object syncObject = new Object();
+	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+	/**
+	 * Read Lock
+	 */
+	private final Lock readLock = readWriteLock.readLock();
+
+	/**
+	 * Write Lock
+	 */
+	private final Lock writeLock = readWriteLock.writeLock();
 
 	/**
 	 * Queue
 	 */
 	private List<Pic> pics = new ArrayList<>();
 
-	private boolean downloadsStopped = true;
-
-	/**
-	 * Count of deleted objects
-	 */
-	private int deletedObjects = 0;
+	private volatile boolean downloadsStopped = true;
 
 	private final QueueSQLiteDB queueSQLiteDB;
 
@@ -129,7 +135,6 @@ public class QueueManager implements IPicListener {
 			@Override
 			public void queueEmpty() {
 				// If the queue is now empty, it is a good time to commit the database
-				saveDatabase();
 				if (!isDownloadsStopped() && settingsManager.getDownloadsSettings().isAutoRetryAfterDownloadsComplete()) {
 					startDownload();
 				}
@@ -148,24 +153,9 @@ public class QueueManager implements IPicListener {
 	}
 
 	/**
-	 * Saves the database in another thread
-	 */
-	public void asyncSaveDatabase() {
-		// Nothing to do
-	}
-
-	/**
-	 * Saves the database
-	 */
-	public void saveDatabase() {
-		// Nothing to do
-	}
-
-	/**
 	 * Saves and closes the database
 	 */
 	public void closeDatabase() {
-		saveDatabase();
 		logger.info("Closing Queue Database");
 		queueSQLiteDB.closeAllDatabaseConnections();
 	}
@@ -176,8 +166,11 @@ public class QueueManager implements IPicListener {
 	 * @return Queue-Array
 	 */
 	public List<Pic> getQueue() {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			return new ArrayList<>(pics);
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -185,8 +178,11 @@ public class QueueManager implements IPicListener {
 	 * @return Queue-Size
 	 */
 	public int getQueueSize() {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			return pics.size();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -195,8 +191,11 @@ public class QueueManager implements IPicListener {
 	 * @return Index
 	 */
 	public int indexOfPic(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			return pics.indexOf(pic);
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -205,11 +204,14 @@ public class QueueManager implements IPicListener {
 	 * @return Pic
 	 */
 	public Pic getPicByIndex(int index) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			if (index < 0 || index >= pics.size()) {
 				return null;
 			}
 			return pics.get(index);
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -217,23 +219,22 @@ public class QueueManager implements IPicListener {
 	 * @param pic Pic
 	 */
 	public void addPic(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			writeLock.lock();
 			if (pics.contains(pic)) {
 				return;
 			}
+
 			pics.add(pic);
 			queueSQLiteDB.insertEntry(pic);
 			pic.removeAllListener();
 			pic.addPicListener(this);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					tableModel.addRow(pic);
-				}
-			};
-			executeInEventQueueThread(r);
+			executeInEventQueueThread(() -> tableModel.addRow(pic));
+		} finally {
+			writeLock.unlock();
 		}
+
 		if (settingsManager.getDownloadsSettings().isAutoStartDownloads()) {
 			startDownload(pic);
 		}
@@ -244,7 +245,8 @@ public class QueueManager implements IPicListener {
 	 */
 	public void addPics(List<Pic> picList) {
 		List<Pic> picsAdded = new ArrayList<>();
-		synchronized (syncObject) {
+		try {
+			writeLock.lock();
 			for (Pic pic : picList) {
 				if (!(pics.contains(pic))) {
 					pics.add(pic);
@@ -255,16 +257,15 @@ public class QueueManager implements IPicListener {
 			}
 			queueSQLiteDB.insertEntries(picList);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					for (Pic pic : picList) {
-						tableModel.addRow(pic);
-					}
+			executeInEventQueueThread(() -> {
+				for (Pic pic : picList) {
+					tableModel.addRow(pic);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+		} finally {
+			writeLock.unlock();
 		}
+
 		if (settingsManager.getDownloadsSettings().isAutoStartDownloads()) {
 			startDownload(picsAdded);
 		}
@@ -289,75 +290,70 @@ public class QueueManager implements IPicListener {
 	}
 
 	/**
+	 * Removes Pic from the queue based on index
+	 * If there are downloads running this method will not do anything!
+	 * 
 	 * @param pic Pic
 	 */
 	public void removePic(Pic pic) {
-		if (pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.DOWNLOADING || pic.getStatus() == PicState.ABORTING) {
+		if (downloadQueueManager.isDownloading() || (pic.getStatus() == PicState.WAITING || pic.getStatus() == PicState.DOWNLOADING || pic.getStatus() == PicState.ABORTING)) {
 			return;
 		}
 
-		synchronized (syncObject) {
+		try {
+			writeLock.lock();
 			int index = pics.indexOf(pic);
 			if (index >= 0) {
 				pics.remove(pic);
 				pic.removeAllListener();
 				queueSQLiteDB.deleteEntry(pic);
-				deletedObjects++;
 
-				Runnable r = new Runnable() {
-					@Override
-					public void run() {
-						tableModel.removeRow(index);
-						// Manually called, because the model overwrites the removeRow method and does not fire the event.
-						tableModel.fireTableDataChanged();
-					}
-				};
-				executeInEventQueueThread(r);
+				executeInEventQueueThread(() -> {
+					tableModel.removeRow(index);
+					// Manually called, because the model overwrites the removeRow method and does not fire the event.
+					tableModel.fireTableDataChanged();
+				});
 			}
-			if (deletedObjects > 100) {
-				saveDatabase();
-				deletedObjects = 0;
-			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
 	/**
-	 * Removes Pics from the queue based on indices
+	 * Removes Pics from the queue
 	 * If there are downloads running this method will not do anything!
 	 * 
-	 * @param indices Indices
+	 * @param pics Pics
 	 */
-	public void removePics(int[] indices) {
+	public void removePics(List<Pic> pics) {
 		if (downloadQueueManager.isDownloading()) {
 			return;
 		}
 
-		synchronized (syncObject) {
-			List<Pic> picsToDelete = new ArrayList<>();
+		try {
+			writeLock.lock();
+
+			pics.stream().forEach(Pic::removeAllListener);
+
+			int[] indices = pics.stream().mapToInt(pics::indexOf).filter(index -> index >= 0).sorted().toArray();
+
+			// Remove in reverse order
 			for (int i = indices.length - 1; i > -1; i--) {
-				if ((indices[i] < 0) || (indices[i] >= pics.size())) {
-					continue;
-				}
-				Pic pic = pics.get(indices[i]);
-				pic.removeAllListener();
 				pics.remove(indices[i]);
-				picsToDelete.add(pic);
 			}
-			queueSQLiteDB.deleteEntries(picsToDelete);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					for (int i = indices.length - 1; i > -1; i--) {
-						tableModel.removeRow(indices[i]);
-					}
-					// Manually called, because the model overwrites the removeRow method and does not fire the event.
-					tableModel.fireTableDataChanged();
+			queueSQLiteDB.deleteEntries(pics);
+
+			executeInEventQueueThread(() -> {
+				// Remove in reverse order
+				for (int i = indices.length - 1; i > -1; i--) {
+					tableModel.removeRow(indices[i]);
 				}
-			};
-			executeInEventQueueThread(r);
-
-			deletedObjects = 0;
+				// Manually called, because the model overwrites the removeRow method and does not fire the event.
+				tableModel.fireTableDataChanged();
+			});
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -365,12 +361,8 @@ public class QueueManager implements IPicListener {
 	 * Start downloads
 	 */
 	public void startDownload() {
-		List<Pic> list;
 		downloadsStopped = false;
-		synchronized (syncObject) {
-			list = new ArrayList<>(pics);
-		}
-		startDownload(list);
+		startDownload(getQueue());
 	}
 
 	/**
@@ -380,24 +372,7 @@ public class QueueManager implements IPicListener {
 	 * @return PicDownloadListener or null if download should not be started (because Pic is deactivated for example)
 	 */
 	private PicDownloadListener prepareDownload(Pic pic) {
-		synchronized (pic) {
-			// If the download is deactivated, then we don't start the download
-			if (pic.isDeactivated()) {
-				return null;
-			}
-
-			PicState status = pic.getStatus();
-			if (status == PicState.SLEEPING || status == PicState.FAILED || status == PicState.FAILED_FILE_NOT_EXIST || status == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
-				pic.setStop(false);
-				pic.setStopOncePressed(false);
-				pic.setStatus(PicState.WAITING);
-
-				PicDownloadListener newDownloadListener = new PicDownloadListener(pic, fileDownloaderFactory);
-				pic.setDownloadListener(newDownloadListener);
-				return newDownloadListener;
-			}
-			return null;
-		}
+		return pic.prepareDownload(fileDownloaderFactory);
 	}
 
 	/**
@@ -407,15 +382,15 @@ public class QueueManager implements IPicListener {
 	 */
 	private void startDownload(List<Pic> pics) {
 		// request downloadslots for all pics in queue
-		List<PicDownloadListener> picsToDownload = new ArrayList<>();
+		List<PicDownloadListener> picDownloadListeners = new ArrayList<>();
 		for (Pic pic : pics) {
 			PicDownloadListener picDownloadListener = prepareDownload(pic);
 			if (picDownloadListener != null) {
-				picsToDownload.add(picDownloadListener);
+				picDownloadListeners.add(picDownloadListener);
 			}
 		}
 		// Request a download slot
-		downloadQueueManager.addTasksToQueue(picsToDownload);
+		downloadQueueManager.addTasksToQueue(picDownloadListeners);
 	}
 
 	/**
@@ -434,11 +409,8 @@ public class QueueManager implements IPicListener {
 	 * Stop downloads
 	 */
 	public void stopDownload() {
-		List<Pic> list;
 		downloadsStopped = true;
-		synchronized (syncObject) {
-			list = new ArrayList<>(pics);
-		}
+		List<Pic> list = getQueue();
 
 		downloadQueueManager.cancelTasks(false);
 
@@ -459,26 +431,7 @@ public class QueueManager implements IPicListener {
 	 * @param pic Pic
 	 */
 	private void stopDownload(Pic pic) {
-		synchronized (pic) {
-			if (pic.isStopOncePressed()) {
-				pic.setStop(true);
-			}
-			PicState status = pic.getStatus();
-			if (status == PicState.WAITING) {
-				pic.setStop(true);
-				pic.setStatus(PicState.SLEEPING);
-
-				PicProgress progress = pic.getProgress();
-				progress.setBytesTotal(pic.getSize());
-				progress.setBytesDownloaded(0);
-				pic.progressUpdated();
-			} else if (status == PicState.DOWNLOADING) {
-				if (pic.isStop()) {
-					pic.setStatus(PicState.ABORTING);
-				}
-			}
-			pic.setStopOncePressed(true);
-		}
+		pic.stopDownload();
 	}
 
 	/**
@@ -490,166 +443,160 @@ public class QueueManager implements IPicListener {
 		return downloadsStopped;
 	}
 
-	/**
-	 * Returns the Synchronization Object for QueueMananger.pics
-	 * 
-	 * @return Synchronization Object for QueueMananger.pics
-	 */
-	public Object getSyncObject() {
-		return syncObject;
-	}
-
 	@Override
 	public void progressChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
 	public void sizeChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						// Change Cell
-						tableModel.setValueAt(pic.getSize(), index, QueueTableModel.SIZE_COLUMN_INDEX);
-						tableModel.fireTableCellUpdated(index, QueueTableModel.SIZE_COLUMN_INDEX);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					// Change Cell
+					tableModel.setValueAt(pic.getSize(), index, QueueTableModel.SIZE_COLUMN_INDEX);
+					tableModel.fireTableCellUpdated(index, QueueTableModel.SIZE_COLUMN_INDEX);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+
+			updatePic(pic);
+		} finally {
+			readLock.unlock();
 		}
-		updatePic(pic);
 	}
 
 	@Override
 	public void targetChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						// Change Cell
-						tableModel.setValueAt(pic.getTarget(), index, QueueTableModel.TARGET_COLUMN_INDEX);
-						tableModel.fireTableCellUpdated(index, QueueTableModel.TARGET_COLUMN_INDEX);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					// Change Cell
+					tableModel.setValueAt(pic.getTarget(), index, QueueTableModel.TARGET_COLUMN_INDEX);
+					tableModel.fireTableCellUpdated(index, QueueTableModel.TARGET_COLUMN_INDEX);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
 	public void statusChanged(Pic pic) {
-		synchronized (syncObject) {
-			int index = pics.indexOf(pic);
-
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if (pic.getStatus() == PicState.FAILED || pic.getStatus() == PicState.FAILED_FILE_NOT_EXIST || pic.getStatus() == PicState.SLEEPING || pic.getStatus() == PicState.WAITING
-							|| pic.getStatus() == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
-						if ((index > -1) && (tableModel.getRowCount() > index)) {
-							tableModel.setValueAt(pic, index, QueueTableModel.PROGRESS_COLUMN_INDEX);
-							tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
-						}
-					}
+		PicState status = pic.getStatus();
+		if (status == PicState.COMPLETE) {
+			try {
+				writeLock.lock();
+				if (settingsManager.getDownloadsSettings().isSaveLogs()) {
+					logManager.addPicToLog(pic);
 				}
-			};
-			executeInEventQueueThread(r);
-		}
-		if ((pic.getStatus() != PicState.SLEEPING) && (pic.getStatus() != PicState.WAITING) && (pic.getStatus() != PicState.DOWNLOADING) && (pic.getStatus() != PicState.ABORTING)) {
-			/*
-			 * We can gain some speed by only updating the status in the database in some cases.
-			 * When pics are loaded, they reset to SLEEPING if the status is one of the three in the condition above.
-			 * So we don't need to save the status in those cases.
-			 */
-			updatePic(pic);
-		}
-		if (pic.getStatus() == PicState.COMPLETE) {
-			if (settingsManager.getDownloadsSettings().isSaveLogs()) {
-				logManager.addPicToLog(pic);
+				settingsManager.increaseOverallDownloadedFiles(1);
+				settingsManager.increaseOverallDownloadedBytes(pic.getSize());
+				downloadQueueManager.increaseSessionDownloadedBytes(pic.getSize());
+				downloadQueueManager.increaseSessionDownloadedFiles();
+				settingsManager.writeSettings(true);
+				removePic(pic);
+			} finally {
+				writeLock.unlock();
 			}
-			settingsManager.increaseOverallDownloadedFiles(1);
-			settingsManager.increaseOverallDownloadedBytes(pic.getSize());
-			downloadQueueManager.increaseSessionDownloadedBytes(pic.getSize());
-			downloadQueueManager.increaseSessionDownloadedFiles();
-			settingsManager.writeSettings(true);
-			removePic(pic);
+			return;
+		}
+
+		try {
+			readLock.lock();
+			if (status == PicState.FAILED || status == PicState.FAILED_FILE_NOT_EXIST || status == PicState.SLEEPING || status == PicState.WAITING
+					|| status == PicState.FAILED_FILE_TEMPORARY_OFFLINE) {
+				int index = pics.indexOf(pic);
+				executeInEventQueueThread(() -> {
+					if (index > -1 && tableModel.getRowCount() > index) {
+						tableModel.fireTableCellUpdated(index, QueueTableModel.PROGRESS_COLUMN_INDEX);
+					}
+				});
+			}
+
+			if (status != PicState.SLEEPING && status != PicState.WAITING && status != PicState.DOWNLOADING && status != PicState.ABORTING) {
+				/*
+				 * We can gain some speed by only updating the status in the database in some cases.
+				 * When pics are loaded, they reset to SLEEPING if the status is one of the three in the condition above.
+				 * So we don't need to save the status in those cases.
+				 */
+				updatePic(pic);
+			}
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
 	public void deactivatedChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						tableModel.fireTableRowsUpdated(index, index);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					tableModel.fireTableRowsUpdated(index, index);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+
+			updatePic(pic);
+		} finally {
+			readLock.unlock();
 		}
-		updatePic(pic);
 	}
 
 	@Override
 	public void hosterChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						// Change Cell
-						tableModel.setValueAt(pic.getHoster(), index, QueueTableModel.HOST_COLUMN_INDEX);
-						tableModel.fireTableCellUpdated(index, QueueTableModel.HOST_COLUMN_INDEX);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					// Change Cell
+					tableModel.setValueAt(pic.getHoster(), index, QueueTableModel.HOST_COLUMN_INDEX);
+					tableModel.fireTableCellUpdated(index, QueueTableModel.HOST_COLUMN_INDEX);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
 	public void downloadURLChanged(Pic pic) {
-		synchronized (syncObject) {
+		try {
+			readLock.lock();
 			int index = pics.indexOf(pic);
 
-			Runnable r = new Runnable() {
-				@Override
-				public void run() {
-					if ((index > -1) && (tableModel.getRowCount() > index)) {
-						// Change Cell
-						tableModel.setValueAt(pic.getDownloadURL(), index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
-						tableModel.fireTableCellUpdated(index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
-					}
+			executeInEventQueueThread(() -> {
+				if (index > -1 && tableModel.getRowCount() > index) {
+					// Change Cell
+					tableModel.setValueAt(pic.getDownloadURL(), index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
+					tableModel.fireTableCellUpdated(index, QueueTableModel.DOWNLOAD_URL_COLUMN_INDEX);
 				}
-			};
-			executeInEventQueueThread(r);
+			});
+
+			updatePic(pic);
+		} finally {
+			readLock.unlock();
 		}
-		updatePic(pic);
 	}
 
 	/**
@@ -670,11 +617,7 @@ public class QueueManager implements IPicListener {
 		if (EventQueue.isDispatchThread()) {
 			r.run();
 		} else {
-			try {
-				EventQueue.invokeAndWait(r);
-			} catch (InvocationTargetException | InterruptedException e) {
-				logger.error(e.getMessage(), e);
-			}
+			EventQueue.invokeLater(r);
 		}
 	}
 }
