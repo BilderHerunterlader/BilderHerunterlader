@@ -212,7 +212,7 @@ public class URLParseObject {
 	/**
 	 * @return All Parsed URLs
 	 */
-	public List<URLParseObjectFile> getAllDirectLinks() {
+	public synchronized List<URLParseObjectFile> getAllDirectLinks() {
 		List<URLParseObjectFile> allDirectLinks = new ArrayList<>();
 		allDirectLinks.add(directLink);
 		allDirectLinks.addAll(additionalDirectLinks);
@@ -260,17 +260,8 @@ public class URLParseObject {
 	 * 
 	 * @return additionalDirectLinks
 	 */
-	public List<URLParseObjectFile> getAdditionalDirectLinks() {
+	public synchronized List<URLParseObjectFile> getAdditionalDirectLinks() {
 		return additionalDirectLinks;
-	}
-
-	/**
-	 * Sets the additionalDirectLinks
-	 * 
-	 * @param additionalDirectLinks additionalDirectLinks
-	 */
-	public void setAdditionalDirectLinks(List<URLParseObjectFile> additionalDirectLinks) {
-		this.additionalDirectLinks = additionalDirectLinks;
 	}
 
 	/**
@@ -278,7 +269,7 @@ public class URLParseObject {
 	 * 
 	 * @param additionalDirectLink Additional direct link
 	 */
-	public void addAdditionalDirectLink(URLParseObjectFile additionalDirectLink) {
+	public synchronized void addAdditionalDirectLink(URLParseObjectFile additionalDirectLink) {
 		this.additionalDirectLinks.add(additionalDirectLink);
 	}
 
@@ -288,11 +279,10 @@ public class URLParseObject {
 	 * @return the lastHost
 	 */
 	public synchronized Hoster getLastHoster() {
-		try {
-			return hosterStackTrace.get(hosterStackTrace.size() - 1);
-		} catch (Exception e) {
+		if (hosterStackTrace.isEmpty()) {
 			return null;
 		}
+		return hosterStackTrace.getLast();
 	}
 
 	/**
@@ -301,12 +291,7 @@ public class URLParseObject {
 	 * @return the lastHost
 	 */
 	public synchronized Host getLastHost() {
-		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
-			if (hosterStackTrace.get(i) instanceof Host host) {
-				return host;
-			}
-		}
-		return null;
+		return hosterStackTrace.stream().filter(Host.class::isInstance).map(Host.class::cast).reduce((first, second) -> second).orElse(null);
 	}
 
 	/**
@@ -315,12 +300,7 @@ public class URLParseObject {
 	 * @return the lastHost
 	 */
 	public synchronized Rule getLastRule() {
-		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
-			if (hosterStackTrace.get(i) instanceof Rule rule) {
-				return rule;
-			}
-		}
-		return null;
+		return hosterStackTrace.stream().filter(Rule.class::isInstance).map(Rule.class::cast).reduce((first, second) -> second).orElse(null);
 	}
 
 	/**
@@ -341,7 +321,9 @@ public class URLParseObject {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Host-/Rule-Parser-Trace:\n  ContainerURLs:\n");
 		for (int i = containerURLs.size() - 1; i > -1; i--) {
-			sb.append("    " + this.containerURLs.get(i) + "\n");
+			sb.append("    ");
+			sb.append(this.containerURLs.get(i));
+			sb.append("\n");
 		}
 		sb.append("  Hoster/Rules:\n");
 		for (int i = hosterStackTrace.size() - 1; i > -1; i--) {
@@ -351,7 +333,9 @@ public class URLParseObject {
 			} else if (hosterStackTrace.get(i) instanceof Rule rule) {
 				strHoster = rule.getName() + " (" + rule.getVersion() + ")";
 			}
-			sb.append("    " + strHoster + "\n");
+			sb.append("    ");
+			sb.append(strHoster);
+			sb.append("\n");
 		}
 		return sb.toString();
 	}
@@ -373,8 +357,8 @@ public class URLParseObject {
 	 * 
 	 * @return the first containerURL
 	 */
-	public String getFirstContainerURL() {
-		return containerURLs.get(0);
+	public synchronized String getFirstContainerURL() {
+		return containerURLs.getFirst();
 	}
 
 	/**
@@ -382,8 +366,8 @@ public class URLParseObject {
 	 * 
 	 * @return the last containerURL
 	 */
-	public String getContainerURL() {
-		return containerURLs.get(containerURLs.size() - 1);
+	public synchronized String getContainerURL() {
+		return containerURLs.getLast();
 	}
 
 	/**
@@ -391,7 +375,7 @@ public class URLParseObject {
 	 * 
 	 * @param containerURL the containerURL to set
 	 */
-	public void setContainerURL(String containerURL) {
+	public synchronized void setContainerURL(String containerURL) {
 		containerURLs.add(containerURL);
 	}
 
@@ -431,7 +415,7 @@ public class URLParseObject {
 	 * 
 	 * @return True if object is parsed in a loop
 	 */
-	public boolean isLoop() {
+	public synchronized boolean isLoop() {
 		return hosterStackTrace.size() > 50;
 	}
 }

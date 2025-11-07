@@ -515,7 +515,7 @@ public class FileRenameDialog extends JDialog {
 	 * @param defaultvalue Default-Value
 	 * @param files Count of Files
 	 * @param settingsManager Settings Manager
-	 * @return Value
+	 * @return Array[0 = Value, 1 = Start, 2 = Step, 3 = Prefix, 4 = Suffix, 5 = KeepOriginalFilenameFlag, 6 = ClearFilenameFlag] or null if cancelled
 	 */
 	public static String[] showFileRenameDialog(JFrame owner, String description, String defaultvalue, int files, SettingsManager settingsManager) {
 		FileRenameDialog frd = new FileRenameDialog(owner, description, defaultvalue, files, settingsManager);

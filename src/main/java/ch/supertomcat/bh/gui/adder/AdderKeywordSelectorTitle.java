@@ -412,7 +412,7 @@ public class AdderKeywordSelectorTitle extends JDialog {
 	/**
 	 * Filter the Table
 	 */
-	private synchronized void filterTable() {
+	private void filterTable() {
 		String patternTitle = txtFilterTitle.getText();
 		String patternKeywords = txtFilterKeywords.getText();
 		List<RowFilter<AdderKeywordSelectorTitleTableModel, Object>> filters = new ArrayList<>();
