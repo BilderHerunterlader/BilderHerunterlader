@@ -297,9 +297,6 @@ public class HTTPFileDownloader extends FileDownloaderBase {
 		 */
 		targetContainer.setCorrectedFilename(fRetval.getFileName().toString());
 
-		// Let the listeners know, that the target has changed
-		pic.targetChanged();
-
 		/*
 		 * Get the filesize
 		 * Note: Some servers doesn't give us the filesize, so

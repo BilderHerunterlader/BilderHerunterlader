@@ -61,7 +61,6 @@ public class LocalFileDownloader extends FileDownloaderBase {
 			} else {
 				pic.setTargetPath(FileUtil.getDirectory(fMoved.toAbsolutePath().toString()));
 				pic.setTargetFilename(fMoved.getFileName().toString());
-				pic.targetChanged();
 				completeDownload(pic, pic.getSize());
 			}
 		} catch (Exception e) {
