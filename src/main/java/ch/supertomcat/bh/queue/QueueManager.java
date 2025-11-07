@@ -283,10 +283,10 @@ public class QueueManager implements IPicListener {
 	/**
 	 * Updates the given Pics
 	 * 
-	 * @param pics Pics
+	 * @param picList Pics
 	 */
-	public void updatePics(List<Pic> pics) {
-		queueSQLiteDB.updateEntries(pics);
+	public void updatePics(List<Pic> picList) {
+		queueSQLiteDB.updateEntries(picList);
 	}
 
 	/**
@@ -323,9 +323,9 @@ public class QueueManager implements IPicListener {
 	 * Removes Pics from the queue
 	 * If there are downloads running this method will not do anything!
 	 * 
-	 * @param pics Pics
+	 * @param picList Pics
 	 */
-	public void removePics(List<Pic> pics) {
+	public void removePics(List<Pic> picList) {
 		if (downloadQueueManager.isDownloading()) {
 			return;
 		}
@@ -333,16 +333,16 @@ public class QueueManager implements IPicListener {
 		try {
 			writeLock.lock();
 
-			pics.stream().forEach(Pic::removeAllListener);
+			picList.stream().forEach(Pic::removeAllListener);
 
-			int[] indices = pics.stream().mapToInt(pics::indexOf).filter(index -> index >= 0).sorted().toArray();
+			int[] indices = picList.stream().mapToInt(pics::indexOf).filter(index -> index >= 0).sorted().toArray();
 
 			// Remove in reverse order
 			for (int i = indices.length - 1; i > -1; i--) {
 				pics.remove(indices[i]);
 			}
 
-			queueSQLiteDB.deleteEntries(pics);
+			queueSQLiteDB.deleteEntries(picList);
 
 			executeInEventQueueThread(() -> {
 				// Remove in reverse order
@@ -378,12 +378,12 @@ public class QueueManager implements IPicListener {
 	/**
 	 * Start download
 	 * 
-	 * @param pics Pics
+	 * @param picList Pics
 	 */
-	private void startDownload(List<Pic> pics) {
+	private void startDownload(List<Pic> picList) {
 		// request downloadslots for all pics in queue
 		List<PicDownloadListener> picDownloadListeners = new ArrayList<>();
-		for (Pic pic : pics) {
+		for (Pic pic : picList) {
 			PicDownloadListener picDownloadListener = prepareDownload(pic);
 			if (picDownloadListener != null) {
 				picDownloadListeners.add(picDownloadListener);
