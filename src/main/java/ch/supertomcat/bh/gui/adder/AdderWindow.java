@@ -1357,7 +1357,6 @@ public class AdderWindow extends JFrame {
 				queueManager.addPics(picsToAdd);
 
 				dispose();
-				queueManager.saveDatabase();
 			}
 		});
 		thread.setPriority(Thread.MIN_PRIORITY);
@@ -1829,7 +1828,7 @@ public class AdderWindow extends JFrame {
 	/**
 	 * ChangeTargetFilename
 	 */
-	private synchronized void actionChangeTargetFilename() {
+	private void actionChangeTargetFilename() {
 		int filenameColumnModelIndex = jtAdder.getColumn("Filename").getModelIndex();
 		int filenameOverrideColumnModelIndex = jtAdder.getColumn("FilenameOverride").getModelIndex();
 
@@ -1874,7 +1873,7 @@ public class AdderWindow extends JFrame {
 	/**
 	 * ChangeTargetByInput
 	 */
-	private synchronized void actionChangeTargetByInput() {
+	private void actionChangeTargetByInput() {
 		int folderColumnModelIndex = jtAdder.getColumn("TargetFolder").getModelIndex();
 		int folderOverrideColumnModelIndex = jtAdder.getColumn("TargetFolderOverride").getModelIndex();
 		int[] selectedRows = jtAdder.getSelectedRows();
@@ -1901,7 +1900,7 @@ public class AdderWindow extends JFrame {
 	/**
 	 * ChangeTargetBySelection
 	 */
-	private synchronized void actionChangeTargetBySelection() {
+	private void actionChangeTargetBySelection() {
 		File file = FileDialogUtil.showFolderOpenDialog(this, (String)txtTargetDir.getSelectedItem(), null);
 		if (file != null) {
 			String folder = file.getAbsolutePath() + FileUtil.FILE_SEPERATOR;
@@ -1917,7 +1916,7 @@ public class AdderWindow extends JFrame {
 	/**
 	 * CopyURLs
 	 */
-	private synchronized void actionCopyURLs() {
+	private void actionCopyURLs() {
 		int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
 		int[] selectedRows = jtAdder.getSelectedRows();
 		Thread t = new Thread(new Runnable() {
@@ -1943,7 +1942,7 @@ public class AdderWindow extends JFrame {
 	/**
 	 * OpenURLs
 	 */
-	private synchronized void actionOpenURLs() {
+	private void actionOpenURLs() {
 		if (Desktop.isDesktopSupported()) {
 			int urlColumnModelIndex = jtAdder.getColumn("URL").getModelIndex();
 			int[] selectedRows = jtAdder.getSelectedRows();
