@@ -11,6 +11,31 @@ public class KeywordsTableModel extends DefaultTableModel {
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Title Column Index
+	 */
+	public static final int TITLE_COLUMN_INDEX = 0;
+
+	/**
+	 * Keywords Column Index
+	 */
+	public static final int KEYWORDS_COLUMN_INDEX = 1;
+
+	/**
+	 * Folder Column Index
+	 */
+	public static final int FOLDER_COLUMN_INDEX = 2;
+
+	/**
+	 * Relative Folder Column Index
+	 */
+	public static final int RELATIVE_FOLDER_COLUMN_INDEX = 3;
+
+	/**
+	 * Relative Path Column Index
+	 */
+	public static final int RELATIVE_PATH_COLUMN_INDEX = 4;
+
+	/**
 	 * Constructor
 	 */
 	public KeywordsTableModel() {
@@ -41,11 +66,11 @@ public class KeywordsTableModel extends DefaultTableModel {
 	 */
 	public void addRow(Keyword k) {
 		Object[] data = new Object[5];
-		data[0] = k.getTitle();
-		data[1] = k.getKeywords();
-		data[2] = k.getDownloadPath();
-		data[3] = k.getRelativeDownloadPath();
-		data[4] = k.isRelativePath();
+		data[TITLE_COLUMN_INDEX] = k.getTitle();
+		data[KEYWORDS_COLUMN_INDEX] = k.getKeywords();
+		data[FOLDER_COLUMN_INDEX] = k.getDownloadPath();
+		data[RELATIVE_FOLDER_COLUMN_INDEX] = k.getRelativeDownloadPath();
+		data[RELATIVE_PATH_COLUMN_INDEX] = k.isRelativePath();
 		this.addRow(data);
 	}
 
@@ -57,11 +82,11 @@ public class KeywordsTableModel extends DefaultTableModel {
 	 */
 	public void addRow(Keyword k, int position) {
 		Object[] data = new Object[5];
-		data[0] = k.getTitle();
-		data[1] = k.getKeywords();
-		data[2] = k.getDownloadPath();
-		data[3] = k.getRelativeDownloadPath();
-		data[4] = k.isRelativePath();
+		data[TITLE_COLUMN_INDEX] = k.getTitle();
+		data[KEYWORDS_COLUMN_INDEX] = k.getKeywords();
+		data[FOLDER_COLUMN_INDEX] = k.getDownloadPath();
+		data[RELATIVE_FOLDER_COLUMN_INDEX] = k.getRelativeDownloadPath();
+		data[RELATIVE_PATH_COLUMN_INDEX] = k.isRelativePath();
 		this.insertRow(position, data);
 	}
 

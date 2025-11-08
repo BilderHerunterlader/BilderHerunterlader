@@ -709,9 +709,10 @@ public class Keywords extends JPanel {
 		int[] selectedRows = jtKeywords.getSelectedRows();
 		List<Keyword> keywordsToUpdate = new ArrayList<>();
 		for (int i = 0; i < selectedRows.length; i++) {
-			String val = (String)jtKeywords.getValueAt(selectedRows[i], 0);
-			jtKeywords.setValueAt(val, selectedRows[i], 1);
-			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
+			Keyword keyword = keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i]));
+			String title = keyword.getTitle();
+			keyword.setKeywords(title);
+			keywordsToUpdate.add(keyword);
 		}
 		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
@@ -727,9 +728,10 @@ public class Keywords extends JPanel {
 		List<Keyword> keywordsToUpdate = new ArrayList<>();
 		String path = settingsManager.getSavePath();
 		for (int i = 0; i < selectedRows.length; i++) {
-			String val = path + (String)jtKeywords.getValueAt(selectedRows[i], 0);
-			jtKeywords.setValueAt(val, selectedRows[i], 2);
-			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
+			Keyword keyword = keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i]));
+			String downloadPath = path + keyword.getTitle();
+			keyword.setDownloadPath(downloadPath);
+			keywordsToUpdate.add(keyword);
 		}
 		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
@@ -744,9 +746,10 @@ public class Keywords extends JPanel {
 		int[] selectedRows = jtKeywords.getSelectedRows();
 		List<Keyword> keywordsToUpdate = new ArrayList<>();
 		for (int i = 0; i < selectedRows.length; i++) {
-			String val = (String)jtKeywords.getValueAt(selectedRows[i], 0);
-			jtKeywords.setValueAt(val, selectedRows[i], 3);
-			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
+			Keyword keyword = keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i]));
+			String relativeDownloadPath = keyword.getTitle();
+			keyword.setRelativeDownloadPath(relativeDownloadPath);
+			keywordsToUpdate.add(keyword);
 		}
 		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
@@ -763,15 +766,17 @@ public class Keywords extends JPanel {
 		int[] selectedRows = jtKeywords.getSelectedRows();
 		List<Keyword> keywordsToUpdate = new ArrayList<>();
 		for (int i = 0; i < selectedRows.length; i++) {
-			String val = (String)jtKeywords.getValueAt(selectedRows[i], 2);
+			Keyword keyword = keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i]));
 
-			int pos = val.indexOf(dlFolder);
-			if (pos == 0) {
-				val = val.substring(dlFolder.length());
+			String absoluteDownloadPath = keyword.getDownloadPath();
+			if (!absoluteDownloadPath.startsWith(dlFolder)) {
+				continue;
 			}
-			val = val.replace(":", "");
-			jtKeywords.setValueAt(val, selectedRows[i], 3);
-			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
+
+			String relativeDownloadPath = absoluteDownloadPath.substring(dlFolder.length());
+			relativeDownloadPath = relativeDownloadPath.replace(":", "");
+			keyword.setRelativeDownloadPath(relativeDownloadPath);
+			keywordsToUpdate.add(keyword);
 		}
 		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
