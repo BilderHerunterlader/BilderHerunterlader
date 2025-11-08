@@ -1,18 +1,12 @@
 package ch.supertomcat.bh.gui;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.OptionalInt;
 
-import javax.swing.Box;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -112,16 +106,6 @@ public class MainMenuBar {
 	private JMenuItem itemAbout = new JMenuItem(Localization.getString("About"), Icons.getTangoSVGIcon("apps/help-browser.svg", 16));
 
 	/**
-	 * lblLogFile
-	 */
-	private JLabel lblLogFile = new JLabel(Localization.getString("ActiveDownloadLogFile") + " ");
-
-	/**
-	 * cmbLogFile
-	 */
-	private JComboBox<String> cmbLogFile = new JComboBox<>();
-
-	/**
 	 * Constructor
 	 * 
 	 * @param parentWindow Parent Window
@@ -199,41 +183,9 @@ public class MainMenuBar {
 
 		itemAbout.addActionListener(e -> new BHAboutDialog(parentWindow, settingsManager));
 
-		List<String> logFilenames = logManager.getAvailableLogFileNames();
-		for (String logFilename : logFilenames) {
-			cmbLogFile.addItem(logFilename);
-		}
-
-		int currentLogFileIndex = logManager.getCurrentLogFileIndexForArray(logFilenames);
-		cmbLogFile.setSelectedIndex(currentLogFileIndex);
-		cmbLogFile.addActionListener(e -> {
-			settingsManager.getDownloadsSettings().setCurrentDownloadLogFile((String)cmbLogFile.getSelectedItem());
-			settingsManager.fireSettingsChanged();
-			settingsManager.writeSettings(true);
-		});
-
-		OptionalInt logFilesMaxLength = logFilenames.stream().mapToInt(String::length).max();
-		if (logFilesMaxLength.isPresent()) {
-			cmbLogFile.setPrototypeDisplayValue("X".repeat(logFilesMaxLength.getAsInt()));
-			Dimension cmbLogFilePreferredSize = cmbLogFile.getPreferredSize();
-			if (cmbLogFilePreferredSize.width > 0 && cmbLogFilePreferredSize.height > 0) {
-				cmbLogFile.setMaximumSize(cmbLogFilePreferredSize);
-			}
-		}
-
-		cmbLogFile.setFocusable(false);
-		if (logFilenames.size() <= 1) {
-			lblLogFile.setVisible(false);
-			cmbLogFile.setVisible(false);
-		}
-
 		mb.add(menuFile);
 		mb.add(menuSettings);
 		mb.add(menuHelp);
-		mb.add(Box.createGlue());
-		mb.add(lblLogFile);
-		mb.add(cmbLogFile);
-		mb.add(Box.createGlue());
 	}
 
 	/**

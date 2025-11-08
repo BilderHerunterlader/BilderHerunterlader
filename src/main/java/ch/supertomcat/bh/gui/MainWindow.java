@@ -154,7 +154,7 @@ public class MainWindow extends JFrame implements MainWindowAccess {
 			ProxyManager proxyManger, CookieManager cookieManager, HostManager hostManager, ClipboardObserver clipboardObserver, GuiEvent guiEvent) {
 		this.mainMenuBar = new MainMenuBar(this, this, logManager, downloadQueueManager, queueManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, guiEvent);
 		this.queue = new Queue(this, this, queueManager, downloadQueueManager, logManager, keywordManager, proxyManger, settingsManager, cookieManager, hostManager, clipboardObserver);
-		this.log = new Log(logManager, downloadQueueManager, this, settingsManager, clipboardObserver);
+		this.log = new Log(logManager, downloadQueueManager, this, this, settingsManager, clipboardObserver);
 		this.directoryLog = new DirectoryLog(logManager, settingsManager);
 		this.keywords = new Keywords(this, this, keywordManager, settingsManager);
 		this.hosts = new HosterPanel(hostManager, downloadQueueManager, settingsManager);

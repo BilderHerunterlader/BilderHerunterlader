@@ -9,6 +9,7 @@ import java.util.HashSet;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -25,6 +26,7 @@ import javax.swing.event.TableColumnModelListener;
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.gui.BHGUIConstants;
 import ch.supertomcat.bh.gui.MainWindowAccess;
+import ch.supertomcat.bh.importexport.ExportLogs;
 import ch.supertomcat.bh.log.ILogManagerListener;
 import ch.supertomcat.bh.log.LogManager;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
@@ -99,6 +101,16 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * Panel
 	 */
+	private JPanel pnlTopButtons = new JPanel();
+
+	/**
+	 * Button
+	 */
+	private JButton btnExport = new JButton(Localization.getString("Export"), Icons.getTangoSVGIcon("actions/document-save-as.svg", 16));
+
+	/**
+	 * Panel
+	 */
 	private JPanel pnlButtons = new JPanel();
 
 	/**
@@ -132,6 +144,16 @@ public class Log extends JPanel implements ILogManagerListener {
 	private final MainWindowAccess mainWindowAccess;
 
 	/**
+	 * Parent Window
+	 */
+	private final JFrame parentWindow;
+
+	/**
+	 * Settings Manager
+	 */
+	private final SettingsManager settingsManager;
+
+	/**
 	 * Clipboard Observer
 	 */
 	private final ClipboardObserver clipboardObserver;
@@ -142,12 +164,16 @@ public class Log extends JPanel implements ILogManagerListener {
 	 * @param logManager Log Manager
 	 * @param downloadQueueManager Download Queue Manager
 	 * @param mainWindowAccess Main Window Access
+	 * @param parentWindow Parent Window
 	 * @param settingsManager Settings Manager
 	 * @param clipboardObserver Clipboard Observer
 	 */
-	public Log(LogManager logManager, DownloadQueueManager downloadQueueManager, MainWindowAccess mainWindowAccess, SettingsManager settingsManager, ClipboardObserver clipboardObserver) {
+	public Log(LogManager logManager, DownloadQueueManager downloadQueueManager, MainWindowAccess mainWindowAccess, JFrame parentWindow, SettingsManager settingsManager,
+			ClipboardObserver clipboardObserver) {
 		this.logManager = logManager;
 		this.mainWindowAccess = mainWindowAccess;
+		this.parentWindow = parentWindow;
+		this.settingsManager = settingsManager;
 		this.clipboardObserver = clipboardObserver;
 
 		jtLog = new JTable(model);
@@ -214,10 +240,10 @@ public class Log extends JPanel implements ILogManagerListener {
 			last = true;
 		});
 
-		pnlButtons.add(btnFirst);
-		pnlButtons.add(btnPrevious);
-		pnlButtons.add(btnNext);
-		pnlButtons.add(btnLast);
+		pnlTopButtons.add(btnFirst);
+		pnlTopButtons.add(btnPrevious);
+		pnlTopButtons.add(btnNext);
+		pnlTopButtons.add(btnLast);
 
 		lblStatus.setHorizontalAlignment(SwingConstants.LEFT);
 		JPanel pnlStatus = new JPanel();
@@ -227,8 +253,12 @@ public class Log extends JPanel implements ILogManagerListener {
 
 		JPanel pnlTop = new JPanel(new BorderLayout());
 		pnlTop.add(pnlStatus, BorderLayout.WEST);
-		pnlTop.add(pnlButtons, BorderLayout.EAST);
+		pnlTop.add(pnlTopButtons, BorderLayout.EAST);
 		add(pnlTop, BorderLayout.NORTH);
+
+		btnExport.addActionListener(e -> actionExport());
+		pnlButtons.add(btnExport);
+		add(pnlButtons, BorderLayout.SOUTH);
 
 		popupMenu.add(menuItemCopyURL);
 		popupMenu.add(menuItemOpenURL);
@@ -325,6 +355,17 @@ public class Log extends JPanel implements ILogManagerListener {
 		t.start();
 	}
 
+	private void actionExport() {
+		Thread t = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				new ExportLogs(parentWindow, mainWindowAccess, logManager, settingsManager).exportLogs();
+			}
+		});
+		t.setPriority(Thread.MIN_PRIORITY);
+		t.start();
+	}
+
 	/**
 	 * @param vals Values
 	 */
@@ -389,10 +430,5 @@ public class Log extends JPanel implements ILogManagerListener {
 	public void logChanged() {
 		changed = true;
 		reloadLogs();
-	}
-
-	@Override
-	public void currentLogFileChanged() {
-		// Nothing to do
 	}
 }

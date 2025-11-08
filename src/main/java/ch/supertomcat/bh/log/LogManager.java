@@ -11,7 +11,6 @@ import java.nio.file.Files;
 import java.nio.file.InvalidPathException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
 import java.util.ArrayList;
@@ -36,9 +35,7 @@ import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.gui.log.LogTableModel;
 import ch.supertomcat.bh.pic.Pic;
 import ch.supertomcat.bh.pic.URL;
-import ch.supertomcat.bh.settings.BHSettingsListener;
 import ch.supertomcat.bh.settings.SettingsManager;
-import ch.supertomcat.bh.settings.xml.LookAndFeelSetting;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Localization;
@@ -49,9 +46,7 @@ import ch.supertomcat.supertomcatutils.io.FileUtil;
 /**
  * Class for reading and writing log of downloaded URLs
  */
-public class LogManager implements BHSettingsListener {
-	private static final String BH_LOGS_FILENAME = "BH_logs.txt";
-
+public class LogManager {
 	private static final String OLD_BH_LOGS_FILENAME_PREFIX = "BH-logs";
 
 	private static final String BH_LOGS_FILENAME_PREFIX = "BH_logs";
@@ -71,11 +66,6 @@ public class LogManager implements BHSettingsListener {
 	private static Logger logger = LoggerFactory.getLogger(LogManager.class);
 
 	private List<ILogManagerListener> listeners = new CopyOnWriteArrayList<>();
-
-	/**
-	 * Path to Text-Log-File
-	 */
-	private String logFile;
 
 	/**
 	 * Settings Manager
@@ -108,9 +98,6 @@ public class LogManager implements BHSettingsListener {
 		this.blacklistSQLiteDB = new BlacklistSQLiteDB(ApplicationProperties.getProperty(ApplicationMain.DATABASE_PATH) + "/BH-Blacklist.sqlite", settingsManager.getSettings()
 				.isBackupDbOnStart(), settingsManager.getSettings().isDefragDBOnStart(), settingsManager.getSettings().getDefragMinFilesize());
 
-		this.logFile = ApplicationProperties.getProperty("DownloadLogPath")
-				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
-
 		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
 		if (!Files.exists(folder)) {
 			try {
@@ -121,8 +108,6 @@ public class LogManager implements BHSettingsListener {
 		}
 
 		convertOldFiles();
-
-		settingsManager.addSettingsListener(this);
 	}
 
 	/**
@@ -266,27 +251,6 @@ public class LogManager implements BHSettingsListener {
 		if (listeners.contains(l)) {
 			listeners.remove(l);
 		}
-	}
-
-	/**
-	 * @return AvailableLogFileNames
-	 */
-	public List<String> getAvailableLogFileNames() {
-		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
-
-		Predicate<Path> fileFilter = x -> {
-			String filename = x.getFileName().toString();
-			return filename.startsWith(BH_LOGS_FILENAME_PREFIX) && filename.endsWith(".txt") && !filename.equals(BH_LOGS_FILENAME);
-		};
-
-		List<String> logFileNames = new ArrayList<>();
-		logFileNames.add(BH_LOGS_FILENAME);
-		try (Stream<Path> stream = Files.list(folder)) {
-			stream.filter(Files::isRegularFile).filter(fileFilter).map(Path::getFileName).map(Path::toString).sorted().forEach(logFileNames::add);
-		} catch (IOException e) {
-			logger.error("Could not list logfile names", e);
-		}
-		return logFileNames;
 	}
 
 	/**
@@ -451,32 +415,21 @@ public class LogManager implements BHSettingsListener {
 	 * @param pic Pic
 	 */
 	public synchronized void writeLog(Pic pic) {
-		Path file = Paths.get(logFile);
-		try (BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND)) {
-			writer.write(Long.toString(pic.getDateTimeSimple()));
-			writer.write("\t");
-			writer.write(pic.getContainerURL());
-			writer.write("\t");
-			writer.write(pic.getTarget());
-			writer.write("\t");
-			writer.write(Long.toString(pic.getSize()));
-			writer.write("\t");
-			writer.write(pic.getThreadURL());
-			writer.write("\t");
-			writer.write(pic.getDownloadURL());
-			writer.write("\t");
-			writer.write(pic.getThumb());
-			writer.write("\n");
-			writer.flush();
-		} catch (IOException e) {
-			logger.error("Could not write log file: {}", file, e);
-		}
-
 		logsSQLiteDB.insertEntry(new LogEntry(pic));
 
 		for (ILogManagerListener listener : listeners) {
 			listener.logChanged();
 		}
+	}
+
+	/**
+	 * Export all entries to text file
+	 * 
+	 * @param file File
+	 * @throws Exception
+	 */
+	public void exportAllEntriesToTextFile(Path file) throws Exception {
+		logsSQLiteDB.exportAllEntriesToTextFile(file);
 	}
 
 	/**
@@ -538,22 +491,5 @@ public class LogManager implements BHSettingsListener {
 	 */
 	public void addUrlToBlacklist(String url) {
 		writeBlacklist(url);
-	}
-
-	@Override
-	public void settingsChanged() {
-		String currentLogFile = ApplicationProperties.getProperty("DownloadLogPath")
-				+ settingsManager.getDownloadsSettings().getCurrentDownloadLogFile().replace(OLD_BH_LOGS_FILENAME_PREFIX, BH_LOGS_FILENAME_PREFIX);
-		if (!logFile.equals(currentLogFile)) {
-			logFile = currentLogFile;
-			for (ILogManagerListener listener : listeners) {
-				listener.currentLogFileChanged();
-			}
-		}
-	}
-
-	@Override
-	public void lookAndFeelChanged(LookAndFeelSetting lookAndFeel) {
-		// Nothing to do
 	}
 }

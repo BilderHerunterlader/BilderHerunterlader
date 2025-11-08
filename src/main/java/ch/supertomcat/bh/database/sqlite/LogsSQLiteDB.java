@@ -1,5 +1,10 @@
 package ch.supertomcat.bh.database.sqlite;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -338,6 +343,49 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 			} catch (SQLException | ClassNotFoundException e) {
 				logger.error("Could not get LogEntry from database '{}'", tableName, e);
 				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+			}
+		} finally {
+			readLock.unlock();
+		}
+	}
+
+	/**
+	 * Export all entries to text file
+	 * 
+	 * @param file File
+	 * @throws Exception
+	 */
+	public void exportAllEntriesToTextFile(Path file) throws Exception {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection();
+					PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL);
+					ResultSet rs = statement.executeQuery();
+					BufferedWriter writer = Files.newBufferedWriter(file, StandardCharsets.UTF_8)) {
+				while (rs.next()) {
+					LogEntry logEntry = convertResultSetToObject(rs);
+					writer.write(Long.toString(logEntry.getTimestamp()));
+					writer.write("\t");
+					writer.write(logEntry.getContainerURL());
+					writer.write("\t");
+					writer.write(logEntry.getTargetPath());
+					writer.write("\t");
+					writer.write(logEntry.getTargetFilename());
+					writer.write("\t");
+					writer.write(Long.toString(logEntry.getSize()));
+					writer.write("\t");
+					writer.write(logEntry.getThreadURL());
+					writer.write("\t");
+					writer.write(logEntry.getDownloadURL());
+					writer.write("\t");
+					writer.write(logEntry.getThumbURL());
+					writer.write("\n");
+					writer.flush();
+				}
+			} catch (SQLException | ClassNotFoundException | IOException e) {
+				logger.error("Could not export entries from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				throw e;
 			}
 		} finally {
 			readLock.unlock();
