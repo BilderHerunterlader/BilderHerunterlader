@@ -348,8 +348,15 @@ public class Log extends JPanel implements ILogManagerListener {
 	 */
 	public void reloadLogs() {
 		if (changed && last && mainWindowAccess.isTabSelected(this)) {
-			updateIndexAndStatus(logManager.readLogs(-1, model));
-			changed = false;
+			if (EventQueue.isDispatchThread()) {
+				updateIndexAndStatus(logManager.readLogs(-1, model));
+				changed = false;
+			} else {
+				EventQueue.invokeLater(() -> {
+					updateIndexAndStatus(logManager.readLogs(-1, model));
+					changed = false;
+				});
+			}
 		}
 	}
 
@@ -380,15 +387,8 @@ public class Log extends JPanel implements ILogManagerListener {
 
 	@Override
 	public void logChanged() {
-		if (EventQueue.isDispatchThread()) {
-			changed = true;
-			reloadLogs();
-		} else {
-			EventQueue.invokeLater(() -> {
-				changed = true;
-				reloadLogs();
-			});
-		}
+		changed = true;
+		reloadLogs();
 	}
 
 	@Override

@@ -74,30 +74,35 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	}
 
 	@Override
-	protected synchronized boolean createDatabaseIfNotExist() {
-		// Create table if not exist
-		StringBuilder sbCreateTable = new StringBuilder();
-		sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
-		sbCreateTable.append(tableName);
-		sbCreateTable.append(" (");
-		sbCreateTable.append("KeywordID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sbCreateTable.append("Title TEXT NOT NULL, ");
-		sbCreateTable.append("Keywords TEXT NOT NULL, ");
-		sbCreateTable.append("DownloadPath TEXT NOT NULL, ");
-		sbCreateTable.append("RelativeDownloadPath TEXT NOT NULL, ");
-		sbCreateTable.append("RelativePath BOOLEAN NOT NULL");
-		sbCreateTable.append(")");
-		String createTableSQL = sbCreateTable.toString();
+	protected boolean createDatabaseIfNotExist() {
+		try {
+			writeLock.lock();
+			// Create table if not exist
+			StringBuilder sbCreateTable = new StringBuilder();
+			sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
+			sbCreateTable.append(tableName);
+			sbCreateTable.append(" (");
+			sbCreateTable.append("KeywordID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			sbCreateTable.append("Title TEXT NOT NULL, ");
+			sbCreateTable.append("Keywords TEXT NOT NULL, ");
+			sbCreateTable.append("DownloadPath TEXT NOT NULL, ");
+			sbCreateTable.append("RelativeDownloadPath TEXT NOT NULL, ");
+			sbCreateTable.append("RelativePath BOOLEAN NOT NULL");
+			sbCreateTable.append(")");
+			String createTableSQL = sbCreateTable.toString();
 
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (Statement statement = con.createStatement()) {
-				statement.executeUpdate(createTableSQL);
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (Statement statement = con.createStatement()) {
+					statement.executeUpdate(createTableSQL);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not create database: {}", tableName, e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not create database: {}", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -114,54 +119,69 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	}
 
 	@Override
-	public synchronized List<Keyword> getAllEntries() {
-		List<Keyword> keywords = new ArrayList<>();
+	public List<Keyword> getAllEntries() {
+		try {
+			readLock.lock();
+			List<Keyword> keywords = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						keywords.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							keywords.add(convertResultSetToObject(rs));
+						}
+						return keywords;
 					}
-					return keywords;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Keywords from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Keywords from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized Keyword getEntry(int id) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					if (!rs.first()) {
-						logger.error("Could not find Keyword in database: {}", id);
-						return null;
+	public Keyword getEntry(int id) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						if (!rs.first()) {
+							logger.error("Could not find Keyword in database: {}", id);
+							return null;
+						}
+						return convertResultSetToObject(rs);
 					}
-					return convertResultSetToObject(rs);
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Keyword from database '{}': {}", tableName, id, e);
+				return null;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Keyword from database '{}': {}", tableName, id, e);
-			return null;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized boolean insertEntry(Keyword entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				insertEntry(entry, statement);
+	public boolean insertEntry(Keyword entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					insertEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Keyword into database '{}': {}", tableName, entry.getTitle(), e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Keyword into database '{}': {}", tableName, entry.getTitle(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -172,7 +192,7 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void insertEntry(Keyword entry, PreparedStatement statement) throws SQLException {
+	private void insertEntry(Keyword entry, PreparedStatement statement) throws SQLException {
 		statement.setString(1, entry.getTitle());
 		statement.setString(2, entry.getKeywords());
 		statement.setString(3, entry.getDownloadPath());
@@ -197,44 +217,54 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	}
 
 	@Override
-	public synchronized boolean insertEntries(List<Keyword> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				for (Keyword entry : entries) {
-					try {
-						insertEntry(entry, statement);
-					} catch (SQLException e) {
-						logger.error("Could not insert Keyword into database '{}': {}", tableName, entry.getTitle(), e);
-						result = false;
+	public boolean insertEntries(List<Keyword> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					for (Keyword entry : entries) {
+						try {
+							insertEntry(entry, statement);
+						} catch (SQLException e) {
+							logger.error("Could not insert Keyword into database '{}': {}", tableName, entry.getTitle(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Keywords into database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Keywords into database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean updateEntry(Keyword entry) {
-		if (entry.getId() <= 0) {
-			logger.warn("Could not update Keyword in database, because the Keyword has no valid ID: {}. Adding it to database instead.", entry.getId());
-			return insertEntry(entry);
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				updateEntry(entry, statement);
+	public boolean updateEntry(Keyword entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.warn("Could not update Keyword in database, because the Keyword has no valid ID: {}. Adding it to database instead.", entry.getId());
+				return insertEntry(entry);
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Keyword in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					updateEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Keyword in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -246,7 +276,7 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
 	 * @throws SQLException
 	 */
-	private synchronized boolean updateEntry(Keyword entry, PreparedStatement statement) throws SQLException {
+	private boolean updateEntry(Keyword entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.warn("Could not update Keyword in database, because the Keyword has no valid ID: {}. Adding it to database instead.", entry.getId());
 			return insertEntry(entry);
@@ -263,47 +293,57 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	}
 
 	@Override
-	public synchronized boolean updateEntries(List<Keyword> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				for (Keyword entry : entries) {
-					try {
-						if (!updateEntry(entry, statement)) {
+	public boolean updateEntries(List<Keyword> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					for (Keyword entry : entries) {
+						try {
+							if (!updateEntry(entry, statement)) {
+								result = false;
+							}
+						} catch (SQLException e) {
+							logger.error("Could not update Keyword in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
 							result = false;
 						}
-					} catch (SQLException e) {
-						logger.error("Could not update Keyword in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
-						result = false;
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Keywords in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Keywords in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean deleteEntry(Keyword entry) {
-		if (entry.getId() <= 0) {
-			logger.error("Could not delete Keyword in database, because the Keyword has no valid ID: {}", entry.getId());
-			return false;
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				deleteEntry(entry, statement);
+	public boolean deleteEntry(Keyword entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.error("Could not delete Keyword in database, because the Keyword has no valid ID: {}", entry.getId());
+				return false;
 			}
-			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getTitle());
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Keyword into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					deleteEntry(entry, statement);
+				}
+				logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getTitle());
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Keyword into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -314,7 +354,7 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void deleteEntry(Keyword entry, PreparedStatement statement) throws SQLException {
+	private void deleteEntry(Keyword entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.error("Could not delete Keyword in database, because the Keyword has no valid ID: {}", entry.getId());
 			return;
@@ -325,26 +365,31 @@ public class KeywordsSQLiteDB extends SQLiteDB<Keyword> {
 	}
 
 	@Override
-	public synchronized boolean deleteEntries(List<Keyword> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				for (Keyword entry : entries) {
-					try {
-						deleteEntry(entry, statement);
-						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getTitle());
-					} catch (SQLException e) {
-						logger.error("Could not delete Keyword into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
-						result = false;
+	public boolean deleteEntries(List<Keyword> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					for (Keyword entry : entries) {
+						try {
+							deleteEntry(entry, statement);
+							logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getTitle());
+						} catch (SQLException e) {
+							logger.error("Could not delete Keyword into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getTitle(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Keywords in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Keywords in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 }

@@ -95,40 +95,45 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	}
 
 	@Override
-	protected synchronized boolean createDatabaseIfNotExist() {
-		// Create table if not exist
-		StringBuilder sbCreateTable = new StringBuilder();
-		sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
-		sbCreateTable.append(tableName);
-		sbCreateTable.append(" (");
-		sbCreateTable.append("DownloadID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sbCreateTable.append("ContainerURL TEXT NOT NULL, ");
-		sbCreateTable.append("ThreadURL TEXT NOT NULL, ");
-		sbCreateTable.append("ThumbURL TEXT NOT NULL, ");
-		sbCreateTable.append("DownloadURL TEXT NOT NULL, ");
-		sbCreateTable.append("TargetPath TEXT NOT NULL, ");
-		sbCreateTable.append("TargetFilename TEXT NOT NULL, ");
-		sbCreateTable.append("FixedTargetFilename BOOLEAN NOT NULL, ");
-		sbCreateTable.append("LastModified BIGINT NOT NULL, ");
-		sbCreateTable.append("FixedLastModified BOOLEAN NOT NULL, ");
-		sbCreateTable.append("Size BIGINT NOT NULL, ");
-		sbCreateTable.append("Status INTEGER NOT NULL, ");
-		sbCreateTable.append("ErrorMessage TEXT NOT NULL, ");
-		sbCreateTable.append("Deactivated BOOLEAN NOT NULL, ");
-		sbCreateTable.append("RenameWithContentDisposition BOOLEAN NOT NULL, ");
-		sbCreateTable.append("DateTime BIGINT NOT NULL");
-		sbCreateTable.append(")");
-		String createTableSQL = sbCreateTable.toString();
+	protected boolean createDatabaseIfNotExist() {
+		try {
+			writeLock.lock();
+			// Create table if not exist
+			StringBuilder sbCreateTable = new StringBuilder();
+			sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
+			sbCreateTable.append(tableName);
+			sbCreateTable.append(" (");
+			sbCreateTable.append("DownloadID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			sbCreateTable.append("ContainerURL TEXT NOT NULL, ");
+			sbCreateTable.append("ThreadURL TEXT NOT NULL, ");
+			sbCreateTable.append("ThumbURL TEXT NOT NULL, ");
+			sbCreateTable.append("DownloadURL TEXT NOT NULL, ");
+			sbCreateTable.append("TargetPath TEXT NOT NULL, ");
+			sbCreateTable.append("TargetFilename TEXT NOT NULL, ");
+			sbCreateTable.append("FixedTargetFilename BOOLEAN NOT NULL, ");
+			sbCreateTable.append("LastModified BIGINT NOT NULL, ");
+			sbCreateTable.append("FixedLastModified BOOLEAN NOT NULL, ");
+			sbCreateTable.append("Size BIGINT NOT NULL, ");
+			sbCreateTable.append("Status INTEGER NOT NULL, ");
+			sbCreateTable.append("ErrorMessage TEXT NOT NULL, ");
+			sbCreateTable.append("Deactivated BOOLEAN NOT NULL, ");
+			sbCreateTable.append("RenameWithContentDisposition BOOLEAN NOT NULL, ");
+			sbCreateTable.append("DateTime BIGINT NOT NULL");
+			sbCreateTable.append(")");
+			String createTableSQL = sbCreateTable.toString();
 
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (Statement statement = con.createStatement()) {
-				statement.executeUpdate(createTableSQL);
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (Statement statement = con.createStatement()) {
+					statement.executeUpdate(createTableSQL);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not create database: {}", tableName, e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not create database: {}", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -156,54 +161,69 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	}
 
 	@Override
-	public synchronized List<Pic> getAllEntries() {
-		List<Pic> pics = new ArrayList<>();
+	public List<Pic> getAllEntries() {
+		try {
+			readLock.lock();
+			List<Pic> pics = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						pics.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							pics.add(convertResultSetToObject(rs));
+						}
+						return pics;
 					}
-					return pics;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Pics from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Pics from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized Pic getEntry(int id) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					if (!rs.first()) {
-						logger.error("Could not find Pic in database: {}", id);
-						return null;
+	public Pic getEntry(int id) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						if (!rs.first()) {
+							logger.error("Could not find Pic in database: {}", id);
+							return null;
+						}
+						return convertResultSetToObject(rs);
 					}
-					return convertResultSetToObject(rs);
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Pic from database '{}': {}", tableName, id, e);
+				return null;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Pic from database '{}': {}", tableName, id, e);
-			return null;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized boolean insertEntry(Pic entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				insertEntry(entry, statement);
+	public boolean insertEntry(Pic entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					insertEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Pic into database '{}': {}", tableName, entry.getContainerURL(), e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Pic into database '{}': {}", tableName, entry.getContainerURL(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -214,7 +234,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void insertEntry(Pic entry, PreparedStatement statement) throws SQLException {
+	private void insertEntry(Pic entry, PreparedStatement statement) throws SQLException {
 		statement.setString(1, entry.getContainerURL());
 		statement.setString(2, entry.getThreadURL());
 		statement.setString(3, entry.getThumb());
@@ -249,38 +269,48 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	}
 
 	@Override
-	public synchronized boolean insertEntries(List<Pic> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				for (Pic entry : entries) {
-					try {
-						insertEntry(entry, statement);
-					} catch (SQLException e) {
-						logger.error("Could not insert Pic into database '{}': {}", tableName, entry.getContainerURL(), e);
-						result = false;
+	public boolean insertEntries(List<Pic> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					for (Pic entry : entries) {
+						try {
+							insertEntry(entry, statement);
+						} catch (SQLException e) {
+							logger.error("Could not insert Pic into database '{}': {}", tableName, entry.getContainerURL(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Pics into database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Pics into database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean updateEntry(Pic entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				return updateEntry(entry, statement);
+	public boolean updateEntry(Pic entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					return updateEntry(entry, statement);
+				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+				return false;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -292,7 +322,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
 	 * @throws SQLException
 	 */
-	private synchronized boolean updateEntry(Pic entry, PreparedStatement statement) throws SQLException {
+	private boolean updateEntry(Pic entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.warn("Could not update Pic in database, because the Pic has no valid ID: {}. Adding it to database instead.", entry.getId());
 			return insertEntry(entry);
@@ -319,42 +349,52 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	}
 
 	@Override
-	public synchronized boolean updateEntries(List<Pic> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				for (Pic entry : entries) {
-					try {
-						if (!updateEntry(entry, statement)) {
+	public boolean updateEntries(List<Pic> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					for (Pic entry : entries) {
+						try {
+							if (!updateEntry(entry, statement)) {
+								result = false;
+							}
+						} catch (SQLException e) {
+							logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
 							result = false;
 						}
-					} catch (SQLException e) {
-						logger.error("Could not update Pic in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-						result = false;
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Pics in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Pics in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean deleteEntry(Pic entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				deleteEntry(entry, statement);
+	public boolean deleteEntry(Pic entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					deleteEntry(entry, statement);
+				}
+				logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Pic into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+				return false;
 			}
-			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Pic into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -365,7 +405,7 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void deleteEntry(Pic entry, PreparedStatement statement) throws SQLException {
+	private void deleteEntry(Pic entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.error("Could not delete Pic in database, because the Pic has no valid ID: {}", entry.getId());
 			return;
@@ -376,26 +416,31 @@ public class QueueSQLiteDB extends SQLiteDB<Pic> {
 	}
 
 	@Override
-	public synchronized boolean deleteEntries(List<Pic> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				for (Pic entry : entries) {
-					try {
-						deleteEntry(entry, statement);
-						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
-					} catch (SQLException e) {
-						logger.error("Could not delete Pic into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-						result = false;
+	public boolean deleteEntries(List<Pic> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					for (Pic entry : entries) {
+						try {
+							deleteEntry(entry, statement);
+							logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
+						} catch (SQLException e) {
+							logger.error("Could not delete Pic into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Pics in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Pics in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 }

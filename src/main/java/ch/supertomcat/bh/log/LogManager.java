@@ -128,7 +128,7 @@ public class LogManager implements BHSettingsListener {
 	/**
 	 * Convert old log files
 	 */
-	private synchronized void convertOldFiles() {
+	private void convertOldFiles() {
 		Path folder = Paths.get(ApplicationProperties.getProperty("DownloadLogPath"));
 
 		Predicate<Path> fileFilter = x -> {
@@ -148,7 +148,7 @@ public class LogManager implements BHSettingsListener {
 	 * 
 	 * @param oldLogFile Old Log File
 	 */
-	private synchronized void convertOldFile(Path oldLogFile) {
+	private void convertOldFile(Path oldLogFile) {
 		/*
 		 * The old files were written with native encoding. So they are now converted to always have UTF-8 encoding, so that it's predictable
 		 */
@@ -311,7 +311,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param urls Container URLs
 	 * @param ap AdderPanel
 	 */
-	public synchronized void searchBlacklist(List<URL> urls, AdderWindow ap) {
+	public void searchBlacklist(List<URL> urls, AdderWindow ap) {
 		boolean updateProgress = ap != null;
 		try {
 			if (updateProgress) {
@@ -345,7 +345,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param urls Container URLs
 	 * @param ap AdderPanel
 	 */
-	public synchronized void searchLogs(List<URL> urls, AdderWindow ap) {
+	public void searchLogs(List<URL> urls, AdderWindow ap) {
 		boolean updateProgress = ap != null;
 
 		if (updateProgress) {
@@ -484,7 +484,7 @@ public class LogManager implements BHSettingsListener {
 	 * 
 	 * @param url URL
 	 */
-	public synchronized void writeBlacklist(String url) {
+	public void writeBlacklist(String url) {
 		blacklistSQLiteDB.insertEntry(new BlacklistEntry(url));
 	}
 
@@ -499,7 +499,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param max Maximum Entries
 	 * @return Directory-Log
 	 */
-	public synchronized List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, int max) {
+	public List<DirectoryLogObject> readDirectoryLog(Pattern pattern, boolean onlyExistingDirectories, int max) {
 		List<LogEntry> entries = logsSQLiteDB.getDirectoryLogEntries(max);
 		Stream<LogEntry> stream = entries.stream();
 		if (pattern != null) {
@@ -528,14 +528,7 @@ public class LogManager implements BHSettingsListener {
 	 * @param pic Pic
 	 */
 	public void addPicToLog(final Pic pic) {
-		Thread t = new Thread(new Runnable() {
-			@Override
-			public void run() {
-				writeLog(pic);
-			}
-		});
-		t.setPriority(Thread.MIN_PRIORITY);
-		t.start();
+		writeLog(pic);
 	}
 
 	/**

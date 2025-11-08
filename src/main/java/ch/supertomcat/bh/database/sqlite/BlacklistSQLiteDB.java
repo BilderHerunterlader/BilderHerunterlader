@@ -79,36 +79,41 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	}
 
 	@Override
-	protected synchronized boolean createDatabaseIfNotExist() {
-		// Create table if not exist
-		StringBuilder sbCreateTable = new StringBuilder();
+	protected boolean createDatabaseIfNotExist() {
+		try {
+			writeLock.lock();
+			// Create table if not exist
+			StringBuilder sbCreateTable = new StringBuilder();
 
-		sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
-		sbCreateTable.append(tableName);
-		sbCreateTable.append(" (");
-		sbCreateTable.append("BlacklistID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sbCreateTable.append("URL TEXT NOT NULL");
-		sbCreateTable.append(")");
-		String createTableSQL = sbCreateTable.toString();
+			sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
+			sbCreateTable.append(tableName);
+			sbCreateTable.append(" (");
+			sbCreateTable.append("BlacklistID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			sbCreateTable.append("URL TEXT NOT NULL");
+			sbCreateTable.append(")");
+			String createTableSQL = sbCreateTable.toString();
 
-		StringBuilder sbCreateIndexURL = new StringBuilder();
-		sbCreateIndexURL.append("CREATE INDEX IF NOT EXISTS BHBlacklistURLIndex ON ");
-		sbCreateIndexURL.append(tableName);
-		sbCreateIndexURL.append(" (");
-		sbCreateIndexURL.append("URL");
-		sbCreateIndexURL.append(")");
-		String createIndexURLSQL = sbCreateIndexURL.toString();
+			StringBuilder sbCreateIndexURL = new StringBuilder();
+			sbCreateIndexURL.append("CREATE INDEX IF NOT EXISTS BHBlacklistURLIndex ON ");
+			sbCreateIndexURL.append(tableName);
+			sbCreateIndexURL.append(" (");
+			sbCreateIndexURL.append("URL");
+			sbCreateIndexURL.append(")");
+			String createIndexURLSQL = sbCreateIndexURL.toString();
 
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (Statement statement = con.createStatement()) {
-				statement.executeUpdate(createTableSQL);
-				statement.executeUpdate(createIndexURLSQL);
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (Statement statement = con.createStatement()) {
+					statement.executeUpdate(createTableSQL);
+					statement.executeUpdate(createIndexURLSQL);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not create database: {}", tableName, e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not create database: {}", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -121,22 +126,27 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	}
 
 	@Override
-	public synchronized List<BlacklistEntry> getAllEntries() {
-		List<BlacklistEntry> blacklistEntries = new ArrayList<>();
+	public List<BlacklistEntry> getAllEntries() {
+		try {
+			readLock.lock();
+			List<BlacklistEntry> blacklistEntries = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						blacklistEntries.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							blacklistEntries.add(convertResultSetToObject(rs));
+						}
+						return blacklistEntries;
 					}
-					return blacklistEntries;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get BlacklistEntry from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get BlacklistEntry from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -145,19 +155,24 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * 
 	 * @return Count
 	 */
-	public synchronized int getEntriesCount() {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(countAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						return rs.getInt(1);
+	public int getEntriesCount() {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(countAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							return rs.getInt(1);
+						}
 					}
 				}
+				return 0;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get count from database '{}'", tableName, e);
+				return 0;
 			}
-			return 0;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get count from database '{}'", tableName, e);
-			return 0;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -167,52 +182,67 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * @param url URL
 	 * @return True if already downloaded, false otherwise
 	 */
-	public synchronized boolean checkBlacklisted(String url) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(countBlacklistedEntriesSQL)) {
-				statement.setString(1, url);
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						return rs.getInt(1) > 0;
+	public boolean checkBlacklisted(String url) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(countBlacklistedEntriesSQL)) {
+					statement.setString(1, url);
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							return rs.getInt(1) > 0;
+						}
 					}
 				}
+				return false;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get BlacklistEntry from database '{}'", tableName, e);
+				return false;
 			}
-			return false;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get BlacklistEntry from database '{}'", tableName, e);
-			return false;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized BlacklistEntry getEntry(int id) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					if (!rs.first()) {
-						logger.error("Could not find BlacklistEntry in database: {}", id);
-						return null;
+	public BlacklistEntry getEntry(int id) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						if (!rs.first()) {
+							logger.error("Could not find BlacklistEntry in database: {}", id);
+							return null;
+						}
+						return convertResultSetToObject(rs);
 					}
-					return convertResultSetToObject(rs);
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get BlacklistEntry from database '{}': {}", tableName, id, e);
+				return null;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get BlacklistEntry from database '{}': {}", tableName, id, e);
-			return null;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized boolean insertEntry(BlacklistEntry entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				insertEntry(entry, statement);
+	public boolean insertEntry(BlacklistEntry entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					insertEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert BlacklistEntry into database '{}': {}", tableName, entry.getUrl(), e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert BlacklistEntry into database '{}': {}", tableName, entry.getUrl(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -223,7 +253,7 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void insertEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
+	private void insertEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
 		statement.setString(1, entry.getUrl());
 
 		int rowsAffected = statement.executeUpdate();
@@ -244,44 +274,54 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	}
 
 	@Override
-	public synchronized boolean insertEntries(List<BlacklistEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				for (BlacklistEntry entry : entries) {
-					try {
-						insertEntry(entry, statement);
-					} catch (SQLException e) {
-						logger.error("Could not insert BlacklistEntry into database '{}': {}", tableName, entry.getUrl(), e);
-						result = false;
+	public boolean insertEntries(List<BlacklistEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					for (BlacklistEntry entry : entries) {
+						try {
+							insertEntry(entry, statement);
+						} catch (SQLException e) {
+							logger.error("Could not insert BlacklistEntry into database '{}': {}", tableName, entry.getUrl(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert BlacklistEntry into database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert BlacklistEntry into database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean updateEntry(BlacklistEntry entry) {
-		if (entry.getId() <= 0) {
-			logger.warn("Could not update BlacklistEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
-			return insertEntry(entry);
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				updateEntry(entry, statement);
+	public boolean updateEntry(BlacklistEntry entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.warn("Could not update BlacklistEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
+				return insertEntry(entry);
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					updateEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -293,7 +333,7 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
 	 * @throws SQLException
 	 */
-	private synchronized boolean updateEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
+	private boolean updateEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.warn("Could not update BlacklistEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
 			return insertEntry(entry);
@@ -305,47 +345,57 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	}
 
 	@Override
-	public synchronized boolean updateEntries(List<BlacklistEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				for (BlacklistEntry entry : entries) {
-					try {
-						if (!updateEntry(entry, statement)) {
+	public boolean updateEntries(List<BlacklistEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					for (BlacklistEntry entry : entries) {
+						try {
+							if (!updateEntry(entry, statement)) {
+								result = false;
+							}
+						} catch (SQLException e) {
+							logger.error("Could not update BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
 							result = false;
 						}
-					} catch (SQLException e) {
-						logger.error("Could not update BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
-						result = false;
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update BlacklistEntries in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update BlacklistEntries in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean deleteEntry(BlacklistEntry entry) {
-		if (entry.getId() <= 0) {
-			logger.error("Could not delete BlacklistEntry in database, because it has no valid ID: {}", entry.getId());
-			return false;
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				deleteEntry(entry, statement);
+	public boolean deleteEntry(BlacklistEntry entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.error("Could not delete BlacklistEntry in database, because it has no valid ID: {}", entry.getId());
+				return false;
 			}
-			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getUrl());
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					deleteEntry(entry, statement);
+				}
+				logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getUrl());
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete BlacklistEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -356,7 +406,7 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void deleteEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
+	private void deleteEntry(BlacklistEntry entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.error("Could not delete BlacklistEntry in database, because it has no valid ID: {}", entry.getId());
 			return;
@@ -367,27 +417,32 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	}
 
 	@Override
-	public synchronized boolean deleteEntries(List<BlacklistEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				for (BlacklistEntry entry : entries) {
-					try {
-						deleteEntry(entry, statement);
-						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getUrl());
-					} catch (SQLException e) {
-						logger.error("Could not delete BlacklistEntry into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
-						result = false;
+	public boolean deleteEntries(List<BlacklistEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					for (BlacklistEntry entry : entries) {
+						try {
+							deleteEntry(entry, statement);
+							logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getUrl());
+						} catch (SQLException e) {
+							logger.error("Could not delete BlacklistEntry into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getUrl(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete BlacklistEntries in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete BlacklistEntries in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	/**
@@ -395,17 +450,22 @@ public class BlacklistSQLiteDB extends SQLiteDB<BlacklistEntry> {
 	 * 
 	 * @return True if successful, false otherwise
 	 */
-	public synchronized boolean deleteAllEntries() {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
-				statement.executeUpdate();
+	public boolean deleteAllEntries() {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
+					statement.executeUpdate();
+				}
+				logger.debug("Deleted all entries in database '{}'", tableName);
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete all entries in database '{}'", tableName, e);
+				return false;
 			}
-			logger.debug("Deleted all entries in database '{}'", tableName);
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete all entries in database '{}'", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 }

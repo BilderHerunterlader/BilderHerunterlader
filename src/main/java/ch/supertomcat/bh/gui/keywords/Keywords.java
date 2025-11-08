@@ -503,7 +503,7 @@ public class Keywords extends JPanel {
 	 * 
 	 * @param col Column
 	 */
-	private synchronized void filterTable(int col) {
+	private void filterTable(int col) {
 		switch (col) {
 			case 0:
 				patterns[0] = txtTitle.getText();
@@ -771,11 +771,20 @@ public class Keywords extends JPanel {
 	/**
 	 * Clear filters
 	 */
-	public synchronized void clearFilters() {
-		txtTitle.setText("");
-		txtKeywords.setText("");
-		txtPath.setText("");
-		txtRPath.setText("");
+	public void clearFilters() {
+		if (EventQueue.isDispatchThread()) {
+			txtTitle.setText("");
+			txtKeywords.setText("");
+			txtPath.setText("");
+			txtRPath.setText("");
+		} else {
+			EventQueue.invokeLater(() -> {
+				txtTitle.setText("");
+				txtKeywords.setText("");
+				txtPath.setText("");
+				txtRPath.setText("");
+			});
+		}
 	}
 
 	/**

@@ -3,6 +3,9 @@ package ch.supertomcat.bh.keywords;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +23,21 @@ public class KeywordManager {
 	 * Logger for this class
 	 */
 	private Logger logger = LoggerFactory.getLogger(getClass());
+
+	/**
+	 * Lock
+	 */
+	private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
+
+	/**
+	 * Read Lock
+	 */
+	private final Lock readLock = readWriteLock.readLock();
+
+	/**
+	 * Write Lock
+	 */
+	private final Lock writeLock = readWriteLock.writeLock();
 
 	/**
 	 * Keywords
@@ -50,27 +68,42 @@ public class KeywordManager {
 	 * 
 	 * @return Keywords-Array
 	 */
-	public synchronized List<Keyword> getKeywords() {
-		return new ArrayList<>(keywords);
+	public List<Keyword> getKeywords() {
+		try {
+			readLock.lock();
+			return new ArrayList<>(keywords);
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**
 	 * @param keyword Keyword
 	 * @return Index
 	 */
-	public synchronized int indexOfKeyword(Keyword keyword) {
-		return keywords.indexOf(keyword);
+	public int indexOfKeyword(Keyword keyword) {
+		try {
+			readLock.lock();
+			return keywords.indexOf(keyword);
+		} finally {
+			readLock.unlock();
+		}
 	}
 
 	/**
 	 * @param index Index
 	 * @return Pic
 	 */
-	public synchronized Keyword getKeywordByIndex(int index) {
-		if (index < 0 || index >= keywords.size()) {
-			return null;
+	public Keyword getKeywordByIndex(int index) {
+		try {
+			readLock.lock();
+			if (index < 0 || index >= keywords.size()) {
+				return null;
+			}
+			return keywords.get(index);
+		} finally {
+			readLock.unlock();
 		}
-		return keywords.get(index);
 	}
 
 	/**
@@ -78,11 +111,16 @@ public class KeywordManager {
 	 * 
 	 * @param keywords Keywords
 	 */
-	public synchronized void addKeywords(List<Keyword> keywords) {
-		for (Keyword keyword : keywords) {
-			this.keywords.add(keyword);
+	public void addKeywords(List<Keyword> keywords) {
+		try {
+			writeLock.lock();
+			for (Keyword keyword : keywords) {
+				this.keywords.add(keyword);
+			}
+			keywordsSQLiteDB.insertEntries(keywords);
+		} finally {
+			writeLock.unlock();
 		}
-		keywordsSQLiteDB.insertEntries(keywords);
 		keywordsChanged();
 	}
 
@@ -91,9 +129,14 @@ public class KeywordManager {
 	 * 
 	 * @param k Keyword
 	 */
-	public synchronized void addKeyword(Keyword k) {
-		this.keywords.add(k);
-		keywordsSQLiteDB.insertEntry(k);
+	public void addKeyword(Keyword k) {
+		try {
+			writeLock.lock();
+			this.keywords.add(k);
+			keywordsSQLiteDB.insertEntry(k);
+		} finally {
+			writeLock.unlock();
+		}
 		keywordsChanged();
 	}
 
@@ -102,8 +145,13 @@ public class KeywordManager {
 	 * 
 	 * @param keyword Keyword
 	 */
-	public synchronized void updateKeyword(Keyword keyword) {
-		keywordsSQLiteDB.updateEntry(keyword);
+	public void updateKeyword(Keyword keyword) {
+		try {
+			writeLock.lock();
+			keywordsSQLiteDB.updateEntry(keyword);
+		} finally {
+			writeLock.unlock();
+		}
 		keywordsChanged();
 	}
 
@@ -112,21 +160,33 @@ public class KeywordManager {
 	 * 
 	 * @param keywords Keywords
 	 */
-	public synchronized void updateKeywords(List<Keyword> keywords) {
-		keywordsSQLiteDB.updateEntries(keywords);
+	public void updateKeywords(List<Keyword> keywords) {
+		try {
+			writeLock.lock();
+			keywordsSQLiteDB.updateEntries(keywords);
+		} finally {
+			writeLock.unlock();
+		}
 		keywordsChanged();
 	}
 
 	/**
 	 * @param keyword Keyword
 	 */
-	public synchronized void removeKeyword(Keyword keyword) {
-		int index = keywords.indexOf(keyword);
-		if (index >= 0) {
+	public void removeKeyword(Keyword keyword) {
+		try {
+			writeLock.lock();
+			int index = keywords.indexOf(keyword);
+			if (index < 0) {
+				return;
+			}
+
 			keywords.remove(keyword);
 			keywordsSQLiteDB.deleteEntry(keyword);
-			keywordsChanged();
+		} finally {
+			writeLock.unlock();
 		}
+		keywordsChanged();
 	}
 
 	/**
@@ -135,31 +195,28 @@ public class KeywordManager {
 	 * @param indices Indices
 	 */
 	public void removeKeywords(int[] indices) {
-		List<Keyword> keywordsToDelete = new ArrayList<>();
-		for (int i = indices.length - 1; i > -1; i--) {
-			if ((indices[i] < 0) || (indices[i] >= keywords.size())) {
-				continue;
+		try {
+			writeLock.lock();
+			List<Keyword> keywordsToDelete = new ArrayList<>();
+			for (int i = indices.length - 1; i > -1; i--) {
+				if (indices[i] < 0 || indices[i] >= keywords.size()) {
+					continue;
+				}
+				Keyword keyword = keywords.get(indices[i]);
+				keywords.remove(indices[i]);
+				keywordsToDelete.add(keyword);
 			}
-			Keyword keyword = keywords.get(indices[i]);
-			keywords.remove(indices[i]);
-			keywordsToDelete.add(keyword);
+			keywordsSQLiteDB.deleteEntries(keywordsToDelete);
+		} finally {
+			writeLock.unlock();
 		}
-		keywordsSQLiteDB.deleteEntries(keywordsToDelete);
 		keywordsChanged();
-	}
-
-	/**
-	 * Saves the database
-	 */
-	public void saveDatabase() {
-		// Nothing to do
 	}
 
 	/**
 	 * Saves and closes the database
 	 */
 	public void closeDatabase() {
-		saveDatabase();
 		logger.info("Closing Keyword Database");
 		keywordsSQLiteDB.closeAllDatabaseConnections();
 	}

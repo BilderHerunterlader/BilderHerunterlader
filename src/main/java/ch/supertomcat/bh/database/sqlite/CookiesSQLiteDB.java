@@ -93,37 +93,42 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	}
 
 	@Override
-	protected synchronized boolean createDatabaseIfNotExist() {
-		// Create table if not exist
-		StringBuilder sbCreateTable = new StringBuilder();
+	protected boolean createDatabaseIfNotExist() {
+		try {
+			writeLock.lock();
+			// Create table if not exist
+			StringBuilder sbCreateTable = new StringBuilder();
 
-		sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
-		sbCreateTable.append(tableName);
-		sbCreateTable.append(" (");
-		sbCreateTable.append("CookieID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sbCreateTable.append("OriginAttributes TEXT NOT NULL DEFAULT '', ");
-		sbCreateTable.append("Name TEXT, ");
-		sbCreateTable.append("Value TEXT, ");
-		sbCreateTable.append("Host TEXT, ");
-		sbCreateTable.append("Path TEXT, ");
-		sbCreateTable.append("ExpiryTime INTEGER, ");
-		sbCreateTable.append("LastAccessedTime INTEGER, ");
-		sbCreateTable.append("CreationTime INTEGER, ");
-		sbCreateTable.append("Secure BOOLEAN, ");
-		sbCreateTable.append("HttpOnly BOOLEAN, ");
-		sbCreateTable.append("CONSTRAINT BHCookieUnique UNIQUE (Name, Host, Path, OriginAttributes)");
-		sbCreateTable.append(")");
-		String createTableSQL = sbCreateTable.toString();
+			sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
+			sbCreateTable.append(tableName);
+			sbCreateTable.append(" (");
+			sbCreateTable.append("CookieID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			sbCreateTable.append("OriginAttributes TEXT NOT NULL DEFAULT '', ");
+			sbCreateTable.append("Name TEXT, ");
+			sbCreateTable.append("Value TEXT, ");
+			sbCreateTable.append("Host TEXT, ");
+			sbCreateTable.append("Path TEXT, ");
+			sbCreateTable.append("ExpiryTime INTEGER, ");
+			sbCreateTable.append("LastAccessedTime INTEGER, ");
+			sbCreateTable.append("CreationTime INTEGER, ");
+			sbCreateTable.append("Secure BOOLEAN, ");
+			sbCreateTable.append("HttpOnly BOOLEAN, ");
+			sbCreateTable.append("CONSTRAINT BHCookieUnique UNIQUE (Name, Host, Path, OriginAttributes)");
+			sbCreateTable.append(")");
+			String createTableSQL = sbCreateTable.toString();
 
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (Statement statement = con.createStatement()) {
-				statement.executeUpdate(createTableSQL);
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (Statement statement = con.createStatement()) {
+					statement.executeUpdate(createTableSQL);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not create database: {}", tableName, e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not create database: {}", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -176,54 +181,69 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	}
 
 	@Override
-	public synchronized List<BHCookie> getAllEntries() {
-		List<BHCookie> cookies = new ArrayList<>();
+	public List<BHCookie> getAllEntries() {
+		try {
+			readLock.lock();
+			List<BHCookie> cookies = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						cookies.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							cookies.add(convertResultSetToObject(rs));
+						}
+						return cookies;
 					}
-					return cookies;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Cookies from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Cookies from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized BHCookie getEntry(int id) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					if (!rs.first()) {
-						logger.error("Could not find Cookie in database: {}", id);
-						return null;
+	public BHCookie getEntry(int id) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						if (!rs.first()) {
+							logger.error("Could not find Cookie in database: {}", id);
+							return null;
+						}
+						return convertResultSetToObject(rs);
 					}
-					return convertResultSetToObject(rs);
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get Cookie from database '{}': {}", tableName, id, e);
+				return null;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get Cookie from database '{}': {}", tableName, id, e);
-			return null;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized boolean insertEntry(BHCookie entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				insertEntry(entry, statement);
+	public boolean insertEntry(BHCookie entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					insertEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Cookie into database '{}': {}", tableName, entry.getCookie().getName(), e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Cookie into database '{}': {}", tableName, entry.getCookie().getName(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -234,7 +254,7 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void insertEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
+	private void insertEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
 		Cookie cookie = entry.getCookie();
 		statement.setString(1, "");
 		statement.setString(2, cookie.getName());
@@ -275,44 +295,54 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	}
 
 	@Override
-	public synchronized boolean insertEntries(List<BHCookie> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				for (BHCookie entry : entries) {
-					try {
-						insertEntry(entry, statement);
-					} catch (SQLException e) {
-						logger.error("Could not insert Cookie into database '{}': {}", tableName, entry.getCookie().getName(), e);
-						result = false;
+	public boolean insertEntries(List<BHCookie> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					for (BHCookie entry : entries) {
+						try {
+							insertEntry(entry, statement);
+						} catch (SQLException e) {
+							logger.error("Could not insert Cookie into database '{}': {}", tableName, entry.getCookie().getName(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert Cookies into database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert Cookies into database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean updateEntry(BHCookie entry) {
-		if (entry.getId() <= 0) {
-			logger.warn("Could not update Cookie in database, because the Cookie has no valid ID: {}. Adding it to database instead.", entry.getId());
-			return insertEntry(entry);
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				updateEntry(entry, statement);
+	public boolean updateEntry(BHCookie entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.warn("Could not update Cookie in database, because the Cookie has no valid ID: {}. Adding it to database instead.", entry.getId());
+				return insertEntry(entry);
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Cookie in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					updateEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Cookie in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -324,7 +354,7 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
 	 * @throws SQLException
 	 */
-	private synchronized boolean updateEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
+	private boolean updateEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.warn("Could not update Cookie in database, because the Cookie has no valid ID: {}. Adding it to database instead.", entry.getId());
 			return insertEntry(entry);
@@ -357,47 +387,57 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	}
 
 	@Override
-	public synchronized boolean updateEntries(List<BHCookie> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				for (BHCookie entry : entries) {
-					try {
-						if (!updateEntry(entry, statement)) {
+	public boolean updateEntries(List<BHCookie> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					for (BHCookie entry : entries) {
+						try {
+							if (!updateEntry(entry, statement)) {
+								result = false;
+							}
+						} catch (SQLException e) {
+							logger.error("Could not update Cookie in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
 							result = false;
 						}
-					} catch (SQLException e) {
-						logger.error("Could not update Cookie in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
-						result = false;
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update Cookies in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update Cookies in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean deleteEntry(BHCookie entry) {
-		if (entry.getId() <= 0) {
-			logger.error("Could not delete Cookie in database, because the Cookie has no valid ID: {}", entry.getId());
-			return false;
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				deleteEntry(entry, statement);
+	public boolean deleteEntry(BHCookie entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.error("Could not delete Cookie in database, because the Cookie has no valid ID: {}", entry.getId());
+				return false;
 			}
-			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getCookie().getName());
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Cookie into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					deleteEntry(entry, statement);
+				}
+				logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getCookie().getName());
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Cookie into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -408,7 +448,7 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void deleteEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
+	private void deleteEntry(BHCookie entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.error("Could not delete Cookie in database, because the Cookie has no valid ID: {}", entry.getId());
 			return;
@@ -419,27 +459,32 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	}
 
 	@Override
-	public synchronized boolean deleteEntries(List<BHCookie> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				for (BHCookie entry : entries) {
-					try {
-						deleteEntry(entry, statement);
-						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getCookie().getName());
-					} catch (SQLException e) {
-						logger.error("Could not delete Cookie into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
-						result = false;
+	public boolean deleteEntries(List<BHCookie> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					for (BHCookie entry : entries) {
+						try {
+							deleteEntry(entry, statement);
+							logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getCookie().getName());
+						} catch (SQLException e) {
+							logger.error("Could not delete Cookie into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getCookie().getName(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete Cookies in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete Cookies in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	/**
@@ -447,17 +492,22 @@ public class CookiesSQLiteDB extends SQLiteDB<BHCookie> {
 	 * 
 	 * @return True if successful, false otherwise
 	 */
-	public synchronized boolean deleteAllEntries() {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
-				statement.executeUpdate();
+	public boolean deleteAllEntries() {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
+					statement.executeUpdate();
+				}
+				logger.debug("Deleted all entries in database '{}'", tableName);
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete all Cookies in database '{}'", tableName, e);
+				return false;
 			}
-			logger.debug("Deleted all entries in database '{}'", tableName);
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete all Cookies in database '{}'", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 }

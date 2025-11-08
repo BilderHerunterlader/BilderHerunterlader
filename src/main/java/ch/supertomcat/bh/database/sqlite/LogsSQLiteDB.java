@@ -109,61 +109,66 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	}
 
 	@Override
-	protected synchronized boolean createDatabaseIfNotExist() {
-		// Create table if not exist
-		StringBuilder sbCreateTable = new StringBuilder();
+	protected boolean createDatabaseIfNotExist() {
+		try {
+			writeLock.lock();
+			// Create table if not exist
+			StringBuilder sbCreateTable = new StringBuilder();
 
-		sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
-		sbCreateTable.append(tableName);
-		sbCreateTable.append(" (");
-		sbCreateTable.append("LogEntryID INTEGER PRIMARY KEY AUTOINCREMENT, ");
-		sbCreateTable.append("DownloadTimestamp BIGINT NOT NULL, ");
-		sbCreateTable.append("ContainerURL TEXT NOT NULL, ");
-		sbCreateTable.append("ThreadURL TEXT NOT NULL, ");
-		sbCreateTable.append("DownloadURL TEXT NOT NULL, ");
-		sbCreateTable.append("ThumbURL TEXT NOT NULL, ");
-		sbCreateTable.append("TargetPath TEXT NOT NULL, ");
-		sbCreateTable.append("TargetFilename TEXT NOT NULL, ");
-		sbCreateTable.append("Size BIGINT NOT NULL");
-		sbCreateTable.append(")");
-		String createTableSQL = sbCreateTable.toString();
+			sbCreateTable.append("CREATE TABLE IF NOT EXISTS ");
+			sbCreateTable.append(tableName);
+			sbCreateTable.append(" (");
+			sbCreateTable.append("LogEntryID INTEGER PRIMARY KEY AUTOINCREMENT, ");
+			sbCreateTable.append("DownloadTimestamp BIGINT NOT NULL, ");
+			sbCreateTable.append("ContainerURL TEXT NOT NULL, ");
+			sbCreateTable.append("ThreadURL TEXT NOT NULL, ");
+			sbCreateTable.append("DownloadURL TEXT NOT NULL, ");
+			sbCreateTable.append("ThumbURL TEXT NOT NULL, ");
+			sbCreateTable.append("TargetPath TEXT NOT NULL, ");
+			sbCreateTable.append("TargetFilename TEXT NOT NULL, ");
+			sbCreateTable.append("Size BIGINT NOT NULL");
+			sbCreateTable.append(")");
+			String createTableSQL = sbCreateTable.toString();
 
-		StringBuilder sbCreateIndexContainerURL = new StringBuilder();
-		sbCreateIndexContainerURL.append("CREATE INDEX IF NOT EXISTS BHLogEntryContainerURLIndex ON ");
-		sbCreateIndexContainerURL.append(tableName);
-		sbCreateIndexContainerURL.append(" (");
-		sbCreateIndexContainerURL.append("ContainerURL");
-		sbCreateIndexContainerURL.append(")");
-		String createIndexContainerURLSQL = sbCreateIndexContainerURL.toString();
+			StringBuilder sbCreateIndexContainerURL = new StringBuilder();
+			sbCreateIndexContainerURL.append("CREATE INDEX IF NOT EXISTS BHLogEntryContainerURLIndex ON ");
+			sbCreateIndexContainerURL.append(tableName);
+			sbCreateIndexContainerURL.append(" (");
+			sbCreateIndexContainerURL.append("ContainerURL");
+			sbCreateIndexContainerURL.append(")");
+			String createIndexContainerURLSQL = sbCreateIndexContainerURL.toString();
 
-		StringBuilder sbCreateIndexTargetPath = new StringBuilder();
-		sbCreateIndexTargetPath.append("CREATE INDEX IF NOT EXISTS BHLogEntryTargetPathIndex ON ");
-		sbCreateIndexTargetPath.append(tableName);
-		sbCreateIndexTargetPath.append(" (");
-		sbCreateIndexTargetPath.append("TargetPath");
-		sbCreateIndexTargetPath.append(")");
-		String createIndexTargetPathSQL = sbCreateIndexTargetPath.toString();
+			StringBuilder sbCreateIndexTargetPath = new StringBuilder();
+			sbCreateIndexTargetPath.append("CREATE INDEX IF NOT EXISTS BHLogEntryTargetPathIndex ON ");
+			sbCreateIndexTargetPath.append(tableName);
+			sbCreateIndexTargetPath.append(" (");
+			sbCreateIndexTargetPath.append("TargetPath");
+			sbCreateIndexTargetPath.append(")");
+			String createIndexTargetPathSQL = sbCreateIndexTargetPath.toString();
 
-		StringBuilder sbCreateIndexTimestamp = new StringBuilder();
-		sbCreateIndexTimestamp.append("CREATE INDEX IF NOT EXISTS BHLogEntryTimestampIndex ON ");
-		sbCreateIndexTimestamp.append(tableName);
-		sbCreateIndexTimestamp.append(" (");
-		sbCreateIndexTimestamp.append("DownloadTimestamp");
-		sbCreateIndexTimestamp.append(")");
-		String createIndexTimestampSQL = sbCreateIndexTimestamp.toString();
+			StringBuilder sbCreateIndexTimestamp = new StringBuilder();
+			sbCreateIndexTimestamp.append("CREATE INDEX IF NOT EXISTS BHLogEntryTimestampIndex ON ");
+			sbCreateIndexTimestamp.append(tableName);
+			sbCreateIndexTimestamp.append(" (");
+			sbCreateIndexTimestamp.append("DownloadTimestamp");
+			sbCreateIndexTimestamp.append(")");
+			String createIndexTimestampSQL = sbCreateIndexTimestamp.toString();
 
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (Statement statement = con.createStatement()) {
-				statement.executeUpdate(createTableSQL);
-				statement.executeUpdate(createIndexContainerURLSQL);
-				statement.executeUpdate(createIndexTargetPathSQL);
-				statement.executeUpdate(createIndexTimestampSQL);
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (Statement statement = con.createStatement()) {
+					statement.executeUpdate(createTableSQL);
+					statement.executeUpdate(createIndexContainerURLSQL);
+					statement.executeUpdate(createIndexTargetPathSQL);
+					statement.executeUpdate(createIndexTimestampSQL);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not create database: {}", tableName, e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not create database: {}", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -183,22 +188,27 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	}
 
 	@Override
-	public synchronized List<LogEntry> getAllEntries() {
-		List<LogEntry> logEntries = new ArrayList<>();
+	public List<LogEntry> getAllEntries() {
+		try {
+			readLock.lock();
+			List<LogEntry> logEntries = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						logEntries.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							logEntries.add(convertResultSetToObject(rs));
+						}
+						return logEntries;
 					}
-					return logEntries;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get LogEntry from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get LogEntry from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -207,19 +217,24 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * 
 	 * @return Count
 	 */
-	public synchronized int getEntriesCount() {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(countAllEntriesSQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						return rs.getInt(1);
+	public int getEntriesCount() {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(countAllEntriesSQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							return rs.getInt(1);
+						}
 					}
 				}
+				return 0;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get count from database '{}'", tableName, e);
+				return 0;
 			}
-			return 0;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get count from database '{}'", tableName, e);
-			return 0;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -229,23 +244,28 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param count Count
 	 * @return Entries
 	 */
-	public synchronized List<LogEntry> getDirectoryLogEntries(int count) {
-		List<LogEntry> logEntries = new ArrayList<>();
+	public List<LogEntry> getDirectoryLogEntries(int count) {
+		try {
+			readLock.lock();
+			List<LogEntry> logEntries = new ArrayList<>();
 
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectDirectoyLogEntriesSQL)) {
-				statement.setInt(1, count);
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						logEntries.add(convertResultSetToObject(rs));
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectDirectoyLogEntriesSQL)) {
+					statement.setInt(1, count);
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							logEntries.add(convertResultSetToObject(rs));
+						}
+						return logEntries;
 					}
-					return logEntries;
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get LogEntry from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+				return new ArrayList<>();
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get LogEntry from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
-			return new ArrayList<>();
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -256,21 +276,26 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param alternativeURL Alternative URL
 	 * @return True if already downloaded, false otherwise
 	 */
-	public synchronized boolean checkAlreadyDownloaded(String url, String alternativeURL) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(countAlreadyDownloadedEntriesSQL)) {
-				statement.setString(1, url);
-				statement.setString(2, alternativeURL);
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						return rs.getInt(1) > 0;
+	public boolean checkAlreadyDownloaded(String url, String alternativeURL) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(countAlreadyDownloadedEntriesSQL)) {
+					statement.setString(1, url);
+					statement.setString(2, alternativeURL);
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							return rs.getInt(1) > 0;
+						}
 					}
 				}
+				return false;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get LogEntry from database '{}'", tableName, e);
+				return false;
 			}
-			return false;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get LogEntry from database '{}'", tableName, e);
-			return false;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
@@ -283,66 +308,81 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param settingsManager Settings Manager
 	 * @param dateFormat Date Format
 	 */
-	public synchronized void fillTableModelWithEntriesRange(int startOffset, int count, LogTableModel model, SettingsManager settingsManager, DateTimeFormatter dateFormat) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntriesRangeSQL)) {
-				statement.setInt(1, count);
-				statement.setInt(2, startOffset);
-				try (ResultSet rs = statement.executeQuery()) {
-					while (rs.next()) {
-						long timestamp = rs.getLong("DownloadTimestamp");
-						String containerURL = rs.getString("ContainerURL");
-						String targetPath = rs.getString("TargetPath");
-						String targetFilename = rs.getString("TargetFilename");
-						long size = rs.getLong("Size");
+	public void fillTableModelWithEntriesRange(int startOffset, int count, LogTableModel model, SettingsManager settingsManager, DateTimeFormatter dateFormat) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntriesRangeSQL)) {
+					statement.setInt(1, count);
+					statement.setInt(2, startOffset);
+					try (ResultSet rs = statement.executeQuery()) {
+						while (rs.next()) {
+							long timestamp = rs.getLong("DownloadTimestamp");
+							String containerURL = rs.getString("ContainerURL");
+							String targetPath = rs.getString("TargetPath");
+							String targetFilename = rs.getString("TargetFilename");
+							long size = rs.getLong("Size");
 
-						LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
-						String strDateTime = dateTime.format(dateFormat);
-						String strFilesize;
-						if (size > 0) {
-							strFilesize = UnitFormatUtil.getSizeString(size, settingsManager.getSizeView());
-						} else {
-							strFilesize = Localization.getString("Unkown");
+							LocalDateTime dateTime = LocalDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.systemDefault());
+							String strDateTime = dateTime.format(dateFormat);
+							String strFilesize;
+							if (size > 0) {
+								strFilesize = UnitFormatUtil.getSizeString(size, settingsManager.getSizeView());
+							} else {
+								strFilesize = Localization.getString("Unkown");
+							}
+							model.addRow(containerURL, targetPath, targetFilename, strDateTime, strFilesize);
 						}
-						model.addRow(containerURL, targetPath, targetFilename, strDateTime, strFilesize);
 					}
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get LogEntry from database '{}'", tableName, e);
+				JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get LogEntry from database '{}'", tableName, e);
-			JOptionPane.showMessageDialog(null, "Message: " + e.getMessage(), "Database-Error", JOptionPane.ERROR_MESSAGE);
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized LogEntry getEntry(int id) {
-		try (Connection con = getDatabaseConnection()) {
-			try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
-				try (ResultSet rs = statement.executeQuery()) {
-					if (!rs.first()) {
-						logger.error("Could not find LogEntry in database: {}", id);
-						return null;
+	public LogEntry getEntry(int id) {
+		try {
+			readLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				try (PreparedStatement statement = con.prepareStatement(selectEntrySQL)) {
+					try (ResultSet rs = statement.executeQuery()) {
+						if (!rs.first()) {
+							logger.error("Could not find LogEntry in database: {}", id);
+							return null;
+						}
+						return convertResultSetToObject(rs);
 					}
-					return convertResultSetToObject(rs);
 				}
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not get LogEntry from database '{}': {}", tableName, id, e);
+				return null;
 			}
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not get LogEntry from database '{}': {}", tableName, id, e);
-			return null;
+		} finally {
+			readLock.unlock();
 		}
 	}
 
 	@Override
-	public synchronized boolean insertEntry(LogEntry entry) {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				insertEntry(entry, statement);
+	public boolean insertEntry(LogEntry entry) {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					insertEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert LogEntry into database '{}': {}", tableName, entry.getContainerURL(), e);
+				return false;
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert LogEntry into database '{}': {}", tableName, entry.getContainerURL(), e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -353,7 +393,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void insertEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
+	private void insertEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
 		statement.setLong(1, entry.getTimestamp());
 		statement.setString(2, entry.getContainerURL());
 		statement.setString(3, entry.getThreadURL());
@@ -381,44 +421,54 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	}
 
 	@Override
-	public synchronized boolean insertEntries(List<LogEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
-				for (LogEntry entry : entries) {
-					try {
-						insertEntry(entry, statement);
-					} catch (SQLException e) {
-						logger.error("Could not insert LogEntry into database '{}': {}", tableName, entry.getContainerURL(), e);
-						result = false;
+	public boolean insertEntries(List<LogEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(insertEntrySQL, Statement.RETURN_GENERATED_KEYS)) {
+					for (LogEntry entry : entries) {
+						try {
+							insertEntry(entry, statement);
+						} catch (SQLException e) {
+							logger.error("Could not insert LogEntry into database '{}': {}", tableName, entry.getContainerURL(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not insert LogEntry into database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not insert LogEntry into database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean updateEntry(LogEntry entry) {
-		if (entry.getId() <= 0) {
-			logger.warn("Could not update LogEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
-			return insertEntry(entry);
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				updateEntry(entry, statement);
+	public boolean updateEntry(LogEntry entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.warn("Could not update LogEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
+				return insertEntry(entry);
 			}
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					updateEntry(entry, statement);
+				}
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -430,7 +480,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @return True if successful, false otherwise (Only relevant when entry is not in database and is inserted)
 	 * @throws SQLException
 	 */
-	private synchronized boolean updateEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
+	private boolean updateEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.warn("Could not update LogEntry in database, because it has no valid ID: {}. Adding it to database instead.", entry.getId());
 			return insertEntry(entry);
@@ -449,47 +499,57 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	}
 
 	@Override
-	public synchronized boolean updateEntries(List<LogEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
-				for (LogEntry entry : entries) {
-					try {
-						if (!updateEntry(entry, statement)) {
+	public boolean updateEntries(List<LogEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(updateEntrySQL)) {
+					for (LogEntry entry : entries) {
+						try {
+							if (!updateEntry(entry, statement)) {
+								result = false;
+							}
+						} catch (SQLException e) {
+							logger.error("Could not update LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
 							result = false;
 						}
-					} catch (SQLException e) {
-						logger.error("Could not update LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-						result = false;
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not update LogEntries in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not update LogEntries in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	@Override
-	public synchronized boolean deleteEntry(LogEntry entry) {
-		if (entry.getId() <= 0) {
-			logger.error("Could not delete LogEntry in database, because it has no valid ID: {}", entry.getId());
-			return false;
-		}
-
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				deleteEntry(entry, statement);
+	public boolean deleteEntry(LogEntry entry) {
+		try {
+			writeLock.lock();
+			if (entry.getId() <= 0) {
+				logger.error("Could not delete LogEntry in database, because it has no valid ID: {}", entry.getId());
+				return false;
 			}
-			logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-			return false;
+
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					deleteEntry(entry, statement);
+				}
+				logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete LogEntry in database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+				return false;
+			}
+		} finally {
+			writeLock.unlock();
 		}
 	}
 
@@ -500,7 +560,7 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * @param statement Prepared Statement
 	 * @throws SQLException
 	 */
-	private synchronized void deleteEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
+	private void deleteEntry(LogEntry entry, PreparedStatement statement) throws SQLException {
 		if (entry.getId() <= 0) {
 			logger.error("Could not delete LogEntry in database, because it has no valid ID: {}", entry.getId());
 			return;
@@ -511,27 +571,32 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	}
 
 	@Override
-	public synchronized boolean deleteEntries(List<LogEntry> entries) {
-		boolean result = true;
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(false);
-			try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
-				for (LogEntry entry : entries) {
-					try {
-						deleteEntry(entry, statement);
-						logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
-					} catch (SQLException e) {
-						logger.error("Could not delete LogEntry into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
-						result = false;
+	public boolean deleteEntries(List<LogEntry> entries) {
+		try {
+			writeLock.lock();
+			boolean result = true;
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(false);
+				try (PreparedStatement statement = con.prepareStatement(deleteEntrySQL)) {
+					for (LogEntry entry : entries) {
+						try {
+							deleteEntry(entry, statement);
+							logger.debug("Deleted entry with ID {}: {}", entry.getId(), entry.getContainerURL());
+						} catch (SQLException e) {
+							logger.error("Could not delete LogEntry into database '{}' with ID {}: {}", tableName, entry.getId(), entry.getContainerURL(), e);
+							result = false;
+						}
 					}
 				}
+				con.commit();
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete LogEntries in database '{}'", tableName, e);
+				result = false;
 			}
-			con.commit();
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete LogEntries in database '{}'", tableName, e);
-			result = false;
+			return result;
+		} finally {
+			writeLock.unlock();
 		}
-		return result;
 	}
 
 	/**
@@ -539,17 +604,22 @@ public class LogsSQLiteDB extends SQLiteDB<LogEntry> {
 	 * 
 	 * @return True if successful, false otherwise
 	 */
-	public synchronized boolean deleteAllEntries() {
-		try (Connection con = getDatabaseConnection()) {
-			con.setAutoCommit(true);
-			try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
-				statement.executeUpdate();
+	public boolean deleteAllEntries() {
+		try {
+			writeLock.lock();
+			try (Connection con = getDatabaseConnection()) {
+				con.setAutoCommit(true);
+				try (PreparedStatement statement = con.prepareStatement(deleteAllEntriesSQL)) {
+					statement.executeUpdate();
+				}
+				logger.debug("Deleted all entries in database '{}'", tableName);
+				return true;
+			} catch (SQLException | ClassNotFoundException e) {
+				logger.error("Could not delete all logs in database '{}'", tableName, e);
+				return false;
 			}
-			logger.debug("Deleted all entries in database '{}'", tableName);
-			return true;
-		} catch (SQLException | ClassNotFoundException e) {
-			logger.error("Could not delete all logs in database '{}'", tableName, e);
-			return false;
+		} finally {
+			writeLock.unlock();
 		}
 	}
 }
