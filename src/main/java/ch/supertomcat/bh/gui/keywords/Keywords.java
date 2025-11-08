@@ -705,12 +705,15 @@ public class Keywords extends JPanel {
 			return;
 		}
 		enableComponents(false);
-		int[] s = jtKeywords.getSelectedRows();
-		String val = "";
-		for (int i = 0; i < s.length; i++) {
-			val = (String)jtKeywords.getValueAt(s[i], 0);
-			jtKeywords.setValueAt(val, s[i], 1);
+
+		int[] selectedRows = jtKeywords.getSelectedRows();
+		List<Keyword> keywordsToUpdate = new ArrayList<>();
+		for (int i = 0; i < selectedRows.length; i++) {
+			String val = (String)jtKeywords.getValueAt(selectedRows[i], 0);
+			jtKeywords.setValueAt(val, selectedRows[i], 1);
+			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
 		}
+		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
 	}
 
@@ -719,13 +722,16 @@ public class Keywords extends JPanel {
 			return;
 		}
 		enableComponents(false);
-		int[] s = jtKeywords.getSelectedRows();
-		String val = "";
+
+		int[] selectedRows = jtKeywords.getSelectedRows();
+		List<Keyword> keywordsToUpdate = new ArrayList<>();
 		String path = settingsManager.getSavePath();
-		for (int i = 0; i < s.length; i++) {
-			val = path + (String)jtKeywords.getValueAt(s[i], 0);
-			jtKeywords.setValueAt(val, s[i], 2);
+		for (int i = 0; i < selectedRows.length; i++) {
+			String val = path + (String)jtKeywords.getValueAt(selectedRows[i], 0);
+			jtKeywords.setValueAt(val, selectedRows[i], 2);
+			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
 		}
+		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
 	}
 
@@ -734,12 +740,15 @@ public class Keywords extends JPanel {
 			return;
 		}
 		enableComponents(false);
-		int[] s = jtKeywords.getSelectedRows();
-		String val = "";
-		for (int i = 0; i < s.length; i++) {
-			val = (String)jtKeywords.getValueAt(s[i], 0);
-			jtKeywords.setValueAt(val, s[i], 3);
+
+		int[] selectedRows = jtKeywords.getSelectedRows();
+		List<Keyword> keywordsToUpdate = new ArrayList<>();
+		for (int i = 0; i < selectedRows.length; i++) {
+			String val = (String)jtKeywords.getValueAt(selectedRows[i], 0);
+			jtKeywords.setValueAt(val, selectedRows[i], 3);
+			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
 		}
+		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
 	}
 
@@ -748,18 +757,23 @@ public class Keywords extends JPanel {
 			return;
 		}
 		enableComponents(false);
-		int[] s = jtKeywords.getSelectedRows();
-		String val = "";
-		for (int i = 0; i < s.length; i++) {
-			val = (String)jtKeywords.getValueAt(s[i], 2);
-			String dlFolder = settingsManager.getSavePath();
+
+		String dlFolder = settingsManager.getSavePath();
+
+		int[] selectedRows = jtKeywords.getSelectedRows();
+		List<Keyword> keywordsToUpdate = new ArrayList<>();
+		for (int i = 0; i < selectedRows.length; i++) {
+			String val = (String)jtKeywords.getValueAt(selectedRows[i], 2);
+
 			int pos = val.indexOf(dlFolder);
 			if (pos == 0) {
 				val = val.substring(dlFolder.length());
 			}
 			val = val.replace(":", "");
-			jtKeywords.setValueAt(val, s[i], 3);
+			jtKeywords.setValueAt(val, selectedRows[i], 3);
+			keywordsToUpdate.add(keywordManager.getKeywordByIndex(jtKeywords.convertRowIndexToModel(selectedRows[i])));
 		}
+		keywordManager.updateKeywords(keywordsToUpdate);
 		enableComponents(true);
 	}
 
