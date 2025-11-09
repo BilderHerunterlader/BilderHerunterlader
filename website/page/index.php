@@ -104,7 +104,7 @@ $smarty->setConfigDir(dirname(__FILE__) . '/configs/');
 $smarty->setCacheDir(dirname(__FILE__) . '/cache/');
 $smarty->addPluginsDir(dirname(__FILE__) . '/../smartyPlugins/');
 
-$smarty->assign('bhUpdatesXMLFile', realpath('../bh/updatev6.xml'));
+$smarty->assign('bhUpdatesXMLFile', realpath('../bh/updatev7.xml'));
 $smarty->assign('pageLocationTemplate', $pageTemplateFile);
 $smarty->assign('pageLocationSubStyle', $pageLocationSubStyle);
 $smarty->assign('pageTitleArray', $pageTitleArr);

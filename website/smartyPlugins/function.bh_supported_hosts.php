@@ -25,25 +25,26 @@ function smarty_function_bh_supported_hosts($params, $template)
 
 	$supportedHostsArr = array();
 	if ($xml != null) {
-		$hosters = $xml->hoster[0];
+		$redirects = $xml->redirectUpdates[0];
+		foreach ($redirects->redirect as $redirect) {
+			$hostName = getSupportedHostName($redirect);
+			if ($hostName != null) {
+				$supportedHostsArr[] = $hostName;
+			}
+		}
+		
+		$hosters = $xml->hosterUpdates[0];
 		foreach ($hosters->host as $host) {
-			$deleleAttribPresent = findAttribute($host, 'delete') !== null;
-			if ($deleleAttribPresent == false) {
-				$hostName = findAttribute($host, 'name');
-				$redirect = false;
-				if (substr($hostName, 0, 4) === "Host" || substr($hostName, 0, 4) === "Rule") {
-					$hostName = substr($hostName, 4);
-				}
-				if (substr($hostName, 0, 8) === "Redirect") {
-					$hostName = substr($hostName, 8);
-					$redirect = true;
-				}
-				if (substr($hostName, -4) === ".xml") {
-					$hostName = substr($hostName, 0, strlen($hostName) - 4);
-				}
-				if ($redirect) {
-					$hostName .= " (Redirect)";
-				}
+			$hostName = getSupportedHostName($host);
+			if ($hostName != null) {
+				$supportedHostsArr[] = $hostName;
+			}
+		}
+		
+		$rules = $xml->ruleUpdates[0];
+		foreach ($rules->rule as $rule) {
+			$hostName = getSupportedHostName($rule);
+			if ($hostName != null) {
 				$supportedHostsArr[] = $hostName;
 			}
 		}
@@ -52,6 +53,30 @@ function smarty_function_bh_supported_hosts($params, $template)
 	}
 	
 	$template->assign("BHSupportedHostsArray", $supportedHostsArr); 
+}
+
+function getSupportedHostName($redirectOrHostOrRule) {
+	$deleleAttribPresent = findAttribute($redirectOrHostOrRule, 'delete') !== null;
+	if ($deleleAttribPresent == true) {
+		return null;
+	}
+
+	$hostName = findAttribute($redirectOrHostOrRule, 'name');
+	$redirect = false;
+	if (substr($hostName, 0, 4) === "Host" || substr($hostName, 0, 4) === "Rule") {
+		$hostName = substr($hostName, 4);
+	}
+	if (substr($hostName, 0, 8) === "Redirect") {
+		$hostName = substr($hostName, 8);
+		$redirect = true;
+	}
+	if (substr($hostName, -4) === ".xml") {
+		$hostName = substr($hostName, 0, strlen($hostName) - 4);
+	}
+	if ($redirect) {
+		$hostName .= " (Redirect)";
+	}
+	return $hostName;
 }
 
 function arraycmp($a, $b) {

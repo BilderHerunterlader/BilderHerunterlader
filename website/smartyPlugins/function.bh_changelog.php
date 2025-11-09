@@ -27,12 +27,9 @@ function smarty_function_bh_changelog($params, $template)
 	if ($xml != null) {
 		$changelog = $xml->changelog[0];
 		foreach ($changelog->changes as $change) {
-			$lang = (string)$change["lng"];
-			if ($lang === "en") {
-				$version = $change["version"] . ":\n";
-				$desc = str_replace("\\n", "\n", $change) . "\n";
-				$changelogArr[] = $version . $desc;
-			}
+			$version = $change["version"] . ":\n";
+			$desc = str_replace("\\n", "\n", $change) . "\n";
+			$changelogArr[] = $version . $desc;
 		}
 		
 	}
