@@ -51,13 +51,13 @@ import ch.supertomcat.supertomcatutils.http.HTTPUtil;
  * could have same url-pattern. So within in this class it could be determent which
  * board is the right one for a url.
  * 
- * @version 3.5
+ * @version 3.6
  */
 public class HostGenericMultiPageLinkGrabber extends Host implements IHoster, IHosterOptions, IHosterURLAdder {
 	/**
 	 * Version dieser Klasse
 	 */
-	public static final String VERSION = "3.5";
+	public static final String VERSION = "3.6";
 
 	/**
 	 * Name dieser Klasse
