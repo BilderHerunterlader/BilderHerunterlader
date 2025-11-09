@@ -417,12 +417,24 @@ public class UpdateManager {
 				return false;
 			}
 
+			/*
+			 * On Windows quotes have to be added around paths (because the might contain a space), because Windows API is called over JNA. Linux and Mac use
+			 * ProcessBuilder, which already handles this. But it only has to be done for parameters, not the executable.
+			 */
 			List<String> arguments = new ArrayList<>();
 			arguments.add(javaExePath);
 			arguments.add("-jar");
-			arguments.add(updaterJarPath.toAbsolutePath().toString());
+			if (Platform.isWindows()) {
+				arguments.add("\"" + updaterJarPath.toAbsolutePath().toString() + "\"");
+			} else {
+				arguments.add(updaterJarPath.toAbsolutePath().toString());
+			}
 			arguments.add("-update");
-			arguments.add(updateXMLFilePath.toAbsolutePath().toString());
+			if (Platform.isWindows()) {
+				arguments.add("\"" + updateXMLFilePath.toAbsolutePath().toString() + "\"");
+			} else {
+				arguments.add(updateXMLFilePath.toAbsolutePath().toString());
+			}
 
 			executor.startProcess(null, arguments);
 			return true;
