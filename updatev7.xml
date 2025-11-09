@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="6.0.0" />
-	<main version="6.0.0" src="https://www.dropbox.com/scl/fi/wk45viz6kvkrhw6eh3j37/BH-6.0.0.zip?rlkey=jc6k3efssol33o6cx047sewur&amp;dl=1" filename="BH-6.0.0.zip" name="BilderHerunterlader" />
+	<setuprelease version="6.1.0" />
+	<main version="6.1.0" src="https://www.dropbox.com/scl/fi/huxd8qi27ru3twhojbpxz/BH-6.1.0.zip?rlkey=5ig58nzxzbph0tajzd6gqfynr&amp;dl=1" filename="BH-6.1.0.zip" name="BilderHerunterlader" />
 	<redirectUpdates />
 	<hosterUpdates>
 		<host version="4.7" src="https://www.dropbox.com/s/b867m84mcgn29m2/HostCoppermineGalleries.class?dl=1" filename="HostCoppermineGalleries.class" name="HostCoppermineGalleries">
