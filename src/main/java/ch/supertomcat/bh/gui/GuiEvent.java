@@ -11,7 +11,7 @@ import ch.supertomcat.bh.gui.update.UpdateListener;
 /**
  * Class which contains Listeners for GUI-Events
  */
-public class GuiEvent {
+public abstract class GuiEvent {
 	/**
 	 * Listeners
 	 */
@@ -36,6 +36,11 @@ public class GuiEvent {
 			listener.hideWindow();
 		}
 	}
+
+	/**
+	 * @return True if system tray is used, false otherwise
+	 */
+	public abstract boolean isSystemTray();
 
 	/**
 	 * Exit program

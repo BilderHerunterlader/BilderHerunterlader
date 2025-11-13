@@ -2,6 +2,7 @@ package ch.supertomcat.bh;
 
 import java.awt.EventQueue;
 import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,6 +17,8 @@ import javax.swing.UIManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+
+import com.sun.jna.Platform;
 
 import ch.supertomcat.bh.clipboard.ClipboardObserver;
 import ch.supertomcat.bh.clipboard.ClipboardObserverListener;
@@ -68,7 +71,7 @@ public abstract class BH {
 	/**
 	 * SystemTray
 	 */
-	private SystemTrayTool stt;
+	private SystemTrayTool stt = null;
 
 	/**
 	 * Main-Window
@@ -137,7 +140,13 @@ public abstract class BH {
 	 * @throws JAXBException
 	 */
 	public BH() throws JAXBException {
-		GuiEvent guiEvent = new GuiEvent();
+		GuiEvent guiEvent = new GuiEvent() {
+
+			@Override
+			public boolean isSystemTray() {
+				return stt != null;
+			}
+		};
 		guiEvent.addListener(new IGuiEventListener() {
 			@Override
 			public void exitApp(boolean restart, boolean update) {
@@ -288,16 +297,14 @@ public abstract class BH {
 
 		ClipboardObserver clipboardObserver = new ClipboardObserver(settingsManager);
 		main = new MainWindow(settingsManager, logManager, queueManager, downloadQueueManager, keywordManager, proxyManager, cookieManager, hostManager, clipboardObserver, guiEvent);
-		if (SystemTrayTool.isTraySupported()) {
+
+		if (SystemTrayTool.isTraySupported() && (Platform.isWindows() || Platform.isMac())) {
 			/*
 			 * We can only use the SystemTray on Java 1.6 or above and the user wants this
 			 * Because there is a parameter for the prorgramm to make sure SystemTray is not used.
 			 * Because i was reported by a user, SystemTray could make trouble on some systems.
 			 */
 
-			// Init SystemTray
-			stt = new SystemTrayTool(main, main, queueManager, downloadQueueManager, keywordManager, logManager, proxyManager, settingsManager, cookieManager, hostManager, clipboardObserver, guiEvent);
-			stt.init();
 			/*
 			 * If SystemTray is used, we show the window but hide it just again.
 			 * I can't remember exactly why i do this. But it had to do with the focus
@@ -305,11 +312,16 @@ public abstract class BH {
 			 */
 			EventQueue.invokeLater(() -> {
 				main.setVisible(true);
+
+				// Init SystemTray
+				stt = new SystemTrayTool(main, main, queueManager, downloadQueueManager, keywordManager, logManager, proxyManager, settingsManager, cookieManager, hostManager, clipboardObserver, guiEvent);
+				stt.init();
+
+				// Add icon to the SystemTray
+				stt.showTrayIcon();
+
 				main.setVisible(false);
 			});
-
-			// Add icon to the SystemTray
-			stt.showTrayIcon();
 		} else {
 			// If SystemTray is not used bring the main window to the front and request the focus
 			EventQueue.invokeLater(() -> {

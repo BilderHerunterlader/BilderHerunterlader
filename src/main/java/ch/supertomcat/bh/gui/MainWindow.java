@@ -50,7 +50,6 @@ import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.queue.QueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.bh.settings.xml.WindowSettings;
-import ch.supertomcat.bh.systemtray.SystemTrayTool;
 import ch.supertomcat.supertomcatutils.application.ApplicationMain;
 import ch.supertomcat.supertomcatutils.application.ApplicationProperties;
 import ch.supertomcat.supertomcatutils.gui.Icons;
@@ -302,7 +301,7 @@ public class MainWindow extends JFrame implements MainWindowAccess {
 		addWindowListener(new WindowAdapter() {
 			@Override
 			public void windowClosing(WindowEvent e) {
-				if (!SystemTrayTool.isTraySupported()) {
+				if (!guiEvent.isSystemTray()) {
 					if (JOptionPane.showConfirmDialog(MainWindow.this, Localization.getString("ReallyExit"), Localization.getString("Exit"), JOptionPane.YES_NO_OPTION) == JOptionPane.NO_OPTION) {
 						return;
 					}
