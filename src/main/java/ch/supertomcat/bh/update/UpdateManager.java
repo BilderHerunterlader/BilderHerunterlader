@@ -251,7 +251,14 @@ public class UpdateManager {
 			addStartProcess(updateXMLDefinition, applicationPath);
 			writeUpdateXMLFile(updateXMLDefinition, updateXMLFilePath);
 
-			JOptionPane.showMessageDialog(owner, Localization.getString("ProgrammExitBecauseUpdate"), Localization.getString("Update"), JOptionPane.WARNING_MESSAGE);
+			String exitNotificationMessage;
+			if (Platform.isWindows() || Platform.isMac()) {
+				exitNotificationMessage = Localization.getString("ProgrammExitBecauseUpdate");
+			} else {
+				exitNotificationMessage = Localization.getString("ProgrammExitBecauseUpdateNoAutoRestart");
+			}
+
+			JOptionPane.showMessageDialog(owner, exitNotificationMessage, Localization.getString("Update"), JOptionPane.WARNING_MESSAGE);
 
 			logger.info("Start updater and exit");
 			if (mainUpdateAvailable) {
@@ -367,6 +374,14 @@ public class UpdateManager {
 			return;
 		}
 
+		if (!Platform.isWindows() && !Platform.isMac()) {
+			/*
+			 * On Linux it is currently not possible to relaunch BH, because of how the updater is started. The started java process would be in headless mode,
+			 * so BH would not work.
+			 */
+			return;
+		}
+
 		List<String> arguments = new ArrayList<>();
 		arguments.add(javaExePath);
 		arguments.add("-jar");
@@ -402,40 +417,51 @@ public class UpdateManager {
 	private boolean startUpdater(Path updateXMLFilePath, Path updaterJarPath) {
 		try {
 			logger.info("Start upater: XMLFile: {}, UpdaterJarPath: {}", updateXMLFilePath, updaterJarPath);
-			EvelatedProcessExecutor executor;
-			if (Platform.isWindows()) {
-				executor = new WindowsEvelatedProcessExecutor();
-			} else if (Platform.isMac()) {
-				executor = new MacOSEvelatedProcessExecutor();
-			} else {
-				executor = new LinuxEvelatedProcessExecutor();
-			}
+			String updateXMLFileAbsolutePath = updateXMLFilePath.toAbsolutePath().toString();
+			String updaterJarAbsolutePath = updaterJarPath.toAbsolutePath().toString();
+			logger.info("Start upater: UpdateXMLFileAbsolutePath: {}, UpdaterJarAbsolutePath: {}", updateXMLFileAbsolutePath, updaterJarAbsolutePath);
 
 			String javaExePath = ApplicationUtil.getJavaExePath();
 			if (javaExePath == null) {
 				logger.error("Could not find java executable");
 				return false;
 			}
+			logger.info("JavaExePath: {}", javaExePath);
 
-			/*
-			 * On Windows quotes have to be added around paths (because the might contain a space), because Windows API is called over JNA. Linux and Mac use
-			 * ProcessBuilder, which already handles this. But it only has to be done for parameters, not the executable.
-			 */
+			String username = System.getProperty("user.name");
+			logger.info("Username: {}", username);
+
 			List<String> arguments = new ArrayList<>();
-			arguments.add(javaExePath);
-			arguments.add("-jar");
-			if (Platform.isWindows()) {
-				arguments.add("\"" + updaterJarPath.toAbsolutePath().toString() + "\"");
-			} else {
-				arguments.add(updaterJarPath.toAbsolutePath().toString());
-			}
-			arguments.add("-update");
-			if (Platform.isWindows()) {
-				arguments.add("\"" + updateXMLFilePath.toAbsolutePath().toString() + "\"");
-			} else {
-				arguments.add(updateXMLFilePath.toAbsolutePath().toString());
-			}
 
+			EvelatedProcessExecutor executor;
+			if (Platform.isWindows()) {
+				executor = new WindowsEvelatedProcessExecutor();
+				/*
+				 * On Windows quotes have to be added around paths (because the might contain a space), because Windows API is called over JNA. Linux and Mac
+				 * use
+				 * ProcessBuilder, which already handles this. But it only has to be done for parameters, not the executable.
+				 */
+				arguments.add(javaExePath);
+				arguments.add("-jar");
+				arguments.add("\"" + updaterJarAbsolutePath + "\"");
+				arguments.add("-update");
+				arguments.add("\"" + updateXMLFileAbsolutePath + "\"");
+			} else if (Platform.isMac()) {
+				executor = new MacOSEvelatedProcessExecutor();
+				arguments.add(javaExePath);
+				arguments.add("-jar");
+				arguments.add(updaterJarAbsolutePath);
+				arguments.add("-update");
+				arguments.add(updateXMLFileAbsolutePath);
+			} else {
+				executor = new LinuxEvelatedProcessExecutor();
+				arguments.add("--user");
+				arguments.add(username);
+				arguments.add("sh");
+				arguments.add("-c");
+				arguments.add("nohup \"" + javaExePath + "\" -jar \"" + updaterJarAbsolutePath + "\" -update \"" + updateXMLFileAbsolutePath + "\" >/dev/null 2>&1 &");
+			}
+			logger.info("Starting updater: Executor: {}, Arguments: {}", executor.getClass(), arguments);
 			executor.startProcess(null, arguments);
 			return true;
 		} catch (Exception e) {

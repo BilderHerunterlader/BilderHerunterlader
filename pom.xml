@@ -16,7 +16,7 @@
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
 		<libsPath>${project.basedir}/lib</libsPath>
 		<updaterPath>${project.basedir}/updater</updaterPath>
-		<updaterVersion>1.0.0</updaterVersion>
+		<updater.version>1.0.1</updater.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -227,7 +227,7 @@
 								<artifactItem>
 									<groupId>com.github.bilderherunterlader</groupId>
 									<artifactId>supertomcatupdater</artifactId>
-									<version>${updaterVersion}</version>
+									<version>${updater.version}</version>
 									<type>jar</type>
 									<classifier>jar-with-dependencies</classifier>
 									<outputDirectory>${updaterPath}</outputDirectory>
@@ -236,7 +236,7 @@
 								<artifactItem>
 									<groupId>com.github.bilderherunterlader</groupId>
 									<artifactId>supertomcatupdater</artifactId>
-									<version>${updaterVersion}</version>
+									<version>${updater.version}</version>
 									<type>exe</type>
 									<classifier>windows-exe</classifier>
 									<outputDirectory>${updaterPath}</outputDirectory>
