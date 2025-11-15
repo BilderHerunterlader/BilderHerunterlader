@@ -16,7 +16,7 @@
 		<mainClass>ch.supertomcat.bh.BH</mainClass>
 		<libsPath>${project.basedir}/lib</libsPath>
 		<updaterPath>${project.basedir}/updater</updaterPath>
-		<updater.version>1.0.1</updater.version>
+		<updater.version>1.0.2</updater.version>
 	</properties>
 	<dependencies>
 		<dependency>
