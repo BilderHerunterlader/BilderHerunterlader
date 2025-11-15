@@ -121,7 +121,7 @@ public class Log extends JPanel implements ILogManagerListener {
 	/**
 	 * Current Start Index (Index of the line in the logfile)
 	 */
-	private int currentStart = 1;
+	private int currentStart = 0;
 
 	/**
 	 * Flag if the last 100 lines of the logfiles are displayed

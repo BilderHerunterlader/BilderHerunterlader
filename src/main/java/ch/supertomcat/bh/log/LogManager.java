@@ -385,27 +385,36 @@ public class LogManager {
 			return new int[] { 0, 0, 0 };
 		}
 
+		int actualStart = start;
 		if (start < 0 || start >= count) {
 			// Integer division give count of 100 entries for start
 			if (count > 100) {
-				start = count - 100;
+				actualStart = count - 100;
 			} else {
+				actualStart = 0;
+			}
+		} else if (start >= count - 100) {
+			start = count - 100;
+			if (start < 0) {
 				start = 0;
 			}
 		}
 
 		int limit = 100;
-		if (start < 100) {
-			limit = count % 100;
+		if (actualStart < 100 && start != -1) {
+			int remainder = count % 100;
+			if (remainder > 0) {
+				limit = remainder;
+			}
 		}
 
-		logsSQLiteDB.fillTableModelWithEntriesRange(start, limit, model, settingsManager, DATE_FORMAT);
+		logsSQLiteDB.fillTableModelWithEntriesRange(actualStart, limit, model, settingsManager, DATE_FORMAT);
 
 		int entriesCount = model.getRowCount();
 		if (entriesCount <= 0) {
 			return new int[] { 0, 0, 0 };
 		} else {
-			return new int[] { start, start + entriesCount, entriesCount };
+			return new int[] { actualStart, actualStart + entriesCount, entriesCount };
 		}
 	}
 
