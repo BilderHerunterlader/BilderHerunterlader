@@ -16,6 +16,7 @@
 		type="Application"
 		applications="no"
 		encoding="UTF-8"
+		terminal="false"
 		categories="Application;Network"
 		description="BilderHerunterlader">
 	</shortcut>
@@ -30,6 +31,7 @@
 		type="Application"
 		applications="no"
 		encoding="UTF-8"
+		terminal="false"
 		categories="Application;Network"
 		description="Uninstall BilderHerunterlader">
 	</shortcut>
