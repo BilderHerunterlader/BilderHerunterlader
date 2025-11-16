@@ -29,6 +29,7 @@ import ch.supertomcat.bh.gui.MainWindowAccess;
 import ch.supertomcat.bh.importexport.ExportLogs;
 import ch.supertomcat.bh.log.ILogManagerListener;
 import ch.supertomcat.bh.log.LogManager;
+import ch.supertomcat.bh.log.LogPageInfo;
 import ch.supertomcat.bh.queue.DownloadQueueManager;
 import ch.supertomcat.bh.settings.SettingsManager;
 import ch.supertomcat.supertomcatutils.gui.FileExplorerUtil;
@@ -119,9 +120,9 @@ public class Log extends JPanel implements ILogManagerListener {
 	private DefaultStringColorRowRenderer crr;
 
 	/**
-	 * Current Start Index (Index of the line in the logfile)
+	 * CurrentPage
 	 */
-	private int currentStart = 0;
+	private LogPageInfo currentPage = new LogPageInfo(0, 0, 0, 0);
 
 	/**
 	 * Flag if the last 100 lines of the logfiles are displayed
@@ -224,15 +225,15 @@ public class Log extends JPanel implements ILogManagerListener {
 			last = false;
 		});
 		btnPrevious.addActionListener(e -> {
-			if (currentStart > 100) {
-				updateIndexAndStatus(logManager.readLogs(currentStart - 100, model));
-			} else {
+			if (currentPage.start() <= 0) {
 				updateIndexAndStatus(logManager.readLogs(0, model));
+			} else {
+				updateIndexAndStatus(logManager.readLogs(currentPage.start() - LogManager.LOG_ENTRIES_PER_PAGE, model));
 			}
 			last = false;
 		});
 		btnNext.addActionListener(e -> {
-			updateIndexAndStatus(logManager.readLogs(currentStart + 100, model));
+			updateIndexAndStatus(logManager.readLogs(currentPage.start() + LogManager.LOG_ENTRIES_PER_PAGE, model));
 			last = false;
 		});
 		btnLast.addActionListener(e -> {
@@ -367,20 +368,19 @@ public class Log extends JPanel implements ILogManagerListener {
 	}
 
 	/**
-	 * @param vals Values
+	 * Updated index and status
+	 * 
+	 * @param loadedPage Loaded Page
 	 */
-	private void updateIndexAndStatus(int[] vals) {
-		if (vals.length != 3) {
-			return;
-		}
-		int localCurrentStart = vals[0];
-		int end = vals[1];
-		int lineCount = vals[2];
-		this.currentStart = localCurrentStart;
+	private void updateIndexAndStatus(LogPageInfo loadedPage) {
+		int adjustedStart = loadedPage.adjustedStart();
+		int end = loadedPage.end();
+		int lineCount = loadedPage.lineCount();
+		this.currentPage = loadedPage;
 		if (lineCount == 0) {
 			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowNothing"));
 		} else {
-			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowingFrom") + " " + localCurrentStart + " " + Localization.getString("To") + " " + end);
+			lblStatus.setText("Downloads: " + lineCount + " | " + Localization.getString("ShowingFrom") + " " + adjustedStart + " " + Localization.getString("To") + " " + end);
 		}
 	}
 

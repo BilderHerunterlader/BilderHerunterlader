@@ -56,6 +56,11 @@ public class LogManager {
 	private static final String BH_BLACKLIST_FILENAME = "BH_Blacklist.txt";
 
 	/**
+	 * Log Entries per Page
+	 */
+	public static final int LOG_ENTRIES_PER_PAGE = 100;
+
+	/**
 	 * Date Format
 	 */
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT);
@@ -375,46 +380,43 @@ public class LogManager {
 	 * 
 	 * @param start Index of the line in logfile to start from
 	 * @param model Model
-	 * @return int array: 0 -&gt; currentStart, 1 -&gt; end, 2 -&gt; lineCount
+	 * @return Log Page Info
 	 */
-	public synchronized int[] readLogs(int start, LogTableModel model) {
+	public synchronized LogPageInfo readLogs(int start, LogTableModel model) {
 		model.removeAllRows();
 
 		int count = logsSQLiteDB.getEntriesCount();
 		if (count <= 0) {
-			return new int[] { 0, 0, 0 };
+			return new LogPageInfo(0, 0, 0, 0);
 		}
 
+		int resultStart = start;
 		int actualStart = start;
 		if (start < 0 || start >= count) {
-			// Integer division give count of 100 entries for start
-			if (count > 100) {
+			// If start below zero or greater than count just get last page
+			if (count > LOG_ENTRIES_PER_PAGE) {
+				// Always display last 100 lines on last page
 				actualStart = count - 100;
+				// Get nearest start using integer division
+				resultStart = count / LOG_ENTRIES_PER_PAGE * LOG_ENTRIES_PER_PAGE;
 			} else {
 				actualStart = 0;
+				resultStart = 0;
 			}
-		} else if (start >= count - 100) {
-			start = count - 100;
-			if (start < 0) {
-				start = 0;
-			}
+		} else if (count > LOG_ENTRIES_PER_PAGE && start >= count - LOG_ENTRIES_PER_PAGE) {
+			// Always display last 100 lines on last page
+			actualStart = count - LOG_ENTRIES_PER_PAGE;
 		}
 
-		int limit = 100;
-		if (actualStart < 100 && start != -1) {
-			int remainder = count % 100;
-			if (remainder > 0) {
-				limit = remainder;
-			}
-		}
+		int limit = LOG_ENTRIES_PER_PAGE;
 
 		logsSQLiteDB.fillTableModelWithEntriesRange(actualStart, limit, model, settingsManager, DATE_FORMAT);
 
 		int entriesCount = model.getRowCount();
 		if (entriesCount <= 0) {
-			return new int[] { 0, 0, 0 };
+			return new LogPageInfo(0, 0, 0, 0);
 		} else {
-			return new int[] { actualStart, actualStart + entriesCount, entriesCount };
+			return new LogPageInfo(resultStart, actualStart, actualStart + entriesCount, entriesCount);
 		}
 	}
 
