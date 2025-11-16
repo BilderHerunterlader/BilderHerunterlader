@@ -1,6 +1,6 @@
 # Changelog
 
-## Version 5:
+## Version 6:
 - **Java 21 is required!**
 - Display an error, when settings file can't be read and let user decide to replace with default settings or exit program
 - Store download logs in database (Text-File is still written too). This improves performance when checking for already downloaded URLs and in display of table.
