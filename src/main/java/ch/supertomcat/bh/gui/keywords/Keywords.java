@@ -222,7 +222,7 @@ public class Keywords extends JPanel {
 	/**
 	 * Button
 	 */
-	private JToggleButton btnFilter = new JToggleButton(Localization.getString("Filter"), Icons.getTangoIcon("actions/edit-find.png", 16));
+	private JToggleButton btnFilter = new JToggleButton(Localization.getString("Filter"), Icons.getTangoSVGIcon("actions/edit-find.svg", 16));
 
 	/**
 	 * Flag if a process is running
@@ -608,7 +608,7 @@ public class Keywords extends JPanel {
 			return;
 		}
 		int retval = JOptionPane.showConfirmDialog(parentWindow, Localization.getString("KeywordsReallyDelete"), "Warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE, Icons
-				.getTangoIcon("status/dialog-warning.png", 32));
+				.getTangoSVGIcon("status/dialog-warning.svg", 32));
 		if (retval == JOptionPane.NO_OPTION) {
 			return;
 		}
