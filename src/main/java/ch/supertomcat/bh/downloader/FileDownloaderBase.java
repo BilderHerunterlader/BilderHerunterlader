@@ -467,7 +467,7 @@ public abstract class FileDownloaderBase implements FileDownloader {
 
 		// There is no file with this name, so we can create it
 		Files.createFile(fileToCreate);
-		return file; // and return it
+		return fileToCreate; // and return it
 	}
 
 	/**
