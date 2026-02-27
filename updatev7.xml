@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <updates>
-	<setuprelease version="6.1.2" />
-	<main version="6.1.2" src="https://www.dropbox.com/scl/fi/agm3a74nvmu9pabcduup6/BH-6.1.2.zip?rlkey=4f83rhqg0oacm13ladull107r&amp;dl=1" filename="BH-6.1.2.zip" name="BilderHerunterlader" />
+	<setuprelease version="6.1.3" />
+	<main version="6.1.3" src="https://www.dropbox.com/scl/fi/09e363jhkmks0m6fnwokw/BH-6.1.3.zip?rlkey=evs525392iy31ufr0p05q1wj3&amp;dl=1" filename="BH-6.1.3.zip" name="BilderHerunterlader" />
 	<redirectUpdates />
 	<hosterUpdates>
 		<host version="4.8" src="https://www.dropbox.com/s/b867m84mcgn29m2/HostCoppermineGalleries.class?dl=1" filename="HostCoppermineGalleries.class" name="HostCoppermineGalleries">
@@ -69,6 +69,7 @@
 		<!--
 		<changes version="6.0.0"></changes>
 		-->
+		<changes version="6.1.3">- Bug Fixed: File rename was not working, when a file with the same name already exists\n- Replaced remaining Icons by SVG Icons</changes>
 		<changes version="6.1.2">- Fixed update process on linux\n- Use SystemTray only on Windows or MacOS. On Linux it freezes the application and windows are not rendered.\n- Fixed display of logs</changes>
 		<changes version="6.1.1">- Bug Fixed: Logs were not sorted and displayed correctly\n- Logs are not written to text file anymore. But added a button to export all logs to text file.\n- Refactored synchronization for queue and all databases\n- Prevent errors in Chrome when request from WebExtension\n- Added setting for URL detection patterns (This replaces what previously could be done with HostzDefaultImages.txt)\n- Moved settings from HostDefaultFiles host class to normal settings dialog (Detection tab)\n- Added option to use a shared HTTPClient (This could improve performance a bit. But if settings are changed while downloading it could cause a delay or failures. It depends on the usage of BH if this option should be used or not)\n- Bug Fixed: NullPointerException when creation time or expiry time in cookie are null\n- Bug Fixed: Keywords were not saved when some menu item actions were used\n- Bug Fixed: Update fails to start on Windows if only hosts-classes or rules are updated</changes>
 		<changes version="6.1.0">- Bug Fixed: Logs were not sorted and displayed correctly\n- Logs are not written to text file anymore. But added a button to export all logs to text file.\n- Refactored synchronization for queue and all databases\n- Prevent errors in Chrome when request from WebExtension\n- Added setting for URL detection patterns (This replaces what previously could be done with HostzDefaultImages.txt)\n- Moved settings from HostDefaultFiles host class to normal settings dialog (Detection tab)\n- Added option to use a shared HTTPClient (This could improve performance a bit. But if settings are changed while downloading it could cause a delay or failures. It depends on the usage of BH if this option should be used or not)\n- Bug Fixed: NullPointerException when creation time or expiry time in cookie are null\n- Bug Fixed: Keywords were not saved when some menu item actions were used</changes>
