@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Preview Cache
  */
-public class PreviewCache {
+public class PreviewCache implements AutoCloseable {
 	/**
 	 * Logger for this class
 	 */
@@ -120,5 +120,10 @@ public class PreviewCache {
 		 * All Previews Added
 		 */
 		public void allPreviewsAdded();
+	}
+
+	@Override
+	public void close() throws Exception {
+		diskCache.close();
 	}
 }

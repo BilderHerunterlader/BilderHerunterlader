@@ -28,6 +28,7 @@ import ch.supertomcat.bh.gui.BHIcons;
 import ch.supertomcat.bh.gui.GuiEvent;
 import ch.supertomcat.bh.gui.IGuiEventListener;
 import ch.supertomcat.bh.gui.MainWindow;
+import ch.supertomcat.bh.gui.adder.AdderWindow;
 import ch.supertomcat.bh.gui.update.UpdateListener;
 import ch.supertomcat.bh.gui.update.UpdateWindow;
 import ch.supertomcat.bh.hoster.HostManager;
@@ -488,6 +489,8 @@ public abstract class BH {
 
 				cookieManager.closeDatabase();
 			}
+
+			AdderWindow.closePreviewCache();
 
 			if (stt != null) {
 				logger.debug("Removing Trayicon");

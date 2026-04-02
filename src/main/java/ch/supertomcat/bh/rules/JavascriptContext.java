@@ -5,6 +5,7 @@ import org.mozilla.javascript.ContextFactory;
 import org.mozilla.javascript.NativeJavaObject;
 import org.mozilla.javascript.Scriptable;
 import org.mozilla.javascript.WrapFactory;
+import org.mozilla.javascript.lc.type.impl.BasicClassTypeInfo;
 
 /**
  * Class containing classes for setting up the Rhino javascript context
@@ -52,7 +53,7 @@ public class JavascriptContext {
 		 * @param staticType Static Type
 		 */
 		public SandboxNativeJavaObject(Scriptable scope, Object javaObject, Class<?> staticType) {
-			super(scope, javaObject, staticType);
+			super(scope, javaObject, new BasicClassTypeInfo(staticType));
 		}
 
 		@Override

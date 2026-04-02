@@ -94,52 +94,58 @@ public class TransmitterHTTP extends HttpServer {
 		@SuppressWarnings("resource")
 		@Override
 		public void service(Request request, Response response) throws Exception {
-			logger.info("Received request: URI: {}, Method: {}", request.getRequestURI(), request.getMethod());
-			if (!"/BH/DownloadFiles".equals(request.getRequestURI())) {
-				logger.info("Send 404 Not Found");
-				response.sendError(HttpStatus.NOT_FOUND_404.getStatusCode(), "Resource not found");
-				return;
-			} else if (!request.getMethod().matchesMethod("POST")) {
-				logger.info("Send 405 Method not allowed");
-				response.sendError(HttpStatus.METHOD_NOT_ALLOWED_405.getStatusCode(), "Method not allowed");
-				return;
-			} else if (!acceptConnections) {
-				logger.info("Send 503 Service not available");
-				response.sendError(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "BH currently does not accept connections, try later");
-				return;
-			}
+			try {
+				logger.info("Received request: URI: {}, Method: {}", request.getRequestURI(), request.getMethod());
+				if (!"/BH/DownloadFiles".equals(request.getRequestURI())) {
+					logger.info("Send 404 Not Found");
+					response.sendError(HttpStatus.NOT_FOUND_404.getStatusCode(), "Resource not found");
+					return;
+				} else if (!request.getMethod().matchesMethod("POST")) {
+					logger.info("Send 405 Method not allowed");
+					response.sendError(HttpStatus.METHOD_NOT_ALLOWED_405.getStatusCode(), "Method not allowed");
+					return;
+				} else if (!acceptConnections) {
+					logger.info("Send 503 Service not available");
+					response.sendError(HttpStatus.SERVICE_UNAVAILABLE_503.getStatusCode(), "BH currently does not accept connections, try later");
+					return;
+				}
 
-			Charset encoding = StandardCharsets.ISO_8859_1;
-			String contentType = request.getHeader(Header.ContentType);
-			logger.info("Content-Type Header: {}", contentType);
-			if (contentType != null) {
-				Matcher matcher = CONTENT_TYPE_PATTERN.matcher(contentType);
-				if (matcher.find()) {
-					String strEncoding = matcher.group(1);
-					try {
-						encoding = Charset.forName(strEncoding);
-					} catch (IllegalArgumentException e) {
-						logger.error("Could not find charset: '{}'", strEncoding, e);
+				Charset encoding = StandardCharsets.ISO_8859_1;
+				String contentType = request.getHeader(Header.ContentType);
+				logger.info("Content-Type Header: {}", contentType);
+				if (contentType != null) {
+					Matcher matcher = CONTENT_TYPE_PATTERN.matcher(contentType);
+					if (matcher.find()) {
+						String strEncoding = matcher.group(1);
+						try {
+							encoding = Charset.forName(strEncoding);
+						} catch (IllegalArgumentException e) {
+							logger.error("Could not find charset: '{}'", strEncoding, e);
+						}
 					}
 				}
-			}
-			logger.info("Response Encoding: {}", encoding);
+				logger.info("Response Encoding: {}", encoding);
 
-			boolean result = transmitterHelper.parseTransmitterInput(request.getInputStream(), encoding);
-			if (!result) {
-				logger.info("Send 400 Bad Request");
-				response.sendError(HttpStatus.BAD_REQUEST_400.getStatusCode(), "URLs could not be parsed");
-				return;
-			}
+				boolean result = transmitterHelper.parseTransmitterInput(request.getInputStream(), encoding);
+				if (!result) {
+					logger.info("Send 400 Bad Request");
+					response.sendError(HttpStatus.BAD_REQUEST_400.getStatusCode(), "URLs could not be parsed");
+					return;
+				}
 
-			logger.info("Send success reponse");
-			response.setStatus(HttpStatus.OK_200);
-			response.setContentType(ContentType.newContentType("text/plain", encoding.name()));
-			String originRequestHeader = request.getHeader("Origin");
-			if (originRequestHeader != null) {
-				response.setHeader("Access-Control-Allow-Origin", originRequestHeader);
+				logger.info("Send success reponse");
+				response.setStatus(HttpStatus.OK_200);
+				response.setContentType(ContentType.newContentType("text/plain", encoding.name()));
+				String originRequestHeader = request.getHeader("Origin");
+				if (originRequestHeader != null) {
+					response.setHeader("Access-Control-Allow-Origin", originRequestHeader);
+				}
+				response.getWriter().write("URLs received");
+			} catch (Exception e) {
+				// Catch exception to log it and then throw to grizzly. Otherwise the exception is not visible in log.
+				logger.error("Could not handle request", e);
+				throw e;
 			}
-			response.getWriter().write("URLs received");
 		}
 	}
 }

@@ -2216,4 +2216,15 @@ public class AdderWindow extends JFrame {
 			}
 		}
 	}
+
+	/**
+	 * Close Preview Cache
+	 */
+	public static void closePreviewCache() {
+		try {
+			previewCache.close();
+		} catch (Exception e) {
+			LoggerFactory.getLogger(AdderWindow.class).error("Could not close preview cache", e);
+		}
+	}
 }
