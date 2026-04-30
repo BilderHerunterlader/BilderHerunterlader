@@ -66,7 +66,7 @@ public class SettingsManager extends SettingsManagerBase<Settings, BHSettingsLis
 	/**
 	 * Default User Agent
 	 */
-	private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:6.8) Goanna/20251016 PaleMoon/33.9.1";
+	private static final String DEFAULT_USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:6.8) Goanna/20260403 PaleMoon/34.2.0";
 
 	/**
 	 * Log Level Mapping
