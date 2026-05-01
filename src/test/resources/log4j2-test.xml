@@ -4,36 +4,24 @@
 		<Console name="Console" target="SYSTEM_OUT">
 			<PatternLayout pattern="%d{ISO8601} %level{length=1} [%t] %m - (%F:%L)%n" />
 		</Console>
-		<RollingFile name="DailyRollingFile" fileName="${sys:applicationlog4jlogfile}" filePattern="${sys:applicationlog4jlogfile}.%d{yyyy-MM-dd}" append="true" immediateFlush="true">
-			<PatternLayout charset="UTF-8">
-				<Pattern>%d{ISO8601}\t%level{length=1}\t[%t]\t%m\t\t%c (%F:%L)%n</Pattern>
-			</PatternLayout>
-			<Policies>
-				<TimeBasedTriggeringPolicy />
-			</Policies>
-		</RollingFile>
 	</Appenders>
 	<Loggers>
 		<!--
 		<Logger name="org.apache.hc.client5.http" level="debug" additivity="false">
 			<AppenderRef ref="Console" />
-			<AppenderRef ref="DailyRollingFile"/>
 		</Logger>
 		-->
 		<Logger name="org.apache.hc.client5.http.headers" level="debug" additivity="false">
 			<AppenderRef ref="Console" />
-			<AppenderRef ref="DailyRollingFile"/>
 		</Logger>
 		<!--
 		<Logger name="org.apache.hc.client5.http.wire" level="info" additivity="false">
 			<AppenderRef ref="Console" />
-			<AppenderRef ref="DailyRollingFile"/>
 		</Logger>
 		 -->
 
 		<Root level="info">
 			<AppenderRef ref="Console" />
-			<AppenderRef ref="DailyRollingFile"/>
 		</Root>
 	</Loggers>
 </Configuration>
